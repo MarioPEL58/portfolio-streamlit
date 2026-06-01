@@ -225,6 +225,36 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
 
     return closes, missing
 
+def get_snapshot_prices(tickers, closes):
+    prices = {}
+
+    for t in tickers:
+        price = None
+
+        # 1. fast_info
+        try:
+            info = yf.Ticker(t).fast_info
+            price = info.get("lastPrice", None)
+        except:
+            pass
+
+        # 2. history fallback
+        if price is None or pd.isna(price):
+            try:
+                hist = yf.Ticker(t).history(period="5d")
+                if not hist.empty:
+                    price = hist["Close"].iloc[-1]
+            except:
+                pass
+
+        # 3. fallback SICURO
+        if price is None or pd.isna(price):
+            if t in closes.columns:
+                price = closes[t].dropna().iloc[-1]
+
+        prices[t] = price
+
+    return pd.Series(prices)
 
 def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
     tickers = sorted(ops["Ticker"].unique().tolist())
