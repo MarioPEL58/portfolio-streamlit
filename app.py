@@ -325,11 +325,22 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
     cost_df["CostoFirmato"] = (cost_df["Quantita"] * cost_df["Prezzo"].fillna(0.0)) + cost_df["SpeseEuro"].fillna(0.0)
     agg_cost = cost_df.groupby("Ticker").agg(NetQty=("Quantita", "sum"), GrossCost=("CostoFirmato", "sum"))
 
+    # ✅  OLD Cod not working correctly
+#    current = pd.concat([
+#        last_qty.rename("Quantita"),
+#        last_close.rename("Prezzo Attuale"),
+#    ], axis=1
+    # ✅ NUOVA LOGICA PREZZI
+    snapshot_prices = get_snapshot_prices(holdings.columns.tolist(), closes)
+
     current = pd.concat([
         last_qty.rename("Quantita"),
-        last_close.rename("Prezzo Attuale"),
+        snapshot_prices.rename("Prezzo Attuale"),
     ], axis=1)
 
+    # ✅ (opzionale ma consigliato)
+    current["Ultimo Close Storico"] = last_close
+    
     current["Valore"] = current["Quantita"] * current["Prezzo Attuale"]
     current = current.join(agg_cost, how="left").join(meta, how="left")
 
