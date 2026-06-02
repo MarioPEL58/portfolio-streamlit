@@ -230,6 +230,112 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
 
     return closes, missing
 
+@st.cache_data(show_spinner=False)
+def download_fx_series(currencies: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd.DataFrame:
+    """
+    Scarica il cambio giornaliero contro EUR.
+    Convenzione proposta:
+    - EURUSD=X  -> USD per 1 EUR
+    - EURGBP=X  -> GBP per 1 EUR
+    - EURCHF=X  -> CHF per 1 EUR
+
+    Restituisce un DataFrame indicizzato per data con colonne = valute (USD, GBP, CHF, ...)
+    e valori = quantità di valuta estera per 1 EUR.
+    """
+    currencies = sorted(set([c for c in currencies if isinstance(c, str) and c and c != "EUR"]))
+    if not currencies:
+        return pd.DataFrame()
+
+    yahoo_pairs = {ccy: f"EUR{ccy}=X" for ccy in currencies}
+
+    raw = yf.download(
+        tickers=list(yahoo_pairs.values()),
+        start=start_date.strftime("%Y-%m-%d"),
+        end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
+        auto_adjust=False,
+        progress=False,
+        group_by="ticker",
+        threads=True,
+    )
+
+    if raw is None or len(raw) == 0:
+        return pd.DataFrame()
+
+    fx = pd.DataFrame(index=raw.index)
+
+    for ccy, pair in yahoo_pairs.items():
+        try:
+            if isinstance(raw.columns, pd.MultiIndex):
+                lvl0 = set(raw.columns.get_level_values(0))
+
+                # formato 1: primo livello = ticker
+                if pair in lvl0:
+                    if "Close" in raw[pair].columns:
+                        fx[ccy] = raw[pair]["Close"]
+                    elif "Adj Close" in raw[pair].columns:
+                        fx[ccy] = raw[pair]["Adj Close"]
+                else:
+                    # formato 2: primo livello = campo prezzo
+                    if "Close" in lvl0 and pair in raw["Close"].columns:
+                        fx[ccy] = raw["Close"][pair]
+                    elif "Adj Close" in lvl0 and pair in raw["Adj Close"].columns:
+                        fx[ccy] = raw["Adj Close"][pair]
+            else:
+                # caso improbabile di un solo pair
+                if "Close" in raw.columns:
+                    fx[ccy] = raw["Close"]
+                elif "Adj Close" in raw.columns:
+                    fx[ccy] = raw["Adj Close"]
+        except Exception:
+            pass
+
+    return fx.sort_index().ffill()
+
+def convert_closes_to_eur(closes: pd.DataFrame, ops: pd.DataFrame, start_date: pd.Timestamp, end_date: pd.Timestamp):
+    """
+    Converte i prezzi giornalieri in EUR usando il Close giornaliero FX.
+    - Se la valuta del ticker è EUR: lascia invariato
+    - Se la valuta è USD/GBP/CHF/...:
+        prezzo_eur = prezzo_in_valuta / (EUR<VALUTA>=X)
+
+    Restituisce:
+    - closes_eur: prezzi giornalieri convertiti in EUR
+    - fx_rates: dataframe dei cambi giornalieri usati
+    """
+    closes_eur = closes.copy()
+
+    # Mappa ticker -> valuta (ultima nota nelle operazioni)
+    ticker_ccy = (
+        ops.sort_values("Data")
+        .groupby("Ticker")["Valuta"]
+        .last()
+        .fillna("EUR")
+        .to_dict()
+    )
+
+    needed_ccy = [ccy for ccy in ticker_ccy.values() if ccy != "EUR"]
+    fx_rates = download_fx_series(needed_ccy, start_date, end_date)
+
+    if fx_rates.empty:
+        return closes_eur, fx_rates
+
+    for ticker, ccy in ticker_ccy.items():
+        if ticker not in closes_eur.columns:
+            continue
+
+        if ccy == "EUR":
+            continue
+
+        if ccy in fx_rates.columns:
+            fx_series = fx_rates[ccy].reindex(closes_eur.index).ffill()
+
+            # proposta implementativa:
+            # EURUSD=X = USD per 1 EUR
+            # quindi USD -> EUR = USD / EURUSD
+            closes_eur[ticker] = closes_eur[ticker] / fx_series
+
+    return closes_eur, fx_rates
+
 def get_snapshot_prices(tickers, closes):
     prices = {}
 
@@ -289,7 +395,13 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
     holdings = build_holdings(ops, idx)
     closes = closes[holdings.columns].reindex(idx).ffill()
 
-    position_values = holdings * closes
+    # ✅ NUOVO: conversione giornaliera in EUR per i prezzi non-EUR
+    start_date = ops["Data"].min().normalize()
+    end_date = pd.Timestamp.today().normalize()
+    closes_eur, fx_rates = convert_closes_to_eur(closes, ops, start_date, end_date)
+
+    # ✅ Il valore portafoglio va calcolato sui prezzi convertiti in EUR
+    position_values = holdings * closes_eur
     total_value = position_values.sum(axis=1).rename("Valore portafoglio")
 
     # capitale investito (semplice cashflow cumulato)
