@@ -488,9 +488,9 @@ if missing:
 series, current, holdings, exposure = build_portfolio(ops, closes)
 
 # debug info
-st.write("Valore portafoglio finale:", series["Valore portafoglio"].iloc[-1])
-st.write("Capitale investito finale:", series["Capitale investito"].iloc[-1])
-st.write("P/L finale:", series["P/L totale"].iloc[-1])
+# st.write("Valore portafoglio finale:", series["Valore portafoglio"].iloc[-1])
+# st.write("Capitale investito finale:", series["Capitale investito"].iloc[-1])
+# st.write("P/L finale:", series["P/L totale"].iloc[-1])
 
 if series.empty:
     st.error("Non è stato possibile costruire il portafoglio con i dati disponibili.")
