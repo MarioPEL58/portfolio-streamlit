@@ -3,13 +3,14 @@ from __future__ import annotations
 from datetime import date
 from io import BytesIO
 from pathlib import Path
+from xml.etree.ElementPath import ops
 
 import numpy as np
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-import streamlit as st
-import yfinance as yf
+import pandas as pd # type: ignore
+import plotly.express as px # type: ignore
+import plotly.graph_objects as go # type: ignore
+import streamlit as st # type: ignore
+import yfinance as yf # type: ignore
 
 
 # ============================================================
@@ -131,6 +132,8 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
     col_fee = find_col(df.columns, ["Spese euro", "Commissioni", "Commissione", "Fees", "Fee"])
     col_name = find_col(df.columns, ["Nome"])
     col_type = find_col(df.columns, ["Tipo"])
+    col_fx = find_col(df.columns, ["Cambio"])
+    col_flusso_netto = find_col(df.columns, ["Flusso netto"])
     col_area = find_col(df.columns, ["Area"])
     col_sector = find_col(df.columns, ["Settore"])
     col_issuer = find_col(df.columns, ["Emittente"])
@@ -155,6 +158,8 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
 
     out["Prezzo"] = parse_numeric(df[col_price]) if col_price is not None else np.nan
     out["SpeseEuro"] = parse_numeric(df[col_fee]).fillna(0.0) if col_fee is not None else 0.0
+    out["Cambio"] = parse_numeric(df[col_fx]) if col_fx is not None else np.nan
+    out["FlussoNetto"] = parse_numeric(df[col_flusso_netto]) if col_flusso_netto is not None else np.nan
 
     out["Nome"] = df[col_name] if col_name is not None else out["Ticker"]
     out["Tipo"] = df[col_type] if col_type is not None else ""
@@ -290,7 +295,17 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
     # capitale investito (semplice cashflow cumulato)
     ops_cf = ops.copy()
     ops_cf["Prezzo"] = ops_cf["Prezzo"].fillna(0.0)
-    ops_cf["Cashflow"] = -(ops_cf["Quantita"] * ops_cf["Prezzo"]) - ops_cf["SpeseEuro"].fillna(0.0)
+    ops_cf["SpeseEuro"] = ops_cf["SpeseEuro"].fillna(0.0)
+    ops_cf["Cambio"] = ops_cf["Cambio"].fillna(1.0)
+
+    # Se nel file c'è già FlussoNetto, uso quello (più fedele al tuo Excel)
+    # Altrimenti ricostruisco il flusso da Quantita * Prezzo * Cambio + SpeseEuro
+    ops_cf["Cashflow"] = np.where(
+        ops_cf["FlussoNetto"].notna(),
+        ops_cf["FlussoNetto"],
+        -(ops_cf["Quantita"] * ops_cf["Prezzo"] * ops_cf["Cambio"]) - ops_cf["SpeseEuro"]
+    )
+
     invested = (
         ops_cf.groupby("Data")["Cashflow"]
         .sum()
@@ -471,6 +486,11 @@ if missing:
 # Portfolio computation
 # ============================================================
 series, current, holdings, exposure = build_portfolio(ops, closes)
+
+# debug info
+st.write("Valore portafoglio finale:", series["Valore portafoglio"].iloc[-1])
+st.write("Capitale investito finale:", series["Capitale investito"].iloc[-1])
+st.write("P/L finale:", series["P/L totale"].iloc[-1])
 
 if series.empty:
     st.error("Non è stato possibile costruire il portafoglio con i dati disponibili.")
