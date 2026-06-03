@@ -666,7 +666,7 @@ k1.metric("Valore portafoglio", fmt_eur(latest_value))
 k2.metric("Capitale investito", fmt_eur(latest_invested))
 k3.metric("P/L totale", fmt_eur(latest_pnl), delta=fmt_pct(latest_pnl_pct), delta_color="normal" if pd.notna(latest_pnl_pct) else None)
 k4.metric("Posizioni aperte", f"{len(current)}")
-k5.metric("P/L Giornaliero",fmt_eur(latest_daily_pl),delta=None delta_color="normal")
+k5.metric("P/L Giornaliero",fmt_eur(latest_daily_pl),delta=None, delta_color="normal")
 
 
 
