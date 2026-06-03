@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import datetime
 from io import BytesIO
 from pathlib import Path
 from xml.etree.ElementPath import ops
@@ -519,7 +519,7 @@ with st.sidebar:
         st.cache_data.clear()
         st.rerun()
 
-    st.caption(f"Ultimo aggiornamento: {date.datetime.now().strftime('%H:%M:%S')}")
+    st.caption(f"Ultimo aggiornamento: {datetime.now().strftime('%H:%M:%S')}")
     
     st.header("Opzioni")
     benchmark = st.text_input("Ticker benchmark Yahoo (opzionale)", value="CSSPX.MI")
