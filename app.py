@@ -519,7 +519,7 @@ with st.sidebar:
         st.cache_data.clear()
         st.rerun()
 
-    st.caption(f"Ultimo aggiornamento: {datetime.datetime.now().strftime('%H:%M:%S')}")
+    st.caption(f"Ultimo aggiornamento: {date.datetime.now().strftime('%H:%M:%S')}")
     
     st.header("Opzioni")
     benchmark = st.text_input("Ticker benchmark Yahoo (opzionale)", value="CSSPX.MI")
