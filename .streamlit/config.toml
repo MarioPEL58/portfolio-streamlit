@@ -1,8 +1,11 @@
 [theme]
-primaryColor = "#1f77b4"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f3f6fa"
-textColor = "#1f1f1f"
+base = "dark"
+
+primaryColor = "#00C896"        # verde elegante
+backgroundColor = "#0e1117"     # sfondo principale (nero/blu)
+secondaryBackgroundColor = "#262730"  # pannelli/grigio scuro
+textColor = "#FFFFFF"
+font = "sans serif"
 
 [server]
 headless = true
