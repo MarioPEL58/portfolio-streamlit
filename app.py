@@ -746,7 +746,7 @@ def color_pl(val):
         return ""
 
 def style_pl_column(col):
-    if col.name in ["P/L", "P/L %"]:
+    if col.name in ["P/L", "P/L %", "P/L Netto Stimato"]:
         return [color_pl(v) for v in col]
     else:
         return [""] * len(col)  # ✅ importante!
