@@ -710,17 +710,30 @@ with tab_pos:
     ]
     ordered_cols = [c for c in ordered_cols if c in current_view.columns]
 
-    st.dataframe(
-        current_view[ordered_cols].style.format({
-            "Prezzo Attuale": "{:,.4f}",
-            "Valore": "€ {:,.2f}",
-            "Costo Medio Stimato": "{:,.4f}",
-            "Costo Totale Stimato": "€ {:,.2f}",
-            "P/L": "€ {:,.2f}",
-            "P/L %": "{:.2%}",
-        }),
-        use_container_width=True
-    )
+def color_pl(val):
+    if pd.isna(val):
+        return ""
+    elif val > 0:
+        return "color: green"
+    elif val < 0:
+        return "color: red"
+    else:
+        return ""
+
+st.dataframe(
+    current_view[ordered_cols]
+    .style
+    .format({
+        "Prezzo Attuale": "{:,.4f}",
+        "Valore": "€ {:,.2f}",
+        "Costo Medio Stimato": "{:,.4f}",
+        "Costo Totale Stimato": "€ {:,.2f}",
+        "P/L": "€ {:,.2f}",
+        "P/L %": "{:.2%}",
+    })
+    .applymap(color_pl, subset=["P/L", "P/L %"]),
+    use_container_width=True
+)
 
 with tab_exp:
     st.subheader("Allocazione")
