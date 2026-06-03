@@ -731,7 +731,7 @@ st.dataframe(
         "P/L": "€ {:,.2f}",
         "P/L %": "{:.2%}",
     })
-    .applymap(color_pl, subset=["P/L", "P/L %"]),
+    .apply(lambda col: col.map(color_pl) if col.name in ["P/L", "P/L %"] else col),
     use_container_width=True
 )
 
