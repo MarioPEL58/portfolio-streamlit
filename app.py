@@ -129,6 +129,7 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
     col_qty = find_col(df.columns, ["Quantità", "Quantita", "Quantity", "Qta"])
     col_price = find_col(df.columns, ["Prezzo", "Price"])
     col_fee = find_col(df.columns, ["Spese euro", "Commissioni", "Commissione", "Fees", "Fee"])
+    col_tax = find_col(df.columns, ["Tassa"])
     col_name = find_col(df.columns, ["Nome"])
     col_type = find_col(df.columns, ["Tipo"])
     col_fx = find_col(df.columns, ["Cambio"])
@@ -157,6 +158,7 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
 
     out["Prezzo"] = parse_numeric(df[col_price]) if col_price is not None else np.nan
     out["SpeseEuro"] = parse_numeric(df[col_fee]).fillna(0.0) if col_fee is not None else 0.0
+    out["Tassa"] = parse_numeric(df[col_tax]).fillna(0.0) if col_tax is not None else 0.0
     out["Cambio"] = parse_numeric(df[col_fx]) if col_fx is not None else np.nan
     out["FlussoNetto"] = parse_numeric(df[col_flusso_netto]) if col_flusso_netto is not None else np.nan
 
@@ -469,7 +471,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
     
     current["Valore"] = current["Quantita"] * current["Prezzo Attuale"]
     current = current.join(agg_cost, how="left").join(meta, how="left")
-
+    
     current["Costo Medio Stimato"] = np.where(
         current["NetQty"] != 0,
         current["GrossCost"] / current["NetQty"],
@@ -482,7 +484,24 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
         current["P/L"] / current["Costo Totale Stimato"],
         np.nan
     )
+    # ✅ Tax rate per ticker (da colonna Tassa %)
+    tax_rate = (
+        ops.groupby("Ticker")["Tassa"]
+        .last()
+        .rename("TaxRate")
+    )
 
+    # unisci a current
+    current = current.join(tax_rate, how="left")
+
+    # fallback (se manca, es. nuovo ticker)
+    current["TaxRate"] = current["TaxRate"].fillna(0.26)
+
+    # ✅ calcolo P/L netto stimato
+    current["P/L Netto Stimato"] = current.apply(
+        lambda row: row["P/L"] * (1 - row["TaxRate"]) if row["P/L"] > 0 else row["P/L"],
+        axis=1
+    )
     current = current[current["Quantita"] != 0].sort_values("Valore", ascending=False)
 
     exposure = current.reset_index().rename(columns={"index": "Ticker"})
@@ -712,7 +731,7 @@ with tab_pos:
     ordered_cols = [
         "Ticker", "Nome", "Tipo", "Area", "Settore", "Emittente", "Valuta",
         "Quantita", "Prezzo Attuale", "Valore",
-        "Costo Medio Stimato", "Costo Totale Stimato", "P/L", "P/L %"
+        "Costo Medio Stimato", "Costo Totale Stimato", "P/L", "P/L %", "P/L Netto Stimato"
     ]
     ordered_cols = [c for c in ordered_cols if c in current_view.columns]
 
@@ -742,6 +761,7 @@ st.dataframe(
         "Costo Totale Stimato": "€ {:,.2f}",
         "P/L": "€ {:,.2f}",
         "P/L %": "{:.2%}",
+        "P/L Netto Stimato": "€ {:,.2f}",
     })
     .apply(style_pl_column, axis=0),
     use_container_width=True
