@@ -525,7 +525,7 @@ with st.sidebar:
     benchmark = st.text_input("Ticker benchmark Yahoo (opzionale)", value="CSSPX.MI")
     show_benchmark = st.checkbox("Mostra benchmark normalizzato", value=True)
 
-    default_start = date(2026, 3, 1)
+    default_start = datetime(2026, 3, 1)
     min_filter_date = st.date_input("Data minima", value=default_start)
 
     st.markdown("---")
