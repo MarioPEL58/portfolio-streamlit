@@ -515,6 +515,11 @@ with st.sidebar:
     use_local_demo = st.checkbox("Usa file locale demo se presente", value=True)
 
     st.markdown("---")
+    
+    if st.button("🔄 Aggiorna prezzi"):
+        st.cache_data.clear()
+        st.rerun()
+
     st.header("Opzioni")
     benchmark = st.text_input("Ticker benchmark Yahoo (opzionale)", value="CSSPX.MI")
     show_benchmark = st.checkbox("Mostra benchmark normalizzato", value=True)
