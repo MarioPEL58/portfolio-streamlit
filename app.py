@@ -404,6 +404,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
     # ✅ Il valore portafoglio va calcolato sui prezzi convertiti in EUR
     position_values = holdings * closes_eur
     total_value = position_values.sum(axis=1).rename("Valore portafoglio")
+    daily_pl = total_value.diff().rename("P/L Giornaliero")
 
     # capitale investito (semplice cashflow cumulato)
     ops_cf = ops.copy()
@@ -429,7 +430,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
     )
 
     pnl = (total_value + invested).rename("P/L totale")
-    ts = pd.concat([total_value, invested, pnl], axis=1)
+    ts = pd.concat([total_value, invested, pnl, daily_pl], axis=1)
 
     # snapshot finale
     last_qty = holdings.iloc[-1]
@@ -657,13 +658,16 @@ if show_benchmark and benchmark.strip():
 latest_value = float(series["Valore portafoglio"].iloc[-1])
 latest_invested = float(series["Capitale investito"].iloc[-1])
 latest_pnl = float(series["P/L totale"].iloc[-1])
+latest_daily_pl = float(series["P/L Giornaliero"].iloc[-1])
 latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else np.nan
 
-k1, k2, k3, k4 = st.columns(4)
+k1, k2, k3, k4, k5 = st.columns(5)
 k1.metric("Valore portafoglio", fmt_eur(latest_value))
 k2.metric("Capitale investito", fmt_eur(latest_invested))
 k3.metric("P/L totale", fmt_eur(latest_pnl), delta=fmt_pct(latest_pnl_pct), delta_color="normal" if pd.notna(latest_pnl_pct) else None)
 k4.metric("Posizioni aperte", f"{len(current)}")
+k5.metric("P/L Giornaliero",fmt_eur(latest_daily_pl),delta=None delta_color="normal")
+
 
 
 # ============================================================
