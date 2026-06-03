@@ -720,6 +720,12 @@ def color_pl(val):
     else:
         return ""
 
+def style_pl_column(col):
+    if col.name in ["P/L", "P/L %"]:
+        return [color_pl(v) for v in col]
+    else:
+        return [""] * len(col)  # ✅ importante!
+
 st.dataframe(
     current_view[ordered_cols]
     .style
@@ -731,7 +737,7 @@ st.dataframe(
         "P/L": "€ {:,.2f}",
         "P/L %": "{:.2%}",
     })
-    .apply(lambda col: col.map(color_pl) if col.name in ["P/L", "P/L %"] else col),
+    .apply(style_pl_column, axis=0),
     use_container_width=True
 )
 
