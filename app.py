@@ -24,8 +24,7 @@ st.set_page_config(
 
 st.title("📈 Portfolio Tracker ETF / Azioni")
 st.caption(
-    "Carica un file Excel con il foglio Operazioni, ricostruisci il valore del portafoglio nel tempo "
-    "e pubblica l'app su Streamlit Cloud."
+    "Carica un file Excel con il foglio Operazioni, ricostruisci il valore del portafoglio nel tempo. "
 )
 
 
@@ -520,6 +519,8 @@ with st.sidebar:
         st.cache_data.clear()
         st.rerun()
 
+    st.caption(f"Ultimo aggiornamento: {datetime.datetime.now().strftime('%H:%M:%S')}")
+    
     st.header("Opzioni")
     benchmark = st.text_input("Ticker benchmark Yahoo (opzionale)", value="CSSPX.MI")
     show_benchmark = st.checkbox("Mostra benchmark normalizzato", value=True)
@@ -605,7 +606,7 @@ if missing:
 series, current, holdings, exposure = build_portfolio(ops, closes)
 
 # debug info
-st.write("Valore portafoglio finale:", series["Valore portafoglio"].iloc[-1])
+# st.write("Valore portafoglio finale:", series["Valore portafoglio"].iloc[-1])
 # st.write("Capitale investito finale:", series["Capitale investito"].iloc[-1])
 # st.write("P/L finale:", series["P/L totale"].iloc[-1])
 
@@ -642,7 +643,7 @@ latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else 
 k1, k2, k3, k4 = st.columns(4)
 k1.metric("Valore portafoglio", fmt_eur(latest_value))
 k2.metric("Capitale investito", fmt_eur(latest_invested))
-k3.metric("P/L totale", fmt_eur(latest_pnl), delta=fmt_pct(latest_pnl_pct) if pd.notna(latest_pnl_pct) else None)
+k3.metric("P/L totale", fmt_eur(latest_pnl), delta=fmt_pct(latest_pnl_pct), delta_color="normal" if pd.notna(latest_pnl_pct) else None)
 k4.metric("Posizioni aperte", f"{len(current)}")
 
 
@@ -828,13 +829,7 @@ with tab_dl:
 # Footer instructions
 # ============================================================
 st.markdown("---")
-st.markdown("### Deploy rapido")
-st.markdown(
-    """
-1. Fai push di `app.py`, `requirements.txt`, `README.md` e `.streamlit/config.toml` su GitHub  
-2. Apri Streamlit Community Cloud  
-3. Seleziona il repository  
-4. Imposta `app.py` come entrypoint  
-5. Deploy  
-"""
-)
+
+st.markdown("### 📈 Portfolio Tracker")
+st.caption("Aggiornamento in tempo reale dei prezzi")
+
