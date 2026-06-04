@@ -811,7 +811,7 @@ tab_pos, tab_exp, tab_ops, tab_dl = st.tabs(
 
 with tab_pos:
     st.subheader("Posizioni correnti")
-    current_view = current.reset_index().rename(columns={"index": "Ticker"})
+    current_view = current.reset_index().rename(columns={"index": "PositionKey"})
 
     ordered_cols = [
         "Ticker", "Intermediario", "Nome", "Tipo", "Area", "Settore", "Emittente", "Valuta",
