@@ -504,6 +504,19 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
     pnl = (total_value + invested).rename("P/L totale")
 
     ts = pd.concat([total_value, invested, pnl, daily_pl], axis=1)
+    
+    # =========================
+    #     DEBUG P/L mismatch
+    # =========================
+    debug = pd.DataFrame({
+        "P/L totale": pnl,
+        "Delta P/L totale": pnl.diff(),
+        "P/L giornaliero": daily_pl,
+    })
+
+    st.write("DEBUG confronto P/L:")
+    st.write(debug.tail(5))
+
 
     # ---------------------------------------------------
     # 9) Snapshot finale per posizione
