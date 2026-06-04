@@ -124,6 +124,8 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
     df = pd.read_excel(BytesIO(excel_bytes), sheet_name=sheet_name, engine="openpyxl")
     df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
 
+    col_id = find_col(df.columns, ["ID"])
+    col_broker = find_col(df.columns, ["Intermediario"])
     col_ticker = find_col(df.columns, ["Ticker"])
     col_date = find_col(df.columns, ["Data", "Date"])
     col_qty = find_col(df.columns, ["Quantità", "Quantita", "Quantity", "Qta"])
@@ -156,6 +158,8 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
         "Quantita": parse_numeric(df[col_qty]),
     })
 
+    out["ID"] = df[col_id] if col_id is not None else np.nan
+    out["Intermediario"] = df[col_broker] if col_broker is not None else ""
     out["Prezzo"] = parse_numeric(df[col_price]) if col_price is not None else np.nan
     out["SpeseEuro"] = parse_numeric(df[col_fee]).fillna(0.0) if col_fee is not None else 0.0
     out["Tassa"] = parse_numeric(df[col_tax]).fillna(0.0) if col_tax is not None else 0.0
@@ -172,6 +176,13 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
     out = out.dropna(subset=["Ticker", "Data", "Quantita"])
     out = out[out["Ticker"] != ""]
     out = out.sort_values(["Data", "Ticker"]).reset_index(drop=True)
+
+    # Chiave posizione: usa ID se presente, altrimenti fallback su Ticker|Intermediario
+    out["PositionKey"] = np.where(
+        out["ID"].notna(),
+        out["ID"].astype(str).str.strip(),
+        out["Ticker"].astype(str).str.strip() + "|" + out["Intermediario"].astype(str).str.strip()
+    )
 
     return out
 
@@ -369,23 +380,26 @@ def get_snapshot_prices(tickers, closes):
     return pd.Series(prices)
 
 def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
-    tickers = sorted(ops["Ticker"].unique().tolist())
-    holdings = pd.DataFrame(0.0, index=idx, columns=tickers)
+    keys = sorted(ops["PositionKey"].unique().tolist())
+    holdings = pd.DataFrame(0.0, index=idx, columns=keys)
 
-    daily_ops = ops.groupby(["Data", "Ticker"], as_index=False)["Quantita"].sum()
+    daily_ops = ops.groupby(["Data", "PositionKey"], as_index=False)["Quantita"].sum()
 
-    for t in tickers:
+    for k in keys:
         s = (
-            daily_ops[daily_ops["Ticker"] == t]
+            daily_ops[daily_ops["PositionKey"] == k]
             .set_index("Data")["Quantita"]
             .sort_index()
         )
-        holdings[t] = s.reindex(idx, fill_value=0).cumsum()
+        holdings[k] = s.reindex(idx, fill_value=0).cumsum()
 
     return holdings
 
 
 def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
+    # ---------------------------------------------------
+    # 1) Tieni solo i ticker per cui hai prezzi Yahoo
+    # ---------------------------------------------------
     valid_tickers = [t for t in ops["Ticker"].unique() if t in closes.columns]
     ops = ops[ops["Ticker"].isin(valid_tickers)].copy()
 
@@ -393,119 +407,186 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
     idx = closes.index
-    holdings = build_holdings(ops, idx)
-    closes = closes[holdings.columns].reindex(idx).ffill()
 
-    # ✅ NUOVO: conversione giornaliera in EUR per i prezzi non-EUR
+    # ---------------------------------------------------
+    # 2) Holdings per PositionKey
+    # ---------------------------------------------------
+    holdings = build_holdings(ops, idx)
+
+    # ---------------------------------------------------
+    # 3) Prezzi per ticker -> conversione EUR giornaliera
+    # ---------------------------------------------------
+    closes_ticker = closes[valid_tickers].reindex(idx).ffill()
+
     start_date = ops["Data"].min().normalize()
     end_date = pd.Timestamp.today().normalize()
-    closes_eur, fx_rates = convert_closes_to_eur(closes, ops, start_date, end_date)
 
-    # ✅ Il valore portafoglio va calcolato sui prezzi convertiti in EUR
-    position_values = holdings * closes_eur
+    # assume che convert_closes_to_eur lavori su colonne=ticker
+    closes_eur_ticker, fx_rates = convert_closes_to_eur(
+        closes_ticker,
+        ops,
+        start_date,
+        end_date
+    )
+
+    # ---------------------------------------------------
+    # 4) Espandi i prezzi ticker sulle posizioni
+    #    (una posizione = un PositionKey)
+    # ---------------------------------------------------
+    position_to_ticker = (
+        ops.groupby("PositionKey")["Ticker"]
+        .last()
+    )
+
+    position_closes_eur = pd.DataFrame(index=idx)
+
+    for pos_key in holdings.columns:
+        t = position_to_ticker.loc[pos_key]
+        if t in closes_eur_ticker.columns:
+            position_closes_eur[pos_key] = closes_eur_ticker[t]
+
+    # ---------------------------------------------------
+    # 5) Valore giornaliero per posizione / portafoglio
+    # ---------------------------------------------------
+    position_values = holdings * position_closes_eur
     total_value = position_values.sum(axis=1).rename("Valore portafoglio")
-    daily_pl = total_value.diff().rename("P/L Giornaliero")
 
-    # capitale investito (semplice cashflow cumulato)
+    # ---------------------------------------------------
+    # 6) Cashflow storico corretto
+    # ---------------------------------------------------
     ops_cf = ops.copy()
     ops_cf["Prezzo"] = ops_cf["Prezzo"].fillna(0.0)
     ops_cf["SpeseEuro"] = ops_cf["SpeseEuro"].fillna(0.0)
     ops_cf["Cambio"] = ops_cf["Cambio"].fillna(1.0)
 
-    # Se nel file c'è già FlussoNetto, uso quello (più fedele al tuo Excel)
-    # Altrimenti ricostruisco il flusso da Quantita * Prezzo * Cambio + SpeseEuro
+    # Se esiste FlussoNetto lo uso (più fedele al tuo Excel)
+    # altrimenti ricostruisco
     ops_cf["Cashflow"] = np.where(
         ops_cf["FlussoNetto"].notna(),
         ops_cf["FlussoNetto"],
         -(ops_cf["Quantita"] * ops_cf["Prezzo"] * ops_cf["Cambio"]) - ops_cf["SpeseEuro"]
     )
 
-    invested = (
+    # cashflow totale giornaliero
+    daily_cf_total = (
         ops_cf.groupby("Data")["Cashflow"]
         .sum()
-        .sort_index()
         .reindex(idx, fill_value=0.0)
+    )
+
+    # capitale investito cumulato
+    invested = (
+        daily_cf_total
         .cumsum()
         .rename("Capitale investito")
     )
 
+    # ---------------------------------------------------
+    # 7) Cashflow giornaliero per posizione
+    # ---------------------------------------------------
+    daily_cf_positions = (
+        ops_cf.groupby(["Data", "PositionKey"])["Cashflow"]
+        .sum()
+        .unstack(fill_value=0.0)
+        .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
+    )
+
+    # ---------------------------------------------------
+    # 8) P/L giornaliero corretto
+    #    (diff valori + cashflow del giorno)
+    # ---------------------------------------------------
+    daily_pl_positions = (
+        position_values.diff().fillna(0.0)
+        .add(daily_cf_positions, fill_value=0.0)
+    )
+
+    daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
     pnl = (total_value + invested).rename("P/L totale")
+
     ts = pd.concat([total_value, invested, pnl, daily_pl], axis=1)
 
-    # snapshot finale
+    # ---------------------------------------------------
+    # 9) Snapshot finale per posizione
+    # ---------------------------------------------------
     last_qty = holdings.iloc[-1]
-    last_close = closes.iloc[-1]
+    last_close_eur = position_closes_eur.iloc[-1]
+    last_daily_pl = daily_pl_positions.iloc[-1]
 
+    # Metadati per PositionKey
     meta = (
         ops.sort_values("Data")
-        .groupby("Ticker")
+        .groupby("PositionKey")
         .agg({
+            "ID": "last" if "ID" in ops.columns else "first",
+            "Ticker": "last",
+            "Intermediario": "last" if "Intermediario" in ops.columns else "first",
             "Nome": "last",
             "Tipo": "last",
             "Area": "last",
             "Settore": "last",
             "Emittente": "last",
             "Valuta": "last",
+            "Tassa": "last",   # percentuale
         })
     )
 
-    # costo medio stimato semplice
+    # ---------------------------------------------------
+    # 10) Costo medio stimato per posizione
+    # ---------------------------------------------------
     cost_df = ops.copy()
-    cost_df["CostoFirmato"] = (cost_df["Quantita"] * cost_df["Prezzo"].fillna(0.0)) + cost_df["SpeseEuro"].fillna(0.0)
-    agg_cost = cost_df.groupby("Ticker").agg(NetQty=("Quantita", "sum"), GrossCost=("CostoFirmato", "sum"))
+    cost_df["CostoFirmato"] = (
+        (cost_df["Quantita"] * cost_df["Prezzo"].fillna(0.0))
+        + cost_df["SpeseEuro"].fillna(0.0)
+    )
 
-    # ✅  OLD Cod not working correctly
-#    current = pd.concat([
-#        last_qty.rename("Quantita"),
-#        last_close.rename("Prezzo Attuale"),
-#    ], axis=1
-    # ✅ NUOVA LOGICA PREZZI
-    snapshot_prices = get_snapshot_prices(holdings.columns.tolist(), closes)
+    agg_cost = cost_df.groupby("PositionKey").agg(
+        NetQty=("Quantita", "sum"),
+        GrossCost=("CostoFirmato", "sum")
+    )
 
+    # ---------------------------------------------------
+    # 11) Costruisci current per posizione
+    # ---------------------------------------------------
     current = pd.concat([
         last_qty.rename("Quantita"),
-        snapshot_prices.rename("Prezzo Attuale"),
+        last_close_eur.rename("Prezzo Attuale"),
+        last_daily_pl.rename("P/L Giornaliero"),
     ], axis=1)
 
-    # ✅ (opzionale ma consigliato)
-    current["Ultimo Close Storico"] = last_close
-    
+    current["Ultimo Close Storico"] = last_close_eur
     current["Valore"] = current["Quantita"] * current["Prezzo Attuale"]
+
     current = current.join(agg_cost, how="left").join(meta, how="left")
-    
+
     current["Costo Medio Stimato"] = np.where(
         current["NetQty"] != 0,
         current["GrossCost"] / current["NetQty"],
         np.nan
     )
+
     current["Costo Totale Stimato"] = current["Costo Medio Stimato"] * current["Quantita"]
+
     current["P/L"] = current["Valore"] - current["Costo Totale Stimato"]
+
     current["P/L %"] = np.where(
         current["Costo Totale Stimato"] != 0,
         current["P/L"] / current["Costo Totale Stimato"],
         np.nan
     )
-    # ✅ Tax rate per ticker (da colonna Tassa %)
-    tax_rate = (
-        ops.groupby("Ticker")["Tassa"]
-        .last()
-        .rename("TaxRate")
-    )
 
-    # unisci a current
-    current = current.join(tax_rate, how="left")
+    # Tassa è già una percentuale per posizione
+    current["TaxRate"] = current["Tassa"].fillna(0.26)
 
-    # fallback (se manca, es. nuovo ticker)
-    current["TaxRate"] = current["TaxRate"].fillna(0.26)
-
-    # ✅ calcolo P/L netto stimato
     current["P/L Netto Stimato"] = current.apply(
         lambda row: row["P/L"] * (1 - row["TaxRate"]) if row["P/L"] > 0 else row["P/L"],
         axis=1
     )
+
+    # Tieni solo posizioni aperte
     current = current[current["Quantita"] != 0].sort_values("Valore", ascending=False)
 
-    exposure = current.reset_index().rename(columns={"index": "Ticker"})
+    # exposure/tabella finale
+    exposure = current.reset_index().rename(columns={"index": "PositionKey"})
 
     return ts, current, holdings, exposure
 
@@ -733,9 +814,9 @@ with tab_pos:
     current_view = current.reset_index().rename(columns={"index": "Ticker"})
 
     ordered_cols = [
-        "Ticker", "Nome", "Tipo", "Area", "Settore", "Emittente", "Valuta",
+        "Ticker", "Intermediario", "Nome", "Tipo", "Area", "Settore", "Emittente", "Valuta",
         "Quantita", "Prezzo Attuale", "Valore",
-        "Costo Medio Stimato", "Costo Totale Stimato", "P/L", "P/L %", "P/L Netto Stimato"
+        "Costo Medio Stimato", "Costo Totale Stimato", "P/L", "P/L %", "P/L Netto Stimato","P/L Giornaliero"
     ]
     ordered_cols = [c for c in ordered_cols if c in current_view.columns]
 
@@ -743,14 +824,14 @@ def color_pl(val):
     if pd.isna(val):
         return ""
     elif val > 0:
-        return "color: green"
+        return "color: #00ff00; font-weight: bold"
     elif val < 0:
-        return "color: red"
+        return "color: #ff4d4d; font-weight: bold"
     else:
         return ""
 
 def style_pl_column(col):
-    if col.name in ["P/L", "P/L %", "P/L Netto Stimato"]:
+    if col.name in ["P/L", "P/L %", "P/L Netto Stimato","P/L Giornaliero"]:
         return [color_pl(v) for v in col]
     else:
         return [""] * len(col)  # ✅ importante!
@@ -766,6 +847,7 @@ st.dataframe(
         "P/L": "€ {:,.2f}",
         "P/L %": "{:.2%}",
         "P/L Netto Stimato": "€ {:,.2f}",
+        "P/L Giornaliero": "€ {:,.2f}",
     })
     .apply(style_pl_column, axis=0),
     use_container_width=True
