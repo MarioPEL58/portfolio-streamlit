@@ -501,21 +501,25 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
     )
 
     daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
+    
+    # ✅ NUOVO: P/L Giornaliero %
+    daily_pl_pct = (daily_pl / total_value.shift(1)).rename("P/L Giornaliero %")
+
     pnl = (total_value + invested).rename("P/L totale")
 
-    ts = pd.concat([total_value, invested, pnl, daily_pl], axis=1)
+    ts = pd.concat([total_value, invested, pnl, daily_pl,daily_pl_pct], axis=1)
     
     # =========================
     #     DEBUG P/L mismatch
     # =========================
-    debug = pd.DataFrame({
-        "P/L totale": pnl,
-        "Delta P/L totale": pnl.diff(),
-        "P/L giornaliero": daily_pl,
-    })
+    # debug = pd.DataFrame({
+    #     "P/L totale": pnl,
+    #     "Delta P/L totale": pnl.diff(),
+    #     "P/L giornaliero": daily_pl,
+    # })
 
-    st.write("DEBUG confronto P/L:")
-    st.write(debug.tail(5))
+    # st.write("DEBUG confronto P/L:")
+    # st.write(debug.tail(5))
 
 
     # ---------------------------------------------------
@@ -594,6 +598,13 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
         lambda row: row["P/L"] * (1 - row["TaxRate"]) if row["P/L"] > 0 else row["P/L"],
         axis=1
     )
+    
+    current["P/L Giornaliero %"] = current.apply(
+        lambda row: row["P/L Giornaliero"] / (row["Valore"] - row["P/L Giornaliero"])
+        if (row["Valore"] - row["P/L Giornaliero"]) != 0 else np.nan,
+        axis=1
+    )
+
 
     # Tieni solo posizioni aperte
     current = current[current["Quantita"] != 0].sort_values("Valore", ascending=False)
@@ -753,6 +764,7 @@ latest_value = float(series["Valore portafoglio"].iloc[-1])
 latest_invested = float(series["Capitale investito"].iloc[-1])
 latest_pnl = float(series["P/L totale"].iloc[-1])
 latest_daily_pl = float(series["P/L Giornaliero"].iloc[-1])
+latest_daily_pl_pct = float(series["P/L Giornaliero %"].iloc[-1])
 latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else np.nan
 
 k1, k2, k3, k4, k5 = st.columns(5)
@@ -760,8 +772,7 @@ k1.metric("Valore portafoglio", fmt_eur(latest_value))
 k2.metric("Capitale investito", fmt_eur(latest_invested))
 k3.metric("P/L totale", fmt_eur(latest_pnl), delta=fmt_pct(latest_pnl_pct), delta_color="normal" if pd.notna(latest_pnl_pct) else None)
 k4.metric("Posizioni aperte", f"{len(current)}")
-k5.metric("P/L Giornaliero",fmt_eur(latest_daily_pl),delta=None, delta_color="normal")
-
+k5.metric("P/L Giornaliero",fmt_eur(latest_daily_pl),delta=fmt_pct(latest_daily_pl_pct),delta_color="normal" if pd.notna(latest_daily_pl_pct) else None)
 
 
 # ============================================================
@@ -829,7 +840,7 @@ with tab_pos:
     ordered_cols = [
         "Ticker", "Intermediario", "Nome", "Tipo", "Area", "Settore", "Emittente", "Valuta",
         "Quantita", "Prezzo Attuale", "Valore",
-        "Costo Medio Stimato", "Costo Totale Stimato", "P/L", "P/L %", "P/L Netto Stimato","P/L Giornaliero"
+        "Costo Medio Stimato", "Costo Totale Stimato", "P/L", "P/L %", "P/L Netto Stimato","P/L Giornaliero","P/L Giornaliero %"
     ]
     ordered_cols = [c for c in ordered_cols if c in current_view.columns]
 
@@ -861,6 +872,7 @@ st.dataframe(
         "P/L %": "{:.2%}",
         "P/L Netto Stimato": "€ {:,.2f}",
         "P/L Giornaliero": "€ {:,.2f}",
+        "P/L Giornaliero %": "{:.2%}",
     })
     .apply(style_pl_column, axis=0),
     use_container_width=True
