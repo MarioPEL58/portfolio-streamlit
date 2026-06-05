@@ -777,7 +777,6 @@ if ops.empty:
     st.stop()
 
 st.success(f"File caricato: {file_label}")
-st.write(dividends.head())
 
 with st.expander("Anteprima operazioni", expanded=False):
     st.dataframe(ops, use_container_width=True)
@@ -806,7 +805,9 @@ if missing:
 # ============================================================
 # Portfolio computation
 # ============================================================
-series, current, holdings, exposure = build_portfolio(ops, closes)
+series, current, holdings, exposure = build_portfolio(ops, closes, dividends)
+
+st.write(series[["Dividendi netti", "P/L realizzato"]].tail())
 
 # debug info
 # st.write("Valore portafoglio finale:", series["Valore portafoglio"].iloc[-1])
