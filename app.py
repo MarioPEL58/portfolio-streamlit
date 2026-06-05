@@ -777,6 +777,7 @@ if ops.empty:
     st.stop()
 
 st.success(f"File caricato: {file_label}")
+st.write(dividends.head())
 
 with st.expander("Anteprima operazioni", expanded=False):
     st.dataframe(ops, use_container_width=True)
