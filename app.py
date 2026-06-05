@@ -525,14 +525,14 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # ---------------------------------------------------
     # SOLO cashflow positivi = vendite
     realized_from_trades = (
-        ops_cf.loc[ops_cf["Cashflow"] > 0]
-        .groupby("Data")["Cashflow"]
+        ops_cf.loc[ops_cf["FlussoNetto"] > 0]
+        .groupby("Data")["FlussoNetto"]
         .sum()
         .reindex(idx, fill_value=0.0)
     )
-
-    # aggiungi dividendi
+    
     realized_daily = realized_from_trades.add(daily_dividends, fill_value=0.0)
+    
     pl_realizzato = realized_daily.cumsum().rename("P/L realizzato")
 
     # cashflow totale giornaliero
