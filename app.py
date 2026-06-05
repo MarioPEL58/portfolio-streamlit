@@ -521,19 +521,27 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
 
     # ---------------------------------------------------
-    # Realizzato giornaliero = vendite/acquisti chiusi + dividendi
+    # Realizzato giornaliero = profitto da vendite + dividendi
     # ---------------------------------------------------
-    # SOLO cashflow positivi = vendite
+    sell_ops = ops_cf.loc[ops_cf["Quantita"] < 0].copy()
+
+    # profitto netto realizzato per ogni vendita:
+    # incasso netto vendita - costo storico della quantità venduta
+    sell_ops["RealizedTradePL"] = (
+        sell_ops["FlussoNetto"]
+        - (sell_ops["Quantita"].abs() * sell_ops["Prezzo medio s/carico"])
+    )
+
     realized_from_trades = (
-        ops_cf.loc[ops_cf["FlussoNetto"] > 0]
-        .groupby("Data")["FlussoNetto"]
+        sell_ops.groupby("Data")["RealizedTradePL"]
         .sum()
         .reindex(idx, fill_value=0.0)
     )
-    
+
     realized_daily = realized_from_trades.add(daily_dividends, fill_value=0.0)
-    
+
     pl_realizzato = realized_daily.cumsum().rename("P/L realizzato")
+
 
     # cashflow totale giornaliero
     daily_cf_total = (
@@ -683,7 +691,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         current["Dividendi Netti Incassati"] = current["Dividendi Netti Incassati"].fillna(0.0)
     else:
         current["Dividendi Netti Incassati"] = 0.0
-
+        
+    st.write("Dividends keys:", dividends["PositionKey"].unique())
+    st.write("Current keys:", current["PositionKey"].unique())
 
     # Tieni solo posizioni aperte
     current = current[current["Quantita"] != 0].sort_values("Valore", ascending=False)
@@ -810,7 +820,7 @@ if missing:
 # ============================================================
 series, current, holdings, exposure = build_portfolio(ops, closes, dividends)
 
-st.write(series[["Dividendi netti", "P/L realizzato"]].tail())
+st.write(series[["Dividendi netti", "P/L realizzato"]].tail(20))
 
 # debug info
 # st.write("Valore portafoglio finale:", series["Valore portafoglio"].iloc[-1])
