@@ -130,12 +130,13 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
     col_date = find_col(df.columns, ["Data", "Date"])
     col_qty = find_col(df.columns, ["Quantità", "Quantita", "Quantity", "Qta"])
     col_price = find_col(df.columns, ["Prezzo", "Price"])
-    col_fee = find_col(df.columns, ["Spese euro", "Commissioni", "Commissione", "Fees", "Fee"])
+    col_fee = find_col(df.columns, ["Spese euro", "SpeseEuro", "Commissioni", "Commissione", "Fees", "Fee"])
     col_tax = find_col(df.columns, ["Tassa"])
     col_name = find_col(df.columns, ["Nome"])
     col_type = find_col(df.columns, ["Tipo"])
     col_fx = find_col(df.columns, ["Cambio"])
-    col_flusso_netto = find_col(df.columns, ["Flusso netto"])
+    col_flusso_netto = find_col(df.columns, ["Flusso netto", "FlussoNetto"])
+    col_pmc = find_col(df.columns, ["Prezzo medio s/carico", "Prezzo medio s_carico", "Prezzo medio"])
     col_area = find_col(df.columns, ["Area"])
     col_sector = find_col(df.columns, ["Settore"])
     col_issuer = find_col(df.columns, ["Emittente"])
@@ -528,10 +529,12 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
 
     # profitto netto realizzato per ogni vendita:
     # incasso netto vendita - costo storico della quantità venduta
+
     sell_ops["RealizedTradePL"] = (
         sell_ops["FlussoNetto"]
-        - (sell_ops["Quantita"].abs() * sell_ops["Prezzo medio s/carico"])
+        - (sell_ops["Quantita"].abs() * sell_ops[col_pmc])
     )
+
 
     realized_from_trades = (
         sell_ops.groupby("Data")["RealizedTradePL"]
