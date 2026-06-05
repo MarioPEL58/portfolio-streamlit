@@ -683,11 +683,19 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         axis=1
     )
 
+    current = current.copy()
+    
     if dividends is not None and not dividends.empty:
-        
-        # allinea tipo della chiave
-        current["ID"] = current["ID"].astype("string").str.strip()
-        dividends["ID"] = dividends["ID"].astype("string").str.strip()
+    
+        dividends = dividends.copy()
+    
+        # ✅ CONVERSIONE ROBUSTA (questa è la chiave)
+        current["ID"] = current["ID"].astype("Int64", errors="ignore")
+        dividends["ID"] = dividends["ID"].astype("Int64", errors="ignore")
+    
+        # fallback → string (se ci sono NaN o mismatch)
+        current["ID"] = current["ID"].astype(str).str.strip()
+        dividends["ID"] = dividends["ID"].astype(str).str.strip()
     
         dividends_by_position = (
             dividends.groupby("ID")["DividendoNetto"]
@@ -700,10 +708,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     
     else:
         current["Dividendi Netti Incassati"] = 0.0
-
-        
-    # st.write("Dividends keys:", dividends["PositionKey"].unique())
-    # st.write("Current keys:", current.index.unique())
+  
+    st.write("Current ID:", current["ID"].unique())
+    st.write("Dividends ID:", dividends["ID"].unique())
 
     # Tieni solo posizioni aperte
     current = current[current["Quantita"] != 0].sort_values("Valore", ascending=False)
