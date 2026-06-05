@@ -499,7 +499,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # 6) Cashflow storico corretto
     # ---------------------------------------------------
     ops_cf = ops.copy()
-    st.write("Columns:", ops_cf.columns)
+    # st.write("Columns:", ops_cf.columns)
     ops_cf["Prezzo"] = ops_cf["Prezzo"].fillna(0.0)
     ops_cf["SpeseEuro"] = ops_cf["SpeseEuro"].fillna(0.0)
     ops_cf["Cambio"] = ops_cf["Cambio"].fillna(1.0)
@@ -702,8 +702,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         current["Dividendi Netti Incassati"] = 0.0
 
         
-    st.write("Dividends keys:", dividends["PositionKey"].unique())
-    st.write("Current keys:", current.index.unique())
+    # st.write("Dividends keys:", dividends["PositionKey"].unique())
+    # st.write("Current keys:", current.index.unique())
 
     # Tieni solo posizioni aperte
     current = current[current["Quantita"] != 0].sort_values("Valore", ascending=False)
@@ -830,7 +830,7 @@ if missing:
 # ============================================================
 series, current, holdings, exposure = build_portfolio(ops, closes, dividends)
 
-st.write(series[["Dividendi netti", "P/L realizzato"]].tail(20))
+# st.write(series[["Dividendi netti", "P/L realizzato"]].tail(20))
 
 # debug info
 # st.write("Valore portafoglio finale:", series["Valore portafoglio"].iloc[-1])
@@ -873,7 +873,9 @@ latest_realized = float(series["P/L realizzato"].iloc[-1])
 latest_dividends = float(series["Dividendi netti"].sum())
 
 # ✅ calcolo % realizzato
-sell_ops = ops_cf.loc[(ops_cf["Quantita"] < 0) & (ops_cf["FlussoNetto"].notna())].copy()
+sell_ops = ops.loc[
+    (ops["Quantita"] < 0) & (ops["FlussoNetto"].notna())
+].copy()
 
 sell_ops["InvestedAmount"] = (
     sell_ops["Quantita"].abs() * sell_ops["Prezzo medio s/carico"]
