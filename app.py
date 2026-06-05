@@ -166,6 +166,8 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
     out["Tassa"] = parse_numeric(df[col_tax]).fillna(0.0) if col_tax is not None else 0.0
     out["Cambio"] = parse_numeric(df[col_fx]) if col_fx is not None else np.nan
     out["FlussoNetto"] = parse_numeric(df[col_flusso_netto]) if col_flusso_netto is not None else np.nan
+    
+    out["Prezzo medio s/carico"] = (parse_numeric(df[col_pmc]) if col_pmc is not None else np.nan)
 
     out["Nome"] = df[col_name] if col_name is not None else out["Ticker"]
     out["Tipo"] = df[col_type] if col_type is not None else ""
@@ -526,24 +528,20 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # Realizzato giornaliero = profitto da vendite + dividendi
     # ---------------------------------------------------
     sell_ops = ops_cf.loc[ops_cf["Quantita"] < 0].copy()
-
-    # profitto netto realizzato per ogni vendita:
-    # incasso netto vendita - costo storico della quantità venduta
-
+    
     sell_ops["RealizedTradePL"] = (
         sell_ops["FlussoNetto"]
-        - (sell_ops["Quantita"].abs() * sell_ops[col_pmc])
+        - (sell_ops["Quantita"].abs() * sell_ops["Prezzo medio s/carico"])
     )
-
-
+    
     realized_from_trades = (
         sell_ops.groupby("Data")["RealizedTradePL"]
         .sum()
         .reindex(idx, fill_value=0.0)
     )
-
+    
     realized_daily = realized_from_trades.add(daily_dividends, fill_value=0.0)
-
+    
     pl_realizzato = realized_daily.cumsum().rename("P/L realizzato")
 
 
