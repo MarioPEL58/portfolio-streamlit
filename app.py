@@ -684,15 +684,23 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     )
 
     if dividends is not None and not dividends.empty:
+        
+        # allinea tipo della chiave
+        current["ID"] = current["ID"].astype("string").str.strip()
+        dividends["ID"] = dividends["ID"].astype("string").str.strip()
+    
         dividends_by_position = (
-            dividends.groupby("PositionKey")["DividendoNetto"]
+            dividends.groupby("ID")["DividendoNetto"]
             .sum()
             .rename("Dividendi Netti Incassati")
         )
-        current = current.join(dividends_by_position, how="left")
+    
+        current = current.join(dividends_by_position, on="ID")
         current["Dividendi Netti Incassati"] = current["Dividendi Netti Incassati"].fillna(0.0)
+    
     else:
         current["Dividendi Netti Incassati"] = 0.0
+
         
     st.write("Dividends keys:", dividends["PositionKey"].unique())
     st.write("Current keys:", current.index.unique())
@@ -863,7 +871,22 @@ latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else 
 
 latest_realized = float(series["P/L realizzato"].iloc[-1])
 latest_dividends = float(series["Dividendi netti"].sum())
-latest_realized_pct = latest_realized / latest_invested if latest_invested != 0 else np.nan
+
+# ✅ calcolo % realizzato
+sell_ops = ops_cf.loc[(ops_cf["Quantita"] < 0) & (ops_cf["FlussoNetto"].notna())].copy()
+
+sell_ops["InvestedAmount"] = (
+    sell_ops["Quantita"].abs() * sell_ops["Prezzo medio s/carico"]
+)
+
+realized_cost = (
+    sell_ops.groupby("Data")["InvestedAmount"]
+    .sum()
+    .cumsum()
+    .iloc[-1]
+)
+
+latest_realized_pct = latest_realized / realized_cost if realized_cost != 0 else np.nan
 
 
 k1, k2, k3, k4 = st.columns(4)
