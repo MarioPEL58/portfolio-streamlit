@@ -185,7 +185,48 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
     )
 
     return out
+    
+def load_dividends_from_excel(xls) -> pd.DataFrame:
+    try:
+        df = pd.read_excel(xls, sheet_name="DividendiCedole", engine="openpyxl").copy()
+    except Exception:
+        return pd.DataFrame(columns=["ID", "Data", "DividendoNetto", "Nome", "Valuta"])
 
+    df.columns = [str(c).strip() for c in df.columns]
+
+    col_id = find_col(df.columns, ["ID"])
+    col_date = find_col(df.columns, ["Data"])
+    col_div_net = find_col(df.columns, ["Dividendi euro Netti"])
+    col_div_tot = find_col(df.columns, ["Dividendi totali euro"])
+    col_name = find_col(df.columns, ["Nome"])
+    col_currency = find_col(df.columns, ["Valuta"])
+
+    out = pd.DataFrame()
+
+    out["ID"] = df[col_id] if col_id is not None else np.nan
+    out["Data"] = pd.to_datetime(df[col_date], errors="coerce", dayfirst=True)
+
+    # preferisci il netto; fallback sul totale
+    if col_div_net is not None:
+        out["DividendoNetto"] = parse_numeric(df[col_div_net]).fillna(0.0)
+    elif col_div_tot is not None:
+        out["DividendoNetto"] = parse_numeric(df[col_div_tot]).fillna(0.0)
+    else:
+        out["DividendoNetto"] = 0.0
+
+    out["Nome"] = df[col_name] if col_name is not None else ""
+    out["Valuta"] = df[col_currency] if col_currency is not None else ""
+
+    out = out[out["Data"].notna() & (out["DividendoNetto"] != 0)].copy()
+
+    # se usi ID come chiave posizione
+    out["PositionKey"] = np.where(
+        out["ID"].notna(),
+        out["ID"].astype(str).str.strip(),
+        out["Nome"].astype(str).str.strip()
+    )
+
+    return out
 
 @st.cache_data(show_spinner=False)
 def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp):
@@ -396,7 +437,7 @@ def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
     return holdings
 
 
-def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
+def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
     # ---------------------------------------------------
     # 1) Tieni solo i ticker per cui hai prezzi Yahoo
     # ---------------------------------------------------
@@ -466,6 +507,30 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
         ops_cf["FlussoNetto"],
         -(ops_cf["Quantita"] * ops_cf["Prezzo"] * ops_cf["Cambio"]) - ops_cf["SpeseEuro"]
     )
+    # ---------------------------------------------------
+    # Dividendi/Cedole netti giornalieri
+    # ---------------------------------------------------
+    if dividends is None or dividends.empty:
+        daily_dividends = pd.Series(0.0, index=idx, name="Dividendi netti")
+    else:
+        daily_dividends = (
+            dividends.groupby("Data")["DividendoNetto"]
+            .sum()
+            .reindex(idx, fill_value=0.0)
+            .rename("Dividendi netti")
+        )
+
+    # ---------------------------------------------------
+    # Realizzato giornaliero = vendite/acquisti chiusi + dividendi
+    # ---------------------------------------------------
+    realized_daily = (
+        ops_cf.groupby("Data")["Cashflow"]
+        .sum()
+        .reindex(idx, fill_value=0.0)
+        .add(daily_dividends, fill_value=0.0)
+    )
+
+    pl_realizzato = realized_daily.cumsum().rename("P/L realizzato")
 
     # cashflow totale giornaliero
     daily_cf_total = (
@@ -507,7 +572,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
 
     pnl = (total_value + invested).rename("P/L totale")
 
-    ts = pd.concat([total_value, invested, pnl, daily_pl,daily_pl_pct], axis=1)
+    ts = pd.concat([total_value, invested, pnl, daily_pl, daily_pl_pct, daily_dividends, pl_realizzato],axis=1)
     
     # =========================
     #     DEBUG P/L mismatch
@@ -605,6 +670,17 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame):
         axis=1
     )
 
+    if dividends is not None and not dividends.empty:
+        dividends_by_position = (
+            dividends.groupby("PositionKey")["DividendoNetto"]
+            .sum()
+            .rename("Dividendi Netti Incassati")
+        )
+        current = current.join(dividends_by_position, how="left")
+        current["Dividendi Netti Incassati"] = current["Dividendi Netti Incassati"].fillna(0.0)
+    else:
+        current["Dividendi Netti Incassati"] = 0.0
+
 
     # Tieni solo posizioni aperte
     current = current[current["Quantita"] != 0].sort_values("Valore", ascending=False)
@@ -690,6 +766,7 @@ if file_source is None:
 # ============================================================
 try:
     ops = load_operations_from_excel(file_source)
+    dividends = load_dividends_from_excel(file_source)
 except Exception as e:
     st.error(f"Errore nel caricamento del file: {e}")
     st.stop()
@@ -767,13 +844,21 @@ latest_daily_pl = float(series["P/L Giornaliero"].iloc[-1])
 latest_daily_pl_pct = float(series["P/L Giornaliero %"].iloc[-1])
 latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else np.nan
 
-k1, k2, k3, k4, k5 = st.columns(5)
+latest_realized = float(series["P/L realizzato"].iloc[-1])
+latest_dividends = float(series["Dividendi netti"].sum())
+latest_realized_pct = latest_realized / latest_invested if latest_invested != 0 else np.nan
+
+
+k1, k2, k3, k4 = st.columns(4)
 k1.metric("Valore portafoglio", fmt_eur(latest_value))
 k2.metric("Capitale investito", fmt_eur(latest_invested))
-k3.metric("P/L totale", fmt_eur(latest_pnl), delta=fmt_pct(latest_pnl_pct), delta_color="normal" if pd.notna(latest_pnl_pct) else None)
-k4.metric("Posizioni aperte", f"{len(current)}")
-k5.metric("P/L Giornaliero",fmt_eur(latest_daily_pl),delta=fmt_pct(latest_daily_pl_pct),delta_color="normal" if pd.notna(latest_daily_pl_pct) else None)
+k3.metric("Posizioni aperte", len(current))
+k4.metric("Dividendi netti", fmt_eur(latest_dividends))
 
+k5, k6, k7  = st.columns(3)
+k5.metric("P/L totale", fmt_eur(latest_pnl), delta=fmt_pct(latest_pnl_pct), delta_color="normal" if pd.notna(latest_pnl_pct) else None)
+k6.metric("P/L Giornaliero",fmt_eur(latest_daily_pl),delta=fmt_pct(latest_daily_pl_pct),delta_color="normal" if pd.notna(latest_daily_pl_pct) else None)
+k7.metric("P/L realizzato", fmt_eur(latest_realized),delta=fmt_pct(latest_realized_pct))
 
 # ============================================================
 # Main chart
@@ -839,7 +924,7 @@ with tab_pos:
 
     ordered_cols = [
         "Ticker", "Intermediario", "Nome", "Tipo", "Area", "Settore", "Emittente", "Valuta",
-        "Quantita", "Prezzo Attuale", "Valore",
+        "Quantita", "Prezzo Attuale", "Valore","Dividendi Netti Incassati",
         "Costo Medio Stimato", "Costo Totale Stimato", "P/L", "P/L %", "P/L Netto Stimato","P/L Giornaliero","P/L Giornaliero %"
     ]
     ordered_cols = [c for c in ordered_cols if c in current_view.columns]
@@ -866,6 +951,7 @@ st.dataframe(
     .format({
         "Prezzo Attuale": "{:,.4f}",
         "Valore": "€ {:,.2f}",
+        "Dividendi Netti Incassati": "€ {:,.2f}",
         "Costo Medio Stimato": "{:,.4f}",
         "Costo Totale Stimato": "€ {:,.2f}",
         "P/L": "€ {:,.2f}",
