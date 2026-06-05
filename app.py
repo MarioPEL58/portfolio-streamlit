@@ -496,6 +496,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # 6) Cashflow storico corretto
     # ---------------------------------------------------
     ops_cf = ops.copy()
+    st.write("Columns:", ops_cf.columns)
     ops_cf["Prezzo"] = ops_cf["Prezzo"].fillna(0.0)
     ops_cf["SpeseEuro"] = ops_cf["SpeseEuro"].fillna(0.0)
     ops_cf["Cambio"] = ops_cf["Cambio"].fillna(1.0)
