@@ -695,7 +695,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         current["Dividendi Netti Incassati"] = 0.0
         
     st.write("Dividends keys:", dividends["PositionKey"].unique())
-    st.write("Current keys:", current["PositionKey"].unique())
+    st.write("Current keys:", current.index.unique())
 
     # Tieni solo posizioni aperte
     current = current[current["Quantita"] != 0].sort_values("Valore", ascending=False)
