@@ -533,6 +533,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
 
     # aggiungi dividendi
     realized_daily = realized_from_trades.add(daily_dividends, fill_value=0.0)
+    pl_realizzato = realized_daily.cumsum().rename("P/L realizzato")
 
     # cashflow totale giornaliero
     daily_cf_total = (
