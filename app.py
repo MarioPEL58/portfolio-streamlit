@@ -1,3 +1,6 @@
+import os
+import streamlit as st
+
 from __future__ import annotations
 
 import numpy as np
@@ -13,6 +16,8 @@ sys.path.append(str(Path(__file__).resolve().parent))
 
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
+from components.charts import allocation_pie_chart, allocation_bar_chart
+
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel
 from services.market_data import download_close_prices
 from services.portfolio import build_portfolio
@@ -25,8 +30,14 @@ st.set_page_config(
     layout="wide"
 )
 
-# DEV title
-st.title("🚧 DEV Portfolio Tracker ETF / Azioni")
+# ENV check 
+ENV = os.getenv("ENV", "DEV")
+if ENV == "DEV":
+    st.title("🚧 DEV Portfolio Tracker ETF / Azioni")
+    st.warning("⚠️ Ambiente di sviluppo")
+else:
+    st.title("📈 Portfolio Tracker ETF / Azioni")
+
 st.caption(
     "Carica un file Excel con il foglio Operazioni e ricostruisci il valore del portafoglio nel tempo."
 )
@@ -200,36 +211,25 @@ with tab_pos:
 
 with tab_exp:
     st.subheader("Allocazione")
-
-    pie = px.pie(exposure, names="Ticker", values="Valore", hole=0.45)
-    pie.update_layout(height=420, margin=dict(l=10, r=10, t=30, b=10))
-    st.plotly_chart(pie, use_container_width=True)
-
+    
+    # ✅ PIE (Ticker)
+    fig = allocation_pie_chart(exposure, column="Ticker")
+    if fig:
+        st.plotly_chart(fig, use_container_width=True)
+    
     c1, c2 = st.columns(2)
-
+    
+    # ✅ BAR Area
     if "Area" in exposure.columns and exposure["Area"].astype(str).str.strip().any():
-        area_df = (
-            exposure.groupby("Area", dropna=False)["Valore"]
-            .sum()
-            .reset_index()
-            .sort_values("Valore", ascending=False)
-        )
-        c1.plotly_chart(
-            px.bar(area_df, x="Area", y="Valore", title="Per area"),
-            use_container_width=True
-        )
-
+        fig_area = allocation_bar_chart(exposure, column="Area", title="Per area")
+        if fig_area:
+            c1.plotly_chart(fig_area, use_container_width=True)
+    
+    # ✅ BAR Tipo
     if "Tipo" in exposure.columns and exposure["Tipo"].astype(str).str.strip().any():
-        tipo_df = (
-            exposure.groupby("Tipo", dropna=False)["Valore"]
-            .sum()
-            .reset_index()
-            .sort_values("Valore", ascending=False)
-        )
-        c2.plotly_chart(
-            px.bar(tipo_df, x="Tipo", y="Valore", title="Per tipo"),
-            use_container_width=True
-        )
+        fig_tipo = allocation_bar_chart(exposure, column="Tipo", title="Per tipo")
+        if fig_tipo:
+            c2.plotly_chart(fig_tipo, use_container_width=True)
 
 with tab_ops:
     st.subheader("Operazioni")
