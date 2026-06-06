@@ -1,0 +1,131 @@
+from __future__ import annotations
+
+import pandas as pd
+import streamlit as st
+import yfinance as yf
+
+
+@st.cache_data(show_spinner=False)
+def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp):
+    tickers = [t for t in tickers if isinstance(t, str) and t.strip()]
+    if not tickers:
+        return pd.DataFrame(), []
+
+    raw = yf.download(
+        tickers=tickers,
+        start=start_date.strftime("%Y-%m-%d"),
+        end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
+        auto_adjust=False,
+        progress=False,
+        group_by="ticker",
+        threads=True,
+    )
+
+    if raw is None or len(raw) == 0:
+        return pd.DataFrame(), tickers
+
+    closes = pd.DataFrame(index=raw.index)
+
+    if isinstance(raw.columns, pd.MultiIndex):
+        lvl0 = set(raw.columns.get_level_values(0))
+
+        if all(t in lvl0 for t in tickers):
+            for t in tickers:
+                if "Close" in raw[t].columns:
+                    closes[t] = raw[t]["Close"]
+                elif "Adj Close" in raw[t].columns:
+                    closes[t] = raw[t]["Adj Close"]
+        else:
+            field = "Close" if "Close" in lvl0 else ("Adj Close" if "Adj Close" in lvl0 else None)
+            if field is not None:
+                sub = raw[field]
+                for t in tickers:
+                    if t in sub.columns:
+                        closes[t] = sub[t]
+    else:
+        t = tickers[0]
+        if "Close" in raw.columns:
+            closes[t] = raw["Close"]
+        elif "Adj Close" in raw.columns:
+            closes[t] = raw["Adj Close"]
+
+    closes = closes.sort_index().ffill()
+    missing = [t for t in tickers if t not in closes.columns]
+    return closes, missing
+
+
+@st.cache_data(show_spinner=False)
+def download_fx_series(currencies: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd.DataFrame:
+    currencies = sorted(set([c for c in currencies if isinstance(c, str) and c and c != "EUR"]))
+    if not currencies:
+        return pd.DataFrame()
+
+    yahoo_pairs = {ccy: f"EUR{ccy}=X" for ccy in currencies}
+
+    raw = yf.download(
+        tickers=list(yahoo_pairs.values()),
+        start=start_date.strftime("%Y-%m-%d"),
+        end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
+        auto_adjust=False,
+        progress=False,
+        group_by="ticker",
+        threads=True,
+    )
+
+    if raw is None or len(raw) == 0:
+        return pd.DataFrame()
+
+    fx = pd.DataFrame(index=raw.index)
+
+    for ccy, pair in yahoo_pairs.items():
+        try:
+            if isinstance(raw.columns, pd.MultiIndex):
+                lvl0 = set(raw.columns.get_level_values(0))
+
+                if pair in lvl0:
+                    if "Close" in raw[pair].columns:
+                        fx[ccy] = raw[pair]["Close"]
+                    elif "Adj Close" in raw[pair].columns:
+                        fx[ccy] = raw[pair]["Adj Close"]
+                else:
+                    if "Close" in lvl0 and pair in raw["Close"].columns:
+                        fx[ccy] = raw["Close"][pair]
+                    elif "Adj Close" in lvl0 and pair in raw["Adj Close"].columns:
+                        fx[ccy] = raw["Adj Close"][pair]
+            else:
+                if "Close" in raw.columns:
+                    fx[ccy] = raw["Close"]
+                elif "Adj Close" in raw.columns:
+                    fx[ccy] = raw["Adj Close"]
+        except Exception:
+            pass
+
+    return fx.sort_index().ffill()
+
+
+def convert_closes_to_eur(closes: pd.DataFrame, ops: pd.DataFrame, start_date: pd.Timestamp, end_date: pd.Timestamp):
+    closes_eur = closes.copy()
+
+    ticker_ccy = (
+        ops.sort_values("Data")
+        .groupby("Ticker")["Valuta"]
+        .last()
+        .fillna("EUR")
+        .to_dict()
+    )
+
+    needed_ccy = [ccy for ccy in ticker_ccy.values() if ccy != "EUR"]
+    fx_rates = download_fx_series(needed_ccy, start_date, end_date)
+
+    if fx_rates.empty:
+        return closes_eur, fx_rates
+
+    for ticker, ccy in ticker_ccy.items():
+        if ticker not in closes_eur.columns or ccy == "EUR":
+            continue
+
+        if ccy in fx_rates.columns:
+            fx_series = fx_rates[ccy].reindex(closes_eur.index).ffill()
+            closes_eur[ticker] = closes_eur[ticker] / fx_series
+
+    return closes_eur, fx_rates
