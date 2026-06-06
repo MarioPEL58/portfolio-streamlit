@@ -12,6 +12,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent))
 
 from components.sidebar import render_sidebar, resolve_file_source
+from components.charts import portfolio_chart
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel
 from services.market_data import download_close_prices
 from services.portfolio import build_portfolio
@@ -157,48 +158,7 @@ k7.metric(
 # Main chart
 st.subheader("Andamento del portafoglio nel tempo")
 
-fig = go.Figure()
-fig.add_trace(go.Scatter(
-    x=series.index,
-    y=series["Valore portafoglio"],
-    mode="lines",
-    name="Valore portafoglio"
-))
-fig.add_trace(go.Scatter(
-    x=series.index,
-    y=series["Capitale investito"],
-    mode="lines",
-    name="Capitale investito"
-))
-fig.add_trace(go.Scatter(
-    x=series.index,
-    y=series["P/L totale"],
-    mode="lines",
-    name="P/L totale",
-    yaxis="y2"
-))
-
-if bench_norm is not None:
-    fig.add_trace(go.Scatter(
-        x=bench_norm.index,
-        y=bench_norm.values,
-        mode="lines",
-        name=f"Benchmark normalizzato: {benchmark.strip()}"
-    ))
-
-fig.update_layout(
-    height=540,
-    xaxis_title="Data",
-    yaxis_title="Euro",
-    yaxis2=dict(
-        title="P/L",
-        overlaying="y",
-        side="right",
-        showgrid=False
-    ),
-    legend=dict(orientation="h"),
-    margin=dict(l=20, r=20, t=20, b=20)
-)
+fig = portfolio_chart(series, bench_norm=bench_norm, benchmark_name=benchmark)
 
 st.plotly_chart(fig, use_container_width=True)
 
