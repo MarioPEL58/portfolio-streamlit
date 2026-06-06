@@ -22,7 +22,8 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🚧 DEV Portfolio Tracker ETF / Azioni")
+# st.title("📈 Portfolio Tracker ETF / Azioni")   # title for main 
+st.title("🚧 DEV Portfolio Tracker ETF / Azioni")  # title for dev da commentare per pubblicarlo
 st.caption(
     "Carica un file Excel con il foglio Operazioni, ricostruisci il valore del portafoglio nel tempo. "
 )
