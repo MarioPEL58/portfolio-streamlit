@@ -1,7 +1,7 @@
+from __future__ import annotations
+
 import os
 import streamlit as st
-
-from __future__ import annotations
 
 import numpy as np
 import pandas as pd
