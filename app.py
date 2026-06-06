@@ -22,15 +22,29 @@ from services.market_data import download_close_prices
 from services.portfolio import build_portfolio
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 
+ENV = os.getenv("ENV", "DEV")
+
+CONFIG = {
+    "DEV": {
+        "title": "🚧 DEV Portfolio Tracker",
+        "icon": "🚧"
+    },
+    "PROD": {
+        "title": "Portfolio Tracker ETF / Azioni",
+        "icon": "📈"
+    }
+}
+
+cfg = CONFIG.get(ENV, CONFIG["DEV"])
 
 st.set_page_config(
-    page_title="Portfolio Tracker ETF / Azioni",
-    page_icon="📈",
+    page_title=cfg["title"],
+    page_icon=cfg["icon"],
     layout="wide"
 )
 
 # ENV check 
-ENV = os.getenv("ENV", "DEV")
+
 if ENV == "DEV":
     st.title("🚧 DEV Portfolio Tracker ETF / Azioni")
     st.warning("⚠️ Ambiente di sviluppo")
