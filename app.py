@@ -6,6 +6,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parent))
+
 from components.sidebar import render_sidebar, resolve_file_source
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel
 from services.market_data import download_close_prices
