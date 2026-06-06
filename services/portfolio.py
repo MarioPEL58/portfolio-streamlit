@@ -217,4 +217,3 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     exposure = current.reset_index().rename(columns={"index": "PositionKey"})
 
     return ts, current, holdings, exposure
-``
