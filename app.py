@@ -12,6 +12,7 @@ from services.excel_loader import load_dividends_from_excel, load_operations_fro
 from services.market_data import download_close_prices
 from services.portfolio import build_portfolio
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
+from utils.demo import create_demo_file
 
 ENV = os.getenv("ENV", "DEV")
 
