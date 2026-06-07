@@ -8,14 +8,14 @@ def create_demo_file():
     # Foglio Readme con informazioni
     # -------------------------
   
-  df_readme = pd.DataFrame({
-      "Istruzioni": [
-          "Compila il foglio Operazioni con i tuoi dati.",
-          "Inserisci quantità positive per acquisti e negative per vendite.",
-          "Il foglio DividendiCedole è facoltativo.",
-          "Non modificare i nomi delle colonne."
-      ]
-  })
+    df_readme = pd.DataFrame({
+         "Istruzioni": [
+             "Compila il foglio Operazioni con i tuoi dati.",
+             "Inserisci quantità positive per acquisti e negative per vendite.",
+             "Il foglio DividendiCedole è facoltativo.",
+             "Non modificare i nomi delle colonne."
+         ]
+     })
 
   
     # -------------------------
