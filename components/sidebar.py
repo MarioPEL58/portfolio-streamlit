@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-
+from utils.demo import create_demo_file
 
 def render_sidebar():
     with st.sidebar:
@@ -38,6 +38,20 @@ def render_sidebar():
             3. Esplora grafici e tabelle
             4. Scarica i CSV finali
             """)
+
+        # ✅ sezione file demo
+        st.sidebar.markdown("### 📄 File di esempio")
+    
+        demo_file = create_demo_file()
+    
+        st.sidebar.download_button(
+            label="📥 Scarica file demo",
+            data=demo_file,
+            file_name="demo_portafoglio.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    
+        st.sidebar.caption("Scarica un esempio già pronto compatibile con l'app.")
 
         st.markdown("---")
         st.header("Sorgente dati")
