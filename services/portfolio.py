@@ -91,10 +91,10 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
                 # tassa solo su profitto positivo
                 tax_euro = max(realized_gross, 0.0) * tax_rate
 
-                realized_trade_pl = realized_gross - tax_euro
-
                 # cashflow netto vendita
                 cashflow = gross_proceeds - fees - tax_euro
+
+                realized_trade_pl = cashflow - cost_basis_sold
 
                 # scarico costo residuo
                 open_qty = open_qty - sell_qty
