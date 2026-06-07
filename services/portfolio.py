@@ -131,17 +131,28 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
     return ops
 
 def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
-    valid_tickers = [t for t in ops["Ticker"].unique() if t in closes.columns]
-    ops = ops[ops["Ticker"].isin(valid_tickers)].copy()
+    ops_all = ops.copy()
+    valid_tickers = [t for t in ops_all["Ticker"].unique() if t in closes.columns]
+    ops = ops_all[ops_all["Ticker"].isin(valid_tickers)].copy()
 
-    if ops.empty:
+    if ops_all.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
-    # ✅ arricchisco subito le operazioni
-    ops = enrich_ops_with_cost_engine(ops)
+    # arricchisco TUTTE le operazioni
+    ops_all = enrich_ops_with_cost_engine(ops_all)
 
-    idx = closes.index
-    holdings = build_holdings(ops, idx)
+
+    if ops.empty:
+        # se non ci sono ticker con prezzi validi, almeno costruisco una serie vuota ma
+        # non perdo il realizzato; se vuoi, puoi anche gestire questo caso separatamente
+        idx = pd.DatetimeIndex(sorted(ops_all["Data"].dropna().unique()))
+        if len(idx) == 0:
+            return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    else:
+        idx = closes.index
+
+    holdings = build_holdings(ops, idx) if not ops.empty else pd.DataFrame(index=idx)
+
 
     closes_ticker = closes[valid_tickers].reindex(idx).ffill()
 
@@ -166,9 +177,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     position_values = holdings * position_closes_eur
     total_value = position_values.sum(axis=1).rename("Valore portafoglio")
 
-    ops_cf = ops.copy()
+    # cashflow / realized su TUTTE le operazioni, anche senza prezzi di mercato
+    ops_cf = ops_all.copy()
     ops_cf["Cashflow"] = ops_cf["CashflowCalc"]
-    
+
     if dividends is None or dividends.empty:
         daily_dividends = pd.Series(0.0, index=idx, name="Dividendi netti")
     else:
