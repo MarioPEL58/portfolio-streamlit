@@ -134,11 +134,11 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
     flusso_base = - valore - out["SpeseEuro"].fillna(0.0)
     
     # ✅ se FlussoNetto esiste → usa quello (file reale)
-    out["FlussoNetto"] = np.where(
-        col_flusso_netto is not None,
-        parse_numeric(df[col_flusso_netto]),
-        flusso_base
-    )
+    if col_flusso_netto is not None:
+        out["FlussoNetto"] = parse_numeric(df[col_flusso_netto])
+    else:
+        out["FlussoNetto"] = flusso_base
+
     out["Prezzo medio s/carico"] = parse_numeric(df[col_pmc]) if col_pmc is not None else np.nan
 
     out["Nome"] = df[col_name] if col_name is not None else out["Ticker"]
