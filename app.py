@@ -9,9 +9,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-# import sys
-# from pathlib import Path
-# sys.path.append(str(Path(__file__).resolve().parent))
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent))
 
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
