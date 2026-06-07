@@ -131,15 +131,18 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
     return ops
 
 def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
+
     ops_all = ops.copy()
-    valid_tickers = [t for t in ops_all["Ticker"].unique() if t in closes.columns]
-    ops = ops_all[ops_all["Ticker"].isin(valid_tickers)].copy()
 
     if ops_all.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
-    # arricchisco TUTTE le operazioni
+    # ✅ arricchisco TUTTE le operazioni
     ops_all = enrich_ops_with_cost_engine(ops_all)
+
+    # ✅ filtro DOPO l'arricchimento, così ops mantiene le colonne derivate
+    valid_tickers = [t for t in ops_all["Ticker"].unique() if t in closes.columns]
+    ops = ops_all[ops_all["Ticker"].isin(valid_tickers)].copy()
     print (
     "DEBUG OPS ALL",
     ops_all[[
