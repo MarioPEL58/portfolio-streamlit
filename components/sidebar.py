@@ -5,9 +5,8 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-from utils.demo import create_demo_file
 
-def render_sidebar():
+def render_sidebar(create_demo_file):
     with st.sidebar:
         st.title("ℹ️ Guida")
 
