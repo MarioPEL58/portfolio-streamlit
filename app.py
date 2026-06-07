@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent))
 
+from utils.demo import create_demo_file
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
@@ -56,7 +57,7 @@ st.caption(
 )
 
 # Sidebar
-sidebar_cfg = render_sidebar()
+sidebar_cfg = render_sidebar(create_demo_file)
 uploaded_file = sidebar_cfg["uploaded_file"]
 use_local_demo = sidebar_cfg["use_local_demo"]
 benchmark = sidebar_cfg["benchmark"]
