@@ -1,11 +1,9 @@
 import os
 import streamlit as st
-
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from utils.demo import create_demo_file
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
