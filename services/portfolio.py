@@ -140,7 +140,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
 
     # arricchisco TUTTE le operazioni
     ops_all = enrich_ops_with_cost_engine(ops_all)
-    st.write(
+    print (
     "DEBUG OPS ALL",
     ops_all[[
         "Ticker",
@@ -213,8 +213,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         .sum()
         .reindex(idx, fill_value=0.0)
     )
-    st.write("DEBUG SELL OPS", sell_ops[["Ticker", "Data", "Quantita", "AvgCostBefore", "CashflowCalc", "RealizedTradePL"]])
-    st.write("DEBUG REALIZED FROM TRADES", realized_from_trades[realized_from_trades != 0])
+    print ("DEBUG SELL OPS", sell_ops[["Ticker", "Data", "Quantita", "AvgCostBefore", "CashflowCalc", "RealizedTradePL"]])
+    print ("DEBUG REALIZED FROM TRADES", realized_from_trades[realized_from_trades != 0])
     
     realized_daily = realized_from_trades.add(daily_dividends, fill_value=0.0)
     pl_realizzato = realized_daily.cumsum().rename("P/L realizzato")
