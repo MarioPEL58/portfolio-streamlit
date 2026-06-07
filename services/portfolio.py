@@ -137,6 +137,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     if ops.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
+    # ✅ arricchisco subito le operazioni
+    ops = enrich_ops_with_cost_engine(ops)
+
     idx = closes.index
     holdings = build_holdings(ops, idx)
 
@@ -163,7 +166,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     position_values = holdings * position_closes_eur
     total_value = position_values.sum(axis=1).rename("Valore portafoglio")
 
-    ops_cf = enrich_ops_with_cost_engine(ops)
+    ops_cf = ops.copy()
     ops_cf["Cashflow"] = ops_cf["CashflowCalc"]
     
     if dividends is None or dividends.empty:
@@ -177,10 +180,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
 
     sell_ops = ops_cf.loc[ops_cf["Quantita"] < 0].copy()
-    sell_ops["RealizedTradePL"] = (
-        sell_ops["FlussoNetto"]
-        - (sell_ops["Quantita"].abs() * sell_ops["Prezzo medio s/carico"])
-    )
 
     realized_from_trades = (
         sell_ops.groupby("Data")["RealizedTradePL"]
@@ -241,35 +240,29 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         })
     )
 
-    cost_df = ops.copy()
-    cost_df["CostoFirmato"] = (
-        (cost_df["Quantita"] * cost_df["Prezzo"].fillna(0.0))
-        + cost_df["SpeseEuro"].fillna(0.0)
-    )
-
-    agg_cost = cost_df.groupby("PositionKey").agg(
-        NetQty=("Quantita", "sum"),
-        GrossCost=("CostoFirmato", "sum")
-    )
+    cost_state = (
+            ops.groupby("PositionKey")
+            .agg(
+                NetQty=("QtyOpenAfter", "last"),
+                OpenCost=("CostOpenAfter", "last"),
+                AvgCost=("AvgCostAfter", "last"),
+            )
+        )
 
     current = pd.concat([
-        last_qty.rename("Quantita"),
-        last_close_eur.rename("Prezzo Attuale"),
-        last_daily_pl.rename("P/L Giornaliero"),
-    ], axis=1)
+            last_qty.rename("Quantita"),
+            last_close_eur.rename("Prezzo Attuale"),
+            last_daily_pl.rename("P/L Giornaliero"),
+        ], axis=1)
 
     current["Ultimo Close Storico"] = last_close_eur
     current["Valore"] = current["Quantita"] * current["Prezzo Attuale"]
 
-    current = current.join(agg_cost, how="left").join(meta, how="left")
+    current = current.join(cost_state, how="left").join(meta, how="left")
 
-    current["Costo Medio Stimato"] = np.where(
-        current["NetQty"] != 0,
-        current["GrossCost"] / current["NetQty"],
-        np.nan
-    )
+    current["Costo Medio Stimato"] = current["AvgCost"]
+    current["Costo Totale Stimato"] = current["OpenCost"]
 
-    current["Costo Totale Stimato"] = current["Costo Medio Stimato"] * current["Quantita"]
     current["P/L"] = current["Valore"] - current["Costo Totale Stimato"]
 
     current["P/L %"] = np.where(
