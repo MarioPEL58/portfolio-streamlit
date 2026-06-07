@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-from ..utils.demo import create_demo_file
+from utils.demo import create_demo_file
 
 def render_sidebar():
     with st.sidebar:
