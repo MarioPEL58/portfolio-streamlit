@@ -7,11 +7,6 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-
-# import sys
-# from pathlib import Path
-#sys.path.append(str(Path(__file__).resolve().parent))
-
 from utils.demo import create_demo_file
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
