@@ -100,23 +100,8 @@ if selected_brokers:
         ops["Intermediario"].astype(str).str.strip().isin(selected_brokers)
     ].copy()
 
-    if dividends is not None and not dividends.empty:
-        selected_ids = (
-            ops["ID"]
-            .dropna()
-            .astype(str)
-            .str.strip()
-            .unique()
-            .tolist()
-        )
-
-        dividends = dividends.copy()
-        dividends["ID"] = dividends["ID"].astype(str).str.strip()
-
-        dividends = dividends[
-            dividends["ID"].isin(selected_ids)
-        ].copy()
-
+# ✅ NON filtrare i dividendi
+dividends_filtered = dividends.copy() if dividends is not None else dividends
 
 with st.expander("Anteprima operazioni", expanded=False):
     st.dataframe(ops, use_container_width=True)
@@ -139,7 +124,7 @@ if missing:
     st.warning("Ticker senza prezzi scaricati: " + ", ".join(missing))
 
 # Portfolio
-series, current, holdings, exposure, ops_enriched = build_portfolio(ops, closes, dividends)
+series, current, holdings, exposure, ops_enriched = build_portfolio(ops, closes, dividends_filtered)
 
 if series.empty:
     st.error("Non è stato possibile costruire il portafoglio con i dati disponibili.")
