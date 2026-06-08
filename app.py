@@ -181,10 +181,6 @@ if dividends is not None and not dividends.empty:
     if dividends_filtered is not None and dividends_filtered.empty:
         st.caption("ℹ️ Nessun dividendo per il filtro selezionato")
 
-        
-with st.expander("Anteprima operazioni", expanded=False):
-    st.dataframe(ops_enriched, use_container_width=True)
-
 # Price download
 start_date = ops["Data"].min().normalize()
 end_date = pd.Timestamp.today().normalize()
@@ -208,6 +204,9 @@ series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered
 if series.empty:
     st.error("Non è stato possibile costruire il portafoglio con i dati disponibili.")
     st.stop()
+    
+with st.expander("Anteprima operazioni", expanded=False):
+    st.dataframe(ops_enriched, use_container_width=True)
 
 # Benchmark
 bench_norm = None
