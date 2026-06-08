@@ -106,18 +106,27 @@ else:
 # ✅ 2. CREA dividends_filtered (DOPO)
 # =========================
 if dividends is not None and not dividends.empty:
-    valid_ids = (
+    # ✅ normalizzo ID OPS
+    ops_ids = (
         ops_filtered["ID"]
         .dropna()
         .astype(str)
         .str.strip()
+        .str.replace(".0", "", regex=False)
     )
 
+    # ✅ normalizzo ID DIVIDENDI
     dividends_filtered = dividends.copy()
-    dividends_filtered["ID"] = dividends_filtered["ID"].astype(str).str.strip()
+    dividends_filtered["ID"] = (
+        dividends_filtered["ID"]
+        .astype(str)
+        .str.strip()
+        .str.replace(".0", "", regex=False)
+    )
 
+    # ✅ filtro corretto
     dividends_filtered = dividends_filtered[
-        dividends_filtered["ID"].isin(valid_ids)
+        dividends_filtered["ID"].isin(ops_ids)
     ].copy()
 else:
     dividends_filtered = dividends
