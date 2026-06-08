@@ -281,6 +281,17 @@ realized_dividends = float(series["Dividendi netti"].sum())
 realized_total = realized_trading + realized_dividends
 
 unrealized_pl = latest_pnl - realized_total
+
+start_date = series.index.min()
+end_date = series.index.max()
+
+days = (end_date - start_date).days
+
+if days > 5 and latest_pnl_pct is not None:
+    annualized_pct = (1 + latest_pnl_pct) ** (365.25 / days) - 1
+else:
+    annualized_pct = None
+
 # =========================
 # UI KPI
 # =========================
@@ -358,7 +369,7 @@ with c4:
     render_total_pl_card(
         total_pl=latest_pnl,
         total_pct=latest_pnl_pct,
-        annualized_pct=None  # puoi aggiungerlo dopo
+        annualized_pct=annualized_pct
     )
 
 
