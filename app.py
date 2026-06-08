@@ -100,8 +100,32 @@ if selected_brokers:
         ops["Intermediario"].astype(str).str.strip().isin(selected_brokers)
     ].copy()
 
-# ✅ NON filtrare i dividendi
-dividends_filtered = dividends.copy() if dividends is not None else dividends
+
+# =========================
+# ✅ FILTRO DIVIDENDI (Opzione A CORRETTA)
+# =========================
+if dividends is not None and not dividends.empty:
+    valid_ids = (
+        ops_filtered["ID"]
+        .dropna()
+        .astype(str)
+        .str.strip()
+    )
+
+    dividends_filtered = dividends.copy()
+    dividends_filtered["ID"] = dividends_filtered["ID"].astype(str).str.strip()
+
+    dividends_filtered = dividends_filtered[
+        dividends_filtered["ID"].isin(valid_ids)
+    ].copy()
+else:
+    dividends_filtered = dividends
+    
+# ✅ message if dividends_filtered 
+
+if dividends is not None and not dividends.empty:
+    if dividends_filtered.empty:
+        st.caption("ℹ️ Nessun dividendo per il filtro selezionato")
 
 with st.expander("Anteprima operazioni", expanded=False):
     st.dataframe(ops, use_container_width=True)
