@@ -235,16 +235,16 @@ if show_benchmark and benchmark.strip():
 # KPIs
 # =========================
 
-# latest_value = float(series["Valore portafoglio"].iloc[-1])
-# latest_invested = float(series["Capitale investito"].iloc[-1])
-# latest_pnl = float(series["P/L totale"].iloc[-1])
-# latest_daily_pl = float(series["P/L Giornaliero"].iloc[-1])
-# latest_daily_pl_pct = float(series["P/L Giornaliero %"].iloc[-1])
+latest_value = float(series["Valore portafoglio"].iloc[-1])
+latest_invested = float(series["Capitale investito"].iloc[-1])
+latest_pnl = float(series["P/L totale"].iloc[-1])
+latest_daily_pl = float(series["P/L Giornaliero"].iloc[-1])
+latest_daily_pl_pct = float(series["P/L Giornaliero %"].iloc[-1])
 
-# latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else np.nan
+latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else np.nan
 
-# latest_realized = float(series["P/L realizzato"].iloc[-1])
-# latest_dividends = float(series["Dividendi netti"].sum())
+latest_realized = float(series["P/L realizzato"].iloc[-1])
+latest_dividends = float(series["Dividendi netti"].sum())
 
 
 
