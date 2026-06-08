@@ -223,13 +223,18 @@ k4.metric("Dividendi netti", fmt_eur(latest_dividends))
 
 k5, k6, k7 = st.columns(3)
 
-k5.metric(
-    "P/L totale",
-    fmt_eur(latest_pnl),
-    delta=fmt_pct(latest_pnl_pct) if pd.notna(latest_pnl_pct) else None,
-    delta_color="normal" if pd.notna(latest_pnl_pct) else None
-)
-
+if pd.notna(latest_pnl_pct):
+    k5.metric(
+        "P/L totale",
+        fmt_eur(latest_pnl),
+        delta=fmt_pct(latest_pnl_pct),
+        delta_color="normal"
+    )
+else:
+    k5.metric(
+        "P/L totale",
+        fmt_eur(latest_pnl)
+    )
 
 if pd.notna(latest_daily_pl_pct):
     k6.metric(
@@ -244,12 +249,18 @@ else:
         fmt_eur(latest_daily_pl)
     )
 
-k7.metric(
-    "P/L realizzato",
-    fmt_eur(latest_realized),
-    delta=fmt_pct(latest_realized_pct) if pd.notna(latest_realized_pct) else None,
-    delta_color="normal" if pd.notna(latest_realized_pct) else None
-)
+if pd.notna(latest_realized_pct):
+    k7.metric(
+        "P/L realizzato",
+        fmt_eur(latest_realized),
+        delta=fmt_pct(latest_realized_pct),
+        delta_color="normal"
+    )
+else:
+    k7.metric(
+        "P/L realizzato",
+        fmt_eur(latest_realized)
+    )
 
 # Main chart
 st.subheader("Andamento del portafoglio nel tempo")
