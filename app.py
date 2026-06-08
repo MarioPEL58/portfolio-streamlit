@@ -298,5 +298,11 @@ with tab_dl:
 st.markdown("---")
 footer_text = CONFIG.get(ENV, CONFIG["DEV"])["title"]
 footer_icon = CONFIG.get(ENV, CONFIG["DEV"])["icon"]
-st.markdown(f"### {footer_icon} {footer_text}")
+
+st.markdown(
+    f"<div style='text-align: center; color: gray;'>"
+    f"{CONFIG[ENV]['icon']} {CONFIG[ENV]['title']}"
+    f"</div>",
+    unsafe_allow_html=True
+)
 st.caption("Aggiornamento in tempo reale dei prezzi")
