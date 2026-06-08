@@ -296,5 +296,7 @@ with tab_dl:
     )
 
 st.markdown("---")
-st.markdown("### 📈 Portfolio Tracker")
+footer_text = CONFIG.get(ENV, CONFIG["DEV"])["title"]
+footer_icon = CONFIG.get(ENV, CONFIG["DEV"])["icon"]
+st.markdown(f"### {footer_icon} {footer_text}")
 st.caption("Aggiornamento in tempo reale dei prezzi")
