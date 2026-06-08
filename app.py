@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
+from components.operations_preview import render_operations_preview
 
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel
 from services.market_data import download_close_prices
@@ -204,9 +205,10 @@ series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered
 if series.empty:
     st.error("Non è stato possibile costruire il portafoglio con i dati disponibili.")
     st.stop()
-    
-with st.expander("Anteprima operazioni", expanded=False):
-    st.dataframe(ops_enriched, use_container_width=True)
+
+render_operations_preview(ops_enriched)
+# with st.expander("Anteprima operazioni", expanded=False):
+#    st.dataframe(ops_enriched, use_container_width=True)
 
 # Benchmark
 bench_norm = None
