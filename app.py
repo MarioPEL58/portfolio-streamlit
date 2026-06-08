@@ -230,12 +230,19 @@ k5.metric(
     delta_color="normal" if pd.notna(latest_pnl_pct) else None
 )
 
-k6.metric(
-    "P/L Giornaliero",
-    fmt_eur(latest_daily_pl),
-    delta=fmt_pct(latest_daily_pl_pct) if pd.notna(latest_daily_pl_pct) else None,
-    delta_color="normal" if pd.notna(latest_daily_pl_pct) else None
-)
+
+if pd.notna(latest_daily_pl_pct):
+    k6.metric(
+        "P/L Giornaliero",
+        fmt_eur(latest_daily_pl),
+        delta=fmt_pct(latest_daily_pl_pct),
+        delta_color="normal"
+    )
+else:
+    k6.metric(
+        "P/L Giornaliero",
+        fmt_eur(latest_daily_pl)
+    )
 
 k7.metric(
     "P/L realizzato",
