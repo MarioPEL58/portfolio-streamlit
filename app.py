@@ -265,7 +265,22 @@ if not sell_ops.empty:
     )
 else:
     latest_realized_pct = np.nan
+# =========================
+# ✅ Breakdown P/L
+# =========================
 
+sell_ops = ops_enriched.loc[ops_enriched["Quantita"] < 0].copy()
+
+realized_trading = (
+    sell_ops["RealizedTradePL"].sum()
+    if not sell_ops.empty else 0.0
+)
+
+realized_dividends = float(series["Dividendi netti"].sum())
+
+realized_total = realized_trading + realized_dividends
+
+unrealized_pl = latest_pnl - realized_total
 # =========================
 # UI KPI
 # =========================
