@@ -216,8 +216,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         .sum()
         .reindex(idx, fill_value=0.0)
     )
-    print ("DEBUG SELL OPS", sell_ops[["Ticker", "Data", "Quantita", "AvgCostBefore", "CashflowCalc", "RealizedTradePL"]])
-    print ("DEBUG REALIZED FROM TRADES", realized_from_trades[realized_from_trades != 0])
+    # print ("DEBUG SELL OPS", sell_ops[["Ticker", "Data", "Quantita", "AvgCostBefore", "CashflowCalc", "RealizedTradePL"]])
+    # print ("DEBUG REALIZED FROM TRADES", realized_from_trades[realized_from_trades != 0])
     
     realized_daily = realized_from_trades.add(daily_dividends, fill_value=0.0)
     pl_realizzato = realized_daily.cumsum().rename("P/L realizzato")
@@ -340,4 +340,4 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     current = current[current["Quantita"] != 0].sort_values("Valore", ascending=False)
     exposure = current.reset_index().rename(columns={"index": "PositionKey"})
 
-    return ts, current, holdings, exposure
+    return ts, current, holdings, exposure, ops_all
