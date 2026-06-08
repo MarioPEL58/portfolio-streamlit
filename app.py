@@ -77,6 +77,47 @@ if ops.empty:
 
 st.success(f"File caricato: {file_label}")
 
+# =========================
+# 🎛️ FILTRO GLOBALE
+# =========================
+st.markdown("### 🎛️ Filtri")
+
+all_brokers = sorted(
+    ops["Intermediario"].dropna().astype(str).str.strip().unique().tolist()
+)
+
+selected_brokers = st.multiselect(
+    "Intermediari",
+    options=all_brokers,
+    default=all_brokers
+)
+
+# =========================
+# Applico filtro
+# =========================
+if selected_brokers:
+    ops = ops[
+        ops["Intermediario"].astype(str).str.strip().isin(selected_brokers)
+    ].copy()
+
+    if dividends is not None and not dividends.empty:
+        selected_ids = (
+            ops["ID"]
+            .dropna()
+            .astype(str)
+            .str.strip()
+            .unique()
+            .tolist()
+        )
+
+        dividends = dividends.copy()
+        dividends["ID"] = dividends["ID"].astype(str).str.strip()
+
+        dividends = dividends[
+            dividends["ID"].isin(selected_ids)
+        ].copy()
+
+
 with st.expander("Anteprima operazioni", expanded=False):
     st.dataframe(ops, use_container_width=True)
 
@@ -252,10 +293,10 @@ with tab_exp:
 
 with tab_ops:
     st.subheader("Operazioni")
-    all_tickers = ["Tutti"] + sorted(ops["Ticker"].unique().tolist())
+    all_tickers = ["Tutti"] + sorted(ops_enriched["Ticker"].unique().tolist())
     selected_ticker = st.selectbox("Filtra per ticker", all_tickers)
 
-    show_ops = ops if selected_ticker == "Tutti" else ops[ops["Ticker"] == selected_ticker]
+    show_ops = (ops_enriched if selected_ticker == "Tutti" else ops_enriched[ops_enriched["Ticker"] == selected_ticker])
     st.dataframe(show_ops, use_container_width=True)
 
 with tab_dl:
