@@ -68,7 +68,8 @@ def render_unrealized_card(value, pct, daily_value=None, daily_pct=None):
                 font-size: 0.85em;
                 color: #9aa0a6;
                 display: flex;
-                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
             ">
                 <span>Ultimo giorno</span>
                 <span>
