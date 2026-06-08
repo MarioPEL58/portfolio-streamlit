@@ -23,11 +23,11 @@ def render_operations_preview(ops_enriched):
 
             cols = [c for c in cols if c in ops_enriched.columns]
 
-            def highlight_sell(val):
-                try:
-                    return "color: red" if float(val) < 0 else ""
-                except:
-                    return ""
+            # ✅ funzione stile corretta
+            def highlight_sell_col(s):
+                if s.name == "Quantita":
+                    return ["color: red" if val < 0 else "" for val in s]
+                return [""] * len(s)
 
             st.dataframe(
                 ops_enriched[cols]
@@ -38,6 +38,6 @@ def render_operations_preview(ops_enriched):
                     "AvgCostBefore": "{:,.2f}",
                     "RealizedTradePL": "€ {:,.2f}"
                 })
-                .applymap(highlight_sell, subset=["Quantita"]),
+                .apply(highlight_sell_col, axis=0),
                 use_container_width=True
             )
