@@ -88,9 +88,6 @@ def render_realized_card(realized_total, dividends_total):
                 <span style="font-size: 1.8em; font-weight: 600;">
                     {fmt_eur(realized_total)}
                 </span>
-                <span style="font-size: 0.7em;">
-                    EUR
-                </span>
             </div>
             <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
                 <span>Dividendi totali</span>
@@ -133,9 +130,6 @@ def render_total_pl_card(total_pl, total_pct, annualized_pct=None):
             ">
                 <span style="font-size: 1.8em; font-weight: 600;">
                     {fmt_eur(total_pl)}
-                </span>
-                <span style="font-size: 0.7em;">
-                    EUR
                 </span>
                 <span style="font-size: 1em; color: {pct_color};">
                     {fmt_pct(total_pct)}
