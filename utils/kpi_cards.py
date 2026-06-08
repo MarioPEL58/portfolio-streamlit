@@ -14,7 +14,7 @@ def render_value_card(value):
             background-color: #1f1f1f;
             border: 1px solid #2a2a2a;
         ">
-            <div style="color: #9aa0a6; font-size: 0.9em;">
+            <div style="color: #ffffff; font-size: 0.9em;">
                 Valore del portafoglio
             </div>
             <div style="
@@ -43,7 +43,7 @@ def render_unrealized_card(value, pct, daily_value=None, daily_pct=None):
 
     st.markdown(f"""
     <div style="padding:16px;border-radius:12px;background-color:#1f1f1f;border:1px solid #2a2a2a;">
-        <div style="color:#9aa0a6;font-size:0.9em;">Profitto non realizzato</div>
+        <div style="color:#ffffff;font-size:0.9em;">Profitto non realizzato</div>
         <div style="margin-top:6px;font-size:1.8em;font-weight:600;color:{color};">
             {fmt_eur(value)}
             <span style="font-size:0.6em;margin-left:8px;color:{pct_color};">{fmt_pct(pct)}</span>
@@ -75,7 +75,7 @@ def render_realized_card(realized_total, dividends_total):
             background-color: #1f1f1f;
             border: 1px solid #2a2a2a;
         ">
-            <div style="color: #9aa0a6; font-size: 0.9em;">
+            <div style="color: #ffffff; font-size: 0.9em;">
                 Profitto realizzato
             </div>
             <div style="
@@ -121,7 +121,7 @@ def render_total_pl_card(total_pl, total_pct, annualized_pct=None):
             background-color: #1f1f1f;
             border: 1px solid #2a2a2a;
         ">
-            <div style="color: #9aa0a6; font-size: 0.9em;">
+            <div style="color: #ffffff; font-size: 0.9em;">
                 Profitto totale
             </div>
             <div style="
