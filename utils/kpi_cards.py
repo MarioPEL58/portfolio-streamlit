@@ -41,50 +41,22 @@ def render_unrealized_card(value, pct, daily_value=None, daily_pct=None):
     daily_color = "#26a69a" if (daily_value is not None and daily_value >= 0) else "#ef5350"
     daily_pct_color = "#26a69a" if (daily_pct is not None and daily_pct >= 0) else "#ef5350"
 
-    st.markdown(
-        f"""
-        <div style="
-            padding: 16px;
-            border-radius: 12px;
-            background-color: #1f1f1f;
-            border: 1px solid #2a2a2a;
-        ">
-            <div style="color: #9aa0a6; font-size: 0.9em;">
-                Profitto non realizzato
-            </div>
-            <div style="
-                margin-top: 6px;
-                font-size: 1.8em;
-                font-weight: 600;
-                color: {color};
-            ">
-                {fmt_eur(value)}
-                <span style="font-size: 0.6em; margin-left: 8px; color: {pct_color};">
-                    {fmt_pct(pct)}
-                </span>
-            </div>
-            <div style="
-                margin-top: 10px;
-                font-size: 0.85em;
-                color: #9aa0a6;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            ">
-                <span>Ultimo giorno</span>
-                <span>
-                    <span style="color: {daily_color};">
-                        {fmt_eur(daily_value) if daily_value is not None else ""}
-                    </span>
-                    <span style="margin-left: 6px; color: {daily_pct_color};">
-                        {fmt_pct(daily_pct) if daily_pct is not None else ""}
-                    </span>
-                </span>
-            </div>
+    st.markdown(f"""
+    <div style="padding:16px;border-radius:12px;background-color:#1f1f1f;border:1px solid #2a2a2a;">
+        <div style="color:#9aa0a6;font-size:0.9em;">Profitto non realizzato</div>
+        <div style="margin-top:6px;font-size:1.8em;font-weight:600;color:{color};">
+            {fmt_eur(value)}
+            <span style="font-size:0.6em;margin-left:8px;color:{pct_color};">{fmt_pct(pct)}</span>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
+            <span style="white-space:nowrap;">Ultimo giorno</span>
+            <span style="display:flex;align-items:baseline;margin-left:8px;gap:4px;white-space:nowrap;">
+                <span style="color:{daily_color};">{fmt_eur(daily_value) if daily_value is not None else ""}</span>
+                <span style="color:{daily_pct_color};">{fmt_pct(daily_pct) if daily_pct is not None else ""}</span>
+            </span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # =========================
