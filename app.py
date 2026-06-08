@@ -78,29 +78,56 @@ if ops.empty:
 st.success(f"File caricato: {file_label}")
 
 # =========================
-# 🎛️ FILTRO GLOBALE
+# 🎛️ FILTRI GLOBALI
 # =========================
 st.markdown("### 🎛️ Filtri")
 
-all_brokers = sorted(
-    ops["Intermediario"].dropna().astype(str).str.strip().unique().tolist()
-)
+col1, col2 = st.columns(2)
 
-selected_brokers = st.multiselect(
-    "Intermediari",
-    options=all_brokers,
-    default=all_brokers
-)
+# -------------------------
+# ✅ Intermediario
+# -------------------------
+with col1:
+    all_brokers = sorted(
+        ops["Intermediario"].dropna().astype(str).str.strip().unique().tolist()
+    )
+
+    selected_brokers = st.multiselect(
+        "Intermediari",
+        options=all_brokers,
+        default=all_brokers
+    )
+
+# -------------------------
+# ✅ Tipo
+# -------------------------
+with col2:
+    all_types = sorted(
+        ops["Tipo"].dropna().astype(str).str.strip().unique().tolist()
+    )
+
+    selected_types = st.multiselect(
+        "Tipo",
+        options=all_types,
+        default=all_types
+    )
 
 # =========================
-# ✅ 1. CREA ops_filtered
+# ✅ FILTRO OPERAZIONI
 # =========================
+ops_filtered = ops.copy()
+
 if selected_brokers:
-    ops_filtered = ops[
-        ops["Intermediario"].astype(str).str.strip().isin(selected_brokers)
-    ].copy()
-else:
-    ops_filtered = ops.copy()
+    ops_filtered = ops_filtered[
+        ops_filtered["Intermediario"].astype(str).str.strip().isin(selected_brokers)
+    ]
+
+if selected_types:
+    ops_filtered = ops_filtered[
+        ops_filtered["Tipo"].astype(str).str.strip().isin(selected_types)
+    ]
+
+ops_filtered = ops_filtered.copy()
 
 # =========================
 # ✅ 2. CREA dividends_filtered (DOPO)
@@ -131,13 +158,32 @@ if dividends is not None and not dividends.empty:
 else:
     dividends_filtered = dividends
 
-# ✅ opzionale UX
+
+# =========================
+# ✅ FEEDBACK UX
+# =========================
+
+# ✅ filtro attivo
+active_filters = []
+
+if len(selected_brokers) != len(all_brokers):
+    active_filters.append("Intermediari")
+
+if len(selected_types) != len(all_types):
+    active_filters.append("Tipo")
+
+if active_filters:
+    st.caption(f"Filtri attivi: {', '.join(active_filters)}")
+
+
+# ✅ dividendi mancanti (solo se esistono ma filtrati via)
 if dividends is not None and not dividends.empty:
     if dividends_filtered is not None and dividends_filtered.empty:
         st.caption("ℹ️ Nessun dividendo per il filtro selezionato")
+
         
 with st.expander("Anteprima operazioni", expanded=False):
-    st.dataframe(ops, use_container_width=True)
+    st.dataframe(ops_enriched, use_container_width=True)
 
 # Price download
 start_date = ops["Data"].min().normalize()
