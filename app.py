@@ -226,21 +226,21 @@ k5, k6, k7 = st.columns(3)
 k5.metric(
     "P/L totale",
     fmt_eur(latest_pnl),
-    delta=fmt_pct(latest_pnl_pct),
+    delta=fmt_pct(latest_pnl_pct) if pd.notna(latest_pnl_pct) else None,
     delta_color="normal" if pd.notna(latest_pnl_pct) else None
 )
 
 k6.metric(
     "P/L Giornaliero",
     fmt_eur(latest_daily_pl),
-    delta=fmt_pct(latest_daily_pl_pct),
+    delta=fmt_pct(latest_daily_pl_pct) if pd.notna(latest_daily_pl_pct) else None,
     delta_color="normal" if pd.notna(latest_daily_pl_pct) else None
 )
 
 k7.metric(
     "P/L realizzato",
     fmt_eur(latest_realized),
-    delta=fmt_pct(latest_realized_pct),
+    delta=fmt_pct(latest_realized_pct) if pd.notna(latest_realized_pct) else None,
     delta_color="normal" if pd.notna(latest_realized_pct) else None
 )
 
