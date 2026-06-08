@@ -141,15 +141,9 @@ def render_total_pl_card(total_pl, total_pct, annualized_pct=None):
                     {fmt_pct(total_pct)}
                 </span>
             </div>
-            <div style="
-                margin-top: 10px;
-                font-size: 0.85em;
-                color: #9aa0a6;
-                display: flex;
-                justify-content: space-between;
-            ">
+            <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
                 <span>Rendimento annualizzato</span>
-                <span>
+                <span style="margin-left:8px;">
                     {fmt_pct(annualized_pct) if annualized_pct is not None else ""}
                 </span>
             </div>
