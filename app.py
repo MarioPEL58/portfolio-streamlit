@@ -164,16 +164,16 @@ else:
 # =========================
 
 # ✅ filtro attivo
-active_filters = []
+active_filters_details = []
 
-if len(selected_brokers) != len(all_brokers):
-    active_filters.append("Intermediari")
+if set(selected_brokers) != set(all_brokers):
+    active_filters_details.append(f"Intermediari ({', '.join(selected_brokers)})")
 
-if len(selected_types) != len(all_types):
-    active_filters.append("Tipo")
+if set(selected_types) != set(all_types):
+    active_filters_details.append(f"Tipo ({', '.join(selected_types)})")
 
-if active_filters:
-    st.caption(f"Filtri attivi: {', '.join(active_filters)}")
+if active_filters_details:
+    st.caption(f"Filtri attivi: {', '.join(active_filters_details)}")
 
 
 # ✅ dividendi mancanti (solo se esistono ma filtrati via)
