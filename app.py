@@ -157,7 +157,7 @@ if missing:
     st.warning("Ticker senza prezzi scaricati: " + ", ".join(missing))
 
 # Portfolio
-series, current, holdings, exposure, ops_enriched = build_portfolio(ops, closes, dividends_filtered)
+series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
 
 if series.empty:
     st.error("Non è stato possibile costruire il portafoglio con i dati disponibili.")
