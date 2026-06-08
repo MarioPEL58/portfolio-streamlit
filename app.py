@@ -15,6 +15,13 @@ from services.portfolio import build_portfolio
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 
+from utils.kpi_cards import (
+    render_value_card,
+    render_unrealized_card,
+    render_realized_card,
+    render_total_pl_card
+)
+
 ENV = os.getenv("ENV", "DEV")
 
 CONFIG = {
@@ -228,16 +235,18 @@ if show_benchmark and benchmark.strip():
 # KPIs
 # =========================
 
-latest_value = float(series["Valore portafoglio"].iloc[-1])
-latest_invested = float(series["Capitale investito"].iloc[-1])
-latest_pnl = float(series["P/L totale"].iloc[-1])
-latest_daily_pl = float(series["P/L Giornaliero"].iloc[-1])
-latest_daily_pl_pct = float(series["P/L Giornaliero %"].iloc[-1])
+# latest_value = float(series["Valore portafoglio"].iloc[-1])
+# latest_invested = float(series["Capitale investito"].iloc[-1])
+# latest_pnl = float(series["P/L totale"].iloc[-1])
+# latest_daily_pl = float(series["P/L Giornaliero"].iloc[-1])
+# latest_daily_pl_pct = float(series["P/L Giornaliero %"].iloc[-1])
 
-latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else np.nan
+# latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else np.nan
 
-latest_realized = float(series["P/L realizzato"].iloc[-1])
-latest_dividends = float(series["Dividendi netti"].sum())
+# latest_realized = float(series["P/L realizzato"].iloc[-1])
+# latest_dividends = float(series["Dividendi netti"].sum())
+
+
 
 # =========================
 # ✅ Realized % (NUOVO METODO)
@@ -261,53 +270,82 @@ else:
 # UI KPI
 # =========================
 
-k1, k2, k3, k4 = st.columns(4)
+# k1, k2, k3, k4 = st.columns(4)
 
-k1.metric("Valore portafoglio", fmt_eur(latest_value))
-k2.metric("Capitale investito", fmt_eur(latest_invested))
-k3.metric("Posizioni aperte", len(current))
-k4.metric("Dividendi netti", fmt_eur(latest_dividends))
+# k1.metric("Valore portafoglio", fmt_eur(latest_value))
+# k2.metric("Capitale investito", fmt_eur(latest_invested))
+# k3.metric("Posizioni aperte", len(current))
+# k4.metric("Dividendi netti", fmt_eur(latest_dividends))
 
-k5, k6, k7 = st.columns(3)
+# k5, k6, k7 = st.columns(3)
 
-if pd.notna(latest_pnl_pct):
-    k5.metric(
-        "P/L totale",
-        fmt_eur(latest_pnl),
-        delta=fmt_pct(latest_pnl_pct),
-        delta_color="normal"
-    )
-else:
-    k5.metric(
-        "P/L totale",
-        fmt_eur(latest_pnl)
+# if pd.notna(latest_pnl_pct):
+#     k5.metric(
+#         "P/L totale",
+#         fmt_eur(latest_pnl),
+#         delta=fmt_pct(latest_pnl_pct),
+#         delta_color="normal"
+#     )
+# else:
+#     k5.metric(
+#         "P/L totale",
+#         fmt_eur(latest_pnl)
+#     )
+
+# if pd.notna(latest_daily_pl_pct):
+#     k6.metric(
+#         "P/L Giornaliero",
+#         fmt_eur(latest_daily_pl),
+#         delta=fmt_pct(latest_daily_pl_pct),
+#         delta_color="normal"
+#     )
+# else:
+#     k6.metric(
+#         "P/L Giornaliero",
+#         fmt_eur(latest_daily_pl)
+#     )
+
+# if pd.notna(latest_realized_pct):
+#     k7.metric(
+#         "P/L realizzato",
+#         fmt_eur(latest_realized),
+#         delta=fmt_pct(latest_realized_pct),
+#         delta_color="normal"
+#     )
+# else:
+#     k7.metric(
+#         "P/L realizzato",
+#         fmt_eur(latest_realized)
+#     )
+
+st.markdown("### 📊 KPI Portafoglio")
+
+c1, c2, c3, c4 = st.columns(4)
+
+with c1:
+    render_value_card(latest_value)
+
+with c2:
+    render_unrealized_card(
+        value=unrealized_pl,
+        pct=latest_pnl_pct,
+        daily_value=latest_daily_pl,
+        daily_pct=latest_daily_pl_pct
     )
 
-if pd.notna(latest_daily_pl_pct):
-    k6.metric(
-        "P/L Giornaliero",
-        fmt_eur(latest_daily_pl),
-        delta=fmt_pct(latest_daily_pl_pct),
-        delta_color="normal"
-    )
-else:
-    k6.metric(
-        "P/L Giornaliero",
-        fmt_eur(latest_daily_pl)
+with c3:
+    render_realized_card(
+        realized_total=latest_realized,
+        dividends_total=latest_dividends
     )
 
-if pd.notna(latest_realized_pct):
-    k7.metric(
-        "P/L realizzato",
-        fmt_eur(latest_realized),
-        delta=fmt_pct(latest_realized_pct),
-        delta_color="normal"
+with c4:
+    render_total_pl_card(
+        total_pl=latest_pnl,
+        total_pct=latest_pnl_pct,
+        annualized_pct=None  # puoi aggiungerlo dopo
     )
-else:
-    k7.metric(
-        "P/L realizzato",
-        fmt_eur(latest_realized)
-    )
+
 
 # Main chart
 st.subheader("Andamento del portafoglio nel tempo")
