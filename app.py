@@ -282,6 +282,11 @@ realized_total = realized_trading + realized_dividends
 
 unrealized_pl = latest_pnl - realized_total
 
+if latest_invested != 0:
+    unrealized_pct = unrealized_pl / abs(latest_invested)
+else:
+    unrealized_pct = None
+
 start_date = series.index.min()
 end_date = series.index.max()
 
@@ -354,7 +359,7 @@ with c1:
 with c2:
     render_unrealized_card(
         value=unrealized_pl,
-        pct=latest_pnl_pct,
+        pct=unrealized_pctt,
         daily_value=latest_daily_pl,
         daily_pct=latest_daily_pl_pct
     )
