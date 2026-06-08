@@ -359,7 +359,7 @@ with c1:
 with c2:
     render_unrealized_card(
         value=unrealized_pl,
-        pct=unrealized_pctt,
+        pct=unrealized_pct,
         daily_value=latest_daily_pl,
         daily_pct=latest_daily_pl_pct
     )
