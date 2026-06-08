@@ -98,7 +98,7 @@ if missing:
     st.warning("Ticker senza prezzi scaricati: " + ", ".join(missing))
 
 # Portfolio
-series, current, holdings, exposure = build_portfolio(ops, closes, dividends)
+series, current, holdings, exposure, ops_enriched = build_portfolio(ops, closes, dividends)
 
 if series.empty:
     st.error("Non è stato possibile costruire il portafoglio con i dati disponibili.")
@@ -138,7 +138,7 @@ latest_dividends = float(series["Dividendi netti"].sum())
 # =========================
 
 # usa ops CF già arricchite dal motore
-sell_ops = ops_cf.loc[ops_cf["Quantita"] < 0].copy()
+sell_ops = ops_enriched.loc[ops_enriched["Quantita"] < 0].copy()
 
 if not sell_ops.empty:
     realized_cost = (
