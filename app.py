@@ -93,16 +93,17 @@ selected_brokers = st.multiselect(
 )
 
 # =========================
-# Applico filtro
+# ✅ 1. CREA ops_filtered
 # =========================
 if selected_brokers:
-    ops = ops[
+    ops_filtered = ops[
         ops["Intermediario"].astype(str).str.strip().isin(selected_brokers)
     ].copy()
-
+else:
+    ops_filtered = ops.copy()
 
 # =========================
-# ✅ FILTRO DIVIDENDI (Opzione A CORRETTA)
+# ✅ 2. CREA dividends_filtered (DOPO)
 # =========================
 if dividends is not None and not dividends.empty:
     valid_ids = (
@@ -120,13 +121,12 @@ if dividends is not None and not dividends.empty:
     ].copy()
 else:
     dividends_filtered = dividends
-    
-# ✅ message if dividends_filtered 
 
+# ✅ opzionale UX
 if dividends is not None and not dividends.empty:
-    if dividends_filtered.empty:
+    if dividends_filtered is not None and dividends_filtered.empty:
         st.caption("ℹ️ Nessun dividendo per il filtro selezionato")
-
+        
 with st.expander("Anteprima operazioni", expanded=False):
     st.dataframe(ops, use_container_width=True)
 
