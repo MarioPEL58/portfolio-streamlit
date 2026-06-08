@@ -49,11 +49,9 @@ def render_unrealized_card(value, pct, daily_value=None, daily_pct=None):
             background-color: #1f1f1f;
             border: 1px solid #2a2a2a;
         ">
-
             <div style="color: #9aa0a6; font-size: 0.9em;">
                 Profitto non realizzato
             </div>
-
             <div style="
                 margin-top: 6px;
                 font-size: 1.8em;
@@ -65,7 +63,6 @@ def render_unrealized_card(value, pct, daily_value=None, daily_pct=None):
                     {fmt_pct(pct)}
                 </span>
             </div>
-
             <div style="
                 margin-top: 10px;
                 font-size: 0.85em;
@@ -83,7 +80,6 @@ def render_unrealized_card(value, pct, daily_value=None, daily_pct=None):
                     </span>
                 </span>
             </div>
-
         </div>
         """,
         unsafe_allow_html=True
@@ -106,11 +102,9 @@ def render_realized_card(realized_total, dividends_total):
             background-color: #1f1f1f;
             border: 1px solid #2a2a2a;
         ">
-
             <div style="color: #9aa0a6; font-size: 0.9em;">
                 Profitto realizzato
             </div>
-
             <div style="
                 margin-top: 6px;
                 display: flex;
@@ -125,7 +119,6 @@ def render_realized_card(realized_total, dividends_total):
                     EUR
                 </span>
             </div>
-
             <div style="
                 margin-top: 10px;
                 font-size: 0.85em;
@@ -139,7 +132,6 @@ def render_realized_card(realized_total, dividends_total):
                     <span style="font-size: 0.9em;"> EUR</span>
                 </span>
             </div>
-
         </div>
         """,
         unsafe_allow_html=True
@@ -162,11 +154,9 @@ def render_total_pl_card(total_pl, total_pct, annualized_pct=None):
             background-color: #1f1f1f;
             border: 1px solid #2a2a2a;
         ">
-
             <div style="color: #9aa0a6; font-size: 0.9em;">
                 Profitto totale
             </div>
-
             <div style="
                 margin-top: 6px;
                 display: flex;
@@ -177,16 +167,13 @@ def render_total_pl_card(total_pl, total_pct, annualized_pct=None):
                 <span style="font-size: 1.8em; font-weight: 600;">
                     {fmt_eur(total_pl)}
                 </span>
-
                 <span style="font-size: 0.7em;">
                     EUR
                 </span>
-
                 <span style="font-size: 1em; color: {pct_color};">
                     {fmt_pct(total_pct)}
                 </span>
             </div>
-
             <div style="
                 margin-top: 10px;
                 font-size: 0.85em;
@@ -199,7 +186,6 @@ def render_total_pl_card(total_pl, total_pct, annualized_pct=None):
                     {fmt_pct(annualized_pct) if annualized_pct is not None else ""}
                 </span>
             </div>
-
         </div>
         """,
         unsafe_allow_html=True
