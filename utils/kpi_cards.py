@@ -92,17 +92,11 @@ def render_realized_card(realized_total, dividends_total):
                     EUR
                 </span>
             </div>
-            <div style="
-                margin-top: 10px;
-                font-size: 0.85em;
-                color: #9aa0a6;
-                display: flex;
-                justify-content: space-between;
-            ">
+            <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
                 <span>Dividendi totali</span>
-                <span style="color: {div_color};">
-                    {fmt_eur(dividends_total)}
-                    <span style="font-size: 0.9em;"> EUR</span>
+                <span style="display:flex;align-items:baseline;margin-left:8px;gap:4px;">
+                    <span style="color:{div_color};">{fmt_eur(dividends_total)}</span>
+                    <span style="font-size:0.9em;color:{div_color};">EUR</span>
                 </span>
             </div>
         </div>
