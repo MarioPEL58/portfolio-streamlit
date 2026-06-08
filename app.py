@@ -118,57 +118,71 @@ if show_benchmark and benchmark.strip():
         if not b.empty and b.iloc[0] != 0:
             bench_norm = abs(series["Capitale investito"].iloc[-1]) * (b / b.iloc[0])
 
+# =========================
 # KPIs
+# =========================
+
 latest_value = float(series["Valore portafoglio"].iloc[-1])
 latest_invested = float(series["Capitale investito"].iloc[-1])
 latest_pnl = float(series["P/L totale"].iloc[-1])
 latest_daily_pl = float(series["P/L Giornaliero"].iloc[-1])
 latest_daily_pl_pct = float(series["P/L Giornaliero %"].iloc[-1])
+
 latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else np.nan
 
 latest_realized = float(series["P/L realizzato"].iloc[-1])
 latest_dividends = float(series["Dividendi netti"].sum())
 
-sell_ops = ops.loc[
-    (ops["Quantita"] < 0) & (ops["FlussoNetto"].notna())
-].copy()
+# =========================
+# ✅ Realized % (NUOVO METODO)
+# =========================
 
-sell_ops["InvestedAmount"] = (
-    sell_ops["Quantita"].abs() * sell_ops["Prezzo medio s/carico"]
-)
+# usa ops CF già arricchite dal motore
+sell_ops = ops_cf.loc[ops_cf["Quantita"] < 0].copy()
 
-realized_cost = (
-    sell_ops.groupby("Data")["InvestedAmount"]
-    .sum()
-    .cumsum()
-    .iloc[-1]
-) if not sell_ops.empty else 0.0
+if not sell_ops.empty:
+    realized_cost = (
+        sell_ops["Quantita"].abs() * sell_ops["AvgCostBefore"]
+    ).sum()
 
-latest_realized_pct = latest_realized / realized_cost if realized_cost != 0 else np.nan
+    latest_realized_pct = (
+        latest_realized / realized_cost if realized_cost != 0 else np.nan
+    )
+else:
+    latest_realized_pct = np.nan
+
+# =========================
+# UI KPI
+# =========================
 
 k1, k2, k3, k4 = st.columns(4)
+
 k1.metric("Valore portafoglio", fmt_eur(latest_value))
 k2.metric("Capitale investito", fmt_eur(latest_invested))
 k3.metric("Posizioni aperte", len(current))
 k4.metric("Dividendi netti", fmt_eur(latest_dividends))
 
 k5, k6, k7 = st.columns(3)
+
 k5.metric(
     "P/L totale",
     fmt_eur(latest_pnl),
     delta=fmt_pct(latest_pnl_pct),
     delta_color="normal" if pd.notna(latest_pnl_pct) else None
 )
+
 k6.metric(
     "P/L Giornaliero",
     fmt_eur(latest_daily_pl),
     delta=fmt_pct(latest_daily_pl_pct),
     delta_color="normal" if pd.notna(latest_daily_pl_pct) else None
 )
+
 k7.metric(
     "P/L realizzato",
     fmt_eur(latest_realized),
-    delta=fmt_pct(latest_realized_pct)
+    delta=fmt_pct(latest_realized_pct),
+    delta_color="normal" if pd.notna(latest_realized_pct) else None
 )
 
 # Main chart
