@@ -306,7 +306,7 @@ st.markdown("### 📊 KPI Portafoglio")
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    render_value_card(latest_value, latest_invested)
+    render_value_card(latest_value, abs(latest_invested))
 
 with c2:
     render_unrealized_card(
