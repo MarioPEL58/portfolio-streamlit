@@ -13,6 +13,7 @@ from services.excel_loader import load_dividends_from_excel, load_operations_fro
 from services.market_data import download_close_prices
 from services.portfolio import build_portfolio
 from services.portfolio_metrics import compute_portfolio_xirr
+from services.market_status import compute_market_update_label
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 
@@ -56,8 +57,10 @@ st.caption(
     "Carica un file Excel con il foglio Operazioni e ricostruisci il valore del portafoglio nel tempo."
 )
 
+update_label = compute_market_update_label(closes)
+
 # Sidebar
-sidebar_cfg = render_sidebar(create_demo_file)
+sidebar_cfg = render_sidebar(create_demo_file,update_label)
 uploaded_file = sidebar_cfg["uploaded_file"]
 use_local_demo = sidebar_cfg["use_local_demo"]
 benchmark = sidebar_cfg["benchmark"]
