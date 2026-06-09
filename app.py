@@ -256,13 +256,23 @@ intraday_last_ts = download_last_intraday_timestamp(
     filtered_tickers
 )
 
+markets = []
+if "Mercato" in ops_filtered.columns:
+    markets = (
+        ops_filtered["Mercato"]
+        .dropna()
+        .astype(str)
+        .str.strip()
+        .tolist()
+    )
+
 update_label = compute_market_update_label(
     closes=closes,
     intraday_last_ts=intraday_last_ts,
+    markets=markets,
     tz_name="Europe/Rome"
 )
 
-# old --- update_label = compute_market_update_label(closes)
 st.caption(update_label)
 
 # Main chart
