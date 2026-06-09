@@ -88,103 +88,13 @@ if ops.empty:
 st.success(f"File caricato: {file_label}")
 
 # =========================
-# 🎛️ FILTRI GLOBALI
+# 🎛️ FILTER CONTEXT ✅
 # =========================
-st.markdown("### 🎛️ Filtri")
+filter_ctx = render_filters(ops, dividends)
 
-col1, col2 = st.columns(2)
-
-# -------------------------
-# ✅ Intermediario
-# -------------------------
-with col1:
-    all_brokers = sorted(
-        ops["Intermediario"].dropna().astype(str).str.strip().unique().tolist()
-    )
-
-    selected_brokers = st.multiselect(
-        "Intermediari",
-        options=all_brokers,
-        default=all_brokers
-    )
-
-# -------------------------
-# ✅ Tipo
-# -------------------------
-with col2:
-    all_types = sorted(
-        ops["Tipo"].dropna().astype(str).str.strip().unique().tolist()
-    )
-
-    selected_types = st.multiselect(
-        "Tipo",
-        options=all_types,
-        default=all_types
-    )
-
-# =========================
-# ✅ FILTRO OPERAZIONI
-# =========================
-ops_filtered = ops.copy()
-
-if selected_brokers:
-    ops_filtered = ops_filtered[
-        ops_filtered["Intermediario"].astype(str).str.strip().isin(selected_brokers)
-    ]
-
-if selected_types:
-    ops_filtered = ops_filtered[
-        ops_filtered["Tipo"].astype(str).str.strip().isin(selected_types)
-    ]
-
-ops_filtered = ops_filtered.copy()
-
-# =========================
-# ✅ 2. CREA dividends_filtered (DOPO)
-# =========================
-if dividends is not None and not dividends.empty:
-    # ✅ normalizzo ID OPS
-    ops_ids = (
-        ops_filtered["ID"]
-        .dropna()
-        .astype(str)
-        .str.strip()
-        .str.replace(".0", "", regex=False)
-    )
-
-    # ✅ normalizzo ID DIVIDENDI
-    dividends_filtered = dividends.copy()
-    dividends_filtered["ID"] = (
-        dividends_filtered["ID"]
-        .astype(str)
-        .str.strip()
-        .str.replace(".0", "", regex=False)
-    )
-
-    # ✅ filtro corretto
-    dividends_filtered = dividends_filtered[
-        dividends_filtered["ID"].isin(ops_ids)
-    ].copy()
-else:
-    dividends_filtered = dividends
-
-
-# =========================
-# ✅ FEEDBACK UX
-# =========================
-
-# ✅ filtro attivo
-active_filters_details = []
-
-if set(selected_brokers) != set(all_brokers):
-    active_filters_details.append(f"Intermediari ({', '.join(selected_brokers)})")
-
-if set(selected_types) != set(all_types):
-    active_filters_details.append(f"Tipo ({', '.join(selected_types)})")
-
-if active_filters_details:
-    st.caption(f"Filtri attivi: {', '.join(active_filters_details)}")
-
+ops_filtered = filter_ctx["ops"]
+dividends_filtered = filter_ctx["dividends"]
+filtered_tickers = filter_ctx["tickers"]
 
 # ✅ dividendi mancanti (solo se esistono ma filtrati via)
 if dividends is not None and not dividends.empty:
@@ -196,7 +106,7 @@ start_date = ops["Data"].min().normalize()
 end_date = pd.Timestamp.today().normalize()
 
 closes, missing = download_close_prices(
-    sorted(ops["Ticker"].unique().tolist()),
+    filtered_tickers,
     start_date,
     end_date
 )
@@ -342,7 +252,7 @@ with c4:
 
 # ✅ timestamp intraday per il solo label
 intraday_last_ts = download_last_intraday_timestamp(
-    sorted(ops_filtered["Ticker"].unique().tolist())
+    filtered_tickers
 )
 
 update_label = compute_market_update_label(
