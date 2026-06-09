@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 import yfinance as yf
-
+import numpy as np
 
 @st.cache_data(show_spinner=False)
 def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp):
@@ -49,8 +49,41 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         elif "Adj Close" in raw.columns:
             closes[t] = raw["Adj Close"]
 
-    closes = closes.sort_index().ffill()
+    closes = closes.sort_index()
+    
+    # =========================
+    # ✅ Pulizia base
+    # =========================
+    closes = closes.replace([0, np.inf, -np.inf], np.nan)
+    
+    # =========================
+    # ✅ Rimozione outlier (glitch)
+    # =========================
+    returns = closes.pct_change()
+    
+    threshold = 0.3  # 30% giornaliero
+    outliers = returns.abs() > threshold
+    
+    closes[outliers] = np.nan
+    
+    # =========================
+    # ✅ Fill
+    # =========================
+    closes = closes.ffill()
+    
+    # =========================
+    # ✅ Controllo qualità
+    # =========================
+    invalid_points = outliers.sum().sum()
+    
+    if invalid_points > 0:
+        st.caption(f"⚠️ Correzione automatica di {invalid_points} prezzi anomali")
+    
+    # =========================
+    # ✅ Missing ticker
+    # =========================
     missing = [t for t in tickers if t not in closes.columns]
+    
     return closes, missing
 
 
@@ -100,7 +133,17 @@ def download_fx_series(currencies: list[str], start_date: pd.Timestamp, end_date
         except Exception:
             pass
 
-    return fx.sort_index().ffill()
+    fx = fx.sort_index()
+    
+    fx = fx.replace([0, np.inf, -np.inf], np.nan)
+    
+    returns = fx.pct_change()
+    outliers = returns.abs() > 0.3
+    
+    fx[outliers] = np.nan
+    fx = fx.ffill()
+    
+    return fx
 
 
 def convert_closes_to_eur(closes: pd.DataFrame, ops: pd.DataFrame, start_date: pd.Timestamp, end_date: pd.Timestamp):
@@ -129,3 +172,69 @@ def convert_closes_to_eur(closes: pd.DataFrame, ops: pd.DataFrame, start_date: p
             closes_eur[ticker] = closes_eur[ticker] / fx_series
 
     return closes_eur, fx_rates
+    
+@st.cache_data(show_spinner=False, ttl=120)
+def download_last_intraday_timestamp(tickers: list[str]):
+    tickers = [t for t in tickers if isinstance(t, str) and t.strip()]
+    if not tickers:
+        return None
+
+    try:
+        raw = yf.download(
+            tickers=tickers,
+            period="1d",
+            interval="5m",
+            auto_adjust=False,
+            progress=False,
+            group_by="ticker",
+            threads=True,
+            prepost=False,
+        )
+    except Exception:
+        return None
+
+    if raw is None or len(raw) == 0:
+        return None
+
+    timestamps = []
+
+    try:
+        if isinstance(raw.columns, pd.MultiIndex):
+            lvl0 = set(raw.columns.get_level_values(0))
+
+            # caso: MultiIndex con primo livello = ticker
+            if any(t in lvl0 for t in tickers):
+                for t in tickers:
+                    if t in lvl0:
+                        sub = raw[t]
+                        col = "Close" if "Close" in sub.columns else ("Adj Close" if "Adj Close" in sub.columns else None)
+                        if col is not None:
+                            s = sub[col].dropna()
+                            if not s.empty:
+                                timestamps.append(s.index.max())
+
+            # caso alternativo: primo livello = campo ("Close"/"Adj Close")
+            else:
+                field = "Close" if "Close" in lvl0 else ("Adj Close" if "Adj Close" in lvl0 else None)
+                if field is not None:
+                    sub = raw[field]
+                    for t in tickers:
+                        if t in sub.columns:
+                            s = sub[t].dropna()
+                            if not s.empty:
+                                timestamps.append(s.index.max())
+
+        else:
+            col = "Close" if "Close" in raw.columns else ("Adj Close" if "Adj Close" in raw.columns else None)
+            if col is not None:
+                s = raw[col].dropna()
+                if not s.empty:
+                    timestamps.append(s.index.max())
+
+    except Exception:
+        return None
+
+    if not timestamps:
+        return None
+
+    return max(timestamps)

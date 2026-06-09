@@ -21,17 +21,156 @@ def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
         holdings[key] = s.reindex(idx, fill_value=0).cumsum()
 
     return holdings
+def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calcola in Python, per ogni operazione:
+    - AvgCostBefore
+    - AvgCostAfter
+    - CostOpenAfter
+    - QtyOpenAfter
+    - CashflowCalc
+    - RealizedTradePL
 
+    Logica:
+    - acquisto: aumenta quantità e costo residuo
+    - vendita: realizza P/L sul costo medio residuo
+    - tassa applicata solo a vendite con profitto positivo
+    """
+
+    ops = ops.copy().sort_values(["PositionKey", "Data"]).reset_index(drop=True)
+    ops["_rowid"] = np.arange(len(ops))
+
+    # sicurezza
+    ops["Quantita"] = ops["Quantita"].fillna(0.0)
+    ops["Prezzo"] = ops["Prezzo"].fillna(0.0)
+    ops["Cambio"] = ops["Cambio"].fillna(1.0)
+    ops["SpeseEuro"] = ops["SpeseEuro"].fillna(0.0)
+    ops["Tassa"] = ops["Tassa"].fillna(0.0)
+
+    avg_before_list = []
+    avg_after_list = []
+    qty_after_list = []
+    cost_after_list = []
+    realized_list = []
+    cashflow_list = []
+    tax_euro_list = []
+
+    for pos_key, grp in ops.groupby("PositionKey", sort=False):
+        open_qty = 0.0
+        open_cost = 0.0
+
+        for _, row in grp.iterrows():
+            qty = float(row["Quantita"])
+            price = float(row["Prezzo"])
+            fx = float(row["Cambio"])
+            fees = float(row["SpeseEuro"])
+            tax_rate = float(row["Tassa"])
+
+            avg_cost_before = open_cost / open_qty if open_qty != 0 else 0.0
+            realized_trade_pl = 0.0
+            tax_euro = 0.0
+
+            if qty > 0:
+                # ACQUISTO
+                buy_cost = qty * price * fx + fees
+                open_qty = open_qty + qty
+                open_cost = open_cost + buy_cost
+
+                cashflow = -buy_cost
+
+            elif qty < 0:
+                # VENDITA
+                sell_qty = abs(qty)
+
+                # costo storico della quantità venduta
+                cost_basis_sold = sell_qty * avg_cost_before
+
+                gross_proceeds = sell_qty * price * fx
+                realized_gross = gross_proceeds - fees - cost_basis_sold
+
+                # tassa solo su profitto positivo
+                tax_euro = max(realized_gross, 0.0) * tax_rate
+
+                # cashflow netto vendita
+                cashflow = gross_proceeds - fees - tax_euro
+
+                realized_trade_pl = cashflow - cost_basis_sold
+
+                # scarico costo residuo
+                open_qty = open_qty - sell_qty
+                open_cost = open_cost - cost_basis_sold
+
+                # anti floating residuals
+                if abs(open_qty) < 1e-12:
+                    open_qty = 0.0
+                if abs(open_cost) < 1e-12:
+                    open_cost = 0.0
+
+            else:
+                # qty == 0
+                cashflow = 0.0
+
+            avg_cost_after = open_cost / open_qty if open_qty != 0 else 0.0
+
+            avg_before_list.append(avg_cost_before)
+            avg_after_list.append(avg_cost_after)
+            qty_after_list.append(open_qty)
+            cost_after_list.append(open_cost)
+            realized_list.append(realized_trade_pl)
+            cashflow_list.append(cashflow)
+            tax_euro_list.append(tax_euro)
+
+    ops["AvgCostBefore"] = avg_before_list
+    ops["AvgCostAfter"] = avg_after_list
+    ops["QtyOpenAfter"] = qty_after_list
+    ops["CostOpenAfter"] = cost_after_list
+    ops["RealizedTradePL"] = realized_list
+    ops["CashflowCalc"] = cashflow_list
+    ops["TaxEuroCalc"] = tax_euro_list
+
+    return ops
 
 def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
-    valid_tickers = [t for t in ops["Ticker"].unique() if t in closes.columns]
-    ops = ops[ops["Ticker"].isin(valid_tickers)].copy()
 
-    if ops.empty:
+    ops_all = ops.copy()
+
+    if ops_all.empty:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
-    idx = closes.index
-    holdings = build_holdings(ops, idx)
+    # ✅ arricchisco TUTTE le operazioni
+    ops_all = enrich_ops_with_cost_engine(ops_all)
+
+    # ✅ filtro DOPO l'arricchimento, così ops mantiene le colonne derivate
+    valid_tickers = [t for t in ops_all["Ticker"].unique() if t in closes.columns]
+    ops = ops_all[ops_all["Ticker"].isin(valid_tickers)].copy()
+    print (
+    "DEBUG OPS ALL",
+    ops_all[[
+        "Ticker",
+        "Data",
+        "Quantita",
+        "Prezzo",
+        "Cambio",
+        "SpeseEuro",
+        "Tassa",
+        "AvgCostBefore",
+        "AvgCostAfter",
+        "CashflowCalc",
+        "RealizedTradePL"
+    ]]
+    )
+
+    if ops.empty:
+        # se non ci sono ticker con prezzi validi, almeno costruisco una serie vuota ma
+        # non perdo il realizzato; se vuoi, puoi anche gestire questo caso separatamente
+        idx = pd.DatetimeIndex(sorted(ops_all["Data"].dropna().unique()))
+        if len(idx) == 0:
+            return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    else:
+        idx = closes.index
+
+    holdings = build_holdings(ops, idx) if not ops.empty else pd.DataFrame(index=idx)
+
 
     closes_ticker = closes[valid_tickers].reindex(idx).ffill()
 
@@ -56,16 +195,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     position_values = holdings * position_closes_eur
     total_value = position_values.sum(axis=1).rename("Valore portafoglio")
 
-    ops_cf = ops.copy()
-    ops_cf["Prezzo"] = ops_cf["Prezzo"].fillna(0.0)
-    ops_cf["SpeseEuro"] = ops_cf["SpeseEuro"].fillna(0.0)
-    ops_cf["Cambio"] = ops_cf["Cambio"].fillna(1.0)
-
-    ops_cf["Cashflow"] = np.where(
-        ops_cf["FlussoNetto"].notna(),
-        ops_cf["FlussoNetto"],
-        -(ops_cf["Quantita"] * ops_cf["Prezzo"] * ops_cf["Cambio"]) - ops_cf["SpeseEuro"]
-    )
+    # cashflow / realized su TUTTE le operazioni, anche senza prezzi di mercato
+    ops_cf = ops_all.copy()
+    ops_cf["Cashflow"] = ops_cf["CashflowCalc"]
 
     if dividends is None or dividends.empty:
         daily_dividends = pd.Series(0.0, index=idx, name="Dividendi netti")
@@ -78,17 +210,15 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
 
     sell_ops = ops_cf.loc[ops_cf["Quantita"] < 0].copy()
-    sell_ops["RealizedTradePL"] = (
-        sell_ops["FlussoNetto"]
-        - (sell_ops["Quantita"].abs() * sell_ops["Prezzo medio s/carico"])
-    )
 
     realized_from_trades = (
         sell_ops.groupby("Data")["RealizedTradePL"]
         .sum()
         .reindex(idx, fill_value=0.0)
     )
-
+    # print ("DEBUG SELL OPS", sell_ops[["Ticker", "Data", "Quantita", "AvgCostBefore", "CashflowCalc", "RealizedTradePL"]])
+    # print ("DEBUG REALIZED FROM TRADES", realized_from_trades[realized_from_trades != 0])
+    
     realized_daily = realized_from_trades.add(daily_dividends, fill_value=0.0)
     pl_realizzato = realized_daily.cumsum().rename("P/L realizzato")
 
@@ -142,35 +272,29 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         })
     )
 
-    cost_df = ops.copy()
-    cost_df["CostoFirmato"] = (
-        (cost_df["Quantita"] * cost_df["Prezzo"].fillna(0.0))
-        + cost_df["SpeseEuro"].fillna(0.0)
-    )
-
-    agg_cost = cost_df.groupby("PositionKey").agg(
-        NetQty=("Quantita", "sum"),
-        GrossCost=("CostoFirmato", "sum")
-    )
+    cost_state = (
+            ops.groupby("PositionKey")
+            .agg(
+                NetQty=("QtyOpenAfter", "last"),
+                OpenCost=("CostOpenAfter", "last"),
+                AvgCost=("AvgCostAfter", "last"),
+            )
+        )
 
     current = pd.concat([
-        last_qty.rename("Quantita"),
-        last_close_eur.rename("Prezzo Attuale"),
-        last_daily_pl.rename("P/L Giornaliero"),
-    ], axis=1)
+            last_qty.rename("Quantita"),
+            last_close_eur.rename("Prezzo Attuale"),
+            last_daily_pl.rename("P/L Giornaliero"),
+        ], axis=1)
 
     current["Ultimo Close Storico"] = last_close_eur
     current["Valore"] = current["Quantita"] * current["Prezzo Attuale"]
 
-    current = current.join(agg_cost, how="left").join(meta, how="left")
+    current = current.join(cost_state, how="left").join(meta, how="left")
 
-    current["Costo Medio Stimato"] = np.where(
-        current["NetQty"] != 0,
-        current["GrossCost"] / current["NetQty"],
-        np.nan
-    )
+    current["Costo Medio Stimato"] = current["AvgCost"]
+    current["Costo Totale Stimato"] = current["OpenCost"]
 
-    current["Costo Totale Stimato"] = current["Costo Medio Stimato"] * current["Quantita"]
     current["P/L"] = current["Valore"] - current["Costo Totale Stimato"]
 
     current["P/L %"] = np.where(
@@ -216,4 +340,4 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     current = current[current["Quantita"] != 0].sort_values("Valore", ascending=False)
     exposure = current.reset_index().rename(columns={"index": "PositionKey"})
 
-    return ts, current, holdings, exposure
+    return ts, current, holdings, exposure, ops_all

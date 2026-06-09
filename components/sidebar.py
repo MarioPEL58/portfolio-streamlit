@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
+import pytz
 
-
-def render_sidebar():
+def render_sidebar(create_demo_file):
     with st.sidebar:
         st.title("ℹ️ Guida")
 
@@ -39,6 +39,20 @@ def render_sidebar():
             4. Scarica i CSV finali
             """)
 
+        # ✅ sezione file demo
+        st.sidebar.markdown("### 📄 File di esempio")
+    
+        demo_file = create_demo_file()
+    
+        st.sidebar.download_button(
+            label="📥 Scarica file demo",
+            data=demo_file,
+            file_name="demo_portafoglio.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    
+        st.sidebar.caption("Scarica un esempio già pronto compatibile con l'app.")
+
         st.markdown("---")
         st.header("Sorgente dati")
 
@@ -56,7 +70,11 @@ def render_sidebar():
             st.cache_data.clear()
             st.rerun()
 
-        st.caption(f"Ultimo aggiornamento: {datetime.now().strftime('%H:%M:%S')}")
+        tz = pytz.timezone("Europe/Rome")
+        last_update = datetime.now(tz).strftime("%H:%M:%S %Z")  
+        st.caption(f"Ultimo aggiornamento: {last_update}")
+
+        # st.caption(f"Ultimo aggiornamento: {datetime.now().strftime('%H:%M:%S')}")
 
         st.header("Opzioni")
         benchmark = st.text_input(
