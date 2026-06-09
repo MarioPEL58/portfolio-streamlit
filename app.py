@@ -340,6 +340,9 @@ with c4:
     )
 
 
+update_label = compute_market_update_label(closes)
+st.caption(update_label)
+
 # Main chart
 st.subheader("Andamento del portafoglio nel tempo")
 
