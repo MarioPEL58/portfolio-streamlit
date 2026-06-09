@@ -10,7 +10,7 @@ from components.charts import allocation_pie_chart, allocation_bar_chart
 from components.operations_preview import render_operations_preview
 
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel
-from services.market_data import download_close_prices
+from services.market_data import download_close_prices, download_last_intraday_timestamp
 from services.portfolio import build_portfolio
 from services.portfolio_metrics import compute_portfolio_xirr
 from services.market_status import compute_market_update_label
@@ -28,7 +28,7 @@ ENV = os.getenv("ENV", "DEV")
 
 CONFIG = {
     "DEV": {
-        "title": "🚧 DEV Portfolio Tracker",
+        "title": "DEV Portfolio Tracker",
         "icon": "🚧"
     },
     "PROD": {
@@ -340,7 +340,18 @@ with c4:
     )
 
 
-update_label = compute_market_update_label(closes)
+# ✅ timestamp intraday per il solo label
+intraday_last_ts = download_last_intraday_timestamp(
+    sorted(ops_filtered["Ticker"].unique().tolist())
+)
+
+update_label = compute_market_update_label(
+    closes=closes,
+    intraday_last_ts=intraday_last_ts,
+    tz_name="Europe/Rome"
+)
+
+# old --- update_label = compute_market_update_label(closes)
 st.caption(update_label)
 
 # Main chart
