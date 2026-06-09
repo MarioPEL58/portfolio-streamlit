@@ -49,8 +49,41 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         elif "Adj Close" in raw.columns:
             closes[t] = raw["Adj Close"]
 
-    closes = closes.sort_index().ffill()
+    closes = closes.sort_index()
+    
+    # =========================
+    # ✅ Pulizia base
+    # =========================
+    closes = closes.replace([0, np.inf, -np.inf], np.nan)
+    
+    # =========================
+    # ✅ Rimozione outlier (glitch)
+    # =========================
+    returns = closes.pct_change()
+    
+    threshold = 0.3  # 30% giornaliero
+    outliers = returns.abs() > threshold
+    
+    closes[outliers] = np.nan
+    
+    # =========================
+    # ✅ Fill
+    # =========================
+    closes = closes.ffill()
+    
+    # =========================
+    # ✅ Controllo qualità
+    # =========================
+    invalid_points = outliers.sum().sum()
+    
+    if invalid_points > 0:
+        st.caption(f"⚠️ Correzione automatica di {invalid_points} prezzi anomali")
+    
+    # =========================
+    # ✅ Missing ticker
+    # =========================
     missing = [t for t in tickers if t not in closes.columns]
+    
     return closes, missing
 
 
@@ -100,7 +133,17 @@ def download_fx_series(currencies: list[str], start_date: pd.Timestamp, end_date
         except Exception:
             pass
 
-    return fx.sort_index().ffill()
+    fx = fx.sort_index()
+    
+    fx = fx.replace([0, np.inf, -np.inf], np.nan)
+    
+    returns = fx.pct_change()
+    outliers = returns.abs() > 0.3
+    
+    fx[outliers] = np.nan
+    fx = fx.ffill()
+    
+    return fx
 
 
 def convert_closes_to_eur(closes: pd.DataFrame, ops: pd.DataFrame, start_date: pd.Timestamp, end_date: pd.Timestamp):
