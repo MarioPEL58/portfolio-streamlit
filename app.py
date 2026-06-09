@@ -57,7 +57,7 @@ st.caption(
     "Carica un file Excel con il foglio Operazioni e ricostruisci il valore del portafoglio nel tempo."
 )
 
-update_label = compute_market_update_label(closes)
+update_label = None
 
 # Sidebar
 sidebar_cfg = render_sidebar(create_demo_file,update_label)
