@@ -69,4 +69,3 @@ def compute_market_update_label(closes, intraday_last_ts=None, tz_name="Europe/R
         status = f"⚠️ dati vecchi ({days_diff} giorni)"
 
     return f"Ultimo aggiornamento: {last_update} • {status}"
-``
