@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 import yfinance as yf
-
+import numpy as np
 
 @st.cache_data(show_spinner=False)
 def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp):
