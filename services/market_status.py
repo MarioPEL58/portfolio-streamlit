@@ -35,4 +35,3 @@ def compute_market_update_label(closes):
         status = "🕒 mercato chiuso"
 
     return f"Ultimo aggiornamento: {last_update} • {status}"
-``
