@@ -12,6 +12,7 @@ from components.operations_preview import render_operations_preview
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel
 from services.market_data import download_close_prices
 from services.portfolio import build_portfolio
+from services.portfolio_metrics import compute_portfolio_xirr
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 
@@ -246,7 +247,15 @@ latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else 
 latest_realized = float(series["P/L realizzato"].iloc[-1])
 latest_dividends = float(series["Dividendi netti"].sum())
 
-
+#
+# Valcolo Xirr e flusso 
+#
+xirr_value, xirr_flows = compute_portfolio_xirr(
+    ops_enriched=ops_enriched,
+    dividends=dividends_filtered,
+    final_value=latest_value,
+    valuation_date=series.index.max()
+)
 
 # =========================
 # ✅ Realized % (NUOVO METODO)
@@ -326,7 +335,7 @@ with c4:
     render_total_pl_card(
         total_pl=latest_pnl,
         total_pct=latest_pnl_pct,
-        annualized_pct=annualized_pct
+        annualized_pct=xirr_value
     )
 
 
@@ -338,8 +347,8 @@ fig = portfolio_chart(series, bench_norm=bench_norm, benchmark_name=benchmark)
 st.plotly_chart(fig, use_container_width=True)
 
 # Tabs
-tab_pos, tab_exp, tab_ops, tab_dl = st.tabs(
-    ["Posizioni", "Esposizione", "Operazioni", "Download"]
+tab_pos, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
+    ["Posizioni", "Esposizione", "Flussi", "Operazioni", "Download"]
 )
 
 with tab_pos:
@@ -394,6 +403,20 @@ with tab_exp:
         fig_tipo = allocation_bar_chart(exposure, column="Tipo", title="Per tipo")
         if fig_tipo:
             c2.plotly_chart(fig_tipo, use_container_width=True)
+
+with tab_flu:
+    st.subheader("📊 Flussi per data (XIRR)")
+    st.caption("Flussi utilizzati per il calcolo del rendimento annualizzato XIRR")
+
+    st.dataframe(
+        xirr_flows.style.format({
+            "Operazioni": "€ {:,.2f}",
+            "Dividendi": "€ {:,.2f}",
+            "Valore finale": "€ {:,.2f}",
+            "Totale": "€ {:,.2f}"
+        }),
+        use_container_width=True
+    )
 
 with tab_ops:
     st.subheader("Operazioni")
