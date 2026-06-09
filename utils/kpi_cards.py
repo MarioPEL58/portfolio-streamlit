@@ -5,30 +5,19 @@ from utils.formatting import fmt_eur, fmt_pct
 # =========================
 # 1️⃣ VALORE PORTAFOGLIO
 # =========================
-def render_value_card(value):
-    st.markdown(
-        f"""
-        <div style="
-            padding: 16px;
-            border-radius: 12px;
-            background-color: #1f1f1f;
-            border: 1px solid #2a2a2a;
-        ">
-            <div style="color: #ffffff; font-size: 0.9em;">
-                Valore del portafoglio
-            </div>
-            <div style="
-                font-size: 1.8em;
-                font-weight: 600;
-                margin-top: 4px;
-            ">
-                {fmt_eur(value)}
-            </div>
+def render_value_card(value, invested):
+    st.markdown(f"""
+    <div style="padding:16px;border-radius:12px;background-color:#1f1f1f;border:1px solid #2a2a2a;">
+        <div style="color:#ffffff;font-size:0.9em;">Valore del portafoglio</div>
+        <div style="margin-top:6px;font-size:1.8em;font-weight:600;">
+            {fmt_eur(value)}
         </div>
-        """,
-        unsafe_allow_html=True
-    )
-
+        <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
+            <span>Capitale inv.</span>
+            <span style="margin-left:8px;">{fmt_eur(invested)}</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # =========================
 # 2️⃣ NON REALIZZATO
