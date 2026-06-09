@@ -7,7 +7,7 @@ import pandas as pd
 import streamlit as st
 import pytz
 
-def render_sidebar(create_demo_file):
+def render_sidebar(create_demo_file, update_label=None):
     with st.sidebar:
         st.title("ℹ️ Guida")
 
@@ -70,9 +70,8 @@ def render_sidebar(create_demo_file):
             st.cache_data.clear()
             st.rerun()
 
-        tz = pytz.timezone("Europe/Rome")
-        last_update = datetime.now(tz).strftime("%H:%M:%S %Z")  
-        st.caption(f"Ultimo aggiornamento: {last_update}")
+        if update_label:
+            st.caption(update_label)
 
         # st.caption(f"Ultimo aggiornamento: {datetime.now().strftime('%H:%M:%S')}")
 
