@@ -297,64 +297,16 @@ if days > 5 and latest_pnl_pct is not None:
 else:
     annualized_pct = None
 
-# =========================
-# UI KPI
-# =========================
-
-# k1, k2, k3, k4 = st.columns(4)
-
-# k1.metric("Valore portafoglio", fmt_eur(latest_value))
-# k2.metric("Capitale investito", fmt_eur(latest_invested))
-# k3.metric("Posizioni aperte", len(current))
-# k4.metric("Dividendi netti", fmt_eur(latest_dividends))
-
-# k5, k6, k7 = st.columns(3)
-
-# if pd.notna(latest_pnl_pct):
-#     k5.metric(
-#         "P/L totale",
-#         fmt_eur(latest_pnl),
-#         delta=fmt_pct(latest_pnl_pct),
-#         delta_color="normal"
-#     )
-# else:
-#     k5.metric(
-#         "P/L totale",
-#         fmt_eur(latest_pnl)
-#     )
-
-# if pd.notna(latest_daily_pl_pct):
-#     k6.metric(
-#         "P/L Giornaliero",
-#         fmt_eur(latest_daily_pl),
-#         delta=fmt_pct(latest_daily_pl_pct),
-#         delta_color="normal"
-#     )
-# else:
-#     k6.metric(
-#         "P/L Giornaliero",
-#         fmt_eur(latest_daily_pl)
-#     )
-
-# if pd.notna(latest_realized_pct):
-#     k7.metric(
-#         "P/L realizzato",
-#         fmt_eur(latest_realized),
-#         delta=fmt_pct(latest_realized_pct),
-#         delta_color="normal"
-#     )
-# else:
-#     k7.metric(
-#         "P/L realizzato",
-#         fmt_eur(latest_realized)
-#     )
+# -------------------------
+#  box KPI
+# -------------------------
 
 st.markdown("### 📊 KPI Portafoglio")
 
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    render_value_card(latest_value)
+    render_value_card(latest_value, latest_invested)
 
 with c2:
     render_unrealized_card(
