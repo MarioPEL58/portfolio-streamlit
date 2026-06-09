@@ -57,10 +57,8 @@ st.caption(
     "Carica un file Excel con il foglio Operazioni e ricostruisci il valore del portafoglio nel tempo."
 )
 
-update_label = None
-
 # Sidebar
-sidebar_cfg = render_sidebar(create_demo_file,update_label)
+sidebar_cfg = render_sidebar(create_demo_file)
 uploaded_file = sidebar_cfg["uploaded_file"]
 use_local_demo = sidebar_cfg["use_local_demo"]
 benchmark = sidebar_cfg["benchmark"]
