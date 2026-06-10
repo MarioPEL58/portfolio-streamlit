@@ -146,7 +146,7 @@ def daily_pl_bar_chart(current: pd.DataFrame, label_col: str = "Ticker"):
             x=df["P/L Giornaliero %"],
             y=df[label_col],
             orientation="h",
-            marker_color=df["color"],
+            marker_color=dict(color= df["color"], cornerradius=8),
             text=df["label"],
             textposition="outside"
         )
@@ -217,7 +217,7 @@ def daily_pl_bar_chart_by_sign(current: pd.DataFrame, positive: bool = True, lab
             x=df["x_plot"],
             y=df[label_col],
             orientation="h",
-            marker_color=color,
+            marker_color=dict(color= df["color"], cornerradius=8),
             text=df["label"],
             textposition="outside",
             width=0.45  # ✅ barre più sottili
@@ -242,7 +242,7 @@ def daily_pl_bar_chart_by_sign(current: pd.DataFrame, positive: bool = True, lab
             showlegend=False,
             margin=dict(l=20, r=20, t=50, b=20),
             height=max(300, 42 * len(df)),
-            bargap=0.35
+            bargap=0.12
         )
     else:
         # ✅ tick negativi ma asse verso destra
@@ -268,7 +268,7 @@ def daily_pl_bar_chart_by_sign(current: pd.DataFrame, positive: bool = True, lab
             showlegend=False,
             margin=dict(l=20, r=20, t=50, b=20),
             height=max(300, 42 * len(df)),
-            bargap=0.35
+            bargap=0.12
         )
 
     return fig
