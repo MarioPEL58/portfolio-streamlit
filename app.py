@@ -266,13 +266,25 @@ with tab_perf:
 with tab_daily:
     st.subheader("📅 Performance giornaliera")
 
+    max_abs_pct = 0.01
+    if current is not None and not current.empty and "P/L Giornaliero %" in current.columns:
+        max_abs_pct = pd.to_numeric(
+            current["P/L Giornaliero %"],
+            errors="coerce"
+        ).abs().max()
+
+        if pd.isna(max_abs_pct) or max_abs_pct == 0:
+            max_abs_pct = 0.01
+
+
     # ✅ Grafico posizioni in profitto
     st.markdown("#### 🟢 Posizioni in profitto")
 
     fig_pos = daily_pl_bar_chart_by_sign(
         current=current,
         positive=True,
-        label_col="Ticker"
+        label_col="Ticker",
+        max_abs_pct=max_abs_pct
     )
 
     if fig_pos:
@@ -286,7 +298,8 @@ with tab_daily:
     fig_neg = daily_pl_bar_chart_by_sign(
         current=current,
         positive=False,
-        label_col="Ticker"
+        label_col="Ticker",
+        max_abs_pct=max_abs_pct
     )
 
     if fig_neg:
