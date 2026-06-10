@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
-from components.charts import daily_pl_bar_chart
+from components.charts import daily_pl_bar_chart_by_sign
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 
@@ -264,13 +264,35 @@ with tab_perf:
     st.plotly_chart(fig, use_container_width=True)
 
 with tab_daily:
-    fig = daily_pl_bar_chart(
-        current,
-        label_col="Ticker"   # oppure "Nome"
+    st.subheader("📅 Performance giornaliera")
+
+    # ✅ Grafico posizioni in profitto
+    st.markdown("#### 🟢 Posizioni in profitto")
+
+    fig_pos = daily_pl_bar_chart_by_sign(
+        current=current,
+        positive=True,
+        label_col="Ticker"
     )
 
-    if fig:
-        st.plotly_chart(fig, use_container_width=True)
+    if fig_pos:
+        st.plotly_chart(fig_pos, use_container_width=True)
+    else:
+        st.caption("Nessuna posizione in profitto oggi")
+
+    # ✅ Grafico posizioni in perdita
+    st.markdown("#### 🔴 Posizioni in perdita")
+
+    fig_neg = daily_pl_bar_chart_by_sign(
+        current=current,
+        positive=False,
+        label_col="Ticker"
+    )
+
+    if fig_neg:
+        st.plotly_chart(fig_neg, use_container_width=True)
+    else:
+        st.caption("Nessuna posizione in perdita oggi")
 
 # Tabs
 tab_pos, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
