@@ -244,7 +244,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
 
     daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
     daily_pl_pct = (daily_pl / total_value.shift(1)).rename("P/L Giornaliero %")
-    pnl = (total_value + invested).rename("P/L totale")
+    pnl = (total_value + invested).rename("P/L trading")
 
     ts = pd.concat(
         [total_value, invested, pnl, daily_pl, daily_pl_pct, daily_dividends, pl_realizzato],
