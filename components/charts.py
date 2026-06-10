@@ -174,6 +174,10 @@ def daily_pl_bar_chart_by_sign(current: pd.DataFrame, positive: bool = True, lab
         if col not in df.columns:
             return None
 
+    # ✅ forzo tipo numerico (fix bug ordinamento)
+    df["P/L Giornaliero %"] = pd.to_numeric(df["P/L Giornaliero %"], errors="coerce")
+    df["P/L Giornaliero"] = pd.to_numeric(df["P/L Giornaliero"], errors="coerce")
+
     df = df.dropna(subset=["P/L Giornaliero %"]).copy()
 
     if df.empty:
@@ -182,34 +186,47 @@ def daily_pl_bar_chart_by_sign(current: pd.DataFrame, positive: bool = True, lab
     if label_col not in df.columns:
         label_col = "Ticker" if "Ticker" in df.columns else df.columns[0]
 
+    # =========================
+    # ✅ POSITIVI
+    # =========================
     if positive:
         df = df[df["P/L Giornaliero %"] > 0].copy()
+
+        # ✅ SORT CORRETTO
+        df = df.sort_values(by="P/L Giornaliero %", ascending=False)
+
+        df["x_plot"] = df["P/L Giornaliero %"]
+
         title = "Posizioni in profitto giornaliero"
         color = "#26a69a"
-        df = df.sort_values("P/L Giornaliero %", ascending=False)
-        df["x_plot"] = df["P/L Giornaliero %"]
-        df["label"] = df.apply(
-            lambda x: f"{x['P/L Giornaliero %']:.2%} ({x['P/L Giornaliero']:.2f}€)",
-            axis=1
-        )
+
+    # =========================
+    # ✅ NEGATIVI (ribaltati)
+    # =========================
     else:
         df = df[df["P/L Giornaliero %"] < 0].copy()
-        title = "Posizioni in perdita giornaliera"
-        color = "#ef5350"
-        df = df.sort_values("P/L Giornaliero %", ascending=True)
 
-        # ✅ asse X positivo ma semanticamente negativo
+        # ✅ sort corretto per negativi
+        df = df.sort_values(by="P/L Giornaliero %", ascending=True)
+
+        # ✅ asse positivo ma semanticamente negativo
         df["x_plot"] = df["P/L Giornaliero %"].abs()
 
-        # label con segno negativo visibile
-        df["label"] = df.apply(
-            lambda x: f"{x['P/L Giornaliero %']:.2%} ({x['P/L Giornaliero']:.2f}€)",
-            axis=1
-        )
+        title = "Posizioni in perdita giornaliera"
+        color = "#ef5350"
 
     if df.empty:
         return None
 
+    # ✅ label (con segno vero)
+    df["label"] = df.apply(
+        lambda x: f"{x['P/L Giornaliero %']:.2%} ({x['P/L Giornaliero']:.2f}€)",
+        axis=1
+    )
+
+    # =========================
+    # ✅ grafico
+    # =========================
     fig = go.Figure()
 
     fig.add_trace(
@@ -217,35 +234,34 @@ def daily_pl_bar_chart_by_sign(current: pd.DataFrame, positive: bool = True, lab
             x=df["x_plot"],
             y=df[label_col],
             orientation="h",
-            marker_color=dict(color= df["color"], cornerradius=8),
+            marker=dict(
+                color=color,
+                cornerradius=8  # ✅ arrotondato (come hai verificato 👍)
+            ),
             text=df["label"],
             textposition="outside",
-            width=0.45  # ✅ barre più sottili
+            width=0.48  # ✅ più sottile
         )
     )
 
-    # ✅ arrotondamento estremità (se supportato dalla tua versione Plotly)
-    try:
-        fig.update_traces(marker=dict(cornerradius=8))
-    except Exception:
-        pass
+    max_x = df["x_plot"].max()
 
-    max_x = df["x_plot"].max() if not df.empty else 0
-
+    # =========================
+    # ✅ layout
+    # =========================
     if positive:
         fig.update_layout(
             title=title,
-            yaxis=dict(autorange="reversed"),
-            xaxis=dict(
-                tickformat=".2%"
-            ),
+            yaxis=dict(autorange="reversed"),   # ✅ ORDINE TOP → BOTTOM
+            xaxis=dict(tickformat=".2%"),
             showlegend=False,
-            margin=dict(l=20, r=20, t=50, b=20),
             height=max(300, 42 * len(df)),
-            bargap=0.12
+            margin=dict(l=20, r=20, t=50, b=20),
+            bargap=0.12   # ✅ barre più vicine
         )
+
     else:
-        # ✅ tick negativi ma asse verso destra
+        # ✅ asse negativo visuale
         tickvals = [0]
         ticktext = ["0%"]
 
@@ -263,11 +279,11 @@ def daily_pl_bar_chart_by_sign(current: pd.DataFrame, positive: bool = True, lab
                 tickmode="array",
                 tickvals=tickvals,
                 ticktext=ticktext,
-                range=[0, max_x * 1.15 if max_x > 0 else 1]
+                range=[0, max_x * 1.15]
             ),
             showlegend=False,
-            margin=dict(l=20, r=20, t=50, b=20),
             height=max(300, 42 * len(df)),
+            margin=dict(l=20, r=20, t=50, b=20),
             bargap=0.12
         )
 
