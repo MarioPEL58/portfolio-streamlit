@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
+from components.charts import daily_pl_bar_chart
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 
@@ -246,11 +247,30 @@ update_label = compute_market_update_label(
 st.caption(update_label)
 
 # Main chart
-st.subheader("Andamento del portafoglio nel tempo")
 
-fig = portfolio_chart(series, bench_norm=bench_norm, benchmark_name=benchmark)
+st.subheader("📊 Grafici")
 
-st.plotly_chart(fig, use_container_width=True)
+tab_perf, tab_daily = st.tabs([
+    "📈 Andamento portafoglio",
+    "📅 Giornaliero"
+])
+
+with tab_perf:
+    fig = portfolio_chart(
+        series,
+        bench_norm=bench_norm,
+        benchmark_name=benchmark
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+with tab_daily:
+    fig = daily_pl_bar_chart(
+        current,
+        label_col="Ticker"   # oppure "Nome"
+    )
+
+    if fig:
+        st.plotly_chart(fig, use_container_width=True)
 
 # Tabs
 tab_pos, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
