@@ -146,7 +146,7 @@ def daily_pl_bar_chart(current: pd.DataFrame, label_col: str = "Ticker"):
             x=df["P/L Giornaliero %"],
             y=df[label_col],
             orientation="h",
-            marker_color=dict(color= df["color"], cornerradius=2),
+            marker_color=dict(color= df["color"], cornerradius=8),
             text=df["label"],
             textposition="outside"
         )
@@ -224,7 +224,7 @@ def daily_pl_bar_chart_by_sign(
             base=0,
             marker=dict(
                 color=color,
-                cornerradius=2
+                cornerradius=8
             ),
             text=df["label"],
             textposition="outside",
