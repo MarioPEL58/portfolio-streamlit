@@ -147,7 +147,6 @@ if show_benchmark and benchmark.strip():
 # =========================
 # KPIs
 # =========================
-
 latest_value = float(series["Valore portafoglio"].iloc[-1])
 latest_invested = float(series["Capitale investito"].iloc[-1])
 latest_pnl = float(series["P/L totale"].iloc[-1])
@@ -159,9 +158,9 @@ latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else 
 latest_realized = float(series["P/L realizzato"].iloc[-1])
 latest_dividends = float(series["Dividendi netti"].sum())
 
-#
-# Valcolo Xirr e flusso 
-#
+# =========================
+# XIRR + flussi
+# =========================
 xirr_value, xirr_flows = compute_portfolio_xirr(
     ops_enriched=ops_enriched,
     dividends=dividends_filtered,
@@ -170,10 +169,8 @@ xirr_value, xirr_flows = compute_portfolio_xirr(
 )
 
 # =========================
-# ✅ Realized % (NUOVO METODO)
+# Realized %
 # =========================
-
-# usa ops CF già arricchite dal motore
 sell_ops = ops_enriched.loc[ops_enriched["Quantita"] < 0].copy()
 
 if not sell_ops.empty:
@@ -186,42 +183,27 @@ if not sell_ops.empty:
     )
 else:
     latest_realized_pct = np.nan
-# =========================
-# ✅ Breakdown P/L
-# =========================
 
-sell_ops = ops_enriched.loc[ops_enriched["Quantita"] < 0].copy()
-
+# =========================
+# Breakdown P/L
+# =========================
 realized_trading = (
     sell_ops["RealizedTradePL"].sum()
     if not sell_ops.empty else 0.0
 )
 
 realized_dividends = float(series["Dividendi netti"].sum())
-
 realized_total = realized_trading + realized_dividends
 
-unrealized_pl = latest_pnl - realized_total
+# ✅ NON realizzato: usa direttamente le posizioni aperte
+unrealized_pl = float(current["P/L"].sum()) if not current.empty else 0.0
 
-if latest_invested != 0:
-    unrealized_pct = unrealized_pl / abs(latest_invested)
-else:
-    unrealized_pct = None
+open_cost = float(current["Costo Totale Stimato"].sum()) if not current.empty else 0.0
+unrealized_pct = unrealized_pl / open_cost if open_cost != 0 else None
 
-start_date = series.index.min()
-end_date = series.index.max()
-
-days = (end_date - start_date).days
-
-if days > 5 and latest_pnl_pct is not None:
-    annualized_pct = (1 + latest_pnl_pct) ** (365.25 / days) - 1
-else:
-    annualized_pct = None
-
-# -------------------------
-#  box KPI
-# -------------------------
-
+# =========================
+# KPI cards
+# =========================
 st.markdown("### 📊 KPI Portafoglio")
 
 c1, c2, c3, c4 = st.columns(4)
@@ -249,8 +231,7 @@ with c4:
         total_pct=latest_pnl_pct,
         annualized_pct=xirr_value
     )
-
-
+    
 # ✅ timestamp intraday per il solo label
 intraday_last_ts = download_last_intraday_timestamp(
     filtered_tickers
