@@ -149,7 +149,7 @@ if show_benchmark and benchmark.strip():
 # =========================
 latest_value = float(series["Valore portafoglio"].iloc[-1])
 latest_invested = float(series["Capitale investito"].iloc[-1])
-latest_pnl = float(series["P/L totale"].iloc[-1])
+latest_pnl = float(series["P/L trading"].iloc[-1])
 latest_daily_pl = float(series["P/L Giornaliero"].iloc[-1])
 latest_daily_pl_pct = float(series["P/L Giornaliero %"].iloc[-1])
 
