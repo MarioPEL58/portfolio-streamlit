@@ -1,5 +1,6 @@
 import plotly.graph_objects as go
 import plotly.express as px
+import pandas as pd
 
 def portfolio_chart(series, bench_norm=None, benchmark_name=""):
     fig = go.Figure()
@@ -98,6 +99,66 @@ def allocation_bar_chart(exposure, column="Area", title=None):
     fig.update_layout(
         height=420,
         margin=dict(l=10, r=10, t=40, b=10)
+    )
+
+    return fig
+
+def daily_pl_bar_chart(current: pd.DataFrame, label_col: str = "Ticker"):
+    if current is None or current.empty:
+        return None
+
+    df = current.copy()
+
+    # sicurezza colonne
+    required_cols = ["P/L Giornaliero", "P/L Giornaliero %"]
+    for col in required_cols:
+        if col not in df.columns:
+            return None
+
+    df = df.dropna(subset=["P/L Giornaliero %"])
+
+    if df.empty:
+        return None
+
+    # label (usa Nome se disponibile)
+    if label_col not in df.columns:
+        label_col = "Ticker" if "Ticker" in df.columns else df.columns[0]
+
+    # ordinamento per % decrescente
+    df = df.sort_values("P/L Giornaliero %", ascending=False)
+
+    # label combinata: % + €
+    df["label"] = df.apply(
+        lambda x: f"{x['P/L Giornaliero %']:.2%} ({x['P/L Giornaliero']:.2f}€)",
+        axis=1
+    )
+
+    # colore
+    df["color"] = df["P/L Giornaliero %"].apply(
+        lambda x: "#26a69a" if x >= 0 else "#ef5350"
+    )
+
+    # costruzione grafico
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Bar(
+            x=df["P/L Giornaliero %"],
+            y=df[label_col],
+            orientation="h",
+            marker_color=df["color"],
+            text=df["label"],
+            textposition="outside"
+        )
+    )
+
+    fig.update_layout(
+        title="Performance giornaliera (%)",
+        yaxis=dict(autorange="reversed"),
+        xaxis_tickformat=".2%",
+        showlegend=False,
+        margin=dict(l=20, r=20, t=50, b=20),
+        height=max(350, 45 * len(df))
     )
 
     return fig
