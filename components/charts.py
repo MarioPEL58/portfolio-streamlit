@@ -205,9 +205,8 @@ def daily_pl_bar_chart_by_sign(
     if df.empty:
         return None
 
-    df["label"] = df.apply(
-        lambda x: f"{x['P/L Giornaliero %']:.3%} ({x['P/L Giornaliero']:.2f}€)",
-        axis=1
+    df["label"] = df["P/L Giornaliero %"].apply(
+        lambda x: f"{x:.2%}"
     )
 
     if max_abs_pct is None:
@@ -232,7 +231,7 @@ def daily_pl_bar_chart_by_sign(
             customdata=df[["P/L Giornaliero %", "P/L Giornaliero"]],
             hovertemplate=(
                 "%{y}<br>"
-                "P/L Giornaliero %%: %{customdata[0]:.4%}<br>"
+                "P/L Giornaliero %: %{customdata[0]:.4%}<br>"
                 "P/L Giornaliero: %{customdata[1]:.2f}€"
                 "<extra></extra>"
             ),
