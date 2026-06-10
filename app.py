@@ -189,6 +189,10 @@ unrealized_pct = unrealized_pl / open_cost if open_cost != 0 else None
 total_pl = realized_total + unrealized_pl
 total_pct = total_pl / abs(latest_invested) if latest_invested != 0 else None
 
+open_daily_pl = float(current["P/L Giornaliero"].sum()) if not current.empty else 0.0
+open_value = float(current["Valore"].sum()) if not current.empty else 0.0
+open_daily_pct = open_daily_pl / (open_value - open_daily_pl) if (open_value - open_daily_pl) != 0 else None
+
 # =========================
 # KPI cards
 # =========================
@@ -198,21 +202,18 @@ c1, c2, c3, c4 = st.columns(4)
 
 with c1:
     render_value_card(latest_value, abs(latest_invested))
-
 with c2:
     render_unrealized_card(
         value=unrealized_pl,
         pct=unrealized_pct,
-        daily_value=latest_daily_pl,
-        daily_pct=latest_daily_pl_pct
+        daily_value=open_daily_pl,
+        daily_pct=open_daily_pct
     )
-
 with c3:
     render_realized_card(
         realized_total=realized_total,
         dividends_total=realized_dividends
     )
-
 with c4:
     render_total_pl_card(
         total_pl=total_pl,
@@ -220,7 +221,6 @@ with c4:
         annualized_pct=xirr_value
     )
 
-    
 # ✅ timestamp intraday per il solo label
 intraday_last_ts = download_last_intraday_timestamp(
     filtered_tickers
