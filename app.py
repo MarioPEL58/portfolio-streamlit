@@ -153,8 +153,6 @@ latest_pnl = float(series["P/L totale"].iloc[-1])
 latest_daily_pl = float(series["P/L Giornaliero"].iloc[-1])
 latest_daily_pl_pct = float(series["P/L Giornaliero %"].iloc[-1])
 
-latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else np.nan
-
 latest_realized = float(series["P/L realizzato"].iloc[-1])
 latest_dividends = float(series["Dividendi netti"].sum())
 
@@ -169,37 +167,27 @@ xirr_value, xirr_flows = compute_portfolio_xirr(
 )
 
 # =========================
-# Realized %
+# Breakdown P/L
 # =========================
 sell_ops = ops_enriched.loc[ops_enriched["Quantita"] < 0].copy()
 
-if not sell_ops.empty:
-    realized_cost = (
-        sell_ops["Quantita"].abs() * sell_ops["AvgCostBefore"]
-    ).sum()
-
-    latest_realized_pct = (
-        latest_realized / realized_cost if realized_cost != 0 else np.nan
-    )
-else:
-    latest_realized_pct = np.nan
-
-# =========================
-# Breakdown P/L
-# =========================
 realized_trading = (
     sell_ops["RealizedTradePL"].sum()
     if not sell_ops.empty else 0.0
 )
 
-realized_dividends = float(series["Dividendi netti"].sum())
+realized_dividends = latest_dividends
 realized_total = realized_trading + realized_dividends
 
-# ✅ NON realizzato: usa direttamente le posizioni aperte
+# Non realizzato = somma P/L posizioni aperte
 unrealized_pl = float(current["P/L"].sum()) if not current.empty else 0.0
 
 open_cost = float(current["Costo Totale Stimato"].sum()) if not current.empty else 0.0
 unrealized_pct = unrealized_pl / open_cost if open_cost != 0 else None
+
+# Totale coerente con il breakdown
+total_pl = realized_total + unrealized_pl
+total_pct = total_pl / abs(latest_invested) if latest_invested != 0 else None
 
 # =========================
 # KPI cards
@@ -221,16 +209,17 @@ with c2:
 
 with c3:
     render_realized_card(
-        realized_total=latest_realized,
-        dividends_total=latest_dividends
+        realized_total=realized_total,
+        dividends_total=realized_dividends
     )
 
 with c4:
     render_total_pl_card(
-        total_pl=latest_pnl,
-        total_pct=latest_pnl_pct,
+        total_pl=total_pl,
+        total_pct=total_pct,
         annualized_pct=xirr_value
     )
+
     
 # ✅ timestamp intraday per il solo label
 intraday_last_ts = download_last_intraday_timestamp(
