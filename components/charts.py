@@ -163,7 +163,16 @@ def daily_pl_bar_chart(current: pd.DataFrame, label_col: str = "Ticker"):
 
     return fig
 
-def daily_pl_bar_chart_by_sign(current: pd.DataFrame, positive: bool = True, label_col: str = "Ticker"):
+import plotly.graph_objects as go
+import pandas as pd
+
+
+def daily_pl_bar_chart_by_sign(
+    current: pd.DataFrame,
+    positive: bool = True,
+    label_col: str = "Ticker",
+    max_abs_pct: float | None = None
+):
     if current is None or current.empty:
         return None
 
@@ -174,10 +183,8 @@ def daily_pl_bar_chart_by_sign(current: pd.DataFrame, positive: bool = True, lab
         if col not in df.columns:
             return None
 
-    # ✅ forzo tipo numerico (fix bug ordinamento)
     df["P/L Giornaliero %"] = pd.to_numeric(df["P/L Giornaliero %"], errors="coerce")
     df["P/L Giornaliero"] = pd.to_numeric(df["P/L Giornaliero"], errors="coerce")
-
     df = df.dropna(subset=["P/L Giornaliero %"]).copy()
 
     if df.empty:
@@ -186,47 +193,33 @@ def daily_pl_bar_chart_by_sign(current: pd.DataFrame, positive: bool = True, lab
     if label_col not in df.columns:
         label_col = "Ticker" if "Ticker" in df.columns else df.columns[0]
 
-    # =========================
-    # ✅ POSITIVI
-    # =========================
     if positive:
         df = df[df["P/L Giornaliero %"] > 0].copy()
-
-        # ✅ SORT CORRETTO
         df = df.sort_values(by="P/L Giornaliero %", ascending=False)
-
         df["x_plot"] = df["P/L Giornaliero %"]
-
         title = "Posizioni in profitto giornaliero"
         color = "#26a69a"
-
-    # =========================
-    # ✅ NEGATIVI (ribaltati)
-    # =========================
     else:
         df = df[df["P/L Giornaliero %"] < 0].copy()
-
-        # ✅ sort corretto per negativi
         df = df.sort_values(by="P/L Giornaliero %", ascending=True)
-
-        # ✅ asse positivo ma semanticamente negativo
         df["x_plot"] = df["P/L Giornaliero %"].abs()
-
         title = "Posizioni in perdita giornaliera"
         color = "#ef5350"
 
     if df.empty:
         return None
 
-    # ✅ label (con segno vero)
     df["label"] = df.apply(
         lambda x: f"{x['P/L Giornaliero %']:.2%} ({x['P/L Giornaliero']:.2f}€)",
         axis=1
     )
 
-    # =========================
-    # ✅ grafico
-    # =========================
+    # ✅ scala comune
+    if max_abs_pct is None:
+        max_x = max(df["x_plot"].max(), 0.01)
+    else:
+        max_x = max(float(max_abs_pct), 0.01)
+
     fig = go.Figure()
 
     fig.add_trace(
@@ -236,50 +229,45 @@ def daily_pl_bar_chart_by_sign(current: pd.DataFrame, positive: bool = True, lab
             orientation="h",
             marker=dict(
                 color=color,
-                cornerradius=8  # ✅ arrotondato (come hai verificato 👍)
+                cornerradius=8
             ),
             text=df["label"],
             textposition="outside",
-            width=0.48  # ✅ più sottile
+            width=0.48
         )
     )
 
-    max_x = df["x_plot"].max()
-
-    # =========================
-    # ✅ layout
-    # =========================
     if positive:
         fig.update_layout(
             title=title,
-            yaxis=dict(autorange="reversed"),   # ✅ ORDINE TOP → BOTTOM
-            xaxis=dict(tickformat=".2%"),
+            yaxis=dict(autorange="reversed"),
+            xaxis=dict(
+                range=[0, max_x * 1.15],
+                tickformat=".2%"
+            ),
             showlegend=False,
             height=max(300, 42 * len(df)),
             margin=dict(l=20, r=20, t=50, b=20),
-            bargap=0.12   # ✅ barre più vicine
+            bargap=0.12
         )
-
     else:
-        # ✅ asse negativo visuale
         tickvals = [0]
         ticktext = ["0%"]
 
-        if max_x > 0:
-            steps = 4
-            for i in range(1, steps + 1):
-                v = max_x * i / steps
-                tickvals.append(v)
-                ticktext.append(f"-{v:.2%}")
+        steps = 4
+        for i in range(1, steps + 1):
+            v = max_x * i / steps
+            tickvals.append(v)
+            ticktext.append(f"-{v:.2%}")
 
         fig.update_layout(
             title=title,
             yaxis=dict(autorange="reversed"),
             xaxis=dict(
+                range=[0, max_x * 1.15],
                 tickmode="array",
                 tickvals=tickvals,
-                ticktext=ticktext,
-                range=[0, max_x * 1.15]
+                ticktext=ticktext
             ),
             showlegend=False,
             height=max(300, 42 * len(df)),
