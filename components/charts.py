@@ -20,9 +20,9 @@ def portfolio_chart(series, bench_norm=None, benchmark_name=""):
 
     fig.add_trace(go.Scatter(
         x=series.index,
-        y=series["P/L totale"],
+        y=series["P/L trading"],
         mode="lines",
-        name="P/L totale",
+        name="P/L trading",
         yaxis="y2"
     ))
 
