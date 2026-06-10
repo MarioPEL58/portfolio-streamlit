@@ -163,10 +163,6 @@ def daily_pl_bar_chart(current: pd.DataFrame, label_col: str = "Ticker"):
 
     return fig
 
-import plotly.graph_objects as go
-import pandas as pd
-
-
 def daily_pl_bar_chart_by_sign(
     current: pd.DataFrame,
     positive: bool = True,
@@ -210,11 +206,10 @@ def daily_pl_bar_chart_by_sign(
         return None
 
     df["label"] = df.apply(
-        lambda x: f"{x['P/L Giornaliero %']:.2%} ({x['P/L Giornaliero']:.2f}€)",
+        lambda x: f"{x['P/L Giornaliero %']:.3%} ({x['P/L Giornaliero']:.2f}€)",
         axis=1
     )
 
-    # ✅ scala comune
     if max_abs_pct is None:
         max_x = max(df["x_plot"].max(), 0.01)
     else:
@@ -227,20 +222,32 @@ def daily_pl_bar_chart_by_sign(
             x=df["x_plot"],
             y=df[label_col],
             orientation="h",
+            base=0,
             marker=dict(
                 color=color,
-                cornerradius=8
+                cornerradius=2
             ),
             text=df["label"],
             textposition="outside",
-            width=0.48
+            customdata=df[["P/L Giornaliero %", "P/L Giornaliero"]],
+            hovertemplate=(
+                "%{y}<br>"
+                "P/L Giornaliero %%: %{customdata[0]:.4%}<br>"
+                "P/L Giornaliero: %{customdata[1]:.2f}€"
+                "<extra></extra>"
+            ),
+            width=0.55
         )
     )
 
     if positive:
         fig.update_layout(
             title=title,
-            yaxis=dict(autorange="reversed"),
+            yaxis=dict(
+                autorange="reversed",
+                categoryorder="array",
+                categoryarray=df[label_col].tolist()
+            ),
             xaxis=dict(
                 range=[0, max_x * 1.15],
                 tickformat=".2%"
@@ -248,7 +255,7 @@ def daily_pl_bar_chart_by_sign(
             showlegend=False,
             height=max(300, 42 * len(df)),
             margin=dict(l=20, r=20, t=50, b=20),
-            bargap=0.12
+            bargap=0.08
         )
     else:
         tickvals = [0]
@@ -262,7 +269,11 @@ def daily_pl_bar_chart_by_sign(
 
         fig.update_layout(
             title=title,
-            yaxis=dict(autorange="reversed"),
+            yaxis=dict(
+                autorange="reversed",
+                categoryorder="array",
+                categoryarray=df[label_col].tolist()
+            ),
             xaxis=dict(
                 range=[0, max_x * 1.15],
                 tickmode="array",
@@ -272,7 +283,7 @@ def daily_pl_bar_chart_by_sign(
             showlegend=False,
             height=max(300, 42 * len(df)),
             margin=dict(l=20, r=20, t=50, b=20),
-            bargap=0.12
+            bargap=0.08
         )
 
     return fig
