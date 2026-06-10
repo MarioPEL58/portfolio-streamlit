@@ -162,3 +162,66 @@ def daily_pl_bar_chart(current: pd.DataFrame, label_col: str = "Ticker"):
     )
 
     return fig
+
+def daily_pl_bar_chart_by_sign(current: pd.DataFrame, positive: bool = True, label_col: str = "Ticker"):
+    if current is None or current.empty:
+        return None
+
+    df = current.copy()
+
+    required_cols = ["P/L Giornaliero", "P/L Giornaliero %"]
+    for col in required_cols:
+        if col not in df.columns:
+            return None
+
+    df = df.dropna(subset=["P/L Giornaliero %"]).copy()
+
+    if df.empty:
+        return None
+
+    if label_col not in df.columns:
+        label_col = "Ticker" if "Ticker" in df.columns else df.columns[0]
+
+    if positive:
+        df = df[df["P/L Giornaliero %"] > 0].copy()
+        title = "Posizioni in profitto giornaliero"
+        color = "#26a69a"
+    else:
+        df = df[df["P/L Giornaliero %"] < 0].copy()
+        title = "Posizioni in perdita giornaliera"
+        color = "#ef5350"
+
+    if df.empty:
+        return None
+
+    df = df.sort_values("P/L Giornaliero %", ascending=False if positive else True)
+
+    df["label"] = df.apply(
+        lambda x: f"{x['P/L Giornaliero %']:.2%} ({x['P/L Giornaliero']:.2f}€)",
+        axis=1
+    )
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Bar(
+            x=df["P/L Giornaliero %"],
+            y=df[label_col],
+            orientation="h",
+            marker_color=color,
+            text=df["label"],
+            textposition="outside"
+        )
+    )
+
+    fig.update_layout(
+        title=title,
+        yaxis=dict(autorange="reversed"),
+        xaxis_tickformat=".2%",
+        showlegend=False,
+        margin=dict(l=20, r=20, t=50, b=20),
+        height=max(300, 45 * len(df))
+    )
+
+    return fig
+
