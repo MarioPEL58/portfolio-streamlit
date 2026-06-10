@@ -186,42 +186,89 @@ def daily_pl_bar_chart_by_sign(current: pd.DataFrame, positive: bool = True, lab
         df = df[df["P/L Giornaliero %"] > 0].copy()
         title = "Posizioni in profitto giornaliero"
         color = "#26a69a"
+        df = df.sort_values("P/L Giornaliero %", ascending=False)
+        df["x_plot"] = df["P/L Giornaliero %"]
+        df["label"] = df.apply(
+            lambda x: f"{x['P/L Giornaliero %']:.2%} ({x['P/L Giornaliero']:.2f}€)",
+            axis=1
+        )
     else:
         df = df[df["P/L Giornaliero %"] < 0].copy()
         title = "Posizioni in perdita giornaliera"
         color = "#ef5350"
+        df = df.sort_values("P/L Giornaliero %", ascending=True)
+
+        # ✅ asse X positivo ma semanticamente negativo
+        df["x_plot"] = df["P/L Giornaliero %"].abs()
+
+        # label con segno negativo visibile
+        df["label"] = df.apply(
+            lambda x: f"{x['P/L Giornaliero %']:.2%} ({x['P/L Giornaliero']:.2f}€)",
+            axis=1
+        )
 
     if df.empty:
         return None
-
-    df = df.sort_values("P/L Giornaliero %", ascending=False if positive else True)
-
-    df["label"] = df.apply(
-        lambda x: f"{x['P/L Giornaliero %']:.2%} ({x['P/L Giornaliero']:.2f}€)",
-        axis=1
-    )
 
     fig = go.Figure()
 
     fig.add_trace(
         go.Bar(
-            x=df["P/L Giornaliero %"],
+            x=df["x_plot"],
             y=df[label_col],
             orientation="h",
             marker_color=color,
             text=df["label"],
-            textposition="outside"
+            textposition="outside",
+            width=0.45  # ✅ barre più sottili
         )
     )
 
-    fig.update_layout(
-        title=title,
-        yaxis=dict(autorange="reversed"),
-        xaxis_tickformat=".2%",
-        showlegend=False,
-        margin=dict(l=20, r=20, t=50, b=20),
-        height=max(300, 45 * len(df))
-    )
+    # ✅ arrotondamento estremità (se supportato dalla tua versione Plotly)
+    try:
+        fig.update_traces(marker=dict(cornerradius=8))
+    except Exception:
+        pass
+
+    max_x = df["x_plot"].max() if not df.empty else 0
+
+    if positive:
+        fig.update_layout(
+            title=title,
+            yaxis=dict(autorange="reversed"),
+            xaxis=dict(
+                tickformat=".2%"
+            ),
+            showlegend=False,
+            margin=dict(l=20, r=20, t=50, b=20),
+            height=max(300, 42 * len(df)),
+            bargap=0.35
+        )
+    else:
+        # ✅ tick negativi ma asse verso destra
+        tickvals = [0]
+        ticktext = ["0%"]
+
+        if max_x > 0:
+            steps = 4
+            for i in range(1, steps + 1):
+                v = max_x * i / steps
+                tickvals.append(v)
+                ticktext.append(f"-{v:.2%}")
+
+        fig.update_layout(
+            title=title,
+            yaxis=dict(autorange="reversed"),
+            xaxis=dict(
+                tickmode="array",
+                tickvals=tickvals,
+                ticktext=ticktext,
+                range=[0, max_x * 1.15 if max_x > 0 else 1]
+            ),
+            showlegend=False,
+            margin=dict(l=20, r=20, t=50, b=20),
+            height=max(300, 42 * len(df)),
+            bargap=0.35
+        )
 
     return fig
-
