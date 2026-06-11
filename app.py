@@ -265,7 +265,12 @@ with tab_perf:
 
 with tab_daily:
     st.subheader("📅 Performance giornaliera")
-
+    view_mode = st.radio(
+        "Visualizzazione",
+        options=["Top 10", "Tutte"],
+        horizontal=True
+    )
+    
     max_abs_pct = 0.01
     if current is not None and not current.empty and "P/L Giornaliero %" in current.columns:
         max_abs_pct = pd.to_numeric(
