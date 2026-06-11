@@ -293,10 +293,11 @@ with tab_daily:
     st.markdown("#### 🟢 Posizioni in profitto")
 
     fig_pos = daily_pl_bar_chart_by_sign(
-        current=current,
+        current=df_view,
         positive=True,
         label_col="Ticker",
-        max_abs_pct=max_abs_pct
+        max_abs_pct=max_abs_pct,
+        top_n=top_n
     )
 
     if fig_pos:
@@ -308,10 +309,11 @@ with tab_daily:
     st.markdown("#### 🔴 Posizioni in perdita")
 
     fig_neg = daily_pl_bar_chart_by_sign(
-        current=current,
+        current=df_view,
         positive=False,
         label_col="Ticker",
-        max_abs_pct=max_abs_pct
+        max_abs_pct=max_abs_pct,
+        top_n=top_n
     )
 
     if fig_neg:
