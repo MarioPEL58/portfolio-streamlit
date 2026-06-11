@@ -164,7 +164,7 @@ def daily_pl_bar_chart(current: pd.DataFrame, label_col: str = "Ticker"):
 
     return fig
 
-def daily_pl_bar_chart_by_sign(
+def daily_pl_bar_chart_by_sign_old(
     current: pd.DataFrame,
     positive: bool = True,
     label_col: str = "Ticker",
@@ -327,6 +327,146 @@ def daily_pl_bar_chart_by_sign(
             margin=dict(l=20, r=20, t=50, b=20),
             bargap=STYLE["bargap"],
             barmode="overlay"
+        )
+
+    return fig
+
+def daily_pl_bar_chart_by_sign(
+    current: pd.DataFrame,
+    positive: bool = True,
+    label_col: str = "Ticker",
+    max_abs_pct: float | None = None
+):
+    if current is None or current.empty:
+        return None
+
+    df = current.copy()
+
+    required_cols = ["P/L Giornaliero", "P/L Giornaliero %"]
+    for col in required_cols:
+        if col not in df.columns:
+            return None
+
+    df["P/L Giornaliero %"] = pd.to_numeric(df["P/L Giornaliero %"], errors="coerce")
+    df["P/L Giornaliero"] = pd.to_numeric(df["P/L Giornaliero"], errors="coerce")
+    df = df.dropna(subset=["P/L Giornaliero %"]).copy()
+
+    if df.empty:
+        return None
+
+    if label_col not in df.columns:
+        label_col = "Ticker" if "Ticker" in df.columns else df.columns[0]
+
+    if positive:
+        df = df[df["P/L Giornaliero %"] > 0].copy()
+        df = df.sort_values("P/L Giornaliero %", ascending=False)
+        df["x_plot"] = df["P/L Giornaliero %"]
+        title = "Posizioni in profitto giornaliero"
+        color = STYLE["color_positive"]
+    else:
+        df = df[df["P/L Giornaliero %"] < 0].copy()
+        df = df.sort_values("P/L Giornaliero %", ascending=True)
+        df["x_plot"] = df["P/L Giornaliero %"].abs()
+        title = "Posizioni in perdita giornaliera"
+        color = STYLE["color_negative"]
+
+    if df.empty:
+        return None
+
+    # label breve: solo %
+    df["label"] = df["P/L Giornaliero %"].apply(lambda x: f"{x:.2%}")
+
+    if max_abs_pct is None:
+        max_x = max(df["x_plot"].max(), 0.01)
+    else:
+        max_x = max(float(max_abs_pct), 0.01)
+
+    # ✅ asse Y numerico
+    n = len(df)
+    y_pos = list(range(n))
+
+    fig = go.Figure()
+
+    # barra grigia di fondo
+    fig.add_trace(
+        go.Bar(
+            x=[max_x] * n,
+            y=y_pos,
+            orientation="h",
+            marker=dict(
+                color=STYLE["color_background_bar"]
+            ),
+            showlegend=False,
+            hoverinfo="skip",
+            width=STYLE["bar_width"]
+        )
+    )
+
+    # barra reale
+    fig.add_trace(
+        go.Bar(
+            x=df["x_plot"],
+            y=y_pos,
+            orientation="h",
+            base=0,
+            marker=dict(
+                color=color,
+                cornerradius=STYLE["corner_radius"]
+            ),
+            text=df["label"],
+            textposition="outside",
+            customdata=df[[label_col, "P/L Giornaliero %", "P/L Giornaliero"]],
+            hovertemplate=(
+                "%{customdata[0]}<br>"
+                "P/L Giornaliero %: %{customdata[1]:.4%}<br>"
+                "P/L Giornaliero: %{customdata[2]:.2f}€"
+                "<extra></extra>"
+            ),
+            width=STYLE["bar_width"]
+        )
+    )
+
+    common_layout = dict(
+        title=title,
+        showlegend=False,
+        height=max(STYLE["min_height"], STYLE["height_factor"] * n),
+        margin=dict(l=20, r=20, t=50, b=20),
+        bargap=STYLE["bargap"],
+        barmode="overlay",
+        yaxis=dict(
+            tickmode="array",
+            tickvals=y_pos,
+            ticktext=df[label_col].tolist(),
+            autorange="reversed"
+        )
+    )
+
+    if positive:
+        fig.update_layout(
+            **common_layout,
+            xaxis=dict(
+                range=[0, max_x * STYLE["x_padding_factor"]],
+                tickformat=".2%"
+            )
+        )
+    else:
+        tickvals = [0]
+        ticktext = ["0%"]
+
+        steps = 4
+        for i in range(1, steps + 1):
+            v = max_x * i / steps
+            tickvals.append(v)
+            ticktext.append(f"-{v:.2%}")
+
+        fig.update_layout(
+            **common_layout,
+            xaxis=dict(
+                range=[0, max_x * STYLE["x_padding_factor"]],
+                tickmode="array",
+                tickvals=tickvals,
+                ticktext=ticktext
+            )
         )
 
     return fig
