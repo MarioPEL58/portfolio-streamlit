@@ -268,7 +268,8 @@ def daily_pl_bar_chart_by_sign(
             showlegend=False,
             height=max(300, 42 * len(df)),
             margin=dict(l=20, r=20, t=50, b=20),
-            bargap=0.05
+            bargap=0.05,
+            barmode="overlay"
         )
     else:
         tickvals = [0]
@@ -296,7 +297,8 @@ def daily_pl_bar_chart_by_sign(
             showlegend=False,
             height=max(300, 42 * len(df)),
             margin=dict(l=20, r=20, t=50, b=20),
-            bargap=0.05
+            bargap=0.05,
+            barmode="overlay"
         )
 
     return fig
