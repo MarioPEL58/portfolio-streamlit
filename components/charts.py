@@ -258,7 +258,10 @@ def daily_pl_bar_chart_by_sign(
                 cornerradius=STYLE["corner_radius"]
             ),
             text=df["label"],
-            textposition="outside",
+            textposition=[
+                "outside" if x > max_x * 0.3 else "inside"
+                for x in df["x_plot"]
+            ],
             customdata=df[["P/L Giornaliero %", "P/L Giornaliero"]],
             hovertemplate=(
                 "%{y}<br>"
