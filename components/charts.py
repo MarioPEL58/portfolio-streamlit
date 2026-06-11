@@ -218,6 +218,20 @@ def daily_pl_bar_chart_by_sign(
 
     fig.add_trace(
         go.Bar(
+            x=[max_x] * len(df),   # stessa scala per tutti
+            y=df[label_col],
+            orientation="h",
+            marker=dict(
+                color="rgba(200,200,200,0.25)"  # grigio chiaro
+            ),
+            showlegend=False,
+            hoverinfo="skip",
+            width=0.35
+        )
+    )
+
+    fig.add_trace(
+        go.Bar(
             x=df["x_plot"],
             y=df[label_col],
             orientation="h",
@@ -235,7 +249,7 @@ def daily_pl_bar_chart_by_sign(
                 "P/L Giornaliero: %{customdata[1]:.2f}€"
                 "<extra></extra>"
             ),
-            width=0.55
+            width=0.35
         )
     )
 
@@ -254,7 +268,7 @@ def daily_pl_bar_chart_by_sign(
             showlegend=False,
             height=max(300, 42 * len(df)),
             margin=dict(l=20, r=20, t=50, b=20),
-            bargap=0.08
+            bargap=0.05
         )
     else:
         tickvals = [0]
@@ -282,7 +296,7 @@ def daily_pl_bar_chart_by_sign(
             showlegend=False,
             height=max(300, 42 * len(df)),
             margin=dict(l=20, r=20, t=50, b=20),
-            bargap=0.08
+            bargap=0.05
         )
 
     return fig
