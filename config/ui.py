@@ -1,9 +1,9 @@
 UI_CHART_STYLE = {
     # Bar chart
-    "bar_width": 0.65,
-    "bargap": 0.03,
-    "height_factor": 30,
-    "min_height": 220,
+    "bar_width": 0.45,
+    "bargap": 0.02,
+    "height_factor": 15,
+    "min_height": 160,
     "corner_radius": 2,
 
     # Axis
