@@ -1,5 +1,6 @@
 import plotly.graph_objects as go
 import plotly.express as px
+from config import UI_CHART_STYLE as STYLE
 import pandas as pd
 
 def portfolio_chart(series, bench_norm=None, benchmark_name=""):
@@ -179,6 +180,7 @@ def daily_pl_bar_chart_by_sign(
         if col not in df.columns:
             return None
 
+    # ✅ assicurazione tipo numerico
     df["P/L Giornaliero %"] = pd.to_numeric(df["P/L Giornaliero %"], errors="coerce")
     df["P/L Giornaliero"] = pd.to_numeric(df["P/L Giornaliero"], errors="coerce")
     df = df.dropna(subset=["P/L Giornaliero %"]).copy()
@@ -189,26 +191,35 @@ def daily_pl_bar_chart_by_sign(
     if label_col not in df.columns:
         label_col = "Ticker" if "Ticker" in df.columns else df.columns[0]
 
+    # =========================
+    # POSITIVI
+    # =========================
     if positive:
         df = df[df["P/L Giornaliero %"] > 0].copy()
-        df = df.sort_values(by="P/L Giornaliero %", ascending=False)
+        df = df.sort_values("P/L Giornaliero %", ascending=False)
         df["x_plot"] = df["P/L Giornaliero %"]
         title = "Posizioni in profitto giornaliero"
-        color = "#26a69a"
+        color = STYLE["color_positive"]
+
+    # =========================
+    # NEGATIVI
+    # =========================
     else:
         df = df[df["P/L Giornaliero %"] < 0].copy()
-        df = df.sort_values(by="P/L Giornaliero %", ascending=True)
+        df = df.sort_values("P/L Giornaliero %", ascending=True)
         df["x_plot"] = df["P/L Giornaliero %"].abs()
         title = "Posizioni in perdita giornaliera"
-        color = "#ef5350"
+        color = STYLE["color_negative"]
 
     if df.empty:
         return None
 
-    df["label"] = df["P/L Giornaliero %"].apply(
-        lambda x: f"{x:.2%}"
-    )
+    # ✅ label pulita: solo %
+    df["label"] = df["P/L Giornaliero %"].apply(lambda x: f"{x:.2%}")
 
+    # =========================
+    # scala comune
+    # =========================
     if max_abs_pct is None:
         max_x = max(df["x_plot"].max(), 0.01)
     else:
@@ -216,20 +227,26 @@ def daily_pl_bar_chart_by_sign(
 
     fig = go.Figure()
 
+    # =========================
+    # background (barra grigia)
+    # =========================
     fig.add_trace(
         go.Bar(
-            x=[max_x] * len(df),   # stessa scala per tutti
+            x=[max_x] * len(df),
             y=df[label_col],
             orientation="h",
             marker=dict(
-                color="rgba(200,200,200,0.25)"  # grigio chiaro
+                color=STYLE["color_background_bar"]
             ),
             showlegend=False,
             hoverinfo="skip",
-            width=0.35
+            width=STYLE["bar_width"]
         )
     )
 
+    # =========================
+    # barra reale
+    # =========================
     fig.add_trace(
         go.Bar(
             x=df["x_plot"],
@@ -238,7 +255,7 @@ def daily_pl_bar_chart_by_sign(
             base=0,
             marker=dict(
                 color=color,
-                cornerradius=8
+                cornerradius=STYLE["corner_radius"]
             ),
             text=df["label"],
             textposition="outside",
@@ -249,28 +266,40 @@ def daily_pl_bar_chart_by_sign(
                 "P/L Giornaliero: %{customdata[1]:.2f}€"
                 "<extra></extra>"
             ),
-            width=0.35
+            width=STYLE["bar_width"]
         )
     )
 
+    # =========================
+    # asse Y ordinato
+    # =========================
+    y_axis = dict(
+        autorange="reversed",
+        categoryorder="array",
+        categoryarray=df[label_col].tolist()
+    )
+
+    # =========================
+    # layout POSITIVI
+    # =========================
     if positive:
         fig.update_layout(
             title=title,
-            yaxis=dict(
-                autorange="reversed",
-                categoryorder="array",
-                categoryarray=df[label_col].tolist()
-            ),
+            yaxis=y_axis,
             xaxis=dict(
-                range=[0, max_x * 1.15],
+                range=[0, max_x * STYLE["x_padding_factor"]],
                 tickformat=".2%"
             ),
             showlegend=False,
-            height=max(300, 42 * len(df)),
+            height=max(STYLE["min_height"], STYLE["height_factor"] * len(df)),
             margin=dict(l=20, r=20, t=50, b=20),
-            bargap=0.05,
+            bargap=STYLE["bargap"],
             barmode="overlay"
         )
+
+    # =========================
+    # layout NEGATIVI
+    # =========================
     else:
         tickvals = [0]
         ticktext = ["0%"]
@@ -283,21 +312,17 @@ def daily_pl_bar_chart_by_sign(
 
         fig.update_layout(
             title=title,
-            yaxis=dict(
-                autorange="reversed",
-                categoryorder="array",
-                categoryarray=df[label_col].tolist()
-            ),
+            yaxis=y_axis,
             xaxis=dict(
-                range=[0, max_x * 1.15],
+                range=[0, max_x * STYLE["x_padding_factor"]],
                 tickmode="array",
                 tickvals=tickvals,
                 ticktext=ticktext
             ),
             showlegend=False,
-            height=max(300, 42 * len(df)),
+            height=max(STYLE["min_height"], STYLE["height_factor"] * len(df)),
             margin=dict(l=20, r=20, t=50, b=20),
-            bargap=0.05,
+            bargap=STYLE["bargap"],
             barmode="overlay"
         )
 
