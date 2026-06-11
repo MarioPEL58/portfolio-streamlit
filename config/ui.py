@@ -13,7 +13,7 @@ UI_CHART_STYLE = {
     "text_font_size": 12,
 
     # Colors
-    "color_positive": "#26a69a",
-    "color_negative": "#ef5350",
+    "color_positive": "#089981", # "#26a69a",
+    "color_negative": "#F23645", # "#ef5350",
     "color_background_bar": "rgba(200,200,200,0.15)"
 }
