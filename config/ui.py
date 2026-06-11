@@ -1,10 +1,10 @@
 UI_CHART_STYLE = {
     # Bar chart
-    "bar_width": 0.45,
-    "bargap": 0.02,
-    "height_factor": 15,
+    "bar_width": 0.68,
+    "bargap": 0.025,
+    "height_factor": 24,
     "min_height": 160,
-    "corner_radius": 2,
+    "corner_radius": 8,
 
     # Axis
     "x_padding_factor": 1.15,
