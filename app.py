@@ -270,7 +270,15 @@ with tab_daily:
         options=["Top 10", "Tutte"],
         horizontal=True
     )
+    # copia df base
+    df_view = current.copy()
     
+    if view_mode == "Top 10":
+        # NON filtrare qui per segno — lo fa già la funzione
+        top_n = 10
+    else:
+        top_n = None
+        
     max_abs_pct = 0.01
     if current is not None and not current.empty and "P/L Giornaliero %" in current.columns:
         max_abs_pct = pd.to_numeric(
@@ -280,7 +288,6 @@ with tab_daily:
 
         if pd.isna(max_abs_pct) or max_abs_pct == 0:
             max_abs_pct = 0.01
-
 
     # ✅ Grafico posizioni in profitto
     st.markdown("#### 🟢 Posizioni in profitto")
