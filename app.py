@@ -47,7 +47,7 @@ st.set_page_config(
 
 # 🔹 Header
 st.markdown(f"## {env_cfg['title']}")
-st.caption(ui_cfg["subtitle"])
+st.caption(lang["subtitle"])
 
 if ENV == "DEV":
     st.warning(lang["dev_warning"])
