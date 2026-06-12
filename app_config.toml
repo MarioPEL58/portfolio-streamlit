@@ -98,6 +98,16 @@ active_filters = "Filtri attivi"
 # DIVIDENDI
 no_dividends_filtered = "ℹ️ Nessun dividendo per il filtro selezionato"
 
+# KPI CARDS
+portfolio_value = "Valore del portafoglio"
+invested_capital = "Capitale inv."
+unrealized_profit = "Profitto non realizzato"
+last_day = "Ultimo giorno"
+realized_profit = "Profitto realizzato"
+total_dividends = "Dividendi totali"
+total_profit = "Profitto totale"
+annualized_return = "Rendimento annualizzato"
+
 
 [lang.en]
 
@@ -177,3 +187,13 @@ filter_types = "Type"
 active_filters = "Active filters"
 
 no_dividends_filtered = "ℹ️ No dividends for selected filters"
+
+# KPI CARDS
+portfolio_value = "Portfolio value"
+invested_capital = "Invested capital"
+unrealized_profit = "Unrealized profit"
+last_day = "Last day"
+realized_profit = "Realized profit"
+total_dividends = "Total dividends"
+total_profit = "Total profit"
+annualized_return = "Annualized return"
