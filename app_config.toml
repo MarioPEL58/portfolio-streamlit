@@ -1,2 +1,11 @@
+[app]
 version = "1.0"
-name = "Portfolio Tracker"
+
+[ui]
+subtitle = "Carica un file Excel con il foglio Operazioni..."
+
+[env.DEV]
+title = "🚧 DEV Portfolio Tracker ETF / Azioni"
+
+[env.PROD]
+title = "📈 Portfolio Tracker ETF / Azioni"
