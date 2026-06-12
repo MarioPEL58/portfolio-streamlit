@@ -2,10 +2,12 @@
 version = "1.0"
 
 [ui]
-subtitle = "Carica un file Excel con il foglio Operazioni..."
+subtitle = "Carica un file Excel con il foglio Operazioni"
 
 [env.DEV]
 title = "🚧 DEV Portfolio Tracker ETF / Azioni"
+icon = "🚧"
 
 [env.PROD]
 title = "📈 Portfolio Tracker ETF / Azioni"
+icon = "📈"
