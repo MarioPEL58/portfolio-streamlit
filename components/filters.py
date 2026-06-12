@@ -1,7 +1,8 @@
 import streamlit as st
+from utils.i18n import t
 
 def render_filters(ops, dividends):
-    st.markdown("### 🎛️ Filtri")
+    st.markdown(t("filters_title"))
 
     # -------------------------
     # liste disponibili
@@ -71,16 +72,16 @@ def render_filters(ops, dividends):
     
     if set(st.session_state.selected_brokers) != set(all_brokers):
         active_filters.append(
-            f"Intermediari ({', '.join(st.session_state.selected_brokers)})"
+            f"{t("filter_brokers")} ({', '.join(st.session_state.selected_brokers)})"
         )
     
     if set(st.session_state.selected_types) != set(all_types):
         active_filters.append(
-            f"Tipo ({', '.join(st.session_state.selected_types)})"
+            f"{t('filter_types')} ({', '.join(st.session_state.selected_types)})"
         )
     
     if active_filters:
-        st.caption(f"Filtri attivi: {', '.join(active_filters)}")
+        st.caption(f"{t('active_filters')}: {', '.join(active_filters)}")
     # =========================
     # FILTER DIVIDENDS
     # =========================
@@ -110,7 +111,7 @@ def render_filters(ops, dividends):
     # ✅ dividendi mancanti
     if dividends is not None and not dividends.empty:
         if dividends_filtered is not None and dividends_filtered.empty:
-            st.caption("ℹ️ Nessun dividendo per il filtro selezionato")
+            st.caption(t("no_dividends_filtered"))
     # =========================
     # CONTEXT ✅
     # =========================
