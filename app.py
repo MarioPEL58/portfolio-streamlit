@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from utils.i18n import set_language
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
@@ -32,6 +33,8 @@ CONFIG = load_config()
 
 ENV = os.getenv("ENV", "DEV")
 LANG = st.sidebar.selectbox("Lingua / Language", ["it", "en"])
+
+set_language(CONFIG["lang"][LANG])
 lang = CONFIG["lang"][LANG]
 
 # 🔹 Config letta da TOML
@@ -47,7 +50,7 @@ st.set_page_config(
 
 # 🔹 Header
 st.markdown(f"## {env_cfg['title']}")
-st.caption(lang["subtitle"])
+st.caption(t("subtitle"))
 
 if ENV == "DEV":
     st.warning(lang["dev_warning"])
