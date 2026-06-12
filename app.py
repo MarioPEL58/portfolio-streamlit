@@ -98,11 +98,6 @@ ops_filtered = filter_ctx["ops"]
 dividends_filtered = filter_ctx["dividends"]
 filtered_tickers = filter_ctx["tickers"]
 
-# ✅ dividendi mancanti (solo se esistono ma filtrati via)
-if dividends is not None and not dividends.empty:
-    if dividends_filtered is not None and dividends_filtered.empty:
-        st.caption("ℹ️ Nessun dividendo per il filtro selezionato")
-
 # Price download
 start_date = ops["Data"].min().normalize()
 end_date = pd.Timestamp.today().normalize()
