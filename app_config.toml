@@ -81,6 +81,11 @@ download_operations = "Scarica operazioni CSV"
 # FOOTER
 footer_note = "Aggiornamento in tempo reale dei prezzi"
 
+# OPERATIONS PREVIEW (module)
+operations_preview_title = "Anteprima operazioni"
+operations_preview_subtitle = "Vista sintetica delle operazioni filtrate"
+show_all_columns = "Mostra tutte le colonne"
+
 # in filters.py 
 # FILTRI
 filters_title = "### 🎛️ Filtri"
@@ -158,6 +163,11 @@ download_operations = "Download operations CSV"
 
 # FOOTER
 footer_note = "Real-time price updates"
+
+# OPERATIONS PREVIEW (module)
+operations_preview_title = "Operations preview"
+operations_preview_subtitle = "Summary view of filtered operations"
+show_all_columns = "Show all columns"
 
 # in filters.py 
 filters_title = "### 🎛️ Filters"
