@@ -81,6 +81,17 @@ download_operations = "Scarica operazioni CSV"
 # FOOTER
 footer_note = "Aggiornamento in tempo reale dei prezzi"
 
+# in filters.py 
+# FILTRI
+filters_title = "### 🎛️ Filtri"
+filter_brokers = "Intermediari"
+filter_types = "Tipo"
+
+# FEEDBACK FILTRI
+active_filters = "Filtri attivi"
+
+# DIVIDENDI
+no_dividends_filtered = "ℹ️ Nessun dividendo per il filtro selezionato"
 
 
 [lang.en]
@@ -147,3 +158,12 @@ download_operations = "Download operations CSV"
 
 # FOOTER
 footer_note = "Real-time price updates"
+
+# in filters.py 
+filters_title = "### 🎛️ Filters"
+filter_brokers = "Brokers"
+filter_types = "Type"
+
+active_filters = "Active filters"
+
+no_dividends_filtered = "ℹ️ No dividends for selected filters"
