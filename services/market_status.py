@@ -1,6 +1,7 @@
 from datetime import datetime, time
 import pandas as pd
 import pytz
+from utils.i18n import t
 
 
 MARKET_HOURS = {
