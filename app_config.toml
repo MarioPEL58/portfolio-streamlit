@@ -107,7 +107,10 @@ realized_profit = "Profitto realizzato"
 total_dividends = "Dividendi totali"
 total_profit = "Profitto totale"
 annualized_return = "Rendimento annualizzato"
-
+# market_status.py
+last_update_label = "Ultimo aggiornamento"
+market_closed = "mercato chiuso"
+market_open = "mercato aperto"
 
 [lang.en]
 
@@ -197,3 +200,8 @@ realized_profit = "Realized profit"
 total_dividends = "Total dividends"
 total_profit = "Total profit"
 annualized_return = "Annualized return"
+# market_status.py
+last_update_label = "Last update"
+market_closed = "market closed"
+market_open = "market open"
+
