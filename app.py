@@ -31,6 +31,8 @@ from config.config import load_config
 CONFIG = load_config()
 
 ENV = os.getenv("ENV", "DEV")
+LANG = st.sidebar.selectbox("Lingua / Language", ["it", "en"])
+lang = CONFIG["lang"][LANG]
 
 # 🔹 Config letta da TOML
 env_cfg = CONFIG["env"][ENV]
@@ -48,7 +50,7 @@ st.markdown(f"## {env_cfg['title']}")
 st.caption(ui_cfg["subtitle"])
 
 if ENV == "DEV":
-    st.warning("⚠️ Ambiente di sviluppo")
+    st.warning(lang["dev_warning"])
 
 # Sidebar
 sidebar_cfg = render_sidebar(create_demo_file)
@@ -62,7 +64,7 @@ min_filter_date = sidebar_cfg["min_filter_date"]
 file_source, file_label = resolve_file_source(uploaded_file, use_local_demo)
 
 if file_source is None:
-    st.info("Carica un file Excel per iniziare.")
+    st.info(lang["upload_prompt"])
     st.stop()
 
 # Load data
@@ -70,15 +72,15 @@ try:
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
 except Exception as e:
-    st.error(f"Errore nel caricamento del file: {e}")
+    st.error(f"{lang['load_error']} {e}")
     st.stop()
 
 ops = ops[ops["Data"] >= pd.Timestamp(min_filter_date)]
 if ops.empty:
-    st.warning("Nessuna operazione disponibile dopo la data minima selezionata.")
+    st.warning(lang["no_ops_after_date"])
     st.stop()
 
-st.success(f"File caricato: {file_label}")
+st.success(f"{lang['file_loaded']} {file_label}"
 
 # =========================
 # 🎛️ FILTER CONTEXT ✅
@@ -100,17 +102,17 @@ closes, missing = download_close_prices(
 )
 
 if closes.empty:
-    st.error("Non sono riuscito a scaricare i prezzi da Yahoo Finance.")
+    st.error(lang["no_prices"])
     st.stop()
 
 if missing:
-    st.warning("Ticker senza prezzi scaricati: " + ", ".join(missing))
+    st.warning(lang["missing_tickers"] + ", ".join(missing))
 
 # Portfolio
 series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
 
 if series.empty:
-    st.error("Non è stato possibile costruire il portafoglio con i dati disponibili.")
+    st.error(lang["portfolio_error"])
     st.stop()
 
 render_operations_preview(ops_enriched)
@@ -183,7 +185,7 @@ open_daily_pct = open_daily_pl / (open_value - open_daily_pl) if (open_value - o
 # =========================
 # KPI cards
 # =========================
-st.markdown("### 📊 KPI Portafoglio")
+st.markdown(f"### {lang['kpi_title']}")
 
 c1, c2, c3, c4 = st.columns(4)
 
@@ -234,11 +236,11 @@ st.caption(update_label)
 
 # Main chart
 
-st.subheader("📊 Grafici")
+st.subheader(lang["charts_title"])
 
 tab_perf, tab_daily = st.tabs([
-    "📈 Andamento portafoglio",
-    "📅 Giornaliero"
+    lang["tab_perf"],
+    lang["tab_daily"]
 ])
 
 with tab_perf:
