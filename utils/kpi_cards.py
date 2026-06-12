@@ -13,7 +13,7 @@ def render_value_card(value, invested):
             {fmt_eur(value)}
         </div>
         <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
-            <span>{t("invested_capital")</span>
+            <span>{t("invested_capital")}</span>
             <span style="margin-left:8px;">{fmt_eur(invested)}</span>
         </div>
     </div>
