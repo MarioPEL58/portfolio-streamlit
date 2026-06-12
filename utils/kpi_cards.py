@@ -1,6 +1,6 @@
 import streamlit as st
 from utils.formatting import fmt_eur, fmt_pct
-from i18n import t
+from utils.i18n import t
 
 # =========================
 # 1️⃣ VALORE PORTAFOGLIO
