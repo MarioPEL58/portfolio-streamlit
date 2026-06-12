@@ -1,11 +1,12 @@
 import streamlit as st
+from utils.i18n import t
 
 def render_operations_preview(ops_enriched):
-    with st.expander("Anteprima operazioni", expanded=False):
+    with st.expander(t("operations_preview_title"), expanded=False):
 
-        st.caption("Vista sintetica delle operazioni filtrate")
+        st.caption(t("operations_preview_subtitle"))
 
-        show_full = st.checkbox("Mostra tutte le colonne", value=False)
+        show_full = st.checkbox(t("show_all_columns"), value=False)
 
         if show_full:
             st.dataframe(ops_enriched, use_container_width=True)
