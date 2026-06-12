@@ -2,12 +2,148 @@
 version = "1.0"
 
 [ui]
-subtitle = "Carica un file Excel con il foglio Operazioni"
+# puoi tenerlo vuoto o usarlo per defaults comuni in futuro
 
 [env.DEV]
-title = "🚧 DEV Portfolio Tracker ETF / Azioni"
+title = "🚧 DEV Portfolio Tracker ETF / Stock"
 icon = "🚧"
 
 [env.PROD]
-title = "📈 Portfolio Tracker ETF / Azioni"
+title = "📈 Portfolio Tracker ETF / Stock"
 icon = "📈"
+
+# =========================
+# 🌐 MULTILINGUA
+# =========================
+
+[lang.it]
+
+# HEADER
+subtitle = "Carica un file Excel con il foglio Operazioni e ricostruisci il valore del portafoglio nel tempo."
+dev_warning = "⚠️ Ambiente di sviluppo"
+
+# INPUT / LOADING
+upload_prompt = "Carica un file Excel per iniziare."
+load_error = "Errore nel caricamento del file:"
+no_ops_after_date = "Nessuna operazione disponibile dopo la data minima selezionata."
+file_loaded = "File caricato:"
+no_prices = "Non sono riuscito a scaricare i prezzi da Yahoo Finance."
+missing_tickers = "Ticker senza prezzi scaricati:"
+portfolio_error = "Non è stato possibile costruire il portafoglio con i dati disponibili."
+
+# KPI
+kpi_title = "📊 KPI Portafoglio"
+
+# GRAFICI
+charts_title = "📊 Grafici"
+tab_perf = "📈 Andamento portafoglio"
+tab_daily = "📅 Giornaliero"
+
+daily_title = "📅 Performance giornaliera"
+view_mode = "Visualizzazione"
+view_top = "Top 10"
+view_all = "Tutte"
+profit_section = "#### 🟢 Posizioni in profitto"
+loss_section = "#### 🔴 Posizioni in perdita"
+no_profit_today = "Nessuna posizione in profitto oggi"
+no_loss_today = "Nessuna posizione in perdita oggi"
+
+# TABS
+tab_positions = "Posizioni"
+tab_exposure = "Esposizione"
+tab_flows = "Flussi"
+tab_operations = "Operazioni"
+tab_download = "Download"
+
+# POSIZIONI
+positions_title = "Posizioni correnti"
+
+# ESPOSIZIONE
+allocation_title = "Allocazione"
+allocation_area = "Per area"
+allocation_type = "Per tipo"
+
+# FLUSSI
+flows_title = "📊 Flussi per data (XIRR)"
+flows_subtitle = "Flussi utilizzati per il calcolo del rendimento annualizzato XIRR"
+
+# OPERAZIONI
+operations_title = "Operazioni"
+filter_ticker = "Filtra per ticker"
+all_option = "Tutti"
+
+# DOWNLOAD
+download_title = "Download risultati"
+download_series = "Scarica serie storica CSV"
+download_positions = "Scarica posizioni correnti CSV"
+download_operations = "Scarica operazioni CSV"
+
+# FOOTER
+footer_note = "Aggiornamento in tempo reale dei prezzi"
+
+
+
+[lang.en]
+
+# HEADER
+subtitle = "Upload an Excel file with the Operations sheet and rebuild your portfolio over time."
+dev_warning = "⚠️ Development environment"
+
+# INPUT / LOADING
+upload_prompt = "Upload an Excel file to start."
+load_error = "Error loading file:"
+no_ops_after_date = "No operations available after selected minimum date."
+file_loaded = "File loaded:"
+no_prices = "Unable to download prices from Yahoo Finance."
+missing_tickers = "Tickers without price data:"
+portfolio_error = "Unable to build the portfolio with available data."
+
+# KPI
+kpi_title = "📊 Portfolio KPIs"
+
+# GRAFICI
+charts_title = "📊 Charts"
+tab_perf = "📈 Portfolio performance"
+tab_daily = "📅 Daily"
+
+daily_title = "📅 Daily performance"
+view_mode = "View mode"
+view_top = "Top 10"
+view_all = "All"
+profit_section = "#### 🟢 Winning positions"
+loss_section = "#### 🔴 Losing positions"
+no_profit_today = "No winning positions today"
+no_loss_today = "No losing positions today"
+
+# TABS
+tab_positions = "Positions"
+tab_exposure = "Exposure"
+tab_flows = "Flows"
+tab_operations = "Operations"
+tab_download = "Download"
+
+# POSIZIONI
+positions_title = "Current positions"
+
+# ESPOSIZIONE
+allocation_title = "Allocation"
+allocation_area = "By area"
+allocation_type = "By type"
+
+# FLUSSI
+flows_title = "📊 Cash flows (XIRR)"
+flows_subtitle = "Cash flows used for annualized XIRR calculation"
+
+# OPERAZIONI
+operations_title = "Operations"
+filter_ticker = "Filter by ticker"
+all_option = "All"
+
+# DOWNLOAD
+download_title = "Download results"
+download_series = "Download time series CSV"
+download_positions = "Download current positions CSV"
+download_operations = "Download operations CSV"
+
+# FOOTER
+footer_note = "Real-time price updates"
