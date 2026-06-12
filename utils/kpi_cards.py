@@ -8,12 +8,12 @@ from utils.formatting import fmt_eur, fmt_pct
 def render_value_card(value, invested):
     st.markdown(f"""
     <div style="padding:16px;border-radius:12px;background-color:#1f1f1f;border:1px solid #2a2a2a;">
-        <div style="color:#ffffff;font-size:0.9em;">Valore del portafoglio</div>
+        <div style="color:#ffffff;font-size:0.9em;">{t("portfolio_value")}</div>
         <div style="margin-top:6px;font-size:1.8em;font-weight:600;">
             {fmt_eur(value)}
         </div>
         <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
-            <span>Capitale inv.</span>
+            <span>{t("invested_capital")</span>
             <span style="margin-left:8px;">{fmt_eur(invested)}</span>
         </div>
     </div>
@@ -32,13 +32,13 @@ def render_unrealized_card(value, pct, daily_value=None, daily_pct=None):
 
     st.markdown(f"""
     <div style="padding:16px;border-radius:12px;background-color:#1f1f1f;border:1px solid #2a2a2a;">
-        <div style="color:#ffffff;font-size:0.9em;">Profitto non realizzato</div>
+        <div style="color:#ffffff;font-size:0.9em;">{t("unrealized_profit")}</div>
         <div style="margin-top:6px;font-size:1.8em;font-weight:600;color:{color};">
             {fmt_eur(value)}
             <span style="font-size:0.6em;margin-left:8px;color:{pct_color};">{fmt_pct(pct)}</span>
         </div>
         <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
-            <span style="white-space:nowrap;">Ultimo giorno</span>
+            <span style="white-space:nowrap;">{t("last_day")}</span>
             <span style="display:flex;align-items:baseline;margin-left:8px;gap:4px;white-space:nowrap;">
                 <span style="color:{daily_color};">{fmt_eur(daily_value) if daily_value is not None else ""}</span>
                 <span style="color:{daily_pct_color};">{fmt_pct(daily_pct) if daily_pct is not None else ""}</span>
@@ -65,7 +65,7 @@ def render_realized_card(realized_total, dividends_total):
             border: 1px solid #2a2a2a;
         ">
             <div style="color: #ffffff; font-size: 0.9em;">
-                Profitto realizzato
+                {t("realized_profit")}
             </div>
             <div style="
                 margin-top: 6px;
@@ -79,7 +79,7 @@ def render_realized_card(realized_total, dividends_total):
                 </span>
             </div>
             <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
-                <span>Dividendi totali</span>
+                <span>{t("total_dividends")}</span>
                 <span style="display:flex;align-items:baseline;margin-left:8px;gap:4px;">
                     <span style="color:{div_color};">{fmt_eur(dividends_total)}</span>
                     <span style="font-size:0.9em;color:{div_color};">EUR</span>
@@ -108,7 +108,7 @@ def render_total_pl_card(total_pl, total_pct, annualized_pct=None):
             border: 1px solid #2a2a2a;
         ">
             <div style="color: #ffffff; font-size: 0.9em;">
-                Profitto totale
+                {t("total_profit")}
             </div>
             <div style="
                 margin-top: 6px;
@@ -125,7 +125,7 @@ def render_total_pl_card(total_pl, total_pct, annualized_pct=None):
                 </span>
             </div>
             <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
-                <span>Rendimento annualizzato</span>
+                <span>{t("annualized_return")}</span>
                 <span style="margin-left:8px;">
                     {fmt_pct(annualized_pct) if annualized_pct is not None else ""}
                 </span>
