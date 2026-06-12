@@ -31,7 +31,7 @@ def render_filters(ops, dividends):
 
     with col1:
         st.multiselect(
-            "Intermediari",
+            t("filter_brokers"),
             options=all_brokers,
             default=st.session_state.selected_brokers,
             key="selected_brokers"
@@ -39,7 +39,7 @@ def render_filters(ops, dividends):
 
     with col2:
         st.multiselect(
-            "Tipo",
+            t("filter_types"),
             options=all_types,
             default=st.session_state.selected_types,
             key="selected_types"
