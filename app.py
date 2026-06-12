@@ -385,7 +385,7 @@ with tab_flu:
 
 with tab_ops:
     st.subheader(t("operations_title"))
-    all_tickers = ["Tutti"] + sorted(ops_enriched["Ticker"].unique().tolist())
+    all_tickers = [t("all_option")] + sorted(ops_enriched["Ticker"].unique().tolist())
     selected_ticker = st.selectbox(t("filter_ticker"), all_tickers)
 
     show_ops = (ops_enriched if selected_ticker == t("all_option") else ops_enriched[ops_enriched["Ticker"] == selected_ticker])
