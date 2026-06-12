@@ -26,38 +26,29 @@ from utils.kpi_cards import (
     render_total_pl_card
 )
 
+from config.config import load_config
+
+CONFIG = load_config()
+
 ENV = os.getenv("ENV", "DEV")
 
-CONFIG = {
-    "DEV": {
-        "title": "DEV Portfolio Tracker",
-        "icon": "🚧"
-    },
-    "PROD": {
-        "title": "Portfolio Tracker ETF / Azioni",
-        "icon": "📈"
-    }
-}
+# 🔹 Config letta da TOML
+env_cfg = CONFIG["env"][ENV]
+ui_cfg = CONFIG["ui"]
 
-cfg = CONFIG.get(ENV, CONFIG["DEV"])
-
+# 🔹 Page config
 st.set_page_config(
-    page_title=cfg["title"],
-    page_icon=cfg["icon"],
+    page_title=env_cfg["title"],
+    page_icon=env_cfg["icon"],
     layout="wide"
 )
 
-# ENV check 
+# 🔹 Header
+st.markdown(f"## {env_cfg['title']}")
+st.caption(ui_cfg["subtitle"])
 
 if ENV == "DEV":
-    st.title("🚧 DEV Portfolio Tracker ETF / Azioni")
     st.warning("⚠️ Ambiente di sviluppo")
-else:
-    st.title("📈 Portfolio Tracker ETF / Azioni")
-
-st.caption(
-    "Carica un file Excel con il foglio Operazioni e ricostruisci il valore del portafoglio nel tempo."
-)
 
 # Sidebar
 sidebar_cfg = render_sidebar(create_demo_file)
@@ -434,13 +425,17 @@ with tab_dl:
     )
 
 st.markdown("---")
-footer_text = CONFIG.get(ENV, CONFIG["DEV"])["title"]
-footer_icon = CONFIG.get(ENV, CONFIG["DEV"])["icon"]
+# 🔹 recupero config
+env_cfg = CONFIG["env"][ENV]
+app_cfg = CONFIG["app"]
 
+# 🔹 footer
 st.markdown(
-    f"<div style='text-align: center; color: gray;'>"
-    f"{CONFIG[ENV]['icon']} {CONFIG[ENV]['title']}"
-    f"</div>",
+    f"""
+    <div style='text-align: center; color: gray; font-size: 0.9em;'>
+        {env_cfg['icon']} {env_cfg['title']} • v{app_cfg['version']}
+    </div>
+    """,
     unsafe_allow_html=True
 )
 st.caption("Aggiornamento in tempo reale dei prezzi")
