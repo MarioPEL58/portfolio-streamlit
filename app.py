@@ -80,7 +80,7 @@ if ops.empty:
     st.warning(lang["no_ops_after_date"])
     st.stop()
 
-st.success(f"{lang['file_loaded']} {file_label}"
+st.success(f"{lang['file_loaded']} {file_label}")
 
 # =========================
 # 🎛️ FILTER CONTEXT ✅
