@@ -52,7 +52,7 @@ st.markdown(f"## {env_cfg['title']}")
 st.caption(t("subtitle"))
 
 if ENV == "DEV":
-    st.warning(lang["dev_warning"])
+    st.warning(t("dev_warning"))
 
 # Sidebar
 sidebar_cfg = render_sidebar(create_demo_file)
@@ -66,7 +66,7 @@ min_filter_date = sidebar_cfg["min_filter_date"]
 file_source, file_label = resolve_file_source(uploaded_file, use_local_demo)
 
 if file_source is None:
-    st.info(lang["upload_prompt"])
+    st.info(t("upload_prompt"))
     st.stop()
 
 # Load data
@@ -74,15 +74,15 @@ try:
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
 except Exception as e:
-    st.error(f"{lang['load_error']} {e}")
+    st.error(f"{t('load_error')} {e}")
     st.stop()
 
 ops = ops[ops["Data"] >= pd.Timestamp(min_filter_date)]
 if ops.empty:
-    st.warning(lang["no_ops_after_date"])
+    st.warning(t("no_ops_after_date"))
     st.stop()
 
-st.success(f"{lang['file_loaded']} {file_label}")
+st.success(f"{t('file_loaded')} {file_label}")
 
 # =========================
 # 🎛️ FILTER CONTEXT ✅
@@ -104,17 +104,17 @@ closes, missing = download_close_prices(
 )
 
 if closes.empty:
-    st.error(lang["no_prices"])
+    st.error(t("no_prices"))
     st.stop()
 
 if missing:
-    st.warning(lang["missing_tickers"] + ", ".join(missing))
+    st.warning(t("missing_tickers") + ", ".join(missing))
 
 # Portfolio
 series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
 
 if series.empty:
-    st.error(lang["portfolio_error"])
+    st.error(t("portfolio_error"))
     st.stop()
 
 render_operations_preview(ops_enriched)
@@ -187,7 +187,7 @@ open_daily_pct = open_daily_pl / (open_value - open_daily_pl) if (open_value - o
 # =========================
 # KPI cards
 # =========================
-st.markdown(f"### {lang['kpi_title']}")
+st.markdown(f"### {t('kpi_title')}")
 
 c1, c2, c3, c4 = st.columns(4)
 
@@ -238,11 +238,11 @@ st.caption(update_label)
 
 # Main chart
 
-st.subheader(lang["charts_title"])
+st.subheader(t("charts_title"))
 
 tab_perf, tab_daily = st.tabs([
-    lang["tab_perf"],
-    lang["tab_daily"]
+    t("tab_perf"),
+    t("tab_daily")
 ])
 
 with tab_perf:
@@ -254,16 +254,16 @@ with tab_perf:
     st.plotly_chart(fig, use_container_width=True)
 
 with tab_daily:
-    st.subheader("📅 Performance giornaliera")
+    st.subheader(t("daily_title"))
     view_mode = st.radio(
-        "Visualizzazione",
-        options=["Top 10", "Tutte"],
+        t("view_mode"),
+        options=[t("view_top"), t("view_all")],
         horizontal=True
     )
     # copia df base
     df_view = current.copy()
     
-    if view_mode == "Top 10":
+    if view_mode == t("view_top"):
         # NON filtrare qui per segno — lo fa già la funzione
         top_n = 10
     else:
@@ -280,7 +280,7 @@ with tab_daily:
             max_abs_pct = 0.01
 
     # ✅ Grafico posizioni in profitto
-    st.markdown("#### 🟢 Posizioni in profitto")
+    st.markdown(t("profit_section"))
 
     fig_pos = daily_pl_bar_chart_by_sign(
         current=df_view,
@@ -293,10 +293,10 @@ with tab_daily:
     if fig_pos:
         st.plotly_chart(fig_pos, use_container_width=True)
     else:
-        st.caption("Nessuna posizione in profitto oggi")
+        st.caption(t("no_profit_today"))
 
     # ✅ Grafico posizioni in perdita
-    st.markdown("#### 🔴 Posizioni in perdita")
+    st.markdown(t("loss_section"))
 
     fig_neg = daily_pl_bar_chart_by_sign(
         current=df_view,
@@ -309,15 +309,15 @@ with tab_daily:
     if fig_neg:
         st.plotly_chart(fig_neg, use_container_width=True)
     else:
-        st.caption("Nessuna posizione in perdita oggi")
+        st.caption(t("no_loss_today"))
 
 # Tabs
 tab_pos, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
-    ["Posizioni", "Esposizione", "Flussi", "Operazioni", "Download"]
+    [t("tab_positions"), t("tab_exposure"), t("tab_flows"), t("tab_operations"), t("tab_download")]
 )
 
 with tab_pos:
-    st.subheader("Posizioni correnti")
+    st.subheader(t("positions_title"))
     current_view = current.reset_index().rename(columns={"index": "PositionKey"})
 
     ordered_cols = [
@@ -348,7 +348,7 @@ with tab_pos:
     )
 
 with tab_exp:
-    st.subheader("Allocazione")
+    st.subheader(t("allocation_title"))
     
     # ✅ PIE (Ticker)
     fig = allocation_pie_chart(exposure, column="Ticker")
@@ -359,19 +359,19 @@ with tab_exp:
     
     # ✅ BAR Area
     if "Area" in exposure.columns and exposure["Area"].astype(str).str.strip().any():
-        fig_area = allocation_bar_chart(exposure, column="Area", title="Per area")
+        fig_area = allocation_bar_chart(exposure, column="Area", title=t("allocation_area"))
         if fig_area:
             c1.plotly_chart(fig_area, use_container_width=True)
     
     # ✅ BAR Tipo
     if "Tipo" in exposure.columns and exposure["Tipo"].astype(str).str.strip().any():
-        fig_tipo = allocation_bar_chart(exposure, column="Tipo", title="Per tipo")
+        fig_tipo = allocation_bar_chart(exposure, column="Tipo", title=t("allocation_type"))
         if fig_tipo:
             c2.plotly_chart(fig_tipo, use_container_width=True)
 
 with tab_flu:
-    st.subheader("📊 Flussi per data (XIRR)")
-    st.caption("Flussi utilizzati per il calcolo del rendimento annualizzato XIRR")
+    st.subheader(t("flows_title"))
+    st.caption(t("flows_subtitle "))
 
     st.dataframe(
         xirr_flows.style.format({
@@ -384,15 +384,15 @@ with tab_flu:
     )
 
 with tab_ops:
-    st.subheader("Operazioni")
+    st.subheader(t("operations_title"))
     all_tickers = ["Tutti"] + sorted(ops_enriched["Ticker"].unique().tolist())
-    selected_ticker = st.selectbox("Filtra per ticker", all_tickers)
+    selected_ticker = st.selectbox(t("filter_ticker"), all_tickers)
 
-    show_ops = (ops_enriched if selected_ticker == "Tutti" else ops_enriched[ops_enriched["Ticker"] == selected_ticker])
+    show_ops = (ops_enriched if selected_ticker == t("all_option") else ops_enriched[ops_enriched["Ticker"] == selected_ticker])
     st.dataframe(show_ops, use_container_width=True)
 
 with tab_dl:
-    st.subheader("Download risultati")
+    st.subheader(t("download_title"))
 
     ts_csv = (
         series.reset_index()
@@ -410,19 +410,19 @@ with tab_dl:
 
     d1, d2, d3 = st.columns(3)
     d1.download_button(
-        "Scarica serie storica CSV",
+        t("download_series"),
         ts_csv,
         file_name="serie_storica_portafoglio.csv",
         mime="text/csv"
     )
     d2.download_button(
-        "Scarica posizioni correnti CSV",
+        t("download_positions"),
         current_csv,
         file_name="posizioni_correnti.csv",
         mime="text/csv"
     )
     d3.download_button(
-        "Scarica operazioni CSV",
+        t("download_operations"),
         ops_csv,
         file_name="operazioni_portafoglio.csv",
         mime="text/csv"
@@ -442,4 +442,4 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-st.caption("Aggiornamento in tempo reale dei prezzi")
+st.caption(t("footer_note"))
