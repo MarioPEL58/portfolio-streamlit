@@ -3,6 +3,7 @@ import os
 
 from config.config import load_config
 from utils.i18n import init_language, t
+from utils.demo import create_demo_file
 
 # ✅ CONFIG BASE
 CONFIG = load_config()
@@ -62,3 +63,5 @@ st.write(f"4. {t('help_step_4')}")
 st.divider()
 
 st.success(f"💡 {t('help_tip')}")
+
+
