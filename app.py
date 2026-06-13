@@ -32,7 +32,6 @@ from config.config import load_config
 CONFIG = load_config()
 
 ENV = os.getenv("ENV", "DEV")
-LANG = init_language(CONFIG)
 
 # LANG = st.sidebar.selectbox("Lingua / Language", ["it", "en"])
 # lang = CONFIG["lang"][LANG]
@@ -48,7 +47,7 @@ st.set_page_config(
     page_icon=env_cfg["icon"],
     layout="wide"
 )
-
+LANG = init_language(CONFIG)
 # 🔹 Header
 st.markdown(f"## {env_cfg['title']}")
 st.caption(t("subtitle"))
