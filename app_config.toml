@@ -125,6 +125,9 @@ help_section_file = "📂 File richiesto"
 help_file_desc = "Serve un file Excel con foglio Operazioni"
 help_file_cols = "Colonne: Ticker, Data, Quantità, Prezzo, Spese"
 
+help_demo_title = "📥 File di esempio"
+help_demo_button = "Scarica file demo"
+
 help_section_usage = "▶️ Come usarla"
 help_step_1 = "Carica il file Excel"
 help_step_2 = "Verifica i dati"
@@ -238,6 +241,9 @@ help_fun_3 = "Analyze allocation"
 help_section_file = "📂 Required file"
 help_file_desc = "An Excel file with Operazioni sheet is required"
 help_file_cols = "Columns: Ticker, Date, Quantity, Price, Fees"
+
+help_demo_title = "📥 Sample file"
+help_demo_button = "Download demo file"
 
 help_section_usage = "▶️ How to use"
 help_step_1 = "Upload Excel file"
