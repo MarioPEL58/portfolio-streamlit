@@ -125,6 +125,7 @@ help_section_file = "📂 File richiesto"
 help_file_desc = "Serve un file Excel con foglio Operazioni"
 help_file_cols = "Colonne: Ticker, Data, Quantità, Prezzo, Spese"
 
+help_demo_text = "Puoi usare questo file per testare l'app rapidamente."
 help_demo_title = "📥 File di esempio"
 help_demo_button = "Scarica file demo"
 
@@ -242,6 +243,7 @@ help_section_file = "📂 Required file"
 help_file_desc = "An Excel file with Operazioni sheet is required"
 help_file_cols = "Columns: Ticker, Date, Quantity, Price, Fees"
 
+help_demo_text = "You can use this file to quickly test the app."
 help_demo_title = "📥 Sample file"
 help_demo_button = "Download demo file"
 
