@@ -1,46 +1,54 @@
 import streamlit as st
 import os
-
 from config.config import load_config
 from utils.i18n import set_language, t
 
 CONFIG = load_config()
 ENV = os.getenv("ENV", "DEV")
 
-# stessa lingua della app
+# lingua (per ora semplice, come in app)
 LANG = st.sidebar.selectbox("Lingua / Language", ["it", "en"])
 set_language(CONFIG["lang"][LANG])
 
-st.title("ℹ️ Guida")
+# ===== HEADER =====
+st.title(t("help_title"))
+st.write(t("help_intro"))
 
-col1, col2 = st.columns(2)
+st.divider()
+
+# ===== FUNZIONI =====
+st.markdown(f"### {t('help_section_functions')}")
+
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.markdown("### 📊 Funzioni")
-    st.markdown("""
-    - Andamento portafoglio  
-    - Capitale investito  
-    - Profit & Loss  
-    - Allocazione  
-    """)
-
-    st.markdown("### 📂 File Excel")
-    st.markdown("""
-    Foglio **Operazioni**:
-    - Ticker  
-    - Data  
-    - Quantità  
-    - Prezzo  
-    - Spese  
-    """)
+    with st.container(border=True):
+        st.write(t("help_fun_1"))
 
 with col2:
-    st.markdown("### ▶️ Come usarla")
-    st.markdown("""
-    1. Carica Excel  
-    2. Controlla dati  
-    3. Analizza  
-    4. Esporta CSV  
-    """)
+    with st.container(border=True):
+        st.write(t("help_fun_2"))
 
-    st.info("💡 Controlla sempre i dati dopo il caricamento")
+with col3:
+    with st.container(border=True):
+        st.write(t("help_fun_3"))
+
+st.divider()
+
+# ===== FILE =====
+st.markdown(f"### {t('help_section_file')}")
+st.info(f"{t('help_file_desc')}\n\n{t('help_file_cols')}")
+
+st.divider()
+
+# ===== USO =====
+st.markdown(f"### {t('help_section_usage')}")
+
+st.write(f"1. {t('help_step_1')}")
+st.write(f"2. {t('help_step_2')}")
+st.write(f"3. {t('help_step_3')}")
+st.write(f"4. {t('help_step_4')}")
+
+st.divider()
+
+st.success(f"💡 {t('help_tip')}")
