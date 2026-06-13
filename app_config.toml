@@ -117,9 +117,9 @@ help_title = "ℹ️ Guida"
 help_intro = "Questa app ti aiuta a monitorare il portafoglio in modo completo."
 
 help_section_functions = "📊 Cosa puoi fare"
-help_fun_1 = "Visualizzare l'andamento del portafoglio"
+help_fun_1 = "Visualizzare l\"andamento del portafoglio"
 help_fun_2 = "Calcolare capitale e profit/loss"
-help_fun_3 = "Analizzare l'allocazione"
+help_fun_3 = "Analizzare l\"allocazione"
 
 help_section_file = "📂 File richiesto"
 help_file_desc = "Serve un file Excel con foglio Operazioni"
@@ -246,4 +246,3 @@ help_step_3 = "Analyze results"
 help_step_4 = "Export data"
 
 help_tip = "Always verify your data after upload"
-``
