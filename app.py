@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from utils.i18n import set_language, t
+from utils.i18n import init_language, t
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
