@@ -50,6 +50,18 @@ st.divider()
 st.markdown(f"### {t('help_section_file')}")
 st.info(f"{t('help_file_desc')}\n\n{t('help_file_cols')}")
 
+# 👉 demo file
+st.markdown(f"### {t('help_demo_title')}")
+
+demo_file = create_demo_file()
+
+st.download_button(
+    label=t("help_demo_button"),
+    data=demo_file,
+    file_name="demo_portfolio.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
+
 st.divider()
 
 # USO
