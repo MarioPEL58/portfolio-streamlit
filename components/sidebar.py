@@ -9,36 +9,6 @@ import pytz
 
 def render_sidebar(create_demo_file):
     with st.sidebar:
-        st.title("ℹ️ Guida")
-
-        with st.expander("📊 Cos'è l'app", expanded=False):
-            st.write("""
-            Questa app ti permette di:
-            - ricostruire il valore del portafoglio nel tempo
-            - calcolare capitale investito e P/L
-            - analizzare allocazione e posizioni correnti
-            """)
-
-        with st.expander("📂 Formato file Excel", expanded=False):
-            st.write("""
-            Il file deve contenere un foglio **Operazioni** (o compatibile)
-            con almeno queste colonne:
-
-            - Ticker
-            - Data
-            - Quantità
-            - Prezzo
-            - Spese euro
-            """)
-
-        with st.expander("▶️ Come usarla", expanded=False):
-            st.write("""
-            1. Carica il file Excel
-            2. Verifica le operazioni lette
-            3. Esplora grafici e tabelle
-            4. Scarica i CSV finali
-            """)
-
         # ✅ sezione file demo
         st.sidebar.markdown("### 📄 File di esempio")
     
