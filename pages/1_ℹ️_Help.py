@@ -51,6 +51,7 @@ st.markdown(f"### {t('help_section_file')}")
 st.info(f"{t('help_file_desc')}\n\n{t('help_file_cols')}")
 
 # 👉 demo file
+st.write(t("help_demo_text"))
 st.markdown(f"### {t('help_demo_title')}")
 
 demo_file = create_demo_file()
