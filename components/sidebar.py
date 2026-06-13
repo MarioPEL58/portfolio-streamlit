@@ -9,19 +9,6 @@ import pytz
 
 def render_sidebar(create_demo_file):
     with st.sidebar:
-        # ✅ sezione file demo
-        st.sidebar.markdown("### 📄 File di esempio")
-    
-        demo_file = create_demo_file()
-    
-        st.sidebar.download_button(
-            label="📥 Scarica file demo",
-            data=demo_file,
-            file_name="demo_portafoglio.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-    
-        st.sidebar.caption("Scarica un esempio già pronto compatibile con l'app.")
 
         st.markdown("---")
         st.header("Sorgente dati")
