@@ -32,9 +32,11 @@ from config.config import load_config
 CONFIG = load_config()
 
 ENV = os.getenv("ENV", "DEV")
-LANG = st.sidebar.selectbox("Lingua / Language", ["it", "en"])
-lang = CONFIG["lang"][LANG]
-set_language(CONFIG["lang"][LANG])
+LANG = init_language(CONFIG)
+
+# LANG = st.sidebar.selectbox("Lingua / Language", ["it", "en"])
+# lang = CONFIG["lang"][LANG]
+# set_language(CONFIG["lang"][LANG])
 
 # 🔹 Config letta da TOML
 env_cfg = CONFIG["env"][ENV]
