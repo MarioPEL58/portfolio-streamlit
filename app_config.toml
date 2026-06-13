@@ -112,6 +112,27 @@ last_update_label = "Ultimo aggiornamento"
 market_closed = "mercato chiuso"
 market_open = "mercato aperto"
 
+# help Guida 
+help_title = "ℹ️ Guida"
+help_intro = "Questa app ti aiuta a monitorare il portafoglio in modo completo."
+
+help_section_functions = "📊 Cosa puoi fare"
+help_fun_1 = "Visualizzare l'andamento del portafoglio"
+help_fun_2 = "Calcolare capitale e profit/loss"
+help_fun_3 = "Analizzare l'allocazione"
+
+help_section_file = "📂 File richiesto"
+help_file_desc = "Serve un file Excel con foglio Operazioni"
+help_file_cols = "Colonne: Ticker, Data, Quantità, Prezzo, Spese"
+
+help_section_usage = "▶️ Come usarla"
+help_step_1 = "Carica il file Excel"
+help_step_2 = "Verifica i dati"
+help_step_3 = "Analizza i risultati"
+help_step_4 = "Esporta i dati"
+
+help_tip = "Controlla sempre i dati dopo il caricamento"
+
 [lang.en]
 
 # HEADER
@@ -205,3 +226,24 @@ last_update_label = "Last update"
 market_closed = "market closed"
 market_open = "market open"
 
+#Help guida 
+help_title = "ℹ️ Help"
+help_intro = "This app helps you track your portfolio effectively."
+
+help_section_functions = "📊 What you can do"
+help_fun_1 = "View portfolio performance"
+help_fun_2 = "Calculate capital and P/L"
+help_fun_3 = "Analyze allocation"
+
+help_section_file = "📂 Required file"
+help_file_desc = "An Excel file with Operazioni sheet is required"
+help_file_cols = "Columns: Ticker, Date, Quantity, Price, Fees"
+
+help_section_usage = "▶️ How to use"
+help_step_1 = "Upload Excel file"
+help_step_2 = "Check data"
+help_step_3 = "Analyze results"
+help_step_4 = "Export data"
+
+help_tip = "Always verify your data after upload"
+``
