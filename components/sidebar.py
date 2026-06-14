@@ -39,8 +39,7 @@ def render_sidebar(create_demo_file):
         )
         show_benchmark = st.checkbox("Mostra benchmark normalizzato", value=True)
 
-        default_start = pd.Timestamp(2026, 3, 1).date()
-        min_filter_date = st.date_input("Data minima", value=default_start)
+        min_filter_date = st.date_input("Data minima")
 
 
     return {
