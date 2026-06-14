@@ -287,6 +287,7 @@ with tab_perf:
     
         # allineamento (molto importante)
         filtered_bench_norm = filtered_bench_norm.reindex(filtered_series.index)
+        filtered_bench_norm = filtered_bench_norm.ffill()
     else:
         filtered_bench_norm = None
   
