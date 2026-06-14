@@ -99,6 +99,10 @@ except Exception as e:
     st.error(f"{t('load_error')} {e}")
     st.stop()
 
+st.write("Filtro:", st.session_state.min_filter_date)
+st.write("Min data dati:", ops["Data"].min())
+st.write("Max data dati:", ops["Data"].max())
+
 ops = ops[ops["Data"] >= pd.Timestamp(st.session_state.min_filter_date)]
 if ops.empty:
     st.warning(t("no_ops_after_date"))
