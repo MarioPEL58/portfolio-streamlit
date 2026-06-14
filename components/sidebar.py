@@ -39,8 +39,11 @@ def render_sidebar(create_demo_file):
         )
         show_benchmark = st.checkbox("Mostra benchmark normalizzato", value=True)
 
-        min_filter_date = st.date_input("Data minima")
-
+        min_filter_date = st.date_input(
+            "Data minima",
+            value=st.session_state.get("min_filter_date"),
+            key="min_filter_date"
+        )
 
     return {
         "uploaded_file": uploaded_file,
