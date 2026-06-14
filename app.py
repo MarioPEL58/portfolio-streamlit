@@ -99,7 +99,7 @@ except Exception as e:
     st.error(f"{t('load_error')} {e}")
     st.stop()
 
-ops = ops[ops["Data"] >= pd.Timestamp(min_filter_date)]
+ops = ops[ops["Data"] >= pd.Timestamp(st.session_state.min_filter_date)]
 if ops.empty:
     st.warning(t("no_ops_after_date"))
     st.stop()
