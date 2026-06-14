@@ -41,8 +41,7 @@ def render_sidebar(create_demo_file):
 
         min_filter_date = st.date_input(
             "Data minima",
-            value=st.session_state.get("min_filter_date"),
-            key="min_filter_date"
+            value= None
         )
 
     return {
