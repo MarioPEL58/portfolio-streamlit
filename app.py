@@ -92,8 +92,8 @@ try:
     
     default_start = default_start.date()
 
-if "min_filter_date" not in st.session_state:
-    st.session_state.min_filter_date = default_start
+    if "min_filter_date" not in st.session_state:
+        st.session_state.min_filter_date = default_start
 
 except Exception as e:
     st.error(f"{t('load_error')} {e}")
