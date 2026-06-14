@@ -274,10 +274,12 @@ with tab_perf:
     #     benchmark_name=benchmark
     # )
     
-    filtered_series = series[
-        series.index >= pd.Timestamp(st.session_state.min_filter_date)
-    ]
+    min_date = min_filter_date or default_start
     
+    filtered_series = series[
+        series.index >= pd.Timestamp(min_date)
+    ]
+        
     fig = portfolio_chart(
         filtered_series,
         bench_norm=bench_norm,
