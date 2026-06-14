@@ -52,20 +52,22 @@ st.info(f"{t('help_file_desc')}\n\n{t('help_file_cols')}")
 
 # 👉 demo file
 st.write(t("help_demo_text"))
-st.markdown(f"### {t('help_demo_title')}")
 
-demo_file = create_demo_file()
-
-st.download_button(
-    label=t("help_demo_button"),
-    data=demo_file,
-    file_name="demo_portfolio.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
-
-if st.button(t("help_use_demo")):
-    st.session_state.use_demo = True
-    st.switch_page("app.py")
+col1, col2, col3 = st.columns([2, 1, 1])
+with col1:
+    st.markdown(f"### {t('help_demo_title')}")
+    demo_file = create_demo_file()
+with col2:
+    st.download_button(
+        label=t("help_demo_button"),
+        data=demo_file,
+        file_name="demo_portfolio.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+with col3:
+    if st.button(t("help_use_demo")):
+        st.session_state.use_demo = True
+        st.switch_page("app.py")
     
 st.divider()
 
