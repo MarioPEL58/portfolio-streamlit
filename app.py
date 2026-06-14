@@ -279,10 +279,20 @@ with tab_perf:
     filtered_series = series[
         series.index >= pd.Timestamp(min_date)
     ]
-        
+    # benchmark filtrato (vista)
+    if bench_norm is not None:
+        filtered_bench_norm = bench_norm[
+            bench_norm.index >= pd.Timestamp(min_date)
+        ]
+    
+        # allineamento (molto importante)
+        filtered_bench_norm = filtered_bench_norm.reindex(filtered_series.index)
+    else:
+        filtered_bench_norm = None
+  
     fig = portfolio_chart(
         filtered_series,
-        bench_norm=bench_norm,
+        bench_norm=filtered_bench_norm,
         benchmark_name=benchmark
     )
 
