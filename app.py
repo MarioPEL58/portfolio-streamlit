@@ -60,9 +60,9 @@ sidebar_cfg = render_sidebar(create_demo_file)
 uploaded_file = sidebar_cfg["uploaded_file"]
 benchmark = sidebar_cfg["benchmark"]
 show_benchmark = sidebar_cfg["show_benchmark"]
+min_filter_date = sidebar_cfg["min_filter_date"]
 
 # Input source
-
 if st.session_state.get("use_demo", False):
     file_source = create_demo_file()
     file_label = "Demo file"
@@ -78,30 +78,28 @@ if file_source is None:
 try:
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
-    
-    data_min = pd.to_datetime(ops["Data"]).min()
-    data_max = pd.to_datetime(ops["Data"]).max()
-    
+
+    ops["Data"] = pd.to_datetime(ops["Data"])
+
+    data_min = ops["Data"].min()
+    data_max = ops["Data"].max()
+
     six_months_ago = pd.Timestamp.today() - pd.DateOffset(months=6)
-    
+
     if six_months_ago > data_max:
         default_start = data_min
     else:
         default_start = max(data_min, six_months_ago)
-    
+
     default_start = default_start.date()
-    if not st.session_state.get("min_filter_date"):
-        st.session_state.min_filter_date = default_start
 
 except Exception as e:
     st.error(f"{t('load_error')} {e}")
     st.stop()
 
-st.write("Filtro:", st.session_state.min_filter_date)
-st.write("Min data dati:", ops["Data"].min())
-st.write("Max data dati:", ops["Data"].max())
+effective_min_filter_date = min_filter_date or default_start
 
-ops = ops[ops["Data"] >= pd.Timestamp(st.session_state.min_filter_date)]
+ops = ops[ops["Data"] >= pd.Timestamp(effective_min_filter_date)]
 if ops.empty:
     st.warning(t("no_ops_after_date"))
     st.stop()
