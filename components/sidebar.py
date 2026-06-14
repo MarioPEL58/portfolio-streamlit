@@ -19,8 +19,6 @@ def render_sidebar(create_demo_file):
             help="Carica un file Excel con il foglio 'Operazioni' e le colonne richieste."
         )
 
-        use_local_demo = st.checkbox("Usa file locale demo se presente", value=True)
-
         st.markdown("---")
 
         if st.button("🔄 Aggiorna prezzi"):
@@ -51,23 +49,13 @@ def render_sidebar(create_demo_file):
 
     return {
         "uploaded_file": uploaded_file,
-        "use_local_demo": use_local_demo,
         "benchmark": benchmark,
         "show_benchmark": show_benchmark,
         "min_filter_date": min_filter_date,
     }
 
-
-def resolve_file_source(uploaded_file, use_local_demo: bool):
+def resolve_file_source(uploaded_file):
     if uploaded_file is not None:
         return uploaded_file, uploaded_file.name
-
-    if use_local_demo:
-        candidates = [
-            Path("portafoglio_query_yf_ETF.xlsx"),
-        ]
-        for candidate in candidates:
-            if candidate.exists():
-                return candidate, candidate.name
 
     return None, None
