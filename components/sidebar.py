@@ -42,10 +42,6 @@ def render_sidebar(create_demo_file):
         default_start = pd.Timestamp(2026, 3, 1).date()
         min_filter_date = st.date_input("Data minima", value=default_start)
 
-        st.markdown("---")
-        st.caption(
-            "Per Streamlit Cloud è consigliato usare l'upload del file invece del file locale."
-        )
 
     return {
         "uploaded_file": uploaded_file,
