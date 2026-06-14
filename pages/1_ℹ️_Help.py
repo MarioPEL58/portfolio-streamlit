@@ -63,6 +63,10 @@ st.download_button(
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
 
+if st.button(t("help_use_demo")):
+    st.session_state.use_demo = True
+    st.switch_page("app.py")
+    
 st.divider()
 
 # USO
