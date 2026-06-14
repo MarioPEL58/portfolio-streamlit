@@ -99,7 +99,7 @@ except Exception as e:
 
 effective_min_filter_date = min_filter_date or default_start
 
-ops = ops[ops["Data"] >= pd.Timestamp(effective_min_filter_date)]
+# ops = ops[ops["Data"] >= pd.Timestamp(effective_min_filter_date)]
 if ops.empty:
     st.warning(t("no_ops_after_date"))
     st.stop()
@@ -268,11 +268,22 @@ tab_perf, tab_daily = st.tabs([
 ])
 
 with tab_perf:
+    # fig = portfolio_chart(
+    #     series,
+    #     bench_norm=bench_norm,
+    #     benchmark_name=benchmark
+    # )
+    
+    filtered_series = series[
+        series.index >= pd.Timestamp(st.session_state.min_filter_date)
+    ]
+    
     fig = portfolio_chart(
-        series,
+        filtered_series,
         bench_norm=bench_norm,
         benchmark_name=benchmark
     )
+
     st.plotly_chart(fig, use_container_width=True)
 
 with tab_daily:
