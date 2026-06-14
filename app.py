@@ -79,6 +79,15 @@ if file_source is None:
 try:
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
+    
+    data_min = pd.to_datetime(ops["Data"]).min()
+    six_months_ago = pd.Timestamp.today() - pd.DateOffset(months=6)
+    default_start = max(data_min, six_months_ago).date()
+
+    # inizializza solo una volta
+    if "min_filter_date" not in st.session_state:
+        st.session_state.min_filter_date = default_start
+
 except Exception as e:
     st.error(f"{t('load_error')} {e}")
     st.stop()
