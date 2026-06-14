@@ -59,13 +59,13 @@ with col1:
     demo_file = create_demo_file()
 with col2:
     st.download_button(
-        label=t("help_demo_button"),
+        label="⬇️ " +  t("help_demo_button"),
         data=demo_file,
         file_name="demo_portfolio.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 with col3:
-    if st.button(t("help_use_demo")):
+    if st.button("⚡ " + t("help_use_demo")):
         st.session_state.use_demo = True
         st.switch_page("app.py")
     
