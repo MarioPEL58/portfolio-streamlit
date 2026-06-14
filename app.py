@@ -64,7 +64,13 @@ show_benchmark = sidebar_cfg["show_benchmark"]
 min_filter_date = sidebar_cfg["min_filter_date"]
 
 # Input source
-file_source, file_label = resolve_file_source(uploaded_file, use_local_demo)
+
+if st.session_state.get("use_demo", False):
+    file_source = create_demo_file()
+    file_label = "Demo file"
+    st.session_state.use_demo = False
+else:
+    file_source, file_label = resolve_file_source(uploaded_file, use_local_demo)
 
 if file_source is None:
     st.info(t("upload_prompt"))
