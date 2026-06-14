@@ -60,7 +60,6 @@ sidebar_cfg = render_sidebar(create_demo_file)
 uploaded_file = sidebar_cfg["uploaded_file"]
 benchmark = sidebar_cfg["benchmark"]
 show_benchmark = sidebar_cfg["show_benchmark"]
-min_filter_date = sidebar_cfg["min_filter_date"]
 
 # Input source
 
@@ -91,8 +90,7 @@ try:
         default_start = max(data_min, six_months_ago)
     
     default_start = default_start.date()
-
-    if "min_filter_date" not in st.session_state:
+    if not st.session_state.get("min_filter_date"):
         st.session_state.min_filter_date = default_start
 
 except Exception as e:
