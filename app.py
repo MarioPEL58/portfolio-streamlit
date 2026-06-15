@@ -33,10 +33,6 @@ CONFIG = load_config()
 
 ENV = os.getenv("ENV", "DEV")
 
-# LANG = st.sidebar.selectbox("Lingua / Language", ["it", "en"])
-# lang = CONFIG["lang"][LANG]
-# set_language(CONFIG["lang"][LANG])
-
 # 🔹 Config letta da TOML
 env_cfg = CONFIG["env"][ENV]
 ui_cfg = CONFIG["ui"]
@@ -262,9 +258,10 @@ st.caption(update_label)
 
 st.subheader(t("charts_title"))
 
-tab_perf, tab_daily = st.tabs([
+tab_perf, tab_daily, tab_unrealized = st.tabs([
     t("tab_perf"),
-    t("tab_daily")
+    t("tab_daily"),
+    t("tab_unrealized")
 ])
 
 with tab_perf:
@@ -342,7 +339,7 @@ with tab_daily:
         st.plotly_chart(fig_pos, use_container_width=True)
     else:
         st.caption(t("no_profit_today"))
-
+        
     # ✅ Grafico posizioni in perdita
     st.markdown(t("loss_section"))
 
@@ -360,6 +357,70 @@ with tab_daily:
         st.plotly_chart(fig_neg, use_container_width=True)
     else:
         st.caption(t("no_loss_today"))
+        
+with tab_unrealized:
+    st.subheader(t("unrealized_title"))
+
+    view_mode = st.radio(
+        t("view_mode"),
+        options=[t("view_top"), t("view_all")],
+        horizontal=True
+    )
+
+    # copia df base
+    df_view = current.copy()
+
+    if view_mode == t("view_top"):
+        top_n = 10
+    else:
+        top_n = None
+
+    # ✅ calcolo max per scala %
+    max_abs_pct = 0.01
+    if current is not None and not current.empty and "P/L %" in current.columns:
+        max_abs_pct = pd.to_numeric(
+            current["P/L %"],
+            errors="coerce"
+        ).abs().max()
+
+        if pd.isna(max_abs_pct) or max_abs_pct == 0:
+            max_abs_pct = 0.01
+
+    # ✅ Posizioni in profitto (open)
+    st.markdown(t("profit_section"))
+
+    fig_pos = daily_pl_bar_chart_by_sign(
+        current=df_view,
+        positive=True,
+        label_col="Ticker",
+        pl_col="P/L",
+        pl_pct_col="P/L %",
+        max_abs_pct=max_abs_pct,
+        top_n=top_n
+    )
+
+    if fig_pos:
+        st.plotly_chart(fig_pos, use_container_width=True)
+    else:
+        st.caption(t("no_profit_open"))
+
+    # ✅ Posizioni in perdita (open)
+    st.markdown(t("loss_section"))
+
+    fig_neg = daily_pl_bar_chart_by_sign(
+        current=df_view,
+        positive=False,
+        label_col="Ticker",
+        pl_col="P/L",
+        pl_pct_col="P/L %",
+        max_abs_pct=max_abs_pct,
+        top_n=top_n
+    )
+
+    if fig_neg:
+        st.plotly_chart(fig_neg, use_container_width=True)
+    else:
+        st.caption(t("no_loss_open"))
 
 # Tabs
 tab_pos, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
