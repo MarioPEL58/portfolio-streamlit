@@ -1,6 +1,7 @@
 import plotly.graph_objects as go
 import plotly.express as px
 from config import UI_CHART_STYLE as STYLE
+from utils.i18n import t
 import pandas as pd
 
 def portfolio_chart(series, bench_norm=None, benchmark_name=""):
@@ -197,7 +198,7 @@ def daily_pl_bar_chart_by_sign(
         if top_n:
             df = df.head(top_n)
         df["x_plot"] = df["P/L Giornaliero %"]
-        title = "Posizioni in profitto giornaliero"
+        title = t("bar_profit")
         color = STYLE["color_positive"]
     else:
         df = df[df["P/L Giornaliero %"] < 0].copy()
@@ -205,7 +206,7 @@ def daily_pl_bar_chart_by_sign(
         if top_n:
             df = df.head(top_n)
         df["x_plot"] = df["P/L Giornaliero %"].abs()
-        title = "Posizioni in perdita giornaliera"
+        title = t("bar_loss")
         color = STYLE["color_negative"]
 
     if df.empty:
