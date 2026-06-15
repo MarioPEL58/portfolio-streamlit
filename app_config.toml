@@ -145,6 +145,17 @@ help_step_4 = "Esporta i dati"
 
 help_tip = "Controlla sempre i dati dopo il caricamento"
 
+sidebar_data_source = "Sorgente dati"
+sidebar_upload_label = "Carica il file Excel"
+sidebar_upload_help = "Carica un file Excel con il foglio 'Operazioni' e le colonne richieste."
+sidebar_refresh_button = "🔄 Aggiorna prezzi"
+sidebar_last_update = "Ultimo aggiornamento"
+sidebar_options = "Opzioni"
+sidebar_benchmark_label = "Ticker benchmark Yahoo (opzionale)"
+sidebar_benchmark_help = "Esempio: CSSPX.MI, VWCE.DE, SPY"
+sidebar_show_benchmark = "Mostra benchmark normalizzato"
+sidebar_min_date = "Data minima"
+
 [lang.en]
 
 # HEADER
@@ -270,3 +281,14 @@ help_step_3 = "Analyze results"
 help_step_4 = "Export data"
 
 help_tip = "Always verify your data after upload"
+
+sidebar_data_source = "Data source"
+sidebar_upload_label = "Upload Excel file"
+sidebar_upload_help = "Upload an Excel file with the 'Operazioni' sheet and required columns."
+sidebar_refresh_button = "🔄 Refresh prices"
+sidebar_last_update = "Last update"
+sidebar_options = "Options"
+sidebar_benchmark_label = "Yahoo benchmark ticker (optional)"
+sidebar_benchmark_help = "Example: CSSPX.MI, VWCE.DE, SPY"
+sidebar_show_benchmark = "Show normalized benchmark"
+sidebar_min_date = "Start date"
