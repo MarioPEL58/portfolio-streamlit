@@ -331,7 +331,9 @@ with tab_daily:
     fig_pos = daily_pl_bar_chart_by_sign(
         current=df_view,
         positive=True,
-        label_col="Ticker",
+        label_col="Ticker",    
+        pl_col="P/L Giornaliero",
+        pl_pct_col="P/L Giornaliero %"
         max_abs_pct=max_abs_pct,
         top_n=top_n
     )
@@ -348,6 +350,8 @@ with tab_daily:
         current=df_view,
         positive=False,
         label_col="Ticker",
+        pl_col="P/L Giornaliero",
+        pl_pct_col="P/L Giornaliero %"
         max_abs_pct=max_abs_pct,
         top_n=top_n
     )
