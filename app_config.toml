@@ -1,0 +1,294 @@
+[app]
+version = "1.0"
+
+[ui]
+# puoi tenerlo vuoto o usarlo per defaults comuni in futuro
+
+[env.DEV]
+title = "🚧 DEV Portfolio Tracker ETF / Stock"
+icon = "🚧"
+
+[env.PROD]
+title = "📈 Portfolio Tracker ETF / Stock"
+icon = "📈"
+
+# =========================
+# 🌐 MULTILINGUA
+# =========================
+
+[lang.it]
+
+# HEADER
+subtitle = "Carica un file Excel con il foglio Operazioni e ricostruisci il valore del portafoglio nel tempo."
+dev_warning = "⚠️ Ambiente di sviluppo"
+
+# INPUT / LOADING
+upload_prompt = "Carica un file Excel per iniziare."
+load_error = "Errore nel caricamento del file:"
+no_ops_after_date = "Nessuna operazione disponibile dopo la data minima selezionata."
+file_loaded = "File caricato:"
+no_prices = "Non sono riuscito a scaricare i prezzi da Yahoo Finance."
+missing_tickers = "Ticker senza prezzi scaricati:"
+portfolio_error = "Non è stato possibile costruire il portafoglio con i dati disponibili."
+
+# KPI
+kpi_title = "📊 KPI Portafoglio"
+
+# GRAFICI
+charts_title = "📊 Grafici"
+tab_perf = "📈 Andamento portafoglio"
+tab_daily = "📅 Giornaliero"
+tab_unrealized = "💼 P/L non realizzato"
+
+daily_title = "📅 Performance giornaliera del portafoglio"
+unrealized_title = "💼 Profitto/perdita sulle posizioni attualmente aperte"
+view_mode = "Visualizzazione"
+view_top = "Top 10"
+view_all = "Tutte"
+profit_section = "#### 🟢 Posizioni in profitto"
+loss_section = "#### 🔴 Posizioni in perdita"
+no_profit_today = "Nessuna posizione in profitto oggi"
+no_loss_today = "Nessuna posizione in perdita oggi"
+# daily bars
+bar_profit = "Posizioni in profitto"
+bar_loss = "Posizioni in perdita"
+bar_pl_pct = "P/L %"
+bar_pl_abs = "P/L"
+
+# TABS
+tab_positions = "Posizioni"
+tab_exposure = "Esposizione"
+tab_flows = "Flussi"
+tab_operations = "Operazioni"
+tab_download = "Download"
+
+# POSIZIONI
+positions_title = "Posizioni correnti"
+
+# ESPOSIZIONE
+allocation_title = "Allocazione"
+allocation_area = "Per area"
+allocation_type = "Per tipo"
+
+# FLUSSI
+flows_title = "📊 Flussi per data (XIRR)"
+flows_subtitle = "Flussi utilizzati per il calcolo del rendimento annualizzato XIRR"
+
+# OPERAZIONI
+operations_title = "Operazioni"
+filter_ticker = "Filtra per ticker"
+all_option = "Tutti"
+
+# DOWNLOAD
+download_title = "Download risultati"
+download_series = "Scarica serie storica CSV"
+download_positions = "Scarica posizioni correnti CSV"
+download_operations = "Scarica operazioni CSV"
+
+# FOOTER
+footer_note = "Aggiornamento in tempo reale dei prezzi"
+
+# OPERATIONS PREVIEW (module)
+operations_preview_title = "Anteprima operazioni"
+operations_preview_subtitle = "Vista sintetica delle operazioni filtrate"
+show_all_columns = "Mostra tutte le colonne"
+
+# in filters.py 
+# FILTRI
+filters_title = "### 🎛️ Filtri"
+filter_brokers = "Intermediari"
+filter_types = "Tipo"
+
+# FEEDBACK FILTRI
+active_filters = "Filtri attivi"
+
+# DIVIDENDI
+no_dividends_filtered = "ℹ️ Nessun dividendo per il filtro selezionato"
+
+# KPI CARDS
+portfolio_value = "Valore del portafoglio"
+invested_capital = "Capitale inv."
+unrealized_profit = "Profitto non realizzato"
+last_day = "Ultimo giorno"
+realized_profit = "Profitto realizzato"
+total_dividends = "Dividendi totali"
+total_profit = "Profitto totale"
+annualized_return = "Rendimento annualizzato"
+# market_status.py
+last_update_label = "Ultimo aggiornamento"
+market_closed = "mercato chiuso"
+market_open = "mercato aperto"
+
+# help Guida 
+help_title = "ℹ️ Guida"
+help_intro = "Questa app ti aiuta a monitorare il portafoglio in modo completo."
+
+help_section_functions = "📊 Cosa puoi fare"
+help_fun_1 = "Visualizzare l\"andamento del portafoglio"
+help_fun_2 = "Calcolare capitale e profit/loss"
+help_fun_3 = "Analizzare l\"allocazione"
+
+help_section_file = "📂 File richiesto"
+help_file_desc = "Serve un file Excel con foglio Operazioni"
+help_file_cols = "Colonne: Ticker, Data, Quantità, Prezzo, Spese"
+
+help_demo_text = "Puoi usare questo file per testare l'app rapidamente."
+help_demo_title = "📥 File di esempio"
+help_demo_button = "Scarica file demo"
+help_use_demo = "Usa direttamente questo file"
+
+help_section_usage = "▶️ Come usarla"
+help_step_1 = "Carica il file Excel"
+help_step_2 = "Verifica i dati"
+help_step_3 = "Analizza i risultati"
+help_step_4 = "Esporta i dati"
+
+help_tip = "Controlla sempre i dati dopo il caricamento"
+
+sidebar_data_source = "Sorgente dati"
+sidebar_upload_label = "Carica il file Excel"
+sidebar_upload_help = "Carica un file Excel con il foglio 'Operazioni' e le colonne richieste."
+sidebar_refresh_button = "🔄 Aggiorna prezzi"
+sidebar_last_update = "Ultimo aggiornamento"
+sidebar_options = "Opzioni"
+sidebar_benchmark_label = "Ticker benchmark Yahoo (opzionale)"
+sidebar_benchmark_help = "Esempio: CSSPX.MI, VWCE.DE, SPY"
+sidebar_show_benchmark = "Mostra benchmark normalizzato"
+sidebar_min_date = "Data minima"
+
+[lang.en]
+
+# HEADER
+subtitle = "Upload an Excel file with the Operations sheet and rebuild your portfolio over time."
+dev_warning = "⚠️ Development environment"
+
+# INPUT / LOADING
+upload_prompt = "Upload an Excel file to start."
+load_error = "Error loading file:"
+no_ops_after_date = "No operations available after selected minimum date."
+file_loaded = "File loaded:"
+no_prices = "Unable to download prices from Yahoo Finance."
+missing_tickers = "Tickers without price data:"
+portfolio_error = "Unable to build the portfolio with available data."
+
+# KPI
+kpi_title = "📊 Portfolio KPIs"
+
+# GRAFICI
+charts_title = "📊 Charts"
+tab_perf = "📈 Portfolio performance"
+tab_daily = "📅 Daily"
+tab_unrealized = "💼 Open P/L"
+
+daily_title = "📅 Daily portfolio performance"
+unrealized_title = "💼 Unrealized profit and loss"
+view_mode = "View mode"
+view_top = "Top 10"
+view_all = "All"
+profit_section = "#### 🟢 Winning positions"
+loss_section = "#### 🔴 Losing positions"
+no_profit_today = "No winning positions today"
+no_loss_today = "No losing positions today"
+# daily bars
+bar_profit = "Profitable positions"
+bar_loss = "Losing positions"
+bar_pl_pct = "P/L %"
+bar_pl_abs = "P/L"
+
+# TABS
+tab_positions = "Positions"
+tab_exposure = "Exposure"
+tab_flows = "Flows"
+tab_operations = "Operations"
+tab_download = "Download"
+
+# POSIZIONI
+positions_title = "Current positions"
+
+# ESPOSIZIONE
+allocation_title = "Allocation"
+allocation_area = "By area"
+allocation_type = "By type"
+
+# FLUSSI
+flows_title = "📊 Cash flows (XIRR)"
+flows_subtitle = "Cash flows used for annualized XIRR calculation"
+
+# OPERAZIONI
+operations_title = "Operations"
+filter_ticker = "Filter by ticker"
+all_option = "All"
+
+# DOWNLOAD
+download_title = "Download results"
+download_series = "Download time series CSV"
+download_positions = "Download current positions CSV"
+download_operations = "Download operations CSV"
+
+# FOOTER
+footer_note = "Real-time price updates"
+
+# OPERATIONS PREVIEW (module)
+operations_preview_title = "Operations preview"
+operations_preview_subtitle = "Summary view of filtered operations"
+show_all_columns = "Show all columns"
+
+# in filters.py 
+filters_title = "### 🎛️ Filters"
+filter_brokers = "Brokers"
+filter_types = "Type"
+
+active_filters = "Active filters"
+
+no_dividends_filtered = "ℹ️ No dividends for selected filters"
+
+# KPI CARDS
+portfolio_value = "Portfolio value"
+invested_capital = "Invested capital"
+unrealized_profit = "Unrealized profit"
+last_day = "Last day"
+realized_profit = "Realized profit"
+total_dividends = "Total dividends"
+total_profit = "Total profit"
+annualized_return = "Annualized return"
+# market_status.py
+last_update_label = "Last update"
+market_closed = "market closed"
+market_open = "market open"
+
+#Help guida 
+help_title = "ℹ️ Help"
+help_intro = "This app helps you track your portfolio effectively."
+
+help_section_functions = "📊 What you can do"
+help_fun_1 = "View portfolio performance"
+help_fun_2 = "Calculate capital and P/L"
+help_fun_3 = "Analyze allocation"
+
+help_section_file = "📂 Required file"
+help_file_desc = "An Excel file with Operazioni sheet is required"
+help_file_cols = "Columns: Ticker, Date, Quantity, Price, Fees"
+
+help_demo_text = "You can use this file to quickly test the app."
+help_demo_title = "📥 Sample file"
+help_demo_button = "Download demo file"
+help_use_demo = "Use this demo file"
+
+help_section_usage = "▶️ How to use"
+help_step_1 = "Upload Excel file"
+help_step_2 = "Check data"
+help_step_3 = "Analyze results"
+help_step_4 = "Export data"
+
+help_tip = "Always verify your data after upload"
+
+sidebar_data_source = "Data source"
+sidebar_upload_label = "Upload Excel file"
+sidebar_upload_help = "Upload an Excel file with the 'Operazioni' sheet and required columns."
+sidebar_refresh_button = "🔄 Refresh prices"
+sidebar_last_update = "Last update"
+sidebar_options = "Options"
+sidebar_benchmark_label = "Yahoo benchmark ticker (optional)"
+sidebar_benchmark_help = "Example: CSSPX.MI, VWCE.DE, SPY"
+sidebar_show_benchmark = "Show normalized benchmark"
+sidebar_min_date = "Start date"

@@ -4,9 +4,11 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from utils.i18n import init_language, t
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
+from components.charts import daily_pl_bar_chart_by_sign
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 
@@ -25,69 +27,82 @@ from utils.kpi_cards import (
     render_total_pl_card
 )
 
+from config.config import load_config
+
+CONFIG = load_config()
+
 ENV = os.getenv("ENV", "DEV")
 
-CONFIG = {
-    "DEV": {
-        "title": "DEV Portfolio Tracker",
-        "icon": "🚧"
-    },
-    "PROD": {
-        "title": "Portfolio Tracker ETF / Azioni",
-        "icon": "📈"
-    }
-}
+# 🔹 Config letta da TOML
+env_cfg = CONFIG["env"][ENV]
+ui_cfg = CONFIG["ui"]
 
-cfg = CONFIG.get(ENV, CONFIG["DEV"])
-
+# 🔹 Page config
 st.set_page_config(
-    page_title=cfg["title"],
-    page_icon=cfg["icon"],
+    page_title=env_cfg["title"],
+    page_icon=env_cfg["icon"],
     layout="wide"
 )
 
+LANG = init_language(CONFIG)
+# 🔹 Header
+st.markdown(f"## {env_cfg['title']}")
+st.caption(t("subtitle"))
 
 # ENV check 
-
 if ENV == "DEV":
-    st.title("🚧 DEV Portfolio Tracker ETF / Azioni")
-    st.warning("⚠️ Ambiente di sviluppo")
-else:
-    st.title("📈 Portfolio Tracker ETF / Azioni")
-
-st.caption(
-    "Carica un file Excel con il foglio Operazioni e ricostruisci il valore del portafoglio nel tempo."
-)
+    st.warning(t("dev_warning"))
 
 # Sidebar
 sidebar_cfg = render_sidebar(create_demo_file)
 uploaded_file = sidebar_cfg["uploaded_file"]
-use_local_demo = sidebar_cfg["use_local_demo"]
 benchmark = sidebar_cfg["benchmark"]
 show_benchmark = sidebar_cfg["show_benchmark"]
 min_filter_date = sidebar_cfg["min_filter_date"]
 
 # Input source
-file_source, file_label = resolve_file_source(uploaded_file, use_local_demo)
+if st.session_state.get("use_demo", False):
+    file_source = create_demo_file()
+    file_label = "Demo file"
+    st.session_state.use_demo = False
+else:
+    file_source, file_label = resolve_file_source(uploaded_file)
 
 if file_source is None:
-    st.info("Carica un file Excel per iniziare.")
+    st.info(t("upload_prompt"))
     st.stop()
 
 # Load data
 try:
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
+
+    ops["Data"] = pd.to_datetime(ops["Data"])
+
+    data_min = ops["Data"].min()
+    data_max = ops["Data"].max()
+
+    six_months_ago = pd.Timestamp.today() - pd.DateOffset(months=6)
+
+    if six_months_ago > data_max:
+        default_start = data_min
+    else:
+        default_start = max(data_min, six_months_ago)
+
+    default_start = default_start.date()
+
 except Exception as e:
-    st.error(f"Errore nel caricamento del file: {e}")
+    st.error(f"{t('load_error')} {e}")
     st.stop()
 
-ops = ops[ops["Data"] >= pd.Timestamp(min_filter_date)]
+effective_min_filter_date = min_filter_date or default_start
+
+# ops = ops[ops["Data"] >= pd.Timestamp(effective_min_filter_date)]
 if ops.empty:
-    st.warning("Nessuna operazione disponibile dopo la data minima selezionata.")
+    st.warning(t("no_ops_after_date"))
     st.stop()
 
-st.success(f"File caricato: {file_label}")
+st.success(f"{t('file_loaded')} {file_label}")
 
 # =========================
 # 🎛️ FILTER CONTEXT ✅
@@ -97,11 +112,6 @@ filter_ctx = render_filters(ops, dividends)
 ops_filtered = filter_ctx["ops"]
 dividends_filtered = filter_ctx["dividends"]
 filtered_tickers = filter_ctx["tickers"]
-
-# ✅ dividendi mancanti (solo se esistono ma filtrati via)
-if dividends is not None and not dividends.empty:
-    if dividends_filtered is not None and dividends_filtered.empty:
-        st.caption("ℹ️ Nessun dividendo per il filtro selezionato")
 
 # Price download
 start_date = ops["Data"].min().normalize()
@@ -114,17 +124,17 @@ closes, missing = download_close_prices(
 )
 
 if closes.empty:
-    st.error("Non sono riuscito a scaricare i prezzi da Yahoo Finance.")
+    st.error(t("no_prices"))
     st.stop()
 
 if missing:
-    st.warning("Ticker senza prezzi scaricati: " + ", ".join(missing))
+    st.warning(t("missing_tickers") + ", ".join(missing))
 
 # Portfolio
 series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
 
 if series.empty:
-    st.error("Non è stato possibile costruire il portafoglio con i dati disponibili.")
+    st.error(t("portfolio_error"))
     st.stop()
 
 render_operations_preview(ops_enriched)
@@ -148,21 +158,18 @@ if show_benchmark and benchmark.strip():
 # =========================
 # KPIs
 # =========================
-
 latest_value = float(series["Valore portafoglio"].iloc[-1])
 latest_invested = float(series["Capitale investito"].iloc[-1])
-latest_pnl = float(series["P/L totale"].iloc[-1])
+latest_pnl = float(series["P/L trading"].iloc[-1])
 latest_daily_pl = float(series["P/L Giornaliero"].iloc[-1])
 latest_daily_pl_pct = float(series["P/L Giornaliero %"].iloc[-1])
-
-latest_pnl_pct = latest_pnl / abs(latest_invested) if latest_invested != 0 else np.nan
 
 latest_realized = float(series["P/L realizzato"].iloc[-1])
 latest_dividends = float(series["Dividendi netti"].sum())
 
-#
-# Valcolo Xirr e flusso 
-#
+# =========================
+# XIRR + flussi
+# =========================
 xirr_value, xirr_flows = compute_portfolio_xirr(
     ops_enriched=ops_enriched,
     dividends=dividends_filtered,
@@ -171,26 +178,8 @@ xirr_value, xirr_flows = compute_portfolio_xirr(
 )
 
 # =========================
-# ✅ Realized % (NUOVO METODO)
+# Breakdown P/L
 # =========================
-
-# usa ops CF già arricchite dal motore
-sell_ops = ops_enriched.loc[ops_enriched["Quantita"] < 0].copy()
-
-if not sell_ops.empty:
-    realized_cost = (
-        sell_ops["Quantita"].abs() * sell_ops["AvgCostBefore"]
-    ).sum()
-
-    latest_realized_pct = (
-        latest_realized / realized_cost if realized_cost != 0 else np.nan
-    )
-else:
-    latest_realized_pct = np.nan
-# =========================
-# ✅ Breakdown P/L
-# =========================
-
 sell_ops = ops_enriched.loc[ops_enriched["Quantita"] < 0].copy()
 
 realized_trading = (
@@ -198,59 +187,50 @@ realized_trading = (
     if not sell_ops.empty else 0.0
 )
 
-realized_dividends = float(series["Dividendi netti"].sum())
-
+realized_dividends = latest_dividends
 realized_total = realized_trading + realized_dividends
 
-unrealized_pl = latest_pnl - realized_total
+# Non realizzato = somma P/L posizioni aperte
+unrealized_pl = float(current["P/L"].sum()) if not current.empty else 0.0
 
-if latest_invested != 0:
-    unrealized_pct = unrealized_pl / abs(latest_invested)
-else:
-    unrealized_pct = None
+open_cost = float(current["Costo Totale Stimato"].sum()) if not current.empty else 0.0
+unrealized_pct = unrealized_pl / open_cost if open_cost != 0 else None
 
-start_date = series.index.min()
-end_date = series.index.max()
+# Totale coerente con il breakdown
+total_pl = realized_total + unrealized_pl
+total_pct = total_pl / abs(latest_invested) if latest_invested != 0 else None
 
-days = (end_date - start_date).days
+open_daily_pl = float(current["P/L Giornaliero"].sum()) if not current.empty else 0.0
+open_value = float(current["Valore"].sum()) if not current.empty else 0.0
+open_daily_pct = open_daily_pl / (open_value - open_daily_pl) if (open_value - open_daily_pl) != 0 else None
 
-if days > 5 and latest_pnl_pct is not None:
-    annualized_pct = (1 + latest_pnl_pct) ** (365.25 / days) - 1
-else:
-    annualized_pct = None
-
-# -------------------------
-#  box KPI
-# -------------------------
-
-st.markdown("### 📊 KPI Portafoglio")
+# =========================
+# KPI cards
+# =========================
+st.markdown(f"### {t('kpi_title')}")
 
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
     render_value_card(latest_value, abs(latest_invested))
-
 with c2:
     render_unrealized_card(
         value=unrealized_pl,
         pct=unrealized_pct,
-        daily_value=latest_daily_pl,
-        daily_pct=latest_daily_pl_pct
+        daily_value=open_daily_pl,
+        daily_pct=open_daily_pct
     )
-
 with c3:
     render_realized_card(
-        realized_total=latest_realized,
-        dividends_total=latest_dividends
+        realized_total=realized_total,
+        dividends_total=realized_dividends
     )
-
 with c4:
     render_total_pl_card(
-        total_pl=latest_pnl,
-        total_pct=latest_pnl_pct,
+        total_pl=total_pl,
+        total_pct=total_pct,
         annualized_pct=xirr_value
     )
-
 
 # ✅ timestamp intraday per il solo label
 intraday_last_ts = download_last_intraday_timestamp(
@@ -277,19 +257,182 @@ update_label = compute_market_update_label(
 st.caption(update_label)
 
 # Main chart
-st.subheader("Andamento del portafoglio nel tempo")
 
-fig = portfolio_chart(series, bench_norm=bench_norm, benchmark_name=benchmark)
+st.subheader(t("charts_title"))
 
-st.plotly_chart(fig, use_container_width=True)
+tab_perf, tab_daily, tab_unrealized = st.tabs([
+    t("tab_perf"),
+    t("tab_daily"),
+    t("tab_unrealized")
+])
+
+with tab_perf:
+    # fig = portfolio_chart(
+    #     series,
+    #     bench_norm=bench_norm,
+    #     benchmark_name=benchmark
+    # )
+    
+    min_date = min_filter_date or default_start
+    
+    filtered_series = series[
+        series.index >= pd.Timestamp(min_date)
+    ]
+    # benchmark filtrato (vista)
+    if bench_norm is not None:
+        filtered_bench_norm = bench_norm[
+            bench_norm.index >= pd.Timestamp(min_date)
+        ]
+    
+        # allineamento (molto importante)
+        filtered_bench_norm = filtered_bench_norm.reindex(filtered_series.index)
+        filtered_bench_norm = filtered_bench_norm.ffill()
+    else:
+        filtered_bench_norm = None
+  
+    fig = portfolio_chart(
+        filtered_series,
+        bench_norm=filtered_bench_norm,
+        benchmark_name=benchmark
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+with tab_daily:
+    st.subheader(t("daily_title"))
+    view_mode = st.radio(
+        t("view_mode"),
+        options=[t("view_top"), t("view_all")],
+        horizontal=True,
+        key="view_mode_daily"
+    )
+    # copia df base
+    df_view = current.copy()
+    
+    if view_mode == t("view_top"):
+        # NON filtrare qui per segno — lo fa già la funzione
+        top_n = 10
+    else:
+        top_n = None
+        
+    max_abs_pct = 0.01
+    if current is not None and not current.empty and "P/L Giornaliero %" in current.columns:
+        max_abs_pct = pd.to_numeric(
+            current["P/L Giornaliero %"],
+            errors="coerce"
+        ).abs().max()
+
+        if pd.isna(max_abs_pct) or max_abs_pct == 0:
+            max_abs_pct = 0.01
+
+    # ✅ Grafico posizioni in profitto
+    st.markdown(t("profit_section"))
+
+    fig_pos = daily_pl_bar_chart_by_sign(
+        current=df_view,
+        positive=True,
+        label_col="Ticker",    
+        pl_col="P/L Giornaliero",
+        pl_pct_col="P/L Giornaliero %",
+        max_abs_pct=max_abs_pct,
+        top_n=top_n
+    )
+
+    if fig_pos:
+        st.plotly_chart(fig_pos, use_container_width=True)
+    else:
+        st.caption(t("no_profit_today"))
+        
+    # ✅ Grafico posizioni in perdita
+    st.markdown(t("loss_section"))
+
+    fig_neg = daily_pl_bar_chart_by_sign(
+        current=df_view,
+        positive=False,
+        label_col="Ticker",
+        pl_col="P/L Giornaliero",
+        pl_pct_col="P/L Giornaliero %",
+        max_abs_pct=max_abs_pct,
+        top_n=top_n
+    )
+
+    if fig_neg:
+        st.plotly_chart(fig_neg, use_container_width=True)
+    else:
+        st.caption(t("no_loss_today"))
+        
+with tab_unrealized:
+    st.subheader(t("unrealized_title"))
+
+    view_mode = st.radio(
+        t("view_mode"),
+        options=[t("view_top"), t("view_all")],
+        horizontal=True,
+        key="view_mode_unrealized"
+    )
+
+    # copia df base
+    df_view = current.copy()
+
+    if view_mode == t("view_top"):
+        top_n = 10
+    else:
+        top_n = None
+
+    # ✅ calcolo max per scala %
+    max_abs_pct = 0.01
+    if current is not None and not current.empty and "P/L %" in current.columns:
+        max_abs_pct = pd.to_numeric(
+            current["P/L %"],
+            errors="coerce"
+        ).abs().max()
+
+        if pd.isna(max_abs_pct) or max_abs_pct == 0:
+            max_abs_pct = 0.01
+
+    # ✅ Posizioni in profitto (open)
+    st.markdown(t("profit_section"))
+
+    fig_pos = daily_pl_bar_chart_by_sign(
+        current=df_view,
+        positive=True,
+        label_col="Ticker",
+        pl_col="P/L",
+        pl_pct_col="P/L %",
+        max_abs_pct=max_abs_pct,
+        top_n=top_n
+    )
+
+    if fig_pos:
+        st.plotly_chart(fig_pos, use_container_width=True)
+    else:
+        st.caption(t("no_profit_open"))
+
+    # ✅ Posizioni in perdita (open)
+    st.markdown(t("loss_section"))
+
+    fig_neg = daily_pl_bar_chart_by_sign(
+        current=df_view,
+        positive=False,
+        label_col="Ticker",
+        pl_col="P/L",
+        pl_pct_col="P/L %",
+        max_abs_pct=max_abs_pct,
+        top_n=top_n
+    )
+
+    if fig_neg:
+        st.plotly_chart(fig_neg, use_container_width=True)
+    else:
+        st.caption(t("no_loss_open"))
 
 # Tabs
 tab_pos, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
-    ["Posizioni", "Esposizione", "Flussi", "Operazioni", "Download"]
+    [t("tab_positions"), t("tab_exposure"), t("tab_flows"), t("tab_operations"), t("tab_download")]
 )
 
 with tab_pos:
-    st.subheader("Posizioni correnti")
+    st.subheader(t("positions_title"))
     current_view = current.reset_index().rename(columns={"index": "PositionKey"})
 
     ordered_cols = [
@@ -320,7 +463,7 @@ with tab_pos:
     )
 
 with tab_exp:
-    st.subheader("Allocazione")
+    st.subheader(t("allocation_title"))
     
     # ✅ PIE (Ticker)
     fig = allocation_pie_chart(exposure, column="Ticker")
@@ -331,19 +474,19 @@ with tab_exp:
     
     # ✅ BAR Area
     if "Area" in exposure.columns and exposure["Area"].astype(str).str.strip().any():
-        fig_area = allocation_bar_chart(exposure, column="Area", title="Per area")
+        fig_area = allocation_bar_chart(exposure, column="Area", title=t("allocation_area"))
         if fig_area:
             c1.plotly_chart(fig_area, use_container_width=True)
     
     # ✅ BAR Tipo
     if "Tipo" in exposure.columns and exposure["Tipo"].astype(str).str.strip().any():
-        fig_tipo = allocation_bar_chart(exposure, column="Tipo", title="Per tipo")
+        fig_tipo = allocation_bar_chart(exposure, column="Tipo", title=t("allocation_type"))
         if fig_tipo:
             c2.plotly_chart(fig_tipo, use_container_width=True)
 
 with tab_flu:
-    st.subheader("📊 Flussi per data (XIRR)")
-    st.caption("Flussi utilizzati per il calcolo del rendimento annualizzato XIRR")
+    st.subheader(t("flows_title"))
+    st.caption(t("flows_subtitle "))
 
     st.dataframe(
         xirr_flows.style.format({
@@ -356,15 +499,15 @@ with tab_flu:
     )
 
 with tab_ops:
-    st.subheader("Operazioni")
-    all_tickers = ["Tutti"] + sorted(ops_enriched["Ticker"].unique().tolist())
-    selected_ticker = st.selectbox("Filtra per ticker", all_tickers)
+    st.subheader(t("operations_title"))
+    all_tickers = [t("all_option")] + sorted(ops_enriched["Ticker"].unique().tolist())
+    selected_ticker = st.selectbox(t("filter_ticker"), all_tickers)
 
-    show_ops = (ops_enriched if selected_ticker == "Tutti" else ops_enriched[ops_enriched["Ticker"] == selected_ticker])
+    show_ops = (ops_enriched if selected_ticker == t("all_option") else ops_enriched[ops_enriched["Ticker"] == selected_ticker])
     st.dataframe(show_ops, use_container_width=True)
 
 with tab_dl:
-    st.subheader("Download risultati")
+    st.subheader(t("download_title"))
 
     ts_csv = (
         series.reset_index()
@@ -382,33 +525,36 @@ with tab_dl:
 
     d1, d2, d3 = st.columns(3)
     d1.download_button(
-        "Scarica serie storica CSV",
+        t("download_series"),
         ts_csv,
         file_name="serie_storica_portafoglio.csv",
         mime="text/csv"
     )
     d2.download_button(
-        "Scarica posizioni correnti CSV",
+        t("download_positions"),
         current_csv,
         file_name="posizioni_correnti.csv",
         mime="text/csv"
     )
     d3.download_button(
-        "Scarica operazioni CSV",
+        t("download_operations"),
         ops_csv,
         file_name="operazioni_portafoglio.csv",
         mime="text/csv"
     )
 
 st.markdown("---")
-footer_text = CONFIG.get(ENV, CONFIG["DEV"])["title"]
-footer_icon = CONFIG.get(ENV, CONFIG["DEV"])["icon"]
+# 🔹 recupero config
+env_cfg = CONFIG["env"][ENV]
+app_cfg = CONFIG["app"]
 
+# 🔹 footer
 st.markdown(
-    f"<div style='text-align: center; color: gray;'>"
-    f"{CONFIG[ENV]['icon']} {CONFIG[ENV]['title']}"
-    f"</div>",
+    f"""
+    <div style='text-align: center; color: gray; font-size: 0.9em;'>
+        {env_cfg['icon']} {env_cfg['title']} • v{app_cfg['version']}
+    </div>
+    """,
     unsafe_allow_html=True
-
-
-st.caption("Aggiornamento in tempo reale dei prezzi")
+)
+st.caption(t("footer_note"))

@@ -1,6 +1,7 @@
 from datetime import datetime, time
 import pandas as pd
 import pytz
+from utils.i18n import t
 
 
 MARKET_HOURS = {
@@ -58,7 +59,7 @@ def compute_market_update_label(closes, intraday_last_ts=None, markets=None, tz_
 
     # weekend
     if now.weekday() >= 5:
-        return f"Ultimo aggiornamento: {last_update} • 🕒 mercato chiuso (weekend)"
+        return f"{t('last_update_label')}: {last_update} • 🕒 {t('market_closed')} ({t('weekend')})"
 
     # normalizzazione mercati
     normalized_markets = []
@@ -77,8 +78,11 @@ def compute_market_update_label(closes, intraday_last_ts=None, markets=None, tz_
 
     if not any_market_open:
         if len(set(normalized_markets)) == 1:
-            return f"Ultimo aggiornamento: {last_update} • 🕒 mercato chiuso ({normalized_markets[0].title()})"
-        return f"Ultimo aggiornamento: {last_update} • 🕒 mercati chiusi"
+            return (
+                f"{t('last_update_label')}: {last_update} • "
+                f"🕒 {t('market_closed')} ({normalized_markets[0].title()})"
+            )
+        return f"{t('last_update_label')}: {last_update} • 🕒 {t('markets_closed')}"
 
     # se ho timestamp intraday reale → uso quello
     if intraday_last_ts is not None:
@@ -89,27 +93,27 @@ def compute_market_update_label(closes, intraday_last_ts=None, markets=None, tz_
             delay_minutes = max(delay_minutes, 0)
 
             if delay_minutes < 5:
-                status = "✅ quasi realtime"
+                status = f"✅ {t('almost_realtime')}"
             elif delay_minutes < 30:
-                status = f"⏱️ ritardo ~{delay_minutes} min"
+                status = f"⏱️ {t('delay')} ~{delay_minutes} {t('minutes')}"
             else:
-                status = f"⚠️ ritardo ~{delay_minutes} min"
+                status = f"⚠️ {t('delay')} ~{delay_minutes} {t('minutes')}"
 
-            return f"Ultimo aggiornamento: {last_update} • {status}"
+            return f"{t('last_update_label')}: {last_update} • {status}"
 
     # fallback su dati daily
     if closes is None or closes.empty:
-        return f"Ultimo aggiornamento: {last_update} • ⚠️ nessun dato prezzi"
+        return f"{t('last_update_label')}: {last_update} • ⚠️ {t('no_price_data')}"
 
     last_date = pd.Timestamp(closes.index.max()).date()
     today = now.date()
     days_diff = (today - last_date).days
 
     if days_diff == 0:
-        status = "⏱️ dati aggiornati (delay intraday)"
+        status = f"⏱️ {t('intraday_delay_data')}"
     elif days_diff == 1:
-        status = "🕒 ultimo giorno utile"
+        status = f"🕒 {t('last_useful_day')}"
     else:
-        status = f"⚠️ dati vecchi ({days_diff} giorni)"
+        status = f"⚠️ {t('old_data')} ({days_diff} {t('days')})"
 
-    return f"Ultimo aggiornamento: {last_update} • {status}"
+    return f"{t('last_update_label')}: {last_update} • {status}"
