@@ -47,6 +47,14 @@ profit_section = "#### 🟢 Posizioni in profitto"
 loss_section = "#### 🔴 Posizioni in perdita"
 no_profit_today = "Nessuna posizione in profitto oggi"
 no_loss_today = "Nessuna posizione in perdita oggi"
+# daily bars
+bar_profit = "Posizioni in profitto giornaliero"
+bar_loss = "Posizioni in perdita giornaliera"
+
+[translations.en]
+bar_profit = "Daily profitable positions"
+bar_loss = "Daily losing positions"
+
 
 # TABS
 tab_positions = "Posizioni"
@@ -169,6 +177,9 @@ profit_section = "#### 🟢 Winning positions"
 loss_section = "#### 🔴 Losing positions"
 no_profit_today = "No winning positions today"
 no_loss_today = "No losing positions today"
+# daily bars
+bar_profit = "Daily profitable positions"
+bar_loss = "Daily losing positions"
 
 # TABS
 tab_positions = "Positions"
