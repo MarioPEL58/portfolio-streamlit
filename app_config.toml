@@ -50,11 +50,8 @@ no_loss_today = "Nessuna posizione in perdita oggi"
 # daily bars
 bar_profit = "Posizioni in profitto giornaliero"
 bar_loss = "Posizioni in perdita giornaliera"
-
-[translations.en]
-bar_profit = "Daily profitable positions"
-bar_loss = "Daily losing positions"
-
+bar_pl_pct = "P/L Giornaliero %"
+bar_pl_abs = "P/L Giornaliero"
 
 # TABS
 tab_positions = "Posizioni"
@@ -180,6 +177,8 @@ no_loss_today = "No losing positions today"
 # daily bars
 bar_profit = "Daily profitable positions"
 bar_loss = "Daily losing positions"
+bar_pl_pct = "Daily P/L %"
+bar_pl_abs = "Daily P/L"
 
 # TABS
 tab_positions = "Positions"
