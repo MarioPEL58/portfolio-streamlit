@@ -61,6 +61,14 @@ def read_excel_safely(file_obj) -> bytes:
     return Path(file_obj).read_bytes()
 
 
+def find_standard_col(df: pd.DataFrame, col_name: str):
+    """
+    Trova la colonna nel dataframe usando gli alias definiti nello schema.
+    """
+    from services.schema import COLUMN_ALIASES
+    return find_col(df.columns, COLUMN_ALIASES[col_name])
+
+
 def load_operations_from_excel(file_obj) -> pd.DataFrame:
     excel_bytes = read_excel_safely(file_obj)
     xls = pd.ExcelFile(BytesIO(excel_bytes), engine="openpyxl")
