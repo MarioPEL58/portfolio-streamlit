@@ -5,11 +5,11 @@ version = "1.0"
 # puoi tenerlo vuoto o usarlo per defaults comuni in futuro
 
 [env.DEV]
-title = "🚧 DEV Portfolio Tracker ETF / Stock"
+title = "DEV Portfolio Tracker ETF / Stock"
 icon = "🚧"
 
 [env.PROD]
-title = "📈 Portfolio Tracker ETF / Stock"
+title = "Portfolio Tracker ETF / Stock"
 icon = "📈"
 
 # =========================
