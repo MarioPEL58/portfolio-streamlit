@@ -41,7 +41,7 @@ tab_daily = "📅 Giornaliero"
 tab_unrealized = "💼 P/L non realizzato"
 
 daily_title = "📅 Performance giornaliera del portafoglio"
-unrealized_title = "📅 Profitto/perdita sulle posizioni attualmente aperte"
+unrealized_title = "💼 Profitto/perdita sulle posizioni attualmente aperte"
 view_mode = "Visualizzazione"
 view_top = "Top 10"
 view_all = "Tutte"
