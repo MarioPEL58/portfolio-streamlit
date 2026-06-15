@@ -54,3 +54,20 @@ SHEET_ALIASES = {
         "income"
     ]
 }
+def find_sheet_name(sheet_names, aliases):
+    normalized_sheets = {
+        normalize_text(s): s for s in sheet_names
+    }
+
+    for alias in aliases:
+        key = normalize_text(alias)
+        if key in normalized_sheets:
+            return normalized_sheets[key]
+
+    # fallback: match parziale
+    for sheet in sheet_names:
+        n_sheet = normalize_text(sheet)
+        if any(normalize_text(alias) in n_sheet for alias in aliases):
+            return sheet
+
+    return None
