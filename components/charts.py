@@ -242,6 +242,9 @@ def daily_pl_bar_chart_by_sign(
     )
 
     # barra reale
+    pl_pct_label = t("bar_pl_pct")
+    pl_abs_label = t("bar_pl_abs")
+
     fig.add_trace(
         go.Bar(
             x=df["x_plot"],
@@ -257,8 +260,8 @@ def daily_pl_bar_chart_by_sign(
             customdata=df[[label_col, "P/L Giornaliero %", "P/L Giornaliero"]],
             hovertemplate=(
                 "%{customdata[0]}<br>"
-                "P/L Giornaliero %: %{customdata[1]:.4%}<br>"
-                "P/L Giornaliero: %{customdata[2]:.2f}€"
+                f"{pl_pct_label}: %{{customdata[1]:.4%}}<br>"
+                f"{pl_abs_label}: %{{customdata[2]:.2f}}€"
                 "<extra></extra>"
             ),
             width=STYLE["bar_width"]
