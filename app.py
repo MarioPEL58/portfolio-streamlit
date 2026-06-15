@@ -333,7 +333,7 @@ with tab_daily:
         positive=True,
         label_col="Ticker",    
         pl_col="P/L Giornaliero",
-        pl_pct_col="P/L Giornaliero %"
+        pl_pct_col="P/L Giornaliero %",
         max_abs_pct=max_abs_pct,
         top_n=top_n
     )
@@ -351,7 +351,7 @@ with tab_daily:
         positive=False,
         label_col="Ticker",
         pl_col="P/L Giornaliero",
-        pl_pct_col="P/L Giornaliero %"
+        pl_pct_col="P/L Giornaliero %",
         max_abs_pct=max_abs_pct,
         top_n=top_n
     )
