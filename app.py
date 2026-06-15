@@ -301,7 +301,8 @@ with tab_daily:
     view_mode = st.radio(
         t("view_mode"),
         options=[t("view_top"), t("view_all")],
-        horizontal=True
+        horizontal=True,
+        key="view_mode_daily"
     )
     # copia df base
     df_view = current.copy()
@@ -364,7 +365,8 @@ with tab_unrealized:
     view_mode = st.radio(
         t("view_mode"),
         options=[t("view_top"), t("view_all")],
-        horizontal=True
+        horizontal=True,
+        key="view_mode_unrealized"
     )
 
     # copia df base
