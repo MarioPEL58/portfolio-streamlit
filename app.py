@@ -46,7 +46,7 @@ st.set_page_config(
 
 LANG = init_language(CONFIG)
 # 🔹 Header
-st.markdown(f"## {env_cfg['title']}")
+st.markdown(f"## {env_cfg['icon']} {env_cfg['title']}")
 st.caption(t("subtitle"))
 
 # ENV check 
