@@ -7,41 +7,47 @@ import pandas as pd
 import streamlit as st
 import pytz
 
+from utils.i18n import t
+
+
 def render_sidebar(create_demo_file):
     with st.sidebar:
 
         st.markdown("---")
-        st.header("Sorgente dati")
+        st.header(t("sidebar_data_source"))
 
         uploaded_file = st.file_uploader(
-            "Carica il file Excel",
+            t("sidebar_upload_label"),
             type=["xlsx"],
-            help="Carica un file Excel con il foglio 'Operazioni' e le colonne richieste."
+            help=t("sidebar_upload_help")
         )
 
         st.markdown("---")
 
-        if st.button("🔄 Aggiorna prezzi"):
+        if st.button(t("sidebar_refresh_button")):
             st.cache_data.clear()
             st.rerun()
 
         tz = pytz.timezone("Europe/Rome")
-        last_update = datetime.now(tz).strftime("%H:%M:%S %Z")  
-        st.caption(f"Ultimo aggiornamento: {last_update}")
+        last_update = datetime.now(tz).strftime("%H:%M:%S %Z")
+        st.caption(f"{t('sidebar_last_update')}: {last_update}")
 
-        # st.caption(f"Ultimo aggiornamento: {datetime.now().strftime('%H:%M:%S')}")
+        st.header(t("sidebar_options"))
 
-        st.header("Opzioni")
         benchmark = st.text_input(
-            "Ticker benchmark Yahoo (opzionale)",
+            t("sidebar_benchmark_label"),
             value="CSSPX.MI",
-            help="Esempio: CSSPX.MI, VWCE.DE, SPY"
+            help=t("sidebar_benchmark_help")
         )
-        show_benchmark = st.checkbox("Mostra benchmark normalizzato", value=True)
+
+        show_benchmark = st.checkbox(
+            t("sidebar_show_benchmark"),
+            value=True
+        )
 
         min_filter_date = st.date_input(
-            "Data minima",
-            value= None
+            t("sidebar_min_date"),
+            value=None
         )
 
     return {
@@ -50,6 +56,7 @@ def render_sidebar(create_demo_file):
         "show_benchmark": show_benchmark,
         "min_filter_date": min_filter_date,
     }
+
 
 def resolve_file_source(uploaded_file):
     if uploaded_file is not None:
