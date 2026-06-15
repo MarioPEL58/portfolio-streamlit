@@ -169,6 +169,8 @@ def daily_pl_bar_chart_by_sign(
     current: pd.DataFrame,
     positive: bool = True,
     label_col: str = "Ticker",
+    pl_col: str = "P/L Giornaliero",
+    pl_pct_col: str = "P/L Giornaliero %",
     max_abs_pct: float | None = None,
     top_n: int | None = None
 ):
@@ -177,14 +179,14 @@ def daily_pl_bar_chart_by_sign(
 
     df = current.copy()
 
-    required_cols = ["P/L Giornaliero", "P/L Giornaliero %"]
+    required_cols = [pl_col, pl_pct_col]
     for col in required_cols:
         if col not in df.columns:
             return None
 
-    df["P/L Giornaliero %"] = pd.to_numeric(df["P/L Giornaliero %"], errors="coerce")
-    df["P/L Giornaliero"] = pd.to_numeric(df["P/L Giornaliero"], errors="coerce")
-    df = df.dropna(subset=["P/L Giornaliero %"]).copy()
+    df[pl_pct_col] = pd.to_numeric(df[pl_pct_col], errors="coerce")
+    df[pl_col] = pd.to_numeric(df[pl_col], errors="coerce")
+    df = df.dropna(subset=[pl_pct_col]).copy()
 
     if df.empty:
         return None
@@ -193,19 +195,19 @@ def daily_pl_bar_chart_by_sign(
         label_col = "Ticker" if "Ticker" in df.columns else df.columns[0]
 
     if positive:
-        df = df[df["P/L Giornaliero %"] > 0].copy()
-        df = df.sort_values("P/L Giornaliero %", ascending=False) 
+        df = df[df[pl_pct_col] > 0].copy()
+        df = df.sort_values(pl_pct_col, ascending=False)
         if top_n:
             df = df.head(top_n)
-        df["x_plot"] = df["P/L Giornaliero %"]
+        df["x_plot"] = df[pl_pct_col]
         title = t("bar_profit")
         color = STYLE["color_positive"]
     else:
-        df = df[df["P/L Giornaliero %"] < 0].copy()
-        df = df.sort_values("P/L Giornaliero %", ascending=True)
+        df = df[df[pl_pct_col] < 0].copy()
+        df = df.sort_values(pl_pct_col, ascending=True)
         if top_n:
             df = df.head(top_n)
-        df["x_plot"] = df["P/L Giornaliero %"].abs()
+        df["x_plot"] = df[pl_pct_col].abs()
         title = t("bar_loss")
         color = STYLE["color_negative"]
 
@@ -213,8 +215,7 @@ def daily_pl_bar_chart_by_sign(
         return None
 
     # label breve: solo %
-    df["label"] = df["P/L Giornaliero %"].apply(lambda x: f"{x:.2%}")
-
+    df["label"] =df[pl_pct_col].apply(lambda x: f"{x:.2%}")
     if max_abs_pct is None:
         max_x = max(df["x_plot"].max(), 0.01)
     else:
@@ -257,7 +258,7 @@ def daily_pl_bar_chart_by_sign(
             ),
             text=df["label"],
             textposition="outside",
-            customdata=df[[label_col, "P/L Giornaliero %", "P/L Giornaliero"]],
+            customdata=df[[label_col, pl_pct_col, pl_col]],
             hovertemplate=(
                 "%{customdata[0]}<br>"
                 f"{pl_pct_label}: %{{customdata[1]:.4%}}<br>"
