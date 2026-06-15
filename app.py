@@ -43,11 +43,13 @@ st.set_page_config(
     page_icon=env_cfg["icon"],
     layout="wide"
 )
+
 LANG = init_language(CONFIG)
 # 🔹 Header
 st.markdown(f"## {env_cfg['title']}")
 st.caption(t("subtitle"))
 
+# ENV check 
 if ENV == "DEV":
     st.warning(t("dev_warning"))
 
