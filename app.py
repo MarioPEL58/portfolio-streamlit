@@ -21,8 +21,8 @@ from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 
 from utils.kpi_cards import (
-    _value_card,
-    _unrealized_card,
+    render_value_card,
+    render_unrealized_card,
     render_realized_card,
     render_total_pl_card
 )
