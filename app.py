@@ -62,7 +62,7 @@ min_filter_date = sidebar_cfg["min_filter_date"]
 
 # Input source
 if st.session_state.get("use_demo", False):
-    file_source = create_demo_file()
+    file_source = create_demo_file(LANG)
     file_label = "Demo file"
     st.session_state.use_demo = False
 else:
