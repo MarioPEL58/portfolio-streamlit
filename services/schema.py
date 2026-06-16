@@ -33,8 +33,8 @@ DIVIDEND_ALIASES = {
     "Nome": ["nome", "name"],
     "Valuta": ["valuta", "currency"]
 }
-REQUIRED_COLUMNS = ["Ticker", "Data", "Quantita"]
-DIVIDEND_REQUIRED_COLUMNS = ["Data", "DividendoNetto"]
+REQUIRED_OPERATION_COLUMNS = ["Ticker", "Data", "Quantita"]
+REQUIRED_DIVIDEND_COLUMNS = ["Data", "DividendoNetto"]
 SHEET_ALIASES = {
     "Operazioni": [
         "operazioni",
