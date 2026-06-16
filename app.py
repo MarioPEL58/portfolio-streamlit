@@ -443,29 +443,28 @@ with tab_pos:
         "P/L Netto Stimato", "P/L Giornaliero", "P/L Giornaliero %"
     ]
     ordered_cols = [c for c in ordered_cols if c in current_view.columns]
-    df_base = current_view[ordered_cols]
+    columns_map = get_display_columns()
     
-    styled = (
-        df_base
+    df_display = current_view[ordered_cols].rename(columns=columns_map)
+    
+    st.dataframe(
+        df_display
         .style
         .format({
-            "Prezzo Attuale": "{:,.4f}",
-            "Valore": "€ {:,.2f}",
-            "Dividendi Netti Incassati": "€ {:,.2f}",
-            "Costo Medio Stimato": "{:,.4f}",
-            "Costo Totale Stimato": "€ {:,.2f}",
-            "P/L": "€ {:,.2f}",
-            "P/L %": "{:.2%}",
-            "P/L Netto Stimato": "€ {:,.2f}",
-            "P/L Giornaliero": "€ {:,.2f}",
-            "P/L Giornaliero %": "{:.2%}",
+            columns_map["Prezzo Attuale"]: "{:,.4f}",
+            columns_map["Valore"]: "€ {:,.2f}",
+            columns_map["Dividendi Netti Incassati"]: "€ {:,.2f}",
+            columns_map["Costo Medio Stimato"]: "{:,.4f}",
+            columns_map["Costo Totale Stimato"]: "€ {:,.2f}",
+            columns_map["P/L"]: "€ {:,.2f}",
+            columns_map["P/L %"]: "{:.2%}",
+            columns_map["P/L Netto Stimato"]: "€ {:,.2f}",
+            columns_map["P/L Giornaliero"]: "€ {:,.2f}",
+            columns_map["P/L Giornaliero %"]: "{:.2%}",
         })
-        .apply(style_pl_column, axis=0)
+        .apply(style_pl_column, axis=0),
+        use_container_width=True
     )
-
-    # ✅ rename header DOPO
-    styled.data = styled.data.rename(columns=get_display_columns())
-    st.dataframe(styled, use_container_width=True)
 
 with tab_exp:
     st.subheader(t("allocation_title"))
