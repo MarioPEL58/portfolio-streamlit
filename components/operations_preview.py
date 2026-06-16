@@ -37,7 +37,8 @@ def render_operations_preview(ops_enriched):
             df_base = ops_enriched.copy()
             df_display = df_base.rename(columns=columns_map)
             
-            st.write(df_base.dtypes)
+            # st.write(df_base.dtypes)
+            
             # ✅ FORMATI dinamici (robusti)
             fmt_dict = {}
         
