@@ -490,7 +490,7 @@ with tab_exp:
 
 with tab_flu:
     st.subheader(t("flows_title"))
-    st.caption(t("flows_subtitle "))
+    st.caption(t("flows_subtitle"))
 
     # st.dataframe(
     #     xirr_flows.style.format({
