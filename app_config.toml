@@ -177,6 +177,10 @@ col_pl_net = "P/L netto stimato"
 col_pl_daily = "P/L giornaliero"
 col_pl_daily_pct = "P/L giornaliero %"
 
+col_trade_price = "Prezzo"
+col_avg_cost_before = "Costo medio precedente"
+col_realized_trade_pl = "P/L operazione"
+
 [lang.en]
 
 # HEADER
@@ -335,3 +339,7 @@ col_pl_pct = "P/L %"
 col_pl_net = "Estimated net P/L"
 col_pl_daily = "Daily P/L"
 col_pl_daily_pct = "Daily P/L %"
+
+col_trade_price = "Price"
+col_avg_cost_before = "Avg cost before"
+col_realized_trade_pl = "Trade P/L"
