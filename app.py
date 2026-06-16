@@ -21,8 +21,8 @@ from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 
 from utils.kpi_cards import (
-    render_value_card,
-    render_unrealized_card,
+    _value_card,
+    _unrealized_card,
     render_realized_card,
     render_total_pl_card
 )
@@ -54,7 +54,7 @@ if ENV == "DEV":
     st.warning(t("dev_warning"))
 
 # Sidebar
-sidebar_cfg = render_sidebar(create_demo_file)
+sidebar_cfg = render_sidebar(create_demo_file, LANG)
 uploaded_file = sidebar_cfg["uploaded_file"]
 benchmark = sidebar_cfg["benchmark"]
 show_benchmark = sidebar_cfg["show_benchmark"]
