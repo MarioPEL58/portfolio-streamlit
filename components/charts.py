@@ -106,7 +106,7 @@ def allocation_bar_chart(exposure, column="Area", title=None):
 
     fig = px.bar(
         df,
-        x=column,
+        x=column_label,
         y=value_label,
         title=title if title else f"{t('allocation_title')} {column_label}"
     )
