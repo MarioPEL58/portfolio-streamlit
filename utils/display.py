@@ -40,4 +40,9 @@ def get_display_columns():
         "CostOpenAfter": t("col_cost_open_after"),
         "CashflowCalc": t("col_cashflow_calc"),
         "TaxEuroCalc": t("col_tax_calc"),
+        # XIRR / flows
+        "Operazioni": t("col_flow_operations"),
+        "Dividendi": t("col_flow_dividends"),
+        "Valore finale": t("col_flow_final_value"),
+        "Totale": t("col_flow_total"),
     }
