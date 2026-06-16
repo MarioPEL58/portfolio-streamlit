@@ -91,6 +91,10 @@ def render_operations_preview(ops_enriched):
             # ✅ format sicuro
             fmt_dict = {}
 
+            # ✅ DATA
+            if "Data" in df_base.columns:
+                fmt_dict[columns_map["Data"]] = "{:%d/%m/%Y}"
+
             if "Prezzo" in df_base.columns:
                 fmt_dict[columns_map["Prezzo"]] = "{:,.2f}"
 
