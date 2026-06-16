@@ -1,15 +1,24 @@
 import streamlit as st
+import pandas as pd
 from utils.i18n import t
+from utils.display import get_display_columns
+
 
 def render_operations_preview(ops_enriched):
+
     with st.expander(t("operations_preview_title"), expanded=False):
 
         st.caption(t("operations_preview_subtitle"))
 
         show_full = st.checkbox(t("show_all_columns"), value=False)
 
+        columns_map = get_display_columns()
+
         if show_full:
-            st.dataframe(ops_enriched, use_container_width=True)
+            # ✅ rename completo
+            df_display = ops_enriched.rename(columns=columns_map)
+            st.dataframe(df_display, use_container_width=True)
+
         else:
             cols = [
                 "Data",
@@ -24,21 +33,44 @@ def render_operations_preview(ops_enriched):
 
             cols = [c for c in cols if c in ops_enriched.columns]
 
-            # ✅ funzione stile corretta
-            def highlight_sell_col(s):
-                if s.name == "Quantita":
-                    return ["color: red" if val < 0 else "" for val in s]
-                return [""] * len(s)
-
-            st.dataframe(
+            df_base = (
                 ops_enriched[cols]
                 .sort_values("Data", ascending=False)
-                .style
-                .format({
-                    "Prezzo": "{:,.2f}",
-                    "AvgCostBefore": "{:,.2f}",
-                    "RealizedTradePL": "€ {:,.2f}"
-                })
-                .apply(highlight_sell_col, axis=0),
-                use_container_width=True
             )
+
+            # ✅ rename PRIMA dello style
+            df_display = df_base.rename(columns=columns_map)
+
+            # ✅ colonne tradotte (sicure)
+            fmt_dict = {}
+
+            if "Prezzo" in df_base.columns:
+                fmt_dict[columns_map["Prezzo"]] = "{:,.2f}"
+
+            if "AvgCostBefore" in df_base.columns:
+                fmt_dict[columns_map["AvgCostBefore"]] = "{:,.2f}"
+
+            if "RealizedTradePL" in df_base.columns:
+                fmt_dict[columns_map["RealizedTradePL"]] = "€ {:,.2f}"
+
+            # ✅ highlight vendite (robusto multilingua)
+            def highlight_sell_col(col):
+                name = str(col.name).lower()
+
+                # intercetta quantità IT + EN
+                if "quant" in name:
+                    return [
+                        "color: #DC2626" if pd.notna(v) and v < 0 else ""
+                        for v in col
+                    ]
+
+                return [""] * len(col)
+
+            styled = (
+                df_display
+                .style
+                .format(fmt_dict)
+                .apply(highlight_sell_col, axis=0)
+            )
+
+            st.dataframe(styled, use_container_width=True)
