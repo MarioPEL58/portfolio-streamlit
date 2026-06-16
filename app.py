@@ -498,6 +498,10 @@ with tab_flu:
     
     fmt_dict = {}
     
+    # ✅ DATA
+    if "Data" in xirr_flows.columns:
+        fmt_dict[columns_map["Data"]] = "{:%d/%m/%Y}"
+
     for col in xirr_flows.columns:
         if col in ["Operazioni", "Dividendi", "Valore finale", "Totale"]:
             fmt_dict[columns_map[col]] = "€ {:,.2f}"
