@@ -197,6 +197,12 @@ col_cost_open_after = "Costo residuo"
 col_cashflow_calc = "Flusso calcolato"
 col_tax_calc = "Tassa calcolata"
 
+# === FLOW / XIRR TABLE ===
+col_flow_operations = "Operazioni"
+col_flow_dividends = "Dividendi"
+col_flow_final_value = "Valore finale"
+col_flow_total = "Totale"
+
 [lang.en]
 
 # HEADER
@@ -375,3 +381,9 @@ col_qty_open_after = "Open quantity"
 col_cost_open_after = "Open cost"
 col_cashflow_calc = "Calculated cash flow"
 col_tax_calc = "Calculated tax"
+
+# === FLOW / XIRR TABLE ===
+col_flow_operations = "Operations"
+col_flow_dividends = "Dividends"
+col_flow_final_value = "Final value"
+col_flow_total = "Total"
