@@ -443,10 +443,10 @@ with tab_pos:
         "P/L Netto Stimato", "P/L Giornaliero", "P/L Giornaliero %"
     ]
     ordered_cols = [c for c in ordered_cols if c in current_view.columns]
-    df_display = current_view[ordered_cols].rename(columns=get_display_columns())
-
-    st.dataframe(
-        df_display
+    df_base = current_view[ordered_cols]
+    
+    styled = (
+        df_base
         .style
         .format({
             "Prezzo Attuale": "{:,.4f}",
@@ -460,9 +460,12 @@ with tab_pos:
             "P/L Giornaliero": "€ {:,.2f}",
             "P/L Giornaliero %": "{:.2%}",
         })
-        .apply(style_pl_column, axis=0),
-        use_container_width=True
+        .apply(style_pl_column, axis=0)
     )
+
+    # ✅ rename header DOPO
+    styled.data = styled.data.rename(columns=get_display_columns())
+    st.dataframe(styled, use_container_width=True)
 
 with tab_exp:
     st.subheader(t("allocation_title"))
