@@ -56,6 +56,7 @@ def portfolio_chart(series, bench_norm=None, benchmark_name=""):
 
 
 def allocation_pie_chart(exposure, column="Ticker", title=None):
+    
     if column not in exposure.columns:
         return None
 
@@ -82,6 +83,11 @@ def allocation_pie_chart(exposure, column="Ticker", title=None):
     return fig
     
 def allocation_bar_chart(exposure, column="Area", title=None):
+    
+    def translate_tipo(val):
+        key = f"type_{val}"
+        return t(key) if t(key) != key else val
+        
     if column not in exposure.columns:
         return None
 
@@ -93,6 +99,12 @@ def allocation_bar_chart(exposure, column="Area", title=None):
         .reset_index()
         .sort_values("Valore", ascending=False)
     )
+
+    # ✅ QUI traduci i valori (solo per Tipo)
+    if column == "Tipo":
+        df[column] = df[column].astype(str).apply(
+            lambda v: t(f"type_{v}") if t(f"type_{v}") != f"type_{v}" else v
+        )
 
     # ✅ traduzione colonne
     column_label = columns_map.get(column, column)
