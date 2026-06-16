@@ -44,6 +44,10 @@ def render_operations_preview(ops_enriched):
         
                 col_lower = col.lower()
         
+                # ✅ DATA (PRIMA di tutto)
+                if col_lower == "data":
+                    fmt_dict[columns_map.get(col, col)] = "{:%d/%m/%Y}"
+
                 # prezzi / costi
                 if any(k in col_lower for k in ["prezzo", "cost", "price"]):
                     fmt_dict[columns_map.get(col, col)] = "{:,.2f}"
