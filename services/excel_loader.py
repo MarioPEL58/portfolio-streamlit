@@ -6,34 +6,48 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from services.schema import (
+    COLUMN_ALIASES,
+    DIVIDEND_ALIASES,
+    SHEET_ALIASES,
+    REQUIRED_OPERATION_COLUMNS,
+    REQUIRED_DIVIDEND_COLUMNS,
+)
+
+
+# =========================================================
+# Utilities
+# =========================================================
 
 def normalize_text(s: str) -> str:
     s = str(s).strip().lower()
+
     replacements = {
-        "à": "a", "è": "e", "é": "e", "ì": "i", "ò": "o", "ù": "u",
-        "\xa0": " "
+        "à": "a",
+        "è": "e",
+        "é": "e",
+        "ì": "i",
+        "ò": "o",
+        "ù": "u",
+        "\xa0": " ",
     }
-    for k, v in replacements.items():
-        s = s.replace(k, v)
+
+    for old, new in replacements.items():
+        s = s.replace(old, new)
+
     for ch in ["-", "/", "\\", ".", ",", ":", ";", "(", ")", "[", "]", "{", "}", "\n", "\t"]:
         s = s.replace(ch, " ")
+
     return " ".join(s.split())
 
 
-def find_col(columns, candidates):
-    norm_map = {normalize_text(c): c for c in columns}
-
-    for candidate in candidates:
-        key = normalize_text(candidate)
-        if key in norm_map:
-            return norm_map[key]
-
-    for col in columns:
-        ncol = normalize_text(col)
-        if any(normalize_text(c) in ncol for c in candidates):
-            return col
-
-    return None
+def read_excel_safely(file_obj) -> bytes:
+    if hasattr(file_obj, "read"):
+        data = file_obj.read()
+        if hasattr(file_obj, "seek"):
+            file_obj.seek(0)
+        return data
+    return Path(file_obj).read_bytes()
 
 
 def parse_numeric(series: pd.Series) -> pd.Series:
@@ -52,109 +66,219 @@ def parse_numeric(series: pd.Series) -> pd.Series:
     return pd.to_numeric(s, errors="coerce")
 
 
-def read_excel_safely(file_obj) -> bytes:
-    if hasattr(file_obj, "read"):
-        data = file_obj.read()
-        if hasattr(file_obj, "seek"):
-            file_obj.seek(0)
-        return data
-    return Path(file_obj).read_bytes()
+# =========================================================
+# Column / Sheet detection
+# =========================================================
+
+def find_col(columns, candidates):
+    norm_map = {normalize_text(c): c for c in columns}
+
+    # match esatto
+    for candidate in candidates:
+        key = normalize_text(candidate)
+        if key in norm_map:
+            return norm_map[key]
+
+    # match parziale
+    for col in columns:
+        ncol = normalize_text(col)
+        if any(normalize_text(c) in ncol for c in candidates):
+            return col
+
+    return None
 
 
-def find_standard_col(df: pd.DataFrame, col_name: str):
-    """
-    Trova la colonna nel dataframe usando gli alias definiti nello schema.
-    """
-    from services.schema import COLUMN_ALIASES
-    return find_col(df.columns, COLUMN_ALIASES[col_name])
+def find_sheet_name(sheet_names, candidates):
+    norm_map = {normalize_text(s): s for s in sheet_names}
+
+    # match esatto
+    for candidate in candidates:
+        key = normalize_text(candidate)
+        if key in norm_map:
+            return norm_map[key]
+
+    # match parziale
+    for sheet in sheet_names:
+        nsheet = normalize_text(sheet)
+        if any(normalize_text(c) in nsheet for c in candidates):
+            return sheet
+
+    return None
 
 
-def load_operations_from_excel(file_obj) -> pd.DataFrame:
+def find_standard_col(df: pd.DataFrame, col_name: str, aliases_dict: dict | None = None):
+    aliases_dict = aliases_dict or COLUMN_ALIASES
+    aliases = aliases_dict.get(col_name, [])
+    return find_col(df.columns, aliases)
+
+
+def map_columns(df: pd.DataFrame, aliases_dict: dict) -> dict:
+    return {
+        std_name: find_standard_col(df, std_name, aliases_dict)
+        for std_name in aliases_dict.keys()
+    }
+
+
+def missing_required(mapped_cols: dict, required_cols: list[str]) -> list[str]:
+    return [col for col in required_cols if mapped_cols.get(col) is None]
+
+
+# =========================================================
+# Excel structure detection
+# =========================================================
+
+def detect_excel_structure(file_obj) -> dict:
     excel_bytes = read_excel_safely(file_obj)
     xls = pd.ExcelFile(BytesIO(excel_bytes), engine="openpyxl")
 
-    sheet_name = None
+    # -------------------------
+    # Operazioni
+    # -------------------------
+    operations_sheet = find_sheet_name(
+        xls.sheet_names,
+        SHEET_ALIASES["Operazioni"]
+    )
 
-    if "Operazioni" in xls.sheet_names:
-        sheet_name = "Operazioni"
-    else:
+    operations_columns = {}
+
+    if operations_sheet is not None:
+        tmp = pd.read_excel(
+            BytesIO(excel_bytes),
+            sheet_name=operations_sheet,
+            engine="openpyxl",
+            nrows=30
+        )
+        tmp = tmp.dropna(axis=0, how="all").dropna(axis=1, how="all")
+        operations_columns = map_columns(tmp, COLUMN_ALIASES)
+
+    # fallback: trova il primo foglio compatibile dalle colonne
+    if operations_sheet is None:
         for s in xls.sheet_names:
-            tmp = pd.read_excel(BytesIO(excel_bytes), sheet_name=s, engine="openpyxl", nrows=20)
-            c_ticker = find_col(tmp.columns, ["Ticker"])
-            c_date = find_col(tmp.columns, ["Data", "Date"])
-            c_qty = find_col(tmp.columns, ["Quantità", "Quantita", "Quantity", "Qta"])
-            if c_ticker and c_date and c_qty:
-                sheet_name = s
+            tmp = pd.read_excel(
+                BytesIO(excel_bytes),
+                sheet_name=s,
+                engine="openpyxl",
+                nrows=30
+            )
+            tmp = tmp.dropna(axis=0, how="all").dropna(axis=1, how="all")
+            mapped = map_columns(tmp, COLUMN_ALIASES)
+            missing = missing_required(mapped, REQUIRED_OPERATION_COLUMNS)
+
+            if not missing:
+                operations_sheet = s
+                operations_columns = mapped
                 break
 
-    if sheet_name is None:
-        raise ValueError(
-            "Nessun foglio compatibile trovato. Serve un foglio con almeno: Ticker, Data, Quantità."
+    operations_missing = (
+        missing_required(operations_columns, REQUIRED_OPERATION_COLUMNS)
+        if operations_sheet is not None
+        else REQUIRED_OPERATION_COLUMNS.copy()
+    )
+
+    # -------------------------
+    # Dividendi / Cedole
+    # -------------------------
+    dividends_sheet = find_sheet_name(
+        xls.sheet_names,
+        SHEET_ALIASES["DividendiCedole"]
+    )
+
+    dividends_columns = {}
+
+    if dividends_sheet is not None:
+        tmp = pd.read_excel(
+            BytesIO(excel_bytes),
+            sheet_name=dividends_sheet,
+            engine="openpyxl",
+            nrows=30
         )
+        tmp = tmp.dropna(axis=0, how="all").dropna(axis=1, how="all")
+        dividends_columns = map_columns(tmp, DIVIDEND_ALIASES)
+
+    dividends_missing = (
+        missing_required(dividends_columns, REQUIRED_DIVIDEND_COLUMNS)
+        if dividends_sheet is not None
+        else REQUIRED_DIVIDEND_COLUMNS.copy()
+    )
+
+    return {
+        "sheet_names": xls.sheet_names,
+        "operations": {
+            "sheet_name": operations_sheet,
+            "columns": operations_columns,
+            "missing_required": operations_missing,
+            "is_valid": operations_sheet is not None and len(operations_missing) == 0,
+        },
+        "dividends": {
+            "sheet_name": dividends_sheet,
+            "columns": dividends_columns,
+            "missing_required": dividends_missing,
+            "is_valid": dividends_sheet is not None and len(dividends_missing) == 0,
+        },
+    }
+
+
+# =========================================================
+# Load operations
+# =========================================================
+
+def load_operations_from_excel(file_obj) -> pd.DataFrame:
+    structure = detect_excel_structure(file_obj)
+
+    if not structure["operations"]["is_valid"]:
+        missing = structure["operations"]["missing_required"]
+        raise ValueError(
+            f"Nessun foglio compatibile trovato. Colonne obbligatorie mancanti: {missing}"
+        )
+
+    excel_bytes = read_excel_safely(file_obj)
+    sheet_name = structure["operations"]["sheet_name"]
+    cols = structure["operations"]["columns"]
 
     df = pd.read_excel(BytesIO(excel_bytes), sheet_name=sheet_name, engine="openpyxl")
     df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
 
-    col_id = find_col(df.columns, ["ID"])
-    col_broker = find_col(df.columns, ["Intermediario"])
-    col_ticker = find_col(df.columns, ["Ticker"])
-    col_date = find_col(df.columns, ["Data", "Date"])
-    col_qty = find_col(df.columns, ["Quantità", "Quantita", "Quantity", "Qta"])
-    col_price = find_col(df.columns, ["Prezzo", "Price"])
-    col_fee = find_col(df.columns, ["Spese euro", "SpeseEuro", "Commissioni", "Commissione", "Fees", "Fee"])
-    col_tax = find_col(df.columns, ["Tassa"])
-    col_name = find_col(df.columns, ["Nome"])
-    col_type = find_col(df.columns, ["Tipo"])
-    col_fx = find_col(df.columns, ["Cambio"])
-    col_flusso_netto = find_col(df.columns, ["Flusso netto", "FlussoNetto"])
-    col_pmc = find_col(df.columns, ["Prezzo medio s/carico", "Prezzo medio s_carico", "Prezzo medio"])
-    col_area = find_col(df.columns, ["Area"])
-    col_sector = find_col(df.columns, ["Settore"])
-    col_issuer = find_col(df.columns, ["Emittente"])
-    col_currency = find_col(df.columns, ["Valuta"])
-
-    missing = [
-        name for name, col in [
-            ("Ticker", col_ticker),
-            ("Data", col_date),
-            ("Quantità", col_qty),
-        ]
-        if col is None
-    ]
-    if missing:
-        raise ValueError(f"Colonne obbligatorie mancanti: {missing}")
-
     out = pd.DataFrame({
-        "Ticker": df[col_ticker].astype(str).str.strip(),
-        "Data": pd.to_datetime(df[col_date], dayfirst=True, errors="coerce"),
-        "Quantita": parse_numeric(df[col_qty]),
+        "Ticker": df[cols["Ticker"]].astype(str).str.strip(),
+        "Data": pd.to_datetime(df[cols["Data"]], dayfirst=True, errors="coerce"),
+        "Quantita": parse_numeric(df[cols["Quantita"]]),
     })
 
-    out["ID"] = df[col_id] if col_id is not None else np.nan
-    out["Intermediario"] = df[col_broker] if col_broker is not None else ""
-    out["Prezzo"] = parse_numeric(df[col_price]) if col_price is not None else np.nan
-    out["SpeseEuro"] = parse_numeric(df[col_fee]).fillna(0.0) if col_fee is not None else 0.0
-    out["Tassa"] = parse_numeric(df[col_tax]).fillna(0.0) if col_tax is not None else 0.0
-    out["Cambio"] = parse_numeric(df[col_fx]) if col_fx is not None else np.nan
-    valore = (out["Quantita"] * out["Prezzo"].fillna(0.0) * out["Cambio"].fillna(1.0))
+    out["ID"] = df[cols["ID"]] if cols.get("ID") is not None else np.nan
+    out["Intermediario"] = df[cols["Intermediario"]] if cols.get("Intermediario") is not None else ""
+    out["Prezzo"] = parse_numeric(df[cols["Prezzo"]]) if cols.get("Prezzo") is not None else np.nan
+    out["SpeseEuro"] = (
+        parse_numeric(df[cols["SpeseEuro"]]).fillna(0.0)
+        if cols.get("SpeseEuro") is not None else 0.0
+    )
+    out["Tassa"] = (
+        parse_numeric(df[cols["Tassa"]]).fillna(0.0)
+        if cols.get("Tassa") is not None else 0.0
+    )
+    out["Cambio"] = (
+        parse_numeric(df[cols["Cambio"]])
+        if cols.get("Cambio") is not None else np.nan
+    )
 
-    # ✅ fallback se FlussoNetto non c'è (file demo)
-    flusso_base = - valore - out["SpeseEuro"].fillna(0.0)
-    
-    # ✅ se FlussoNetto esiste → usa quello (file reale)
-    if col_flusso_netto is not None:
-        out["FlussoNetto"] = parse_numeric(df[col_flusso_netto])
+    valore = out["Quantita"] * out["Prezzo"].fillna(0.0) * out["Cambio"].fillna(1.0)
+    flusso_base = -valore - out["SpeseEuro"].fillna(0.0)
+
+    if cols.get("FlussoNetto") is not None:
+        out["FlussoNetto"] = parse_numeric(df[cols["FlussoNetto"]])
     else:
         out["FlussoNetto"] = flusso_base
 
-    out["Prezzo medio s/carico"] = parse_numeric(df[col_pmc]) if col_pmc is not None else np.nan
+    out["Prezzo medio s/carico"] = (
+        parse_numeric(df[cols["Prezzo medio s/carico"]])
+        if cols.get("Prezzo medio s/carico") is not None else np.nan
+    )
 
-    out["Nome"] = df[col_name] if col_name is not None else out["Ticker"]
-    out["Tipo"] = df[col_type] if col_type is not None else ""
-    out["Area"] = df[col_area] if col_area is not None else ""
-    out["Settore"] = df[col_sector] if col_sector is not None else ""
-    out["Emittente"] = df[col_issuer] if col_issuer is not None else ""
-    out["Valuta"] = df[col_currency] if col_currency is not None else ""
+    out["Nome"] = df[cols["Nome"]] if cols.get("Nome") is not None else out["Ticker"]
+    out["Tipo"] = df[cols["Tipo"]] if cols.get("Tipo") is not None else ""
+    out["Area"] = df[cols["Area"]] if cols.get("Area") is not None else ""
+    out["Settore"] = df[cols["Settore"]] if cols.get("Settore") is not None else ""
+    out["Emittente"] = df[cols["Emittente"]] if cols.get("Emittente") is not None else ""
+    out["Valuta"] = df[cols["Valuta"]] if cols.get("Valuta") is not None else ""
 
     out = out.dropna(subset=["Ticker", "Data", "Quantita"])
     out = out[out["Ticker"] != ""]
@@ -169,36 +293,38 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
     return out
 
 
+# =========================================================
+# Load dividends
+# =========================================================
+
 def load_dividends_from_excel(file_obj) -> pd.DataFrame:
+    structure = detect_excel_structure(file_obj)
+
+    if not structure["dividends"]["is_valid"]:
+        return pd.DataFrame(
+            columns=["ID", "Data", "DividendoNetto", "Nome", "Valuta", "PositionKey"]
+        )
+
     excel_bytes = read_excel_safely(file_obj)
+    sheet_name = structure["dividends"]["sheet_name"]
+    cols = structure["dividends"]["columns"]
 
-    try:
-        df = pd.read_excel(BytesIO(excel_bytes), sheet_name="DividendiCedole", engine="openpyxl").copy()
-    except Exception:
-        return pd.DataFrame(columns=["ID", "Data", "DividendoNetto", "Nome", "Valuta", "PositionKey"])
-
-    df.columns = [str(c).strip() for c in df.columns]
-
-    col_id = find_col(df.columns, ["ID"])
-    col_date = find_col(df.columns, ["Data"])
-    col_div_net = find_col(df.columns, ["Dividendi euro Netti"])
-    col_div_tot = find_col(df.columns, ["Dividendi totali euro"])
-    col_name = find_col(df.columns, ["Nome"])
-    col_currency = find_col(df.columns, ["Valuta"])
+    df = pd.read_excel(BytesIO(excel_bytes), sheet_name=sheet_name, engine="openpyxl").copy()
+    df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
 
     out = pd.DataFrame()
-    out["ID"] = df[col_id] if col_id is not None else np.nan
-    out["Data"] = pd.to_datetime(df[col_date], errors="coerce", dayfirst=True)
+    out["ID"] = df[cols["ID"]] if cols.get("ID") is not None else np.nan
+    out["Data"] = pd.to_datetime(df[cols["Data"]], errors="coerce", dayfirst=True)
 
-    if col_div_net is not None:
-        out["DividendoNetto"] = parse_numeric(df[col_div_net]).fillna(0.0)
-    elif col_div_tot is not None:
-        out["DividendoNetto"] = parse_numeric(df[col_div_tot]).fillna(0.0)
+    if cols.get("DividendoNetto") is not None:
+        out["DividendoNetto"] = parse_numeric(df[cols["DividendoNetto"]]).fillna(0.0)
+    elif cols.get("DividendoTotale") is not None:
+        out["DividendoNetto"] = parse_numeric(df[cols["DividendoTotale"]]).fillna(0.0)
     else:
         out["DividendoNetto"] = 0.0
 
-    out["Nome"] = df[col_name] if col_name is not None else ""
-    out["Valuta"] = df[col_currency] if col_currency is not None else ""
+    out["Nome"] = df[cols["Nome"]] if cols.get("Nome") is not None else ""
+    out["Valuta"] = df[cols["Valuta"]] if cols.get("Valuta") is not None else ""
 
     out = out[out["Data"].notna() & (out["DividendoNetto"] != 0)].copy()
 
