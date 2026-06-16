@@ -85,6 +85,8 @@ def allocation_bar_chart(exposure, column="Area", title=None):
     if column not in exposure.columns:
         return None
 
+    columns_map = get_display_columns()
+    
     df = (
         exposure.groupby(column, dropna=False)["Valore"]
         .sum()
