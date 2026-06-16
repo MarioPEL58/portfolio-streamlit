@@ -55,17 +55,18 @@ def render_operations_preview(ops_enriched):
 
             # ✅ highlight vendite (robusto multilingua)
             def highlight_sell_col(col):
-                name = str(col.name).lower()
-
-                # intercetta quantità IT + EN
-                if "quant" in name:
+                name = str(col.name).strip().lower()
+            
+                keywords = ["quant", "qty", "quantity"]
+            
+                if any(k in name for k in keywords):
                     return [
                         "color: #DC2626" if pd.notna(v) and v < 0 else ""
                         for v in col
                     ]
-
+            
                 return [""] * len(col)
-
+                
             styled = (
                 df_display
                 .style
