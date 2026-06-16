@@ -492,13 +492,27 @@ with tab_flu:
     st.subheader(t("flows_title"))
     st.caption(t("flows_subtitle "))
 
+    # st.dataframe(
+    #     xirr_flows.style.format({
+    #         "Operazioni": "€ {:,.2f}",
+    #         "Dividendi": "€ {:,.2f}",
+    #         "Valore finale": "€ {:,.2f}",
+    #         "Totale": "€ {:,.2f}"
+    #     }),
+    #     use_container_width=True
+    # )
+    columns_map = get_display_columns()
+    
+    df_display = xirr_flows.rename(columns=columns_map)
+    
+    fmt_dict = {}
+    
+    for col in xirr_flows.columns:
+        if col in ["Operazioni", "Dividendi", "Valore finale", "Totale"]:
+            fmt_dict[columns_map[col]] = "€ {:,.2f}"
+    
     st.dataframe(
-        xirr_flows.style.format({
-            "Operazioni": "€ {:,.2f}",
-            "Dividendi": "€ {:,.2f}",
-            "Valore finale": "€ {:,.2f}",
-            "Totale": "€ {:,.2f}"
-        }),
+        df_display.style.format(fmt_dict),
         use_container_width=True
     )
 
