@@ -159,6 +159,7 @@ sidebar_show_benchmark = "Mostra benchmark normalizzato"
 sidebar_min_date = "Data minima"
 
 # colonnper tae belle in output 
+col_date = "Data"
 col_ticker = "Ticker"
 col_broker = "Intermediario"
 col_name = "Nome"
@@ -343,7 +344,7 @@ sidebar_show_benchmark = "Show normalized benchmark"
 sidebar_min_date = "Start date"
 
 # colonnper tae belle in output 
-
+col_date = "Date"
 col_ticker = "Ticker"
 col_broker = "Broker"
 col_name = "Name"
