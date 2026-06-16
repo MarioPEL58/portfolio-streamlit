@@ -69,6 +69,8 @@ positions_title = "Posizioni correnti"
 allocation_title = "Allocazione"
 allocation_area = "Per area"
 allocation_type = "Per tipo"
+type_AZ = "Azioni"
+type_ETF = "ETF"
 
 # FLUSSI
 flows_title = "📊 Flussi per data (XIRR)"
@@ -248,6 +250,8 @@ positions_title = "Current positions"
 allocation_title = "Allocation"
 allocation_area = "By area"
 allocation_type = "By type"
+type_AZ = "Stocks"
+type_ETF = "ETFs"
 
 # FLUSSI
 flows_title = "📊 Cash flows (XIRR)"
