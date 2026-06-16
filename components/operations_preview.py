@@ -4,6 +4,21 @@ from utils.i18n import t
 from utils.display import get_display_columns
 
 
+# ✅ funzione RIUSABILE
+def highlight_sell_col(col):
+    name = str(col.name).strip().lower()
+
+    keywords = ["quant", "qty", "quantity"]
+
+    if any(k in name for k in keywords):
+        return [
+            "color: #DC2626" if pd.notna(v) and v < 0 else ""
+            for v in col
+        ]
+
+    return [""] * len(col)
+
+
 def render_operations_preview(ops_enriched):
 
     with st.expander(t("operations_preview_title"), expanded=False):
@@ -14,11 +29,24 @@ def render_operations_preview(ops_enriched):
 
         columns_map = get_display_columns()
 
+        # =========================
+        # ✅ SHOW ALL
+        # =========================
         if show_full:
-            # ✅ rename completo
-            df_display = ops_enriched.rename(columns=columns_map)
-            st.dataframe(df_display, use_container_width=True)
 
+            df_display = ops_enriched.rename(columns=columns_map)
+
+            styled = (
+                df_display
+                .style
+                .apply(highlight_sell_col, axis=0)
+            )
+
+            st.dataframe(styled, use_container_width=True)
+
+        # =========================
+        # ✅ PREVIEW
+        # =========================
         else:
             cols = [
                 "Data",
@@ -38,10 +66,9 @@ def render_operations_preview(ops_enriched):
                 .sort_values("Data", ascending=False)
             )
 
-            # ✅ rename PRIMA dello style
             df_display = df_base.rename(columns=columns_map)
 
-            # ✅ colonne tradotte (sicure)
+            # ✅ format sicuro
             fmt_dict = {}
 
             if "Prezzo" in df_base.columns:
@@ -53,20 +80,6 @@ def render_operations_preview(ops_enriched):
             if "RealizedTradePL" in df_base.columns:
                 fmt_dict[columns_map["RealizedTradePL"]] = "€ {:,.2f}"
 
-            # ✅ highlight vendite (robusto multilingua)
-            def highlight_sell_col(col):
-                name = str(col.name).strip().lower()
-            
-                keywords = ["quant", "qty", "quantity"]
-            
-                if any(k in name for k in keywords):
-                    return [
-                        "color: #DC2626" if pd.notna(v) and v < 0 else ""
-                        for v in col
-                    ]
-            
-                return [""] * len(col)
-                
             styled = (
                 df_display
                 .style
