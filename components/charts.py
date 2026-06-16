@@ -2,6 +2,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from config import UI_CHART_STYLE as STYLE
 from utils.i18n import t
+from utils.display import get_display_columns
 import pandas as pd
 
 def portfolio_chart(series, bench_norm=None, benchmark_name=""):
@@ -91,11 +92,21 @@ def allocation_bar_chart(exposure, column="Area", title=None):
         .sort_values("Valore", ascending=False)
     )
 
+    # ✅ traduzione colonne
+    column_label = columns_map.get(column, column)
+    value_label = columns_map.get("Valore", "Valore")
+    
+   # ✅ rinomina dataframe per plotly
+    df = df.rename(columns={
+        column: column_label,
+        "Valore": value_label
+    })
+
     fig = px.bar(
         df,
         x=column,
-        y="Valore",
-        title=title if title else f"Allocazione per {column}"
+        y=value_label,
+        title=title if title else f"{t('allocation_title')} {column_label}"
     )
 
     fig.update_layout(
