@@ -54,7 +54,7 @@ if ENV == "DEV":
     st.warning(t("dev_warning"))
 
 # Sidebar
-sidebar_cfg = render_sidebar(create_demo_file)
+sidebar_cfg = render_sidebar()
 uploaded_file = sidebar_cfg["uploaded_file"]
 benchmark = sidebar_cfg["benchmark"]
 show_benchmark = sidebar_cfg["show_benchmark"]
