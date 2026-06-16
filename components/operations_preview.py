@@ -33,17 +33,37 @@ def render_operations_preview(ops_enriched):
         # ✅ SHOW ALL
         # =========================
         if show_full:
-
-            df_display = ops_enriched.rename(columns=columns_map)
-
+        
+            df_base = ops_enriched.copy()
+            df_display = df_base.rename(columns=columns_map)
+        
+            # ✅ FORMATI dinamici (robusti)
+            fmt_dict = {}
+        
+            for col in df_base.columns:
+        
+                col_lower = col.lower()
+        
+                # prezzi / costi
+                if any(k in col_lower for k in ["prezzo", "cost", "price"]):
+                    fmt_dict[columns_map.get(col, col)] = "{:,.2f}"
+        
+                # percentuali
+                elif "%" in col:
+                    fmt_dict[columns_map.get(col, col)] = "{:.2%}"
+        
+                # P/L o valori monetari
+                elif any(k in col_lower for k in ["pl", "flow", "tax", "div"]):
+                    fmt_dict[columns_map.get(col, col)] = "€ {:,.2f}"
+        
             styled = (
                 df_display
                 .style
+                .format(fmt_dict)
                 .apply(highlight_sell_col, axis=0)
             )
-
+        
             st.dataframe(styled, use_container_width=True)
-
         # =========================
         # ✅ PREVIEW
         # =========================
