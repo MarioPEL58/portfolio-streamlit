@@ -102,7 +102,7 @@ def render_operations_preview(ops_enriched):
                 fmt_dict[columns_map["Data"]] = "{:%d/%m/%Y}"
                 
             if "Quantita" in df_base.columns:
-                fmt_dict[columns_map["Prezzo"]] = "{:,.2f}"
+                fmt_dict[columns_map["Quantita"]] = "{:,.2f}"
                 
             if "Prezzo" in df_base.columns:
                 fmt_dict[columns_map["Prezzo"]] = "{:,.2f}"
