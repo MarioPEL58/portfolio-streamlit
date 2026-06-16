@@ -9,8 +9,7 @@ import pytz
 
 from utils.i18n import t
 
-
-def render_sidebar(create_demo_file):
+def render_sidebar():
     with st.sidebar:
 
         st.markdown("---")
