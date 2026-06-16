@@ -79,6 +79,14 @@ def get_format_dict(df_base, columns_map=None, lang=None):
         if col_lower == "data":
             fmt_dict[display_col] = date_fmt
 
+        # ID
+        elif col_lower == "id":
+            fmt_dict[display_col] = "{:,.0f}"
+        
+        # ✅ TASSA PRIMA del blocco euro
+        elif col_lower == "tassa" or "tax" in col_lower:
+            fmt_dict[display_col] = "{:.2%}"
+
         # 2) quantità
         elif any(k in col_lower for k in ["quant", "qty", "quantity"]):
             fmt_dict[display_col] = "{:,.2f}"
