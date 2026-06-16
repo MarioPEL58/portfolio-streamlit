@@ -19,6 +19,7 @@ from services.portfolio_metrics import compute_portfolio_xirr
 from services.market_status import compute_market_update_label
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
+from utils.display import get_display_columns
 
 from utils.kpi_cards import (
     render_value_card,
@@ -442,9 +443,10 @@ with tab_pos:
         "P/L Netto Stimato", "P/L Giornaliero", "P/L Giornaliero %"
     ]
     ordered_cols = [c for c in ordered_cols if c in current_view.columns]
+    df_display = current_view[ordered_cols].rename(columns=get_display_columns())
 
     st.dataframe(
-        current_view[ordered_cols]
+        df_display
         .style
         .format({
             "Prezzo Attuale": "{:,.4f}",
