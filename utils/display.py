@@ -84,7 +84,7 @@ def get_format_dict(df_base, columns_map=None, lang=None):
             fmt_dict[display_col] = "{:,.0f}"
         
         # ✅ TASSA PRIMA del blocco euro
-        elif col_lower == "tassa" or "tax" in col_lower:
+        elif col_lower in ["tassa", "tax"]:
             fmt_dict[display_col] = "{:.2%}"
 
         # 2) quantità
