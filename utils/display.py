@@ -108,3 +108,75 @@ def get_format_dict(df_base, columns_map=None, lang=None):
             fmt_dict[display_col] = "€ {:,.2f}"
 
     return fmt_dict
+
+def get_format_dict_positions(df_base, columns_map=None, lang=None):
+
+    if columns_map is None:
+        from utils.display import get_display_columns
+        columns_map = get_display_columns()
+
+    if lang is None:
+        lang = st.session_state.get("lang", "it")
+
+    # ✅ formato data per lingua
+    date_fmt = "{:%d/%m/%Y}" if lang == "it" else "{:%Y-%m-%d}"
+
+    fmt = {}
+
+    for col in df_base.columns:
+        col_lower = str(col).strip().lower()
+        display_col = columns_map.get(col, col)
+
+        # =========================
+        # ✅ DATA
+        # =========================
+        if col_lower == "data":
+            fmt[display_col] = date_fmt
+
+        # =========================
+        # ✅ ID (intero)
+        # =========================
+        elif col_lower == "id":
+            fmt[display_col] = "{:,.0f}"
+
+        # =========================
+        # ✅ QUANTITÀ
+        # =========================
+        elif any(k in col_lower for k in ["quant", "qty", "quantity"]):
+            fmt[display_col] = "{:,.2f}"
+
+        # =========================
+        # ✅ PERCENTUALI (incl. Tassa)
+        # =========================
+        elif col_lower in ["p/l %", "p/l giornaliero %", "tassa", "tax"]:
+            fmt[display_col] = "{:.2%}"
+
+        # =========================
+        # ✅ PREZZI / COSTI
+        # =========================
+        elif any(k in col_lower for k in [
+            "prezzo", "price", "cost", "avgcost", "costo"
+        ]):
+            fmt[display_col] = "{:,.2f}"
+
+        # =========================
+        # ✅ VALORI IN EURO
+        # =========================
+        elif any(k in col_lower for k in [
+            "valore",       # Value
+            "pl",           # P/L
+            "div",          # Dividends
+            "spese",        # Fees
+            "flow",         # Cashflow
+            "cash",         # CashflowCalc
+            "taxeuro",      # TaxEuroCalc (IMPORTANTE!)
+        ]):
+            fmt[display_col] = "€ {:,.2f}"
+
+        # =========================
+        # ✅ FALLBACK NUMERICO
+        # =========================
+        elif pd.api.types.is_numeric_dtype(df_base[col]):
+            fmt[display_col] = "{:,.2f}"
+
+    return fmt
