@@ -209,6 +209,10 @@ col_flow_dividends = "Dividendi"
 col_flow_final_value = "Valore finale"
 col_flow_total = "Totale"
 
+benchmark_label = "Benchmark"
+currency_label = "Euro"
+pl_label = "P/L"
+
 [lang.en]
 
 # HEADER
@@ -398,3 +402,8 @@ col_flow_operations = "Operations"
 col_flow_dividends = "Dividends"
 col_flow_final_value = "Final value"
 col_flow_total = "Total"
+
+benchmark_label = "Benchmark"
+currency_label = "Euro"
+pl_label = "P/L"
+
