@@ -170,6 +170,12 @@ xirr_value, xirr_flows = compute_portfolio_xirr(
 # Benchmark
 # =========================
 bench_norm = None
+
+# =========================
+# ✅ Benchmark flow-adjusted
+# =========================
+bench_series = None   ✅
+
 if show_benchmark and benchmark.strip():
     bench_df, _ = download_close_prices(
         [benchmark.strip()],
@@ -188,12 +194,17 @@ if show_benchmark and benchmark.strip():
         
             # ✅ prepara flows per benchmark
             flows_input = xirr_flows.copy()
-        
+            
+            # ✅ RIMUOVE la riga finale sintetica
+            if "Valore finale" in flows_input.columns:
+                flows_input = flows_input[flows_input["Valore finale"].fillna(0) == 0]
+    
             flow_cols = [c for c in ["Operazioni", "Dividendi"] if c in flows_input.columns]
             flows_input["Flow"] = flows_input[flow_cols].fillna(0.0).sum(axis=1)
         
             flows_input = flows_input[["Data", "Flow"]]
-        
+            #debug 
+            st.write(flows_input.head(10))
             # ✅ nuovo benchmark corretto
             bench_series = build_flow_adjusted_benchmark(
                 flows_df=flows_input,
