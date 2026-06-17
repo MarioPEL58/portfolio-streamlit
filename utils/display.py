@@ -49,6 +49,10 @@ def get_display_columns():
         "CostOpenAfter": t("col_cost_open_after"),
         "CashflowCalc": t("col_cashflow_calc"),
         "TaxEuroCalc": t("col_tax_calc"),
+        
+        "Valore portafoglio": t("col_portfolio_value"),
+        "Capitale investito": t("col_invested_capital"),
+        "P/L trading": t("col_trading_pl"),
     }
 
 
