@@ -49,7 +49,7 @@ def portfolio_chart(series, bench_norm=None, benchmark_name=""):
             showgrid=False
         ),
         legend=dict(orientation="h"),
-        margin=dict(l=20, r=20, t=20, b=20)
+        margin=dict(l=20, r=20, t=20, b=40)
     )
 
     return fig
