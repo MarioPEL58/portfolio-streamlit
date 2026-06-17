@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 from utils.display import get_display_columns, get_format_dict_positions
-from utils.styles import style_pl_column   # se lo hai separato
+from utils.formatting import style_pl_column
 from utils.i18n import t
 
 def render_positions_table(current):
