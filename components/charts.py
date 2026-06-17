@@ -6,27 +6,30 @@ from utils.display import get_display_columns
 import pandas as pd
 
 def portfolio_chart(series, bench_norm=None, benchmark_name=""):
+
+    columns_map = get_display_columns()
+
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(
         x=series.index,
         y=series["Valore portafoglio"],
         mode="lines",
-        name="Valore portafoglio"
+        name=columns_map.get("Valore portafoglio", "Portfolio value")
     ))
 
     fig.add_trace(go.Scatter(
         x=series.index,
         y=series["Capitale investito"],
         mode="lines",
-        name="Capitale investito"
+        name=columns_map.get("Capitale investito", "Invested capital")
     ))
 
     fig.add_trace(go.Scatter(
         x=series.index,
         y=series["P/L trading"],
         mode="lines",
-        name="P/L trading",
+        name=columns_map.get("P/L trading", "Trading P/L"),
         yaxis="y2"
     ))
 
@@ -35,20 +38,21 @@ def portfolio_chart(series, bench_norm=None, benchmark_name=""):
             x=bench_norm.index,
             y=bench_norm.values,
             mode="lines",
-            name=f"Benchmark: {benchmark_name}"
+            name=f"{t('benchmark_label')}: {benchmark_name}"
         ))
 
     fig.update_layout(
         height=540,
-        xaxis_title="Data",
-        yaxis_title="Euro",
+        xaxis_title=t("col_date"),
+        yaxis_title=t("currency_label"),
         yaxis2=dict(
-            title="P/L",
+            title=t("pl_label"),
             overlaying="y",
             side="right",
             showgrid=False
         ),
-        legend=dict(orientation="h",
+        legend=dict(
+            orientation="h",
             yanchor="bottom",
             y=1.02,
             xanchor="right",
@@ -58,8 +62,7 @@ def portfolio_chart(series, bench_norm=None, benchmark_name=""):
     )
 
     return fig
-
-
+    
 def allocation_pie_chart(exposure, column="Ticker", title=None):
     
     if column not in exposure.columns:
