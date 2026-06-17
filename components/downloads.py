@@ -17,7 +17,7 @@ def dataframe_to_excel_bytes(df: pd.DataFrame):
 
 def render_download_tab(series, current, ops):
 
-    st.subheader(t("download_title"))
+    # st.subheader(t("download_title"))
 
     columns_map = get_display_columns()
 
