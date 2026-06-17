@@ -65,6 +65,7 @@ tab_download = "Download"
 
 # POSIZIONI
 positions_title = "Posizioni correnti"
+positions_count = "posizioni"
 
 # ESPOSIZIONE
 allocation_title = "Allocazione"
@@ -257,6 +258,7 @@ tab_download = "Download"
 
 # POSIZIONI
 positions_title = "Current positions"
+positions_count = "positions"
 
 # ESPOSIZIONE
 allocation_title = "Allocation"
