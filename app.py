@@ -20,7 +20,7 @@ from services.market_status import compute_market_update_label
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 from utils.display import get_display_columns
-from components.tables import render_positions_table
+from components.tables import render_positions_table, render_operations_table
 
 from utils.kpi_cards import (
     render_value_card,
@@ -484,11 +484,7 @@ with tab_flu:
 
 with tab_ops:
     st.subheader(t("operations_title"))
-    all_tickers = [t("all_option")] + sorted(ops_enriched["Ticker"].unique().tolist())
-    selected_ticker = st.selectbox(t("filter_ticker"), all_tickers)
-
-    show_ops = (ops_enriched if selected_ticker == t("all_option") else ops_enriched[ops_enriched["Ticker"] == selected_ticker])
-    st.dataframe(show_ops, use_container_width=True)
+    render_operations_table(ops_enriched)
 
 with tab_dl:
     st.subheader(t("download_title"))
