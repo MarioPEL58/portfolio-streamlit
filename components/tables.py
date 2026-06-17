@@ -64,48 +64,70 @@ def render_operations_table(ops_enriched):
 
     columns_map = get_display_columns()
 
-    # =========================
-    # ✅ FILTRO TICKER
-    # =========================
+    # ✅ toggle compatto
+    compact_view = st.toggle(t("compact_view"), value=True, key="compact_view_ops")
+
+    # ✅ filtro ticker
     all_tickers = [t("all_option")] + sorted(ops_enriched["Ticker"].unique().tolist())
 
     selected_ticker = st.selectbox(
         t("filter_ticker"),
-        all_tickers
+        all_tickers,
+        key="operations_table_ticker"
     )
 
     if selected_ticker == t("all_option"):
         df_base = ops_enriched.copy()
     else:
-        df_base = ops_enriched[ops_enriched["Ticker"] == selected_ticker]
+        df_base = ops_enriched[ops_enriched["Ticker"] == selected_ticker].copy()
 
-    # =========================
-    # ✅ NORMALIZZAZIONE
-    # =========================
+    # ✅ vista compatta / completa
+    if compact_view:
+        cols = [
+            "Data",
+            "Ticker",
+            "Intermediario",
+            "Tipo",
+            "Quantita",
+            "Prezzo",
+            "AvgCostBefore",
+            "RealizedTradePL",
+        ]
+    else:
+        cols = list(df_base.columns)
+
+    cols = [c for c in cols if c in df_base.columns]
+    df_base = df_base[cols]
+
+    # ✅ datetime
     if "Data" in df_base.columns:
         df_base["Data"] = pd.to_datetime(df_base["Data"], errors="coerce")
 
-    # =========================
-    # ✅ ORDINAMENTO
-    # =========================
+    # ✅ ordinamento
     if "Data" in df_base.columns:
         df_base = df_base.sort_values("Data", ascending=False)
 
-    # =========================
-    # ✅ DISPLAY
-    # =========================
+    # ✅ traduzione colonne
     df_display = df_base.rename(columns=columns_map)
 
-    # ✅ usa formatter centralizzato
+    # ✅ format centralizzato
     fmt_dict = get_format_dict_positions(df_base, columns_map)
 
-    # =========================
-    # ✅ STYLING
-    # =========================
+    # ✅ highlight quantità negative
+    def highlight_sell_col(col):
+        name = str(col.name).strip().lower()
+        if any(k in name for k in ["quant", "qty", "quantity"]):
+            return [
+                "color: #DC2626" if pd.notna(v) and v < 0 else ""
+                for v in col
+            ]
+        return [""] * len(col)
+
     styled = (
         df_display
         .style
         .format(fmt_dict)
+        .apply(highlight_sell_col, axis=0)
         .apply(style_pl_column, axis=0)
     )
 
