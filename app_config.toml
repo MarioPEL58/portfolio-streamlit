@@ -56,7 +56,6 @@ bar_pl_pct = "P/L %"
 bar_pl_abs = "P/L"
 
 # TABS
-compact_view = "Compact view"
 compact_view = "Vista compatta"
 tab_positions = "Posizioni"
 tab_exposure = "Esposizione"
@@ -246,6 +245,7 @@ bar_pl_pct = "P/L %"
 bar_pl_abs = "P/L"
 
 # TABS
+current_view = "Compact view"
 tab_positions = "Positions"
 tab_exposure = "Exposure"
 tab_flows = "Flows"
