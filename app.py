@@ -198,9 +198,9 @@ if show_benchmark and benchmark.strip():
             # ✅ RIMUOVE la riga finale sintetica
             if "Valore finale" in flows_input.columns:
                 flows_input = flows_input[flows_input["Valore finale"].fillna(0) == 0]
-    
-            flow_cols = [c for c in ["Operazioni", "Dividendi"] if c in flows_input.columns]
-            flows_input["Flow"] = flows_input[flow_cols].fillna(0.0).sum(axis=1)
+                
+            # ✅ Flow corretto (solo flussi di acquisto / vendita no Dividendi per correto confronto valore portfolio )
+            flows_input["Flow"] = flows_input["Operazioni"].fillna(0.0)
         
             flows_input = flows_input[["Data", "Flow"]]
             #debug 
