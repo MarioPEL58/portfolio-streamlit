@@ -8,9 +8,23 @@ from utils.i18n import t
 def render_positions_table(current):
 
     columns_map = get_display_columns()
+    
+    # =========================
+    # ✅ HEADER CONTROL BAR
+    # =========================
+    c1, c2 = st.columns([1, 3])
 
-    # ✅ toggle multilingua
-    compact_view = st.toggle(t("compact_view"), value=True)
+    with c1:
+        compact_view = st.toggle(
+            t("compact_view"),
+            value=True,
+            help=t("compact_view_help")
+        )
+
+    with c2:
+        st.caption(f"📦 {len(current)} {t('positions_count')}")
+
+    st.divider()
 
     df_base = current.reset_index().rename(columns={"index": "PositionKey"})
 
