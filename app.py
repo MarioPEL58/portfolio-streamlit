@@ -20,6 +20,7 @@ from services.market_status import compute_market_update_label
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 from utils.display import get_display_columns
+from components.tables import render_positions_table
 
 from utils.kpi_cards import (
     render_value_card,
@@ -434,38 +435,8 @@ tab_pos, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
 
 with tab_pos:
     st.subheader(t("positions_title"))
-    current_view = current.reset_index().rename(columns={"index": "PositionKey"})
-
-    ordered_cols = [
-        "Ticker", "Intermediario", "Nome", "Tipo", "Area", "Settore", "Emittente", "Valuta",
-        "Quantita", "Prezzo Attuale", "Valore", "Dividendi Netti Incassati",
-        "Costo Medio Stimato", "Costo Totale Stimato", "P/L", "P/L %",
-        "P/L Netto Stimato", "P/L Giornaliero", "P/L Giornaliero %"
-    ]
-    ordered_cols = [c for c in ordered_cols if c in current_view.columns]
-    columns_map = get_display_columns()
+    render_positions_table(current)
     
-    df_display = current_view[ordered_cols].rename(columns=columns_map)
-    
-    st.dataframe(
-        df_display
-        .style
-        .format({
-            columns_map["Prezzo Attuale"]: "{:,.4f}",
-            columns_map["Valore"]: "€ {:,.2f}",
-            columns_map["Dividendi Netti Incassati"]: "€ {:,.2f}",
-            columns_map["Costo Medio Stimato"]: "{:,.4f}",
-            columns_map["Costo Totale Stimato"]: "€ {:,.2f}",
-            columns_map["P/L"]: "€ {:,.2f}",
-            columns_map["P/L %"]: "{:.2%}",
-            columns_map["P/L Netto Stimato"]: "€ {:,.2f}",
-            columns_map["P/L Giornaliero"]: "€ {:,.2f}",
-            columns_map["P/L Giornaliero %"]: "{:.2%}",
-        })
-        .apply(style_pl_column, axis=0),
-        use_container_width=True
-    )
-
 with tab_exp:
     st.subheader(t("allocation_title"))
     
