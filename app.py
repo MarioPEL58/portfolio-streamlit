@@ -174,7 +174,7 @@ bench_norm = None
 # =========================
 # ✅ Benchmark flow-adjusted
 # =========================
-bench_series = None   ✅
+bench_series = None
 
 if show_benchmark and benchmark.strip():
     bench_df, _ = download_close_prices(
