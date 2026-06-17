@@ -209,6 +209,10 @@ col_flow_dividends = "Dividendi"
 col_flow_final_value = "Valore finale"
 col_flow_total = "Totale"
 
+col_portfolio_value = "Valore portafoglio"
+col_invested_capital = "Capitale investito"
+col_trading_pl = "P/L trading"
+
 benchmark_label = "Benchmark"
 currency_label = "Euro"
 pl_label = "P/L"
@@ -402,6 +406,10 @@ col_flow_operations = "Operations"
 col_flow_dividends = "Dividends"
 col_flow_final_value = "Final value"
 col_flow_total = "Total"
+
+col_portfolio_value = "Portfolio value"
+col_invested_capital = "Invested capital"
+col_trading_pl = "Trading P/L"
 
 benchmark_label = "Benchmark"
 currency_label = "Euro"
