@@ -21,6 +21,7 @@ from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 from utils.display import get_display_columns
 from components.tables import render_positions_table, render_operations_table
+from components.downloads import render_download_tab
 
 from utils.kpi_cards import (
     render_value_card,
@@ -488,40 +489,7 @@ with tab_ops:
 
 with tab_dl:
     st.subheader(t("download_title"))
-
-    ts_csv = (
-        series.reset_index()
-        .rename(columns={"index": "Data"})
-        .to_csv(index=False)
-        .encode("utf-8")
-    )
-    current_csv = (
-        current.reset_index()
-        .rename(columns={"index": "Ticker"})
-        .to_csv(index=False)
-        .encode("utf-8")
-    )
-    ops_csv = ops.to_csv(index=False).encode("utf-8")
-
-    d1, d2, d3 = st.columns(3)
-    d1.download_button(
-        t("download_series"),
-        ts_csv,
-        file_name="serie_storica_portafoglio.csv",
-        mime="text/csv"
-    )
-    d2.download_button(
-        t("download_positions"),
-        current_csv,
-        file_name="posizioni_correnti.csv",
-        mime="text/csv"
-    )
-    d3.download_button(
-        t("download_operations"),
-        ops_csv,
-        file_name="operazioni_portafoglio.csv",
-        mime="text/csv"
-    )
+    render_download_tab(series, current, ops)
 
 st.markdown("---")
 # 🔹 recupero config
