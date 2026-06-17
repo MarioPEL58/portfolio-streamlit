@@ -87,6 +87,9 @@ download_title = "Download risultati"
 download_series = "Scarica serie storica CSV"
 download_positions = "Scarica posizioni correnti CSV"
 download_operations = "Scarica operazioni CSV"
+download_series_xlsx = "Scarica serie XLSX"
+download_positions_xlsx = "Scarica posizioni XLSX"
+download_operations_xlsx = "Scarica operazioni XLSX"
 
 # FOOTER
 footer_note = "Aggiornamento in tempo reale dei prezzi"
@@ -276,6 +279,9 @@ download_title = "Download results"
 download_series = "Download time series CSV"
 download_positions = "Download current positions CSV"
 download_operations = "Download operations CSV"
+download_series_xlsx = "Download series XLSX"
+download_positions_xlsx = "Download positions XLSX"
+download_operations_xlsx = "Download operations XLSX"
 
 # FOOTER
 footer_note = "Real-time price updates"
