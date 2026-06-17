@@ -17,6 +17,7 @@ from services.market_data import download_close_prices, download_last_intraday_t
 from services.portfolio import build_portfolio
 from services.portfolio_metrics import compute_portfolio_xirr
 from services.market_status import compute_market_update_label
+from services.benchmark import build_flow_adjusted_benchmark
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 from utils.display import get_display_columns
@@ -144,20 +145,6 @@ render_operations_preview(ops_enriched)
 # with st.expander("Anteprima operazioni", expanded=False):
 #    st.dataframe(ops_enriched, use_container_width=True)
 
-# Benchmark
-bench_norm = None
-if show_benchmark and benchmark.strip():
-    bench_df, _ = download_close_prices(
-        [benchmark.strip()],
-        start_date,
-        end_date
-    )
-
-    if not bench_df.empty and benchmark.strip() in bench_df.columns:
-        b = bench_df[benchmark.strip()].dropna()
-        if not b.empty and b.iloc[0] != 0:
-            bench_norm = abs(series["Capitale investito"].iloc[-1]) * (b / b.iloc[0])
-
 # =========================
 # KPIs
 # =========================
@@ -179,6 +166,39 @@ xirr_value, xirr_flows = compute_portfolio_xirr(
     final_value=latest_value,
     valuation_date=series.index.max()
 )
+# =========================
+# Benchmark
+# =========================
+bench_norm = None
+if show_benchmark and benchmark.strip():
+    bench_df, _ = download_close_prices(
+        [benchmark.strip()],
+        start_date,
+        end_date
+    )
+
+    if not bench_df.empty and benchmark.strip() in bench_df.columns:
+        b = bench_df[benchmark.strip()].dropna()
+        
+        #OLD investing all capital on the first day
+        # if not b.empty and b.iloc[0] != 0:
+        #     bench_norm = abs(series["Capitale investito"].iloc[-1]) * (b / b.iloc[0])
+
+        if not b.empty:
+        
+            # ✅ prepara flows per benchmark
+            flows_input = xirr_flows.copy()
+        
+            flow_cols = [c for c in ["Operazioni", "Dividendi"] if c in flows_input.columns]
+            flows_input["Flow"] = flows_input[flow_cols].fillna(0.0).sum(axis=1)
+        
+            flows_input = flows_input[["Data", "Flow"]]
+        
+            # ✅ nuovo benchmark corretto
+            bench_series = build_flow_adjusted_benchmark(
+                flows_df=flows_input,
+                benchmark_prices=b
+            )
 
 # =========================
 # Breakdown P/L
@@ -281,21 +301,35 @@ with tab_perf:
     filtered_series = series[
         series.index >= pd.Timestamp(min_date)
     ]
-    # benchmark filtrato (vista)
-    if bench_norm is not None:
-        filtered_bench_norm = bench_norm[
-            bench_norm.index >= pd.Timestamp(min_date)
-        ]
+    # benchmark filtrato (vista) old bench_norm tutto invertito il primo giorno 
+    # if bench_norm is not None:
+    #     filtered_bench_norm = bench_norm[
+    #         bench_norm.index >= pd.Timestamp(min_date)
+    #     ]
     
-        # allineamento (molto importante)
-        filtered_bench_norm = filtered_bench_norm.reindex(filtered_series.index)
-        filtered_bench_norm = filtered_bench_norm.ffill()
+    #     # allineamento (molto importante)
+    #     filtered_bench_norm = filtered_bench_norm.reindex(filtered_series.index)
+    #     filtered_bench_norm = filtered_bench_norm.ffill()
+    # else:
+    #     filtered_bench_norm = None
+    #
+    # fig = portfolio_chart(
+    #     filtered_series,
+    #     bench_norm=filtered_bench_norm,
+    #     benchmark_name=benchmark
+    # )
+    if bench_series is not None:
+        filtered_bench = bench_series[bench_series.index >= pd.Timestamp(min_date)]
+    
+        # ✅ allinea al portafoglio
+        filtered_bench = filtered_bench.reindex(filtered_series.index)
+        filtered_bench = filtered_bench.ffill()
     else:
-        filtered_bench_norm = None
-  
+        filtered_bench = None
+    
     fig = portfolio_chart(
         filtered_series,
-        bench_norm=filtered_bench_norm,
+        bench_norm=filtered_bench,   # nome parametro puoi cambiarlo dopo
         benchmark_name=benchmark
     )
 
