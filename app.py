@@ -204,7 +204,7 @@ if show_benchmark and benchmark.strip():
         
             flows_input = flows_input[["Data", "Flow"]]
             #debug 
-            st.write(flows_input.head(10))
+            # st.write(flows_input.head(10))
             # ✅ nuovo benchmark corretto
             bench_series = build_flow_adjusted_benchmark(
                 flows_df=flows_input,
