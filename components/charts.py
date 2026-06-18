@@ -346,3 +346,40 @@ def daily_pl_bar_chart_by_sign(
         )
 
     return fig
+
+def sharpe_gauge(sharpe_value: float | None):
+
+    if sharpe_value is None:
+        return None
+
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=sharpe_value,
+        number={'suffix': ""},
+
+        title={'text': "Sharpe Ratio"},
+
+        gauge={
+            'axis': {'range': [0, 3]},
+            'bar': {'color': "black"},  # ✅ pallino/indicatore
+
+            'steps': [
+                {'range': [0, 1], 'color': "#ef5350"},   # rosso
+                {'range': [1, 2], 'color': "#fdd835"},   # giallo
+                {'range': [2, 3], 'color': "#66bb6a"},   # verde
+            ],
+
+            'threshold': {
+                'line': {'color': "black", 'width': 4},
+                'thickness': 1.0,
+                'value': sharpe_value
+            }
+        }
+    ))
+
+    fig.update_layout(
+        height=300,
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
+
+    return fig
