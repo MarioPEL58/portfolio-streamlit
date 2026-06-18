@@ -623,3 +623,136 @@ def ratio_bar_gradient(
 
     return fig
 
+def ratio_bar_gradient_compare(
+    portfolio_value: float | None,
+    benchmark_value: float | None,
+    title: str,
+    x_max: float = 3.0,
+):
+    if portfolio_value is None:
+        return None
+
+    fig = go.Figure()
+
+    y_center = 0
+    half_height = 0.2
+
+    red = (239, 83, 80)
+    yellow = (253, 216, 53)
+    green = (102, 187, 106)
+
+    steps = 100
+    xs = np.linspace(0, x_max, steps + 1)
+
+    # barra gradiente
+    for i in range(steps):
+        x0 = xs[i]
+        x1 = xs[i + 1]
+        mid = (x0 + x1) / 2
+
+        if mid <= x_max / 2:
+            alpha = mid / (x_max / 2)
+            color = _rgb_str(_interp_color(red, yellow, alpha))
+        else:
+            alpha = (mid - x_max / 2) / (x_max / 2)
+            color = _rgb_str(_interp_color(yellow, green, alpha))
+
+        fig.add_shape(
+            type="rect",
+            x0=x0,
+            x1=x1,
+            y0=y_center - half_height,
+            y1=y_center + half_height,
+            fillcolor=color,
+            line=dict(width=0),
+            layer="below"
+        )
+
+    # helper clamp
+    def clamp(v):
+        return max(0, min(v, x_max))
+
+    p_val = clamp(portfolio_value)
+
+    # marker portfolio
+    fig.add_trace(go.Scatter(
+        x=[p_val],
+        y=[y_center],
+        mode="markers",
+        marker=dict(
+            color="black",
+            size=14,
+            line=dict(color="white", width=1)
+        ),
+        name="Portfolio",
+        showlegend=True
+    ))
+
+    fig.add_annotation(
+        x=p_val,
+        y=y_center + half_height + 0.12,
+        text=f"{portfolio_value:.2f}",
+        showarrow=False,
+        font=dict(color="white", size=12),
+        xanchor="center",
+        yanchor="bottom"
+    )
+
+    # marker benchmark
+    if benchmark_value is not None:
+        b_val = clamp(benchmark_value)
+
+        fig.add_trace(go.Scatter(
+            x=[b_val],
+            y=[y_center],
+            mode="markers",
+            marker=dict(
+                color="white",
+                size=12,
+                line=dict(color="black", width=1)
+            ),
+            name="Benchmark",
+            showlegend=True
+        ))
+
+        fig.add_annotation(
+            x=b_val,
+            y=y_center - half_height - 0.12,
+            text=f"{benchmark_value:.2f}",
+            showarrow=False,
+            font=dict(color="white", size=11),
+            xanchor="center",
+            yanchor="top"
+        )
+
+    fig.update_layout(
+        height=120,
+        margin=dict(l=20, r=20, t=10, b=5),
+        plot_bgcolor="#0E1117",
+        paper_bgcolor="#0E1117",
+        xaxis=dict(
+            range=[0, x_max],
+            showgrid=False,
+            zeroline=False,
+            tickmode="array",
+            tickvals=[0, x_max],
+            ticktext=["0", str(int(x_max))],
+            tickfont=dict(color="white")
+        ),
+        yaxis=dict(
+            range=[-0.6, 0.6],
+            showticklabels=False,
+            showgrid=False,
+            zeroline=False
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.05,
+            xanchor="right",
+            x=1,
+            font=dict(color="white")
+        )
+    )
+
+    return fig
