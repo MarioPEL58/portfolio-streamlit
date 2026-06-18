@@ -127,3 +127,49 @@ def compute_sharpe_ratio(
     sharpe_annualized = sharpe_daily * np.sqrt(periods_per_year)
 
     return sharpe_annualized
+
+def compute_flow_adjusted_returns(
+    portfolio_value: pd.Series,
+    flows_df: pd.DataFrame,
+    flow_col: str = "Operazioni"
+):
+    """
+    Calcola rendimenti giornalieri netti dai flussi esterni.
+
+    portfolio_value:
+        Serie del valore portafoglio nel tempo (index=datetime)
+
+    flows_df:
+        DataFrame con almeno:
+        - Data
+        - flow_col (es. Operazioni)
+
+    flow_col:
+        colonna dei flussi esterni da neutralizzare
+
+    Ritorna:
+        Serie dei rendimenti giornalieri netti dai flussi
+    """
+
+    if portfolio_value is None or portfolio_value.empty:
+        return pd.Series(dtype=float)
+
+    pv = portfolio_value.copy().sort_index()
+    pv.index = pd.to_datetime(pv.index).normalize()
+
+    flows = flows_df.copy()
+    flows["Data"] = pd.to_datetime(flows["Data"]).dt.normalize()
+
+    # aggrega flussi per data
+    daily_flows = flows.groupby("Data")[flow_col].sum().sort_index()
+
+    # riallinea i flussi alle date del portafoglio
+    daily_flows = daily_flows.reindex(pv.index).fillna(0.0)
+
+    prev_value = pv.shift(1)
+
+    # rendimento netto dai flussi
+    returns = (pv - prev_value - daily_flows) / prev_value
+    returns = returns.replace([np.inf, -np.inf], np.nan).dropna()
+
+    return returns
