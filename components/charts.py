@@ -482,7 +482,7 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
     # =========================
     fig.update_layout(
         height=160,
-        margin=dict(l=20, r=20, t=20, b=20),
+        margin=dict(l=20, r=20, t=10, b=15),
 
         plot_bgcolor="black",
         paper_bgcolor="black",
@@ -494,7 +494,8 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
             tickmode="array",
             tickvals=[0, x_max],
             ticktext=["0", str(int(x_max))],
-            tickfont=dict(color="white")
+            tickfont=dict(color="white"),
+            side="top"
         ),
 
         yaxis=dict(
