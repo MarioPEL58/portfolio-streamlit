@@ -190,3 +190,41 @@ def compute_sharpe_from_returns(
 
     sharpe_daily = (mean_return - risk_free_rate) / std_return
     return sharpe_daily * np.sqrt(periods_per_year)
+
+def compute_sortino_ratio(
+    returns: pd.Series,
+    risk_free_rate: float = 0.0,
+    periods_per_year: int = 252
+):
+    """
+    Calcola Sortino ratio annualizzato.
+
+    returns:
+        Serie rendimenti (meglio se già flow-adjusted ✅)
+    """
+
+    if returns is None or returns.empty:
+        return None
+
+    # ✅ rendimento medio
+    mean_return = returns.mean()
+
+    # ✅ seleziona solo rendimenti negativi rispetto al target
+    downside_returns = returns[returns < risk_free_rate]
+
+    if downside_returns.empty:
+        return None
+
+    # ✅ downside deviation
+    downside_std = np.sqrt((downside_returns ** 2).mean())
+
+    if downside_std == 0 or np.isnan(downside_std):
+        return None
+
+    # ✅ Sortino giornaliero
+    sortino_daily = (mean_return - risk_free_rate) / downside_std
+
+    # ✅ annualizzazione
+    sortino_annual = sortino_daily * np.sqrt(periods_per_year)
+
+    return sortino_annual
