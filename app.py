@@ -11,11 +11,11 @@ from components.charts import allocation_pie_chart, allocation_bar_chart
 from components.charts import daily_pl_bar_chart_by_sign, sharpe_gauge
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
-
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel
 from services.market_data import download_close_prices, download_last_intraday_timestamp
 from services.portfolio import build_portfolio
 from services.portfolio_metrics import compute_portfolio_xirr, compute_sharpe_ratio
+from services.portfolio_metrics import compute_flow_adjusted_returns, compute_sharpe_from_returns
 from services.market_status import compute_market_update_label
 from services.benchmark import build_flow_adjusted_benchmark
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
