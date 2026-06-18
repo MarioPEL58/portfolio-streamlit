@@ -169,7 +169,7 @@ def compute_flow_adjusted_returns(
     prev_value = pv.shift(1)
 
     # rendimento netto dai flussi
-    returns = (pv - prev_value - daily_flows) / prev_value
+    returns = (pv - prev_value + daily_flows) / prev_value
     returns = returns.replace([np.inf, -np.inf], np.nan).dropna()
 
     return returns
