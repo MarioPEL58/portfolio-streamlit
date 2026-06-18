@@ -449,8 +449,8 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
             y0=y_center - radius,
             y1=y_center + radius,
             fillcolor=color,
-            line=dict(width=0),
-            layer="below"
+            line=dict(color="white", width=0.5),
+            layer="above"
         )
 
     # =========================
@@ -463,8 +463,8 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
         y0=y_center - radius,
         y1=y_center + radius,
         fillcolor=_rgb_str(red),
-        line=dict(width=0),
-        layer="below"
+        line=dict(color="white", width=0.5),
+        layer="above"
     )
 
     fig.add_shape(
@@ -474,8 +474,8 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
         y0=y_center - radius,
         y1=y_center + radius,
         fillcolor=_rgb_str(green),
-        line=dict(width=0),
-        layer="below"
+        line=dict(color="white", width=0.5),
+        layer="above"
     )
 
     # =========================
