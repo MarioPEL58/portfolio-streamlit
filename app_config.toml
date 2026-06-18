@@ -1,5 +1,5 @@
 [app]
-version = "1.0"
+version = "1.1"
 
 [ui]
 # puoi tenerlo vuoto o usarlo per defaults comuni in futuro
@@ -35,10 +35,11 @@ portfolio_error = "Non è stato possibile costruire il portafoglio con i dati di
 kpi_title = "📊 KPI Portafoglio"
 
 # GRAFICI
-charts_title = "📊 Grafici"
+charts_title = "📊 Portafoglio"
 tab_perf = "📈 Andamento portafoglio"
 tab_daily = "📅 Giornaliero"
 tab_unrealized = "💼 P/L non realizzato"
+tab_analysis = "📐 Analisi"
 
 daily_title = "📅 Performance giornaliera del portafoglio"
 unrealized_title = "💼 Profitto/perdita sulle posizioni attualmente aperte"
@@ -236,10 +237,11 @@ portfolio_error = "Unable to build the portfolio with available data."
 kpi_title = "📊 Portfolio KPIs"
 
 # GRAFICI
-charts_title = "📊 Charts"
+charts_title = "📊 Portfolio"
 tab_perf = "📈 Portfolio performance"
 tab_daily = "📅 Daily"
 tab_unrealized = "💼 Open P/L"
+tab_analysis = "📐 Analysis"
 
 daily_title = "📅 Daily portfolio performance"
 unrealized_title = "💼 Unrealized profit and loss"
