@@ -472,6 +472,7 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
     # =========================
     # ✅ pallino
     # =========================
+
     fig.add_trace(go.Scatter(
         x=[x_val],
         y=[y_center],
@@ -484,18 +485,18 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
         showlegend=False,
         hovertemplate=f"{t('sharpe_value')}: {sharpe_value:.2f}<extra></extra>"
     ))
+    # =========================
+    # ✅ label centrale
+    # =========================
 
-    # =========================
-    # ✅ label a destra (NUOVA)
-    # =========================
     fig.add_annotation(
-        x=x_max + 0.05,
-        y=y_center,
+        x=x_val,
+        y=y_center + half_height + 0.12,  
         text=f"{sharpe_value:.2f}",
         showarrow=False,
-        font=dict(color="white", size=13),
-        xanchor="left",
-        yanchor="middle"
+        font=dict(color="white", size=12),
+        xanchor="center",
+        yanchor="bottom"
     )
 
     # =========================
