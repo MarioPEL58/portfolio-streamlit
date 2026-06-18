@@ -1,6 +1,7 @@
 import plotly.graph_objects as go
 import plotly.express as px
 from config import UI_CHART_STYLE as STYLE
+import numpy as np
 from utils.i18n import t
 from utils.display import get_display_columns
 import pandas as pd
