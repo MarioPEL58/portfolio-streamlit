@@ -513,7 +513,7 @@ with tab_analysis:
         st.plotly_chart(fig, use_container_width=True,key="sharpe_chart")
 
     # fig = sortino ration bar 
-    if bench_sortino:
+    if bench_sortino is not None:
         sortino_max = np.ceil(max(4.0, sortino, bench_sortino)+0.5)
     else:
         sortino_max = np.ceil(max(4.0, sortino)+0.5)
