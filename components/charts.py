@@ -384,10 +384,6 @@ def sharpe_gauge(sharpe_value: float | None):
     )
 
     return fig
-import plotly.graph_objects as go
-import numpy as np
-from utils.i18n import t
-
 
 # =========================
 # ✅ helpers colore
@@ -412,24 +408,21 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
     if sharpe_value is None:
         return None
 
-    # clamp per visual
     x_val = max(0, min(sharpe_value, x_max))
 
     fig = go.Figure()
 
-    # posizione barra
     y_center = 0
-    half_height = 0.18
+    half_height = 0.2
 
-    # colori
     red = (239, 83, 80)
     yellow = (253, 216, 53)
     green = (102, 187, 106)
 
     # =========================
-    # ✅ gradiente
+    # ✅ gradiente (STABILE)
     # =========================
-    steps = 160
+    steps = 100
     xs = np.linspace(0, x_max, steps + 1)
 
     for i in range(steps):
@@ -452,27 +445,12 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
             y1=y_center + half_height,
             fillcolor=color,
             line=dict(width=0),
-            layer="above"
+            layer="below"   # ✅ IMPORTANTISSIMO
         )
 
     # =========================
-    # ✅ bordo sottile (dark mode)
+    # ✅ PALLINO (SOPRA)
     # =========================
-    fig.add_shape(
-        type="rect",
-        x0=0,
-        x1=x_max,
-        y0=y_center - half_height,
-        y1=y_center + half_height,
-        fillcolor="rgba(0,0,0,0)",
-        line=dict(color="rgba(255,255,255,0.25)", width=1),
-        layer="above"
-    )
-
-    # =========================
-    # ✅ pallino
-    # =========================
-
     fig.add_trace(go.Scatter(
         x=[x_val],
         y=[y_center],
@@ -485,13 +463,13 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
         showlegend=False,
         hovertemplate=f"{t('sharpe_value')}: {sharpe_value:.2f}<extra></extra>"
     ))
-    # =========================
-    # ✅ label centrale
-    # =========================
 
+    # =========================
+    # ✅ LABEL SOPRA
+    # =========================
     fig.add_annotation(
         x=x_val,
-        y=y_center + half_height + 0.12,  
+        y=y_center + half_height + 0.12,
         text=f"{sharpe_value:.2f}",
         showarrow=False,
         font=dict(color="white", size=12),
@@ -500,46 +478,15 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
     )
 
     # =========================
-    # ✅ label estremità
-    # =========================
-    fig.add_annotation(
-        x=0,
-        y=y_center - 0.35,
-        text="0",
-        showarrow=False,
-        font=dict(color="white", size=11),
-        xanchor="center"
-    )
-
-    fig.add_annotation(
-        x=x_max,
-        y=y_center - 0.35,
-        text=str(int(x_max)),
-        showarrow=False,
-        font=dict(color="white", size=11),
-        xanchor="center"
-    )
-
-    # =========================
-    # ✅ titolo sopra
-    # =========================
-    fig.add_annotation(
-        x=x_max / 2,
-        y=y_center + 0.45,
-        text=t("sharpe_value"),
-        showarrow=False,
-        font=dict(color="white", size=13)
-    )
-
-    # =========================
-    # ✅ layout
+    # ✅ ASSE X SEMPLICE (fix stabile)
     # =========================
     fig.update_layout(
         height=160,
-        margin=dict(l=20, r=40, t=20, b=10),
+        margin=dict(l=20, r=20, t=20, b=20),
 
         plot_bgcolor="black",
         paper_bgcolor="black",
+
         xaxis=dict(
             range=[0, x_max],
             showgrid=False,
@@ -547,12 +494,16 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
             tickmode="array",
             tickvals=[0, x_max],
             ticktext=["0", str(int(x_max))],
-            tickfont=dict(color="white"),
+            tickfont=dict(color="white")
         ),
+
         yaxis=dict(
-            range=[-0.6, 0.7],
-            visible=False
+            range=[-0.5, 0.6],
+            showticklabels=False,
+            showgrid=False,
+            zeroline=False
         )
     )
 
     return fig
+
