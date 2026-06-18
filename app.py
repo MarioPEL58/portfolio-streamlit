@@ -173,7 +173,7 @@ xirr_value, xirr_flows = compute_portfolio_xirr(
 
 flow_adjusted_returns = compute_flow_adjusted_returns(
     portfolio_value=series["Valore portafoglio"],
-    flows_df=ops_enriched,
+    flows_df=xirr_flows,
     flow_col="Operazioni"
 )
 sharpe = compute_sharpe_from_returns(flow_adjusted_returns)
