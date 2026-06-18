@@ -173,3 +173,20 @@ def compute_flow_adjusted_returns(
     returns = returns.replace([np.inf, -np.inf], np.nan).dropna()
 
     return returns
+    
+def compute_sharpe_from_returns(
+    returns: pd.Series,
+    risk_free_rate: float = 0.0,
+    periods_per_year: int = 252
+):
+    if returns is None or returns.empty:
+        return None
+
+    mean_return = returns.mean()
+    std_return = returns.std()
+
+    if std_return == 0 or np.isnan(std_return):
+        return None
+
+    sharpe_daily = (mean_return - risk_free_rate) / std_return
+    return sharpe_daily * np.sqrt(periods_per_year)
