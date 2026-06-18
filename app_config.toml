@@ -217,6 +217,7 @@ col_trading_pl = "P/L trading"
 benchmark_label = "Benchmark"
 currency_label = "Euro"
 pl_label = "P/L"
+analysis_title ="indice di Sharpe (storico)"
 
 [lang.en]
 
@@ -416,4 +417,4 @@ col_trading_pl = "Trading P/L"
 benchmark_label = "Benchmark"
 currency_label = "Euro"
 pl_label = "P/L"
-
+analysis_title = "Sharpe Ratio (historical)"
