@@ -508,3 +508,118 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
 
     return fig
 
+# =========================
+# ✅ funzione generica
+# =========================
+def ratio_bar_gradient(
+    value: float | None,
+    title: str,
+    x_max: float = 3.0,
+    tick_vals: list[float] | None = None,
+    tick_text: list[str] | None = None,
+):
+    if value is None:
+        return None
+
+    x_val = max(0, min(value, x_max))
+
+    fig = go.Figure()
+
+    y_center = 0
+    half_height = 0.2
+
+    red = (239, 83, 80)
+    yellow = (253, 216, 53)
+    green = (102, 187, 106)
+
+    # =========================
+    # ✅ gradiente
+    # =========================
+    steps = 100
+    xs = np.linspace(0, x_max, steps + 1)
+
+    for i in range(steps):
+        x0 = xs[i]
+        x1 = xs[i + 1]
+        mid = (x0 + x1) / 2
+
+        if mid <= x_max / 2:
+            alpha = mid / (x_max / 2)
+            color = _rgb_str(_interp_color(red, yellow, alpha))
+        else:
+            alpha = (mid - x_max / 2) / (x_max / 2)
+            color = _rgb_str(_interp_color(yellow, green, alpha))
+
+        fig.add_shape(
+            type="rect",
+            x0=x0,
+            x1=x1,
+            y0=y_center - half_height,
+            y1=y_center + half_height,
+            fillcolor=color,
+            line=dict(width=0),
+            layer="below"
+        )
+
+    # =========================
+    # ✅ marker
+    # =========================
+    fig.add_trace(go.Scatter(
+        x=[x_val],
+        y=[y_center],
+        mode="markers",
+        marker=dict(
+            color="black",
+            size=14,
+            line=dict(color="white", width=1)
+        ),
+        showlegend=False,
+        hovertemplate=f"{title}: {value:.2f}<extra></extra>"
+    ))
+
+    # =========================
+    # ✅ label sopra
+    # =========================
+    fig.add_annotation(
+        x=x_val,
+        y=y_center + half_height + 0.12,
+        text=f"{value:.2f}",
+        showarrow=False,
+        font=dict(color="white", size=12),
+        xanchor="center",
+        yanchor="bottom"
+    )
+
+    # =========================
+    # ✅ ticks asse x
+    # =========================
+    if tick_vals is None:
+        tick_vals = [0, x_max]
+
+    if tick_text is None:
+        tick_text = [str(v).rstrip("0").rstrip(".") for v in tick_vals]
+
+    fig.update_layout(
+        height=100,
+        margin=dict(l=20, r=20, t=10, b=5),
+        plot_bgcolor="#0E1117",
+        paper_bgcolor="#0E1117",
+        xaxis=dict(
+            range=[0, x_max],
+            showgrid=False,
+            zeroline=False,
+            tickmode="array",
+            tickvals=tick_vals,
+            ticktext=tick_text,
+            tickfont=dict(color="white")
+        ),
+        yaxis=dict(
+            range=[-0.45, 0.55],
+            showticklabels=False,
+            showgrid=False,
+            zeroline=False
+        )
+    )
+
+    return fig
+
