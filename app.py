@@ -510,7 +510,7 @@ with tab_analysis:
     fig = sharpe_bar_gradient(sharpe)
 
     if fig:
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True,key="sharpe_chart")
 
     # fig = sortino ration bar 
     sortino_max = max(4.0, np.ceil(sortino + 0.5))
@@ -531,8 +531,8 @@ with tab_analysis:
         x_max=sortino_max
     )
 
-    if fig:
-        st.plotly_chart(fig, use_container_width=True)
+    if fig_sortino:
+        st.plotly_chart(fig_sortino, use_container_width=True,key="sortino_chart")
 
 # Tabs
 tab_pos, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
