@@ -485,7 +485,7 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
         margin=dict(l=20, r=20, t=10, b=5),
 
         plot_bgcolor="black",
-        paper_bgcolor="black",
+        paper_bgcolor="#0E1117",
 
         xaxis=dict(
             range=[0, x_max],
