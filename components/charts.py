@@ -384,6 +384,10 @@ def sharpe_gauge(sharpe_value: float | None):
     )
 
     return fig
+import plotly.graph_objects as go
+import numpy as np
+from utils.i18n import t
+
 
 # =========================
 # ✅ helpers colore
@@ -408,21 +412,22 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
     if sharpe_value is None:
         return None
 
+    # clamp per visual
     x_val = max(0, min(sharpe_value, x_max))
 
     fig = go.Figure()
 
-    # coordinate barra
+    # posizione barra
     y_center = 0
-    half_height = 0.20
+    half_height = 0.18
 
-    # colori base
-    red = (239, 83, 80)      # #ef5350
-    yellow = (253, 216, 53)  # #fdd835
-    green = (102, 187, 106)  # #66bb6a
+    # colori
+    red = (239, 83, 80)
+    yellow = (253, 216, 53)
+    green = (102, 187, 106)
 
     # =========================
-    # ✅ gradiente RGB interpolato
+    # ✅ gradiente
     # =========================
     steps = 160
     xs = np.linspace(0, x_max, steps + 1)
@@ -451,7 +456,7 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
         )
 
     # =========================
-    # ✅ bordo esterno sottile (per dare forma)
+    # ✅ bordo sottile (dark mode)
     # =========================
     fig.add_shape(
         type="rect",
@@ -465,50 +470,61 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
     )
 
     # =========================
-    # ✅ indicatore (pallino nero)
+    # ✅ pallino
     # =========================
     fig.add_trace(go.Scatter(
         x=[x_val],
         y=[y_center],
-        mode="markers+text",
+        mode="markers",
         marker=dict(
             color="black",
-            size=16,
+            size=14,
             line=dict(color="white", width=1)
         ),
-        text=[f"{sharpe_value:.2f}"],
-        textposition="top center",
         showlegend=False,
         hovertemplate=f"{t('sharpe_value')}: {sharpe_value:.2f}<extra></extra>"
     ))
 
     # =========================
-    # ✅ etichette estremità barra
+    # ✅ label a destra (NUOVA)
+    # =========================
+    fig.add_annotation(
+        x=x_max + 0.05,
+        y=y_center,
+        text=f"{sharpe_value:.2f}",
+        showarrow=False,
+        font=dict(color="white", size=13),
+        xanchor="left",
+        yanchor="middle"
+    )
+
+    # =========================
+    # ✅ label estremità
     # =========================
     fig.add_annotation(
         x=0,
-        y=-0.32,
+        y=y_center - 0.35,
         text="0",
         showarrow=False,
-        font=dict(color="white", size=12),
+        font=dict(color="white", size=11),
         xanchor="center"
     )
 
     fig.add_annotation(
         x=x_max,
-        y=-0.32,
+        y=y_center - 0.35,
         text=str(int(x_max)),
         showarrow=False,
-        font=dict(color="white", size=12),
+        font=dict(color="white", size=11),
         xanchor="center"
     )
 
     # =========================
-    # ✅ titolo centrale sopra
+    # ✅ titolo sopra
     # =========================
     fig.add_annotation(
         x=x_max / 2,
-        y=0.55,
+        y=y_center + 0.45,
         text=t("sharpe_value"),
         showarrow=False,
         font=dict(color="white", size=13)
@@ -518,22 +534,19 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
     # ✅ layout
     # =========================
     fig.update_layout(
-        height=170,
-        margin=dict(l=20, r=20, t=20, b=20),
+        height=160,
+        margin=dict(l=20, r=40, t=20, b=10),
+
         plot_bgcolor="black",
         paper_bgcolor="black",
+
         xaxis=dict(
-            range=[-0.05, x_max + 0.05],
-            showgrid=False,
-            zeroline=False,
-            showticklabels=False,
+            range=[-0.05, x_max + 0.3],  # spazio per label a destra
             visible=False
         ),
+
         yaxis=dict(
-            range=[-0.6, 0.8],
-            showgrid=False,
-            zeroline=False,
-            showticklabels=False,
+            range=[-0.6, 0.7],
             visible=False
         )
     )
