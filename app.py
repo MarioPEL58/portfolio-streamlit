@@ -514,7 +514,7 @@ with tab_analysis:
 
     # fig = sortino ration bar 
     values = [4.0, sortino] 
-    if use_benchmark:
+    if show_benchmark:
         if bench_sortino is not None and not np.isnan(bench_sortino):
             values.append(bench_sortino)
     sortino_max = np.ceil(max(values) + 0.5)
