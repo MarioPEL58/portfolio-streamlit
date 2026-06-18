@@ -9,7 +9,7 @@ from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
 from components.charts import daily_pl_bar_chart_by_sign, sharpe_gauge
-from components.charts import sharpe_bar_gradient, ratio_bar_gradient
+from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel
@@ -179,6 +179,7 @@ flow_adjusted_returns = compute_flow_adjusted_returns(
 )
 sharpe = compute_sharpe_from_returns(flow_adjusted_returns)
 sortino = compute_sortino_ratio(flow_adjusted_returns)
+
 # =========================
 # Benchmark
 # =========================
@@ -223,6 +224,19 @@ if show_benchmark and benchmark.strip():
                 flows_df=flows_input,
                 benchmark_prices=b
             )
+
+bench_sharpe = None
+if bench_series is not None:
+    bench_returns = compute_flow_adjusted_returns(
+        portfolio_value=bench_series,
+        flows_df=xirr_flows,
+        flow_col="Operazioni"
+    )
+    bench_sharpe = compute_sharpe_from_returns(bench_returns)
+
+bench_sortino = None
+if bench_series is not None:
+    bench_sortino = compute_sortino_ratio(bench_returns)
 
 # =========================
 # Breakdown P/L
@@ -502,13 +516,21 @@ with tab_analysis:
     sortino_max = max(4.0, np.ceil(sortino + 0.5))
     
     st.markdown(t("sortino_value"))
-    fig = ratio_bar_gradient(
-        value=sortino,
+    # fig = ratio_bar_gradient(
+    #     value=sortino,
+    #     title=t("sortino_value"),
+    #     x_max=sortino_max,
+    #     tick_vals=[0, sortino_max],
+    #     tick_text=["0", str(int(sortino_max))]
+    # )
+    
+    fig_sortino = ratio_bar_gradient_compare(
+        portfolio_value=sortino,
+        benchmark_value=bench_sortino,
         title=t("sortino_value"),
-        x_max=sortino_max,
-        tick_vals=[0, sortino_max],
-        tick_text=["0", str(int(sortino_max))]
+        x_max=sortino_max
     )
+
     if fig:
         st.plotly_chart(fig, use_container_width=True)
 
