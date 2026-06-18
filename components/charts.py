@@ -2,30 +2,34 @@ import plotly.graph_objects as go
 import plotly.express as px
 from config import UI_CHART_STYLE as STYLE
 from utils.i18n import t
+from utils.display import get_display_columns
 import pandas as pd
 
 def portfolio_chart(series, bench_norm=None, benchmark_name=""):
+
+    columns_map = get_display_columns()
+
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(
         x=series.index,
         y=series["Valore portafoglio"],
         mode="lines",
-        name="Valore portafoglio"
+        name=columns_map.get("Valore portafoglio", "Portfolio value")
     ))
 
     fig.add_trace(go.Scatter(
         x=series.index,
         y=series["Capitale investito"],
         mode="lines",
-        name="Capitale investito"
+        name=columns_map.get("Capitale investito", "Invested capital")
     ))
 
     fig.add_trace(go.Scatter(
         x=series.index,
         y=series["P/L trading"],
         mode="lines",
-        name="P/L trading",
+        name=columns_map.get("P/L trading", "Trading P/L"),
         yaxis="y2"
     ))
 
@@ -34,27 +38,33 @@ def portfolio_chart(series, bench_norm=None, benchmark_name=""):
             x=bench_norm.index,
             y=bench_norm.values,
             mode="lines",
-            name=f"Benchmark: {benchmark_name}"
+            name=f"{t('benchmark_label')}: {benchmark_name}"
         ))
 
     fig.update_layout(
         height=540,
-        xaxis_title="Data",
-        yaxis_title="Euro",
+        xaxis_title=t("col_date"),
+        yaxis_title=t("currency_label"),
         yaxis2=dict(
-            title="P/L",
+            title=t("pl_label"),
             overlaying="y",
             side="right",
             showgrid=False
         ),
-        legend=dict(orientation="h"),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
         margin=dict(l=20, r=20, t=20, b=20)
     )
 
     return fig
-
-
+    
 def allocation_pie_chart(exposure, column="Ticker", title=None):
+    
     if column not in exposure.columns:
         return None
 
@@ -81,9 +91,16 @@ def allocation_pie_chart(exposure, column="Ticker", title=None):
     return fig
     
 def allocation_bar_chart(exposure, column="Area", title=None):
+    
+    def translate_tipo(val):
+        key = f"type_{val}"
+        return t(key) if t(key) != key else val
+        
     if column not in exposure.columns:
         return None
 
+    columns_map = get_display_columns()
+    
     df = (
         exposure.groupby(column, dropna=False)["Valore"]
         .sum()
@@ -91,11 +108,27 @@ def allocation_bar_chart(exposure, column="Area", title=None):
         .sort_values("Valore", ascending=False)
     )
 
+    # ✅ QUI traduci i valori (solo per Tipo)
+    if column == "Tipo":
+        df[column] = df[column].astype(str).apply(
+            lambda v: t(f"type_{v}") if t(f"type_{v}") != f"type_{v}" else v
+        )
+
+    # ✅ traduzione colonne
+    column_label = columns_map.get(column, column)
+    value_label = columns_map.get("Valore", "Valore")
+    
+   # ✅ rinomina dataframe per plotly
+    df = df.rename(columns={
+        column: column_label,
+        "Valore": value_label
+    })
+
     fig = px.bar(
         df,
-        x=column,
-        y="Valore",
-        title=title if title else f"Allocazione per {column}"
+        x=column_label,
+        y=value_label,
+        title=title if title else f"{t('allocation_title')} {column_label}"
     )
 
     fig.update_layout(

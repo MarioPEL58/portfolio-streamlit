@@ -2,26 +2,102 @@ import io
 import pandas as pd
 
 
-def create_demo_file():
+# =========================================================
+# Display labels per lingua
+# =========================================================
 
-    # -------------------------
-    # Foglio Readme con informazioni
-    # -------------------------
-  
-    df_readme = pd.DataFrame({
-         "Istruzioni": [
-             "Compila il foglio Operazioni con i tuoi dati.",
-             "Inserisci quantità positive per acquisti e negative per vendite.",
-             "Il foglio DividendiCedole è facoltativo.",
-             "Non modificare i nomi delle colonne."
-         ]
-     })
+DEMO_META = {
+    "it": {
+        "readme_sheet": "README",
+        "operations_sheet": "Operazioni",
+        "dividends_sheet": "DividendiCedole",
+        "readme_col": "Istruzioni",
+        "readme_rows": [
+            "Compila il foglio Operazioni con i tuoi dati.",
+            "Inserisci quantità positive per acquisti e negative per vendite.",
+            "Il foglio DividendiCedole è facoltativo.",
+            "Non modificare i nomi delle colonne.",
+        ],
+        "columns_ops": {
+            "ID": "ID",
+            "Statistiche": "Statistiche",
+            "Nome": "Nome",
+            "Tipo": "Tipo",
+            "Classe": "Classe",
+            "Area": "Area",
+            "Settore": "Settore",
+            "Emittente": "Emittente",
+            "Valuta": "Valuta",
+            "ISIN": "ISIN",
+            "Ticker": "Ticker",
+            "Tassa": "Tassa",
+            "Data": "Data",
+            "Mercato": "Mercato",
+            "Intermediario": "Intermediario",
+            "Quantità": "Quantità",
+            "Prezzo": "Prezzo",
+            "Spese valuta": "Spese valuta",
+            "Cambio": "Cambio",
+            "Spese euro": "Spese euro",
+        },
+        "columns_div": {
+            "ID": "ID",
+            "Data": "Data",
+            "Dividendi euro Netti": "Dividendi euro Netti",
+            "Nome": "Nome",
+            "Valuta": "Valuta",
+        },
+    },
+    "en": {
+        "readme_sheet": "README",
+        "operations_sheet": "Operations",
+        "dividends_sheet": "DividendsCoupons",
+        "readme_col": "Instructions",
+        "readme_rows": [
+            "Fill in the Operations sheet with your data.",
+            "Use positive quantities for buys and negative quantities for sells.",
+            "The DividendsCoupons sheet is optional.",
+            "Do not change column names.",
+        ],
+        "columns_ops": {
+            "ID": "ID",
+            "Statistiche": "Statistics",
+            "Nome": "Name",
+            "Tipo": "Type",
+            "Classe": "Class",
+            "Area": "Area",
+            "Settore": "Sector",
+            "Emittente": "Issuer",
+            "Valuta": "Currency",
+            "ISIN": "ISIN",
+            "Ticker": "Ticker",
+            "Tassa": "Tax",
+            "Data": "Date",
+            "Mercato": "Market",
+            "Intermediario": "Broker",
+            "Quantità": "Quantity",
+            "Prezzo": "Price",
+            "Spese valuta": "Currency fees",
+            "Cambio": "Exchange rate",
+            "Spese euro": "Fees in EUR",
+        },
+        "columns_div": {
+            "ID": "ID",
+            "Data": "Date",
+            "Dividendi euro Netti": "Net dividends EUR",
+            "Nome": "Name",
+            "Valuta": "Currency",
+        },
+    },
+}
 
-  
-    # -------------------------
-    # Foglio Operazioni (INPUT PURO)
-    # -------------------------
-    df_ops = pd.DataFrame([
+
+# =========================================================
+# Raw demo data (schema interno fisso)
+# =========================================================
+
+def _build_demo_operations_df() -> pd.DataFrame:
+    return pd.DataFrame([
         {
             "ID": 9,
             "Statistiche": "1",
@@ -243,35 +319,62 @@ def create_demo_file():
             "Spese euro": 0.00,
         },
     ])
-    # -------------------------
-    # Foglio DividendiCedole
-    # -------------------------
-    df_div = pd.DataFrame([
+
+
+def _build_demo_dividends_df() -> pd.DataFrame:
+    return pd.DataFrame([
         {
             "ID": 9,
             "Data": "2026-05-20",
             "Dividendi euro Netti": 76.96,
             "Nome": "A2A",
-            "Valuta": "EUR"
+            "Valuta": "EUR",
         },
         {
             "ID": 11,
             "Data": "2026-05-20",
             "Dividendi euro Netti": 89.91,
             "Nome": "Webuild SpA",
-            "Valuta": "EUR"
-        }
+            "Valuta": "EUR",
+        },
     ])
 
-    # -------------------------
+
+def _translate_df_columns(df: pd.DataFrame, mapping: dict) -> pd.DataFrame:
+    return df.rename(columns=mapping)
+
+
+# =========================================================
+# Public API
+# =========================================================
+
+def create_demo_file(lang: str = "it"):
+    """
+    Crea un file Excel demo localizzato in base alla lingua.
+    Lingue supportate: 'it', 'en'
+    """
+    meta = DEMO_META.get(lang, DEMO_META["it"])
+
+    # README
+    df_readme = pd.DataFrame({
+        meta["readme_col"]: meta["readme_rows"]
+    })
+
+    # Dati demo (schema interno fisso)
+    df_ops = _build_demo_operations_df()
+    df_div = _build_demo_dividends_df()
+
+    # Traduzione colonne
+    df_ops = _translate_df_columns(df_ops, meta["columns_ops"])
+    df_div = _translate_df_columns(df_div, meta["columns_div"])
+
     # File Excel
-    # -------------------------
     buffer = io.BytesIO()
 
     with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-        df_readme.to_excel(writer, sheet_name="README", index=False)
-        df_ops.to_excel(writer, sheet_name="Operazioni", index=False)
-        df_div.to_excel(writer, sheet_name="DividendiCedole", index=False)
+        df_readme.to_excel(writer, sheet_name=meta["readme_sheet"], index=False)
+        df_ops.to_excel(writer, sheet_name=meta["operations_sheet"], index=False)
+        df_div.to_excel(writer, sheet_name=meta["dividends_sheet"], index=False)
 
     buffer.seek(0)
     return buffer

@@ -17,8 +17,12 @@ from services.market_data import download_close_prices, download_last_intraday_t
 from services.portfolio import build_portfolio
 from services.portfolio_metrics import compute_portfolio_xirr
 from services.market_status import compute_market_update_label
+from services.benchmark import build_flow_adjusted_benchmark
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
+from utils.display import get_display_columns
+from components.tables import render_positions_table, render_operations_table
+from components.downloads import render_download_tab
 
 from utils.kpi_cards import (
     render_value_card,
@@ -46,7 +50,7 @@ st.set_page_config(
 
 LANG = init_language(CONFIG)
 # 🔹 Header
-st.markdown(f"## {env_cfg['title']}")
+st.markdown(f"## {env_cfg['icon']} {env_cfg['title']}")
 st.caption(t("subtitle"))
 
 # ENV check 
@@ -54,7 +58,7 @@ if ENV == "DEV":
     st.warning(t("dev_warning"))
 
 # Sidebar
-sidebar_cfg = render_sidebar(create_demo_file)
+sidebar_cfg = render_sidebar()
 uploaded_file = sidebar_cfg["uploaded_file"]
 benchmark = sidebar_cfg["benchmark"]
 show_benchmark = sidebar_cfg["show_benchmark"]
@@ -62,7 +66,7 @@ min_filter_date = sidebar_cfg["min_filter_date"]
 
 # Input source
 if st.session_state.get("use_demo", False):
-    file_source = create_demo_file()
+    file_source = create_demo_file(LANG)
     file_label = "Demo file"
     st.session_state.use_demo = False
 else:
@@ -141,20 +145,6 @@ render_operations_preview(ops_enriched)
 # with st.expander("Anteprima operazioni", expanded=False):
 #    st.dataframe(ops_enriched, use_container_width=True)
 
-# Benchmark
-bench_norm = None
-if show_benchmark and benchmark.strip():
-    bench_df, _ = download_close_prices(
-        [benchmark.strip()],
-        start_date,
-        end_date
-    )
-
-    if not bench_df.empty and benchmark.strip() in bench_df.columns:
-        b = bench_df[benchmark.strip()].dropna()
-        if not b.empty and b.iloc[0] != 0:
-            bench_norm = abs(series["Capitale investito"].iloc[-1]) * (b / b.iloc[0])
-
 # =========================
 # KPIs
 # =========================
@@ -176,6 +166,50 @@ xirr_value, xirr_flows = compute_portfolio_xirr(
     final_value=latest_value,
     valuation_date=series.index.max()
 )
+# =========================
+# Benchmark
+# =========================
+bench_norm = None
+
+# =========================
+# ✅ Benchmark flow-adjusted
+# =========================
+bench_series = None
+
+if show_benchmark and benchmark.strip():
+    bench_df, _ = download_close_prices(
+        [benchmark.strip()],
+        start_date,
+        end_date
+    )
+
+    if not bench_df.empty and benchmark.strip() in bench_df.columns:
+        b = bench_df[benchmark.strip()].dropna()
+        
+        #OLD investing all capital on the first day
+        # if not b.empty and b.iloc[0] != 0:
+        #     bench_norm = abs(series["Capitale investito"].iloc[-1]) * (b / b.iloc[0])
+
+        if not b.empty:
+        
+            # ✅ prepara flows per benchmark
+            flows_input = xirr_flows.copy()
+            
+            # ✅ RIMUOVE la riga finale sintetica
+            if "Valore finale" in flows_input.columns:
+                flows_input = flows_input[flows_input["Valore finale"].fillna(0) == 0]
+                
+            # ✅ Flow corretto (solo flussi di acquisto / vendita no Dividendi per correto confronto valore portfolio )
+            flows_input["Flow"] = flows_input["Operazioni"].fillna(0.0)
+        
+            flows_input = flows_input[["Data", "Flow"]]
+            #debug 
+            # st.write(flows_input.head(10))
+            # ✅ nuovo benchmark corretto
+            bench_series = build_flow_adjusted_benchmark(
+                flows_df=flows_input,
+                benchmark_prices=b
+            )
 
 # =========================
 # Breakdown P/L
@@ -278,21 +312,35 @@ with tab_perf:
     filtered_series = series[
         series.index >= pd.Timestamp(min_date)
     ]
-    # benchmark filtrato (vista)
-    if bench_norm is not None:
-        filtered_bench_norm = bench_norm[
-            bench_norm.index >= pd.Timestamp(min_date)
-        ]
+    # benchmark filtrato (vista) old bench_norm tutto invertito il primo giorno 
+    # if bench_norm is not None:
+    #     filtered_bench_norm = bench_norm[
+    #         bench_norm.index >= pd.Timestamp(min_date)
+    #     ]
     
-        # allineamento (molto importante)
-        filtered_bench_norm = filtered_bench_norm.reindex(filtered_series.index)
-        filtered_bench_norm = filtered_bench_norm.ffill()
+    #     # allineamento (molto importante)
+    #     filtered_bench_norm = filtered_bench_norm.reindex(filtered_series.index)
+    #     filtered_bench_norm = filtered_bench_norm.ffill()
+    # else:
+    #     filtered_bench_norm = None
+    #
+    # fig = portfolio_chart(
+    #     filtered_series,
+    #     bench_norm=filtered_bench_norm,
+    #     benchmark_name=benchmark
+    # )
+    if bench_series is not None:
+        filtered_bench = bench_series[bench_series.index >= pd.Timestamp(min_date)]
+    
+        # ✅ allinea al portafoglio
+        filtered_bench = filtered_bench.reindex(filtered_series.index)
+        filtered_bench = filtered_bench.ffill()
     else:
-        filtered_bench_norm = None
-  
+        filtered_bench = None
+    
     fig = portfolio_chart(
         filtered_series,
-        bench_norm=filtered_bench_norm,
+        bench_norm=filtered_bench,   # nome parametro puoi cambiarlo dopo
         benchmark_name=benchmark
     )
 
@@ -433,35 +481,8 @@ tab_pos, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
 
 with tab_pos:
     st.subheader(t("positions_title"))
-    current_view = current.reset_index().rename(columns={"index": "PositionKey"})
-
-    ordered_cols = [
-        "Ticker", "Intermediario", "Nome", "Tipo", "Area", "Settore", "Emittente", "Valuta",
-        "Quantita", "Prezzo Attuale", "Valore", "Dividendi Netti Incassati",
-        "Costo Medio Stimato", "Costo Totale Stimato", "P/L", "P/L %",
-        "P/L Netto Stimato", "P/L Giornaliero", "P/L Giornaliero %"
-    ]
-    ordered_cols = [c for c in ordered_cols if c in current_view.columns]
-
-    st.dataframe(
-        current_view[ordered_cols]
-        .style
-        .format({
-            "Prezzo Attuale": "{:,.4f}",
-            "Valore": "€ {:,.2f}",
-            "Dividendi Netti Incassati": "€ {:,.2f}",
-            "Costo Medio Stimato": "{:,.4f}",
-            "Costo Totale Stimato": "€ {:,.2f}",
-            "P/L": "€ {:,.2f}",
-            "P/L %": "{:.2%}",
-            "P/L Netto Stimato": "€ {:,.2f}",
-            "P/L Giornaliero": "€ {:,.2f}",
-            "P/L Giornaliero %": "{:.2%}",
-        })
-        .apply(style_pl_column, axis=0),
-        use_container_width=True
-    )
-
+    render_positions_table(current)
+    
 with tab_exp:
     st.subheader(t("allocation_title"))
     
@@ -486,62 +507,34 @@ with tab_exp:
 
 with tab_flu:
     st.subheader(t("flows_title"))
-    st.caption(t("flows_subtitle "))
+    st.caption(t("flows_subtitle"))
+  
+    columns_map = get_display_columns()
+    
+    df_display = xirr_flows.rename(columns=columns_map)
+    
+    fmt_dict = {}
+    
+    # ✅ DATA
+    if "Data" in xirr_flows.columns:
+        fmt_dict[columns_map["Data"]] = "{:%d/%m/%Y}"
 
+    for col in xirr_flows.columns:
+        if col in ["Operazioni", "Dividendi", "Valore finale", "Totale"]:
+            fmt_dict[columns_map[col]] = "€ {:,.2f}"
+    
     st.dataframe(
-        xirr_flows.style.format({
-            "Operazioni": "€ {:,.2f}",
-            "Dividendi": "€ {:,.2f}",
-            "Valore finale": "€ {:,.2f}",
-            "Totale": "€ {:,.2f}"
-        }),
+        df_display.style.format(fmt_dict),
         use_container_width=True
     )
 
 with tab_ops:
     st.subheader(t("operations_title"))
-    all_tickers = [t("all_option")] + sorted(ops_enriched["Ticker"].unique().tolist())
-    selected_ticker = st.selectbox(t("filter_ticker"), all_tickers)
-
-    show_ops = (ops_enriched if selected_ticker == t("all_option") else ops_enriched[ops_enriched["Ticker"] == selected_ticker])
-    st.dataframe(show_ops, use_container_width=True)
+    render_operations_table(ops_enriched)
 
 with tab_dl:
     st.subheader(t("download_title"))
-
-    ts_csv = (
-        series.reset_index()
-        .rename(columns={"index": "Data"})
-        .to_csv(index=False)
-        .encode("utf-8")
-    )
-    current_csv = (
-        current.reset_index()
-        .rename(columns={"index": "Ticker"})
-        .to_csv(index=False)
-        .encode("utf-8")
-    )
-    ops_csv = ops.to_csv(index=False).encode("utf-8")
-
-    d1, d2, d3 = st.columns(3)
-    d1.download_button(
-        t("download_series"),
-        ts_csv,
-        file_name="serie_storica_portafoglio.csv",
-        mime="text/csv"
-    )
-    d2.download_button(
-        t("download_positions"),
-        current_csv,
-        file_name="posizioni_correnti.csv",
-        mime="text/csv"
-    )
-    d3.download_button(
-        t("download_operations"),
-        ops_csv,
-        file_name="operazioni_portafoglio.csv",
-        mime="text/csv"
-    )
+    render_download_tab(series, current, ops)
 
 st.markdown("---")
 # 🔹 recupero config

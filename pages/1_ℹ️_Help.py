@@ -56,7 +56,7 @@ st.write(t("help_demo_text"))
 col1, col2, col3 = st.columns([2, 1, 1])
 with col1:
     st.markdown(f"### {t('help_demo_title')}")
-    demo_file = create_demo_file()
+    demo_file = create_demo_file(LANG)
 with col2:
     st.download_button(
         label="⬇️ " +  t("help_demo_button"),

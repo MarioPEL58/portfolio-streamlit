@@ -1,15 +1,15 @@
 [app]
-version = "1.0"
+version = "1.1"
 
 [ui]
 # puoi tenerlo vuoto o usarlo per defaults comuni in futuro
 
 [env.DEV]
-title = "🚧 DEV Portfolio Tracker ETF / Stock"
+title = "DEV Portfolio Tracker ETF / Stock"
 icon = "🚧"
 
 [env.PROD]
-title = "📈 Portfolio Tracker ETF / Stock"
+title = "Portfolio Tracker ETF / Stock"
 icon = "📈"
 
 # =========================
@@ -35,10 +35,11 @@ portfolio_error = "Non è stato possibile costruire il portafoglio con i dati di
 kpi_title = "📊 KPI Portafoglio"
 
 # GRAFICI
-charts_title = "📊 Grafici"
+charts_title = "📊 Portafoglio"
 tab_perf = "📈 Andamento portafoglio"
 tab_daily = "📅 Giornaliero"
 tab_unrealized = "💼 P/L non realizzato"
+tab_analysis = "📐 Analisi"
 
 daily_title = "📅 Performance giornaliera del portafoglio"
 unrealized_title = "💼 Profitto/perdita sulle posizioni attualmente aperte"
@@ -56,6 +57,7 @@ bar_pl_pct = "P/L %"
 bar_pl_abs = "P/L"
 
 # TABS
+compact_view = "Vista compatta"
 tab_positions = "Posizioni"
 tab_exposure = "Esposizione"
 tab_flows = "Flussi"
@@ -64,11 +66,14 @@ tab_download = "Download"
 
 # POSIZIONI
 positions_title = "Posizioni correnti"
+positions_count = "posizioni"
 
 # ESPOSIZIONE
 allocation_title = "Allocazione"
 allocation_area = "Per area"
 allocation_type = "Per tipo"
+type_AZ = "Azioni"
+type_ETF = "ETF"
 
 # FLUSSI
 flows_title = "📊 Flussi per data (XIRR)"
@@ -84,6 +89,9 @@ download_title = "Download risultati"
 download_series = "Scarica serie storica CSV"
 download_positions = "Scarica posizioni correnti CSV"
 download_operations = "Scarica operazioni CSV"
+download_series_xlsx = "Scarica serie XLSX"
+download_positions_xlsx = "Scarica posizioni XLSX"
+download_operations_xlsx = "Scarica operazioni XLSX"
 
 # FOOTER
 footer_note = "Aggiornamento in tempo reale dei prezzi"
@@ -156,6 +164,60 @@ sidebar_benchmark_help = "Esempio: CSSPX.MI, VWCE.DE, SPY"
 sidebar_show_benchmark = "Mostra benchmark normalizzato"
 sidebar_min_date = "Data minima"
 
+# colonnper tae belle in output 
+col_date = "Data"
+col_ticker = "Ticker"
+col_broker = "Intermediario"
+col_name = "Nome"
+col_type = "Tipo"
+col_area = "Area"
+col_sector = "Settore"
+col_issuer = "Emittente"
+col_currency = "Valuta"
+col_quantity = "Quantità"
+col_price_current = "Prezzo attuale"
+col_value = "Valore"
+col_dividends = "Dividendi netti incassati"
+col_avg_cost = "Costo medio stimato"
+col_total_cost = "Costo totale stimato"
+col_pl = "P/L"
+col_pl_pct = "P/L %"
+col_pl_net = "P/L netto stimato"
+col_pl_daily = "P/L giornaliero"
+col_pl_daily_pct = "P/L giornaliero %"
+
+col_trade_price = "Prezzo"
+col_avg_cost_before = "Costo medio precedente"
+col_realized_trade_pl = "P/L operazione"
+
+col_id = "ID"
+col_fees_eur = "Spese (€)"
+col_tax = "Tassa"
+col_fx = "Cambio"
+col_cashflow = "Flusso netto"
+col_avg_cost_trade = "Prezzo medio s/carico"
+col_position_key = "Chiave posizione"
+col_rowid = "ID riga"
+col_avg_cost_after = "Costo medio dopo"
+col_qty_open_after = "Quantità residua"
+col_cost_open_after = "Costo residuo"
+col_cashflow_calc = "Flusso calcolato"
+col_tax_calc = "Tassa calcolata"
+
+# === FLOW / XIRR TABLE ===
+col_flow_operations = "Operazioni"
+col_flow_dividends = "Dividendi"
+col_flow_final_value = "Valore finale"
+col_flow_total = "Totale"
+
+col_portfolio_value = "Valore portafoglio"
+col_invested_capital = "Capitale investito"
+col_trading_pl = "P/L trading"
+
+benchmark_label = "Benchmark"
+currency_label = "Euro"
+pl_label = "P/L"
+
 [lang.en]
 
 # HEADER
@@ -175,10 +237,11 @@ portfolio_error = "Unable to build the portfolio with available data."
 kpi_title = "📊 Portfolio KPIs"
 
 # GRAFICI
-charts_title = "📊 Charts"
+charts_title = "📊 Portfolio"
 tab_perf = "📈 Portfolio performance"
 tab_daily = "📅 Daily"
 tab_unrealized = "💼 Open P/L"
+tab_analysis = "📐 Analysis"
 
 daily_title = "📅 Daily portfolio performance"
 unrealized_title = "💼 Unrealized profit and loss"
@@ -196,6 +259,7 @@ bar_pl_pct = "P/L %"
 bar_pl_abs = "P/L"
 
 # TABS
+current_view = "Compact view"
 tab_positions = "Positions"
 tab_exposure = "Exposure"
 tab_flows = "Flows"
@@ -204,11 +268,14 @@ tab_download = "Download"
 
 # POSIZIONI
 positions_title = "Current positions"
+positions_count = "positions"
 
 # ESPOSIZIONE
 allocation_title = "Allocation"
 allocation_area = "By area"
 allocation_type = "By type"
+type_AZ = "Stocks"
+type_ETF = "ETFs"
 
 # FLUSSI
 flows_title = "📊 Cash flows (XIRR)"
@@ -224,6 +291,9 @@ download_title = "Download results"
 download_series = "Download time series CSV"
 download_positions = "Download current positions CSV"
 download_operations = "Download operations CSV"
+download_series_xlsx = "Download series XLSX"
+download_positions_xlsx = "Download positions XLSX"
+download_operations_xlsx = "Download operations XLSX"
 
 # FOOTER
 footer_note = "Real-time price updates"
@@ -292,3 +362,58 @@ sidebar_benchmark_label = "Yahoo benchmark ticker (optional)"
 sidebar_benchmark_help = "Example: CSSPX.MI, VWCE.DE, SPY"
 sidebar_show_benchmark = "Show normalized benchmark"
 sidebar_min_date = "Start date"
+
+# colonnper tae belle in output 
+col_date = "Date"
+col_ticker = "Ticker"
+col_broker = "Broker"
+col_name = "Name"
+col_type = "Type"
+col_area = "Area"
+col_sector = "Sector"
+col_issuer = "Issuer"
+col_currency = "Currency"
+col_quantity = "Quantity"
+col_price_current = "Current price"
+col_value = "Value"
+col_dividends = "Net dividends received"
+col_avg_cost = "Estimated average cost"
+col_total_cost = "Estimated total cost"
+col_pl = "P/L"
+col_pl_pct = "P/L %"
+col_pl_net = "Estimated net P/L"
+col_pl_daily = "Daily P/L"
+col_pl_daily_pct = "Daily P/L %"
+
+col_trade_price = "Price"
+col_avg_cost_before = "Avg cost before"
+col_realized_trade_pl = "Trade P/L"
+
+col_id = "ID"
+col_fees_eur = "Fees (€)"
+col_tax = "Tax"
+col_fx = "FX"
+col_cashflow = "Net cash flow"
+col_avg_cost_trade = "Avg cost (trade)"
+col_position_key = "Position key"
+col_rowid = "Row ID"
+col_avg_cost_after = "Avg cost after"
+col_qty_open_after = "Open quantity"
+col_cost_open_after = "Open cost"
+col_cashflow_calc = "Calculated cash flow"
+col_tax_calc = "Calculated tax"
+
+# === FLOW / XIRR TABLE ===
+col_flow_operations = "Operations"
+col_flow_dividends = "Dividends"
+col_flow_final_value = "Final value"
+col_flow_total = "Total"
+
+col_portfolio_value = "Portfolio value"
+col_invested_capital = "Invested capital"
+col_trading_pl = "Trading P/L"
+
+benchmark_label = "Benchmark"
+currency_label = "Euro"
+pl_label = "P/L"
+

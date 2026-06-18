@@ -27,7 +27,16 @@ def color_pl(val):
     return ""
 
 
+
 def style_pl_column(col):
-    if col.name in ["P/L", "P/L %", "P/L Netto Stimato", "P/L Giornaliero", "P/L Giornaliero %"]:
-        return [color_pl(v) for v in col]
+    name = str(col.name).lower()
+
+    # intercetta tutte le colonne P/L (qualsiasi lingua)
+    if "p/l" in name:
+        return [
+            "color: #16A34A" if pd.notna(v) and v >= 0
+            else "color: #DC2626" if pd.notna(v)
+            else ""
+            for v in col
+        ]
     return [""] * len(col)
