@@ -408,25 +408,23 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
     if sharpe_value is None:
         return None
 
-    # clamp visuale
     x_val = max(0, min(sharpe_value, x_max))
 
     fig = go.Figure()
 
-    # dimensioni barra
+    # coordinate barra
     y_center = 0
-    height = 0.4
-    radius = height / 2
+    half_height = 0.20
 
-    # colore base
+    # colori base
     red = (239, 83, 80)      # #ef5350
     yellow = (253, 216, 53)  # #fdd835
     green = (102, 187, 106)  # #66bb6a
 
     # =========================
-    # ✅ gradiente interpolato
+    # ✅ gradiente RGB interpolato
     # =========================
-    steps = 120
+    steps = 160
     xs = np.linspace(0, x_max, steps + 1)
 
     for i in range(steps):
@@ -434,7 +432,6 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
         x1 = xs[i + 1]
         mid = (x0 + x1) / 2
 
-        # rosso → giallo → verde
         if mid <= x_max / 2:
             alpha = mid / (x_max / 2)
             color = _rgb_str(_interp_color(red, yellow, alpha))
@@ -446,40 +443,29 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
             type="rect",
             x0=x0,
             x1=x1,
-            y0=y_center - radius,
-            y1=y_center + radius,
+            y0=y_center - half_height,
+            y1=y_center + half_height,
             fillcolor=color,
-            line=dict(color="white", width=0.5),
+            line=dict(width=0),
             layer="above"
         )
 
     # =========================
-    # ✅ estremità arrotondate (pill)
+    # ✅ bordo esterno sottile (per dare forma)
     # =========================
     fig.add_shape(
-        type="circle",
-        x0=0 - radius,
-        x1=0 + radius,
-        y0=y_center - radius,
-        y1=y_center + radius,
-        fillcolor=_rgb_str(red),
-        line=dict(color="white", width=0.5),
-        layer="above"
-    )
-
-    fig.add_shape(
-        type="circle",
-        x0=x_max - radius,
-        x1=x_max + radius,
-        y0=y_center - radius,
-        y1=y_center + radius,
-        fillcolor=_rgb_str(green),
-        line=dict(color="white", width=0.5),
+        type="rect",
+        x0=0,
+        x1=x_max,
+        y0=y_center - half_height,
+        y1=y_center + half_height,
+        fillcolor="rgba(0,0,0,0)",
+        line=dict(color="rgba(255,255,255,0.25)", width=1),
         layer="above"
     )
 
     # =========================
-    # ✅ indicatore (pallino)
+    # ✅ indicatore (pallino nero)
     # =========================
     fig.add_trace(go.Scatter(
         x=[x_val],
@@ -487,7 +473,8 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
         mode="markers+text",
         marker=dict(
             color="black",
-            size=14
+            size=16,
+            line=dict(color="white", width=1)
         ),
         text=[f"{sharpe_value:.2f}"],
         textposition="top center",
@@ -496,27 +483,59 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
     ))
 
     # =========================
+    # ✅ etichette estremità barra
+    # =========================
+    fig.add_annotation(
+        x=0,
+        y=-0.32,
+        text="0",
+        showarrow=False,
+        font=dict(color="white", size=12),
+        xanchor="center"
+    )
+
+    fig.add_annotation(
+        x=x_max,
+        y=-0.32,
+        text=str(int(x_max)),
+        showarrow=False,
+        font=dict(color="white", size=12),
+        xanchor="center"
+    )
+
+    # =========================
+    # ✅ titolo centrale sopra
+    # =========================
+    fig.add_annotation(
+        x=x_max / 2,
+        y=0.55,
+        text=t("sharpe_value"),
+        showarrow=False,
+        font=dict(color="white", size=13)
+    )
+
+    # =========================
     # ✅ layout
     # =========================
     fig.update_layout(
         height=170,
-        margin=dict(l=20, r=20, t=30, b=20),
+        margin=dict(l=20, r=20, t=20, b=20),
+        plot_bgcolor="black",
+        paper_bgcolor="black",
         xaxis=dict(
-            range=[0, x_max],
-            tickmode="array",
-            tickvals=[0, 1, 2, 3],
-            title=t("sharpe_value"),
+            range=[-0.05, x_max + 0.05],
             showgrid=False,
-            zeroline=False
+            zeroline=False,
+            showticklabels=False,
+            visible=False
         ),
         yaxis=dict(
-            range=[-1, 1],
-            showticklabels=False,
+            range=[-0.6, 0.8],
             showgrid=False,
-            zeroline=False
-        ),
-        plot_bgcolor="black",
-        paper_bgcolor="black"
+            zeroline=False,
+            showticklabels=False,
+            visible=False
+        )
     )
 
     return fig
