@@ -84,3 +84,46 @@ def compute_portfolio_xirr(ops_enriched, dividends, final_value, valuation_date=
             return mid, df
 
     return None, df
+
+def compute_sharpe_ratio(
+    portfolio_series: pd.Series,
+    risk_free_rate: float = 0.0,
+    periods_per_year: int = 252
+):
+    """
+    Calcola Sharpe ratio annualizzato.
+
+    portfolio_series:
+        Serie del valore portafoglio nel tempo (es: series["Valore portafoglio"])
+    risk_free_rate:
+        tasso risk-free giornaliero (default 0)
+    periods_per_year:
+        252 per dati giornalieri
+
+    Ritorna:
+        Sharpe ratio annualizzato
+    """
+
+    if portfolio_series is None or len(portfolio_series) < 2:
+        return None
+
+    # ✅ rendimenti giornalieri
+    returns = portfolio_series.pct_change().dropna()
+
+    if returns.empty:
+        return None
+
+    # ✅ media e volatilità
+    mean_return = returns.mean()
+    std_return = returns.std()
+
+    if std_return == 0 or np.isnan(std_return):
+        return None
+
+    # ✅ Sharpe giornaliero
+    sharpe_daily = (mean_return - risk_free_rate) / std_return
+
+    # ✅ annualizzazione
+    sharpe_annualized = sharpe_daily * np.sqrt(periods_per_year)
+
+    return sharpe_annualized
