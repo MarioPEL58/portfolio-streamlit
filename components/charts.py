@@ -383,3 +383,109 @@ def sharpe_gauge(sharpe_value: float | None):
     )
 
     return fig
+
+def _interp_color(c1, c2, x):
+    """
+    Interpola linearmente tra due colori RGB.
+    c1, c2: tuple (r, g, b)
+    x: valore tra 0 e 1
+    """
+    return (
+        int(c1[0] + (c2[0] - c1[0]) * x),
+        int(c1[1] + (c2[1] - c1[1]) * x),
+        int(c1[2] + (c2[2] - c1[2]) * x),
+    )
+
+
+def _rgb_str(rgb):
+    return f"rgb({rgb[0]},{rgb[1]},{rgb[2]})"
+
+
+def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
+
+    if sharpe_value is None:
+        return None
+
+    # clamp per posizione visuale
+    x_val = max(0, min(sharpe_value, x_max))
+
+    fig = go.Figure()
+
+    # =========================
+    # ✅ gradiente interpolato
+    # =========================
+    steps = 120
+    xs = np.linspace(0, x_max, steps + 1)
+
+    # palette base
+    red = (239, 83, 80)      # #ef5350
+    yellow = (253, 216, 53)  # #fdd835
+    green = (102, 187, 106)  # #66bb6a
+
+    for i in range(steps):
+        x0 = xs[i]
+        x1 = xs[i + 1]
+        mid = (x0 + x1) / 2
+
+        # 0→1.5 rosso→giallo, 1.5→3 giallo→verde
+        if mid <= x_max / 2:
+            alpha = mid / (x_max / 2)
+            color = _rgb_str(_interp_color(red, yellow, alpha))
+        else:
+            alpha = (mid - x_max / 2) / (x_max / 2)
+            color = _rgb_str(_interp_color(yellow, green, alpha))
+
+        fig.add_shape(
+            type="rect",
+            x0=x0,
+            x1=x1,
+            y0=-0.25,
+            y1=0.25,
+            fillcolor=color,
+            line=dict(width=0),
+            layer="below"
+        )
+
+    # =========================
+    # ✅ pallino indicatore
+    # =========================
+    fig.add_trace(go.Scatter(
+        x=[x_val],
+        y=[0],
+        mode="markers+text",
+        marker=dict(
+            color="black",
+            size=16
+        ),
+        text=[f"{sharpe_value:.2f}"],
+        textposition="top center",
+        showlegend=False,
+        hovertemplate=f"{t('sharpe_value')}: {sharpe_value:.2f}<extra></extra>"
+    ))
+
+    # =========================
+    # ✅ layout
+    # =========================
+    fig.update_layout(
+        height=170,
+        margin=dict(l=20, r=20, t=35, b=20),
+        xaxis=dict(
+            range=[0, x_max],
+            tickmode="array",
+            tickvals=[0, 1, 2, 3],
+            ticktext=["0", "1", "2", "3"],
+            title=t("sharpe_value"),
+            showgrid=False,
+            zeroline=False
+        ),
+        yaxis=dict(
+            range=[-0.6, 0.8],
+            showticklabels=False,
+            showgrid=False,
+            zeroline=False
+        ),
+        plot_bgcolor="white",
+        paper_bgcolor="white"
+    )
+
+    return fig
