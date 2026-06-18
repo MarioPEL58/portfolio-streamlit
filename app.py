@@ -494,7 +494,19 @@ with tab_analysis:
     fig = sharpe_bar_gradient(sharpe)
 
     if fig:
+        # st.plotly_chart(fig, use_container_width=True)
+        st.markdown("""
+        <div style="
+            background-color: #0E1117;
+            border-radius: 12px;
+            padding: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        ">
+        """, unsafe_allow_html=True)
+            
         st.plotly_chart(fig, use_container_width=True)
+            
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # Tabs
 tab_pos, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
