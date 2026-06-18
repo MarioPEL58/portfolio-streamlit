@@ -489,9 +489,10 @@ with tab_unrealized:
         st.caption(t("no_loss_open"))
 
 with tab_analysis:
-    st.subheader(t("analysis_title"))
+    # st.subheader(t("analysis_title"))
 
     # fig = sharpe_gauge(sharpe)
+    st.markdown(t("analysis_title"))
     fig = sharpe_bar_gradient(sharpe)
 
     if fig:
@@ -500,6 +501,7 @@ with tab_analysis:
     # fig = sortino ration bar 
     sortino_max = max(4.0, np.ceil(sortino + 0.5))
     
+    st.markdown(t("sortino_value"))
     fig = ratio_bar_gradient(
         value=sortino,
         title=t("sortino_value"),
