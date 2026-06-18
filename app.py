@@ -15,7 +15,7 @@ from components.filters import render_filters
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel
 from services.market_data import download_close_prices, download_last_intraday_timestamp
 from services.portfolio import build_portfolio
-from services.portfolio_metrics import compute_portfolio_xirr
+from services.portfolio_metrics import compute_portfolio_xirr, compute_sharpe_ratio
 from services.market_status import compute_market_update_label
 from services.benchmark import build_flow_adjusted_benchmark
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
@@ -167,6 +167,10 @@ xirr_value, xirr_flows = compute_portfolio_xirr(
     valuation_date=series.index.max()
 )
 # =========================
+# sharpe ratio
+# =========================
+sharpe = compute_sharpe_ratio(series["Valore portafoglio"])
+# =========================
 # Benchmark
 # =========================
 bench_norm = None
@@ -294,10 +298,11 @@ st.caption(update_label)
 
 st.subheader(t("charts_title"))
 
-tab_perf, tab_daily, tab_unrealized = st.tabs([
+tab_perf, tab_daily, tab_unrealized, tab_analysis = st.tabs([
     t("tab_perf"),
     t("tab_daily"),
-    t("tab_unrealized")
+    t("tab_unrealized"),
+    t("tab_analysis")
 ])
 
 with tab_perf:
@@ -473,6 +478,14 @@ with tab_unrealized:
         st.plotly_chart(fig_neg, use_container_width=True)
     else:
         st.caption(t("no_loss_open"))
+
+with tab_analysis:
+    st.subheader(t("analysis_title"))
+
+    fig = sharpe_gauge(sharpe)
+
+    if fig:
+        st.plotly_chart(fig, use_container_width=True)
 
 # Tabs
 tab_pos, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
