@@ -513,11 +513,12 @@ with tab_analysis:
         st.plotly_chart(fig, use_container_width=True,key="sharpe_chart")
 
     # fig = sortino ration bar 
-    if bench_sortino is not None:
-        sortino_max = np.ceil(max(4.0, sortino, bench_sortino)+0.5)
-    else:
-        sortino_max = np.ceil(max(4.0, sortino)+0.5)
-    
+    values = [4.0, sortino] 
+    if use_benchmark:
+        if bench_sortino is not None and not np.isnan(bench_sortino):
+            values.append(bench_sortino)
+    sortino_max = np.ceil(max(values) + 0.5)
+
     st.markdown(t("sortino_value"))
     # fig = ratio_bar_gradient(
     #     value=sortino,
@@ -531,7 +532,7 @@ with tab_analysis:
         portfolio_value=sortino,
         benchmark_value=bench_sortino,
         title=t("sortino_value"),
-        x_max= np.ceil(max(3.0, sortino_max, bench_sortino)+0.5)
+        x_max= sortino_max
     )
 
     if fig_sortino:
