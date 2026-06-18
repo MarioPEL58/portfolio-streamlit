@@ -8,7 +8,8 @@ from utils.i18n import init_language, t
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
-from components.charts import daily_pl_bar_chart_by_sign, sharpe_gauge, sharpe_bar_gradient
+from components.charts import daily_pl_bar_chart_by_sign, sharpe_gauge
+from components.charts import sharpe_bar_gradient
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel
