@@ -481,8 +481,8 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
     # ✅ ASSE X SEMPLICE (fix stabile)
     # =========================
     fig.update_layout(
-        height=160,
-        margin=dict(l=20, r=20, t=10, b=15),
+        height=100,
+        margin=dict(l=20, r=20, t=10, b=5),
 
         plot_bgcolor="black",
         paper_bgcolor="black",
@@ -495,11 +495,11 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
             tickvals=[0, x_max],
             ticktext=["0", str(int(x_max))],
             tickfont=dict(color="white"),
-            side="top"
+            side="bottom"
         ),
 
         yaxis=dict(
-            range=[-0.5, 0.6],
+            range=[-0.4, 0.5],
             showticklabels=False,
             showgrid=False,
             zeroline=False
