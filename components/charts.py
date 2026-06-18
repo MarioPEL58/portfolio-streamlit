@@ -515,8 +515,8 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
             showgrid=False,
             zeroline=False
         ),
-        plot_bgcolor="white",
-        paper_bgcolor="white"
+        plot_bgcolor="black",
+        paper_bgcolor="black"
     )
 
     return fig
