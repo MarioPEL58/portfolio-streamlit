@@ -540,12 +540,15 @@ def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
 
         plot_bgcolor="black",
         paper_bgcolor="black",
-
         xaxis=dict(
-            range=[-0.05, x_max + 0.3],  # spazio per label a destra
-            visible=False
+            range=[0, x_max],
+            showgrid=False,
+            zeroline=False,
+            tickmode="array",
+            tickvals=[0, x_max],
+            ticktext=["0", str(int(x_max))],
+            tickfont=dict(color="white"),
         ),
-
         yaxis=dict(
             range=[-0.6, 0.7],
             visible=False
