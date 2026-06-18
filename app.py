@@ -528,7 +528,7 @@ with tab_analysis:
         portfolio_value=sortino,
         benchmark_value=bench_sortino,
         title=t("sortino_value"),
-        x_max= np.ceil(max(3.0, sortino_max, benchmark_value)+0.5)
+        x_max= np.ceil(max(3.0, sortino_max, bench_sortino)+0.5)
     )
 
     if fig_sortino:
