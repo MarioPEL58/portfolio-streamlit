@@ -519,6 +519,7 @@ with tab_analysis:
         mode="gray"
     )
     if fig_beta:
+        st.markdown(f"### {t('beta_title')}")
         st.plotly_chart(fig_beta, use_container_width=True,key="beta_chart")
     #  (risk-free info)
     if use_risk_free:
