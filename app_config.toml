@@ -223,6 +223,8 @@ sharpe_title = "Indice di Sharpe (storico)"
 sortino_value = "Indice di Sortino"
 beta_title = "Beta vs Benchmark"
 beta_description = "Il Beta misura quanto il portafoglio si muove rispetto al mercato. Un valore di 1 indica un comportamento simile al benchmark. Sopra 1 = più volatile, sotto 1 = più stabile."
+sharpe_description = "Misura il rendimento rispetto al rischio totale. Più alto = migliore efficienza."
+sortino_description = "Simile allo Sharpe ma considera solo le perdite. Più alto = migliori risultati con minori drawdown."
 
 # Risk-free info
 rf_enabled = "Metriche calcolate con tasso risk-free reale"
@@ -434,6 +436,8 @@ sharpe_title = "Sharpe Ratio (historical)"
 sortino_value = "Sortino Ratio"
 beta_title = "Beta vs Benchmark"
 beta_description = "Beta measures how your portfolio moves relative to the market. A value of 1 means it behaves like the benchmark. Above 1 = more volatile, below 1 = more stable."
+sharpe_description = "Measures return relative to total risk. Higher = more efficient."
+sortino_description = "Similar to Sharpe but considers only downside risk. Higher = better performance with fewer losses."
 
 # Risk-free info
 
