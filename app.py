@@ -518,7 +518,8 @@ with tab_analysis:
         x_max=2.0,
         mode="gray"
     )
-
+    if fig_beta:
+        st.plotly_chart(fig_beta, use_container_width=True,key="sharpe_chart")
     #  (risk-free info)
     if use_risk_free:
         st.caption(t("rf_enabled"))
