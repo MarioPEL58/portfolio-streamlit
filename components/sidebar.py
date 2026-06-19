@@ -57,6 +57,7 @@ def render_sidebar():
         "uploaded_file": uploaded_file,
         "benchmark": benchmark,
         "show_benchmark": show_benchmark,
+        "use_risk_free": use_risk_free,
         "min_filter_date": min_filter_date,
     }
 
