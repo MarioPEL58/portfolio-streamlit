@@ -223,7 +223,8 @@ sortino_value = "Indice di Sortino"
 
 # Risk-free info
 rf_enabled = "Metriche calcolate con tasso risk-free reale"
-rf_disabled = "Metriche calcolate con risk-free = 0%"
+rf_disabled = "Metriche calcolate con risk-free uguale a zero"
+rf_value = "Tasso risk-free"
 
 [lang.en]
 
@@ -428,5 +429,8 @@ analysis_title = "Sharpe Ratio (historical)"
 sortino_value = "Sortino Ratio"
 
 # Risk-free info
+
 rf_enabled = "Metrics calculated using real risk-free rate"
-rf_disabled = "Metrics calculated with risk-free = 0%
+rf_disabled = "Metrics calculated with risk-free set to zero"
+rf_value = "Risk-free rate"
+
