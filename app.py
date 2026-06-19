@@ -19,6 +19,8 @@ from services.portfolio_metrics import compute_portfolio_xirr, compute_sharpe_ra
 from services.portfolio_metrics import compute_flow_adjusted_returns, compute_sharpe_from_returns, compute_sortino_ratio
 from services.market_status import compute_market_update_label
 from services.benchmark import build_flow_adjusted_benchmark
+from services.risk_free import get_euro_risk_free_rate
+from utils.finance import annual_to_daily_rate
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 from utils.display import get_display_columns
@@ -63,6 +65,7 @@ sidebar_cfg = render_sidebar()
 uploaded_file = sidebar_cfg["uploaded_file"]
 benchmark = sidebar_cfg["benchmark"]
 show_benchmark = sidebar_cfg["show_benchmark"]
+use_risk_free = sidebar_cfg["use_risk_free"]
 min_filter_date = sidebar_cfg["min_filter_date"]
 
 # Input source
@@ -168,6 +171,16 @@ xirr_value, xirr_flows = compute_portfolio_xirr(
     valuation_date=series.index.max()
 )
 # =========================
+# risk Free evaluation
+# =========================
+rf_daily = 0.0
+rf_annual = None
+
+if use_risk_free:
+    rf_annual = get_euro_risk_free_rate()
+    if rf_annual is not None:
+        rf_daily = annual_to_daily_rate(rf_annual)
+# =========================
 # sharpe and sortino ratio
 # =========================
 #   not correct   sharpe = compute_sharpe_ratio(series["Valore portafoglio"])
@@ -177,8 +190,8 @@ flow_adjusted_returns = compute_flow_adjusted_returns(
     flows_df=xirr_flows,
     flow_col="Operazioni"
 )
-sharpe = compute_sharpe_from_returns(flow_adjusted_returns)
-sortino = compute_sortino_ratio(flow_adjusted_returns)
+sharpe = compute_sharpe_from_returns(flow_adjusted_returns, risk_free_rate=rf_daily)
+sortino = compute_sortino_ratio(flow_adjusted_returns, risk_free_rate=rf_daily)
 
 # =========================
 # Benchmark
@@ -226,18 +239,26 @@ if show_benchmark and benchmark.strip():
             )
 
 bench_sharpe = None
-if bench_series is not None:
+bench_sortino = None
+bench_returns = None
+
+if show_benchmark and bench_series is not None:
+
     bench_returns = compute_flow_adjusted_returns(
         portfolio_value=bench_series,
         flows_df=xirr_flows,
         flow_col="Operazioni"
     )
-    bench_sharpe = compute_sharpe_from_returns(bench_returns)
 
-bench_sortino = None
-if bench_series is not None:
-    bench_sortino = compute_sortino_ratio(bench_returns)
+    bench_sharpe = compute_sharpe_from_returns(
+        bench_returns,
+        risk_free_rate=rf_daily
+    )
 
+    bench_sortino = compute_sortino_ratio(
+        bench_returns,
+        risk_free_rate=rf_daily
+    )
 # =========================
 # Breakdown P/L
 # =========================
@@ -484,6 +505,15 @@ with tab_unrealized:
 with tab_analysis:
     # st.subheader(t("analysis_title"))
 
+    #  (risk-free info)
+    if use_risk_free:
+        st.caption(t("rf_enabled"))
+
+        if rf_annual is not None:
+            st.caption(f"{t('rf_value')}: {rf_annual*100:.2f}%")
+    else:
+        st.caption(t("rf_disabled"))
+
     # fig = sharpe ratio bar (sharpe)
     values = [3.0, sharpe] 
     if show_benchmark:
@@ -495,7 +525,7 @@ with tab_analysis:
     # fig = sharpe_bar_gradient(sharpe)  old bar whithout benchmark
     fig = ratio_bar_gradient_compare(
         portfolio_value=sharpe,
-        benchmark_value=bench_sharpe,
+        benchmark_value=bench_sharpe if show_benchmark else None,
         title=t("analysis_title"),
         x_max= sharpe_max
     )
@@ -521,7 +551,7 @@ with tab_analysis:
     
     fig_sortino = ratio_bar_gradient_compare(
         portfolio_value=sortino,
-        benchmark_value=bench_sortino,
+        benchmark_value=bench_sortino if show_benchmark else None,
         title=t("sortino_value"),
         x_max= sortino_max
     )
