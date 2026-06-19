@@ -545,7 +545,8 @@ with tab_analysis:
     # =========================
     # ✅ SHARPE
     # =========================
-    st.markdown(f"### {t('sharpe_title')}")
+    # st.markdown(f"### {t('sharpe_title')}")
+    title_with_tooltip(title=t("sharpe_title"),tooltip=t("sharpe_description"))
 
     sharpe_max = get_dynamic_max(
         base=3.0,
@@ -566,7 +567,8 @@ with tab_analysis:
     # =========================
     # ✅ SORTINO
     # =========================
-    st.markdown(f"### {t('sortino_value')}")
+    # st.markdown(f"### {t('sortino_value')}")
+    title_with_tooltip(title=t("sortino_value"),tooltip=t("sortino_description"))
 
     sortino_max = get_dynamic_max(
         base=4.0,
