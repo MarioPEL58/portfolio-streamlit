@@ -628,6 +628,7 @@ def ratio_bar_gradient_compare(
     benchmark_value: float | None,
     title: str,
     x_max: float = 3.0,
+    mode: str = "gradient"   # ✅ nuovo parametro
 ):
     if portfolio_value is None:
         return None
@@ -644,37 +645,70 @@ def ratio_bar_gradient_compare(
     steps = 100
     xs = np.linspace(0, x_max, steps + 1)
 
-    # barra gradiente
-    for i in range(steps):
-        x0 = xs[i]
-        x1 = xs[i + 1]
-        mid = (x0 + x1) / 2
+    # =========================
+    # ✅ BARRA
+    # =========================
+    if mode == "gradient":
 
-        if mid <= x_max / 2:
-            alpha = mid / (x_max / 2)
-            color = _rgb_str(_interp_color(red, yellow, alpha))
-        else:
-            alpha = (mid - x_max / 2) / (x_max / 2)
-            color = _rgb_str(_interp_color(yellow, green, alpha))
+        for i in range(steps):
+            x0 = xs[i]
+            x1 = xs[i + 1]
+            mid = (x0 + x1) / 2
 
+            if mid <= x_max / 2:
+                alpha = mid / (x_max / 2)
+                color = _rgb_str(_interp_color(red, yellow, alpha))
+            else:
+                alpha = (mid - x_max / 2) / (x_max / 2)
+                color = _rgb_str(_interp_color(yellow, green, alpha))
+
+            fig.add_shape(
+                type="rect",
+                x0=x0,
+                x1=x1,
+                y0=y_center - half_height,
+                y1=y_center + half_height,
+                fillcolor=color,
+                line=dict(width=0),
+                layer="below"
+            )
+
+    elif mode == "gray":
+
+        for i in range(steps):
+            fig.add_shape(
+                type="rect",
+                x0=xs[i],
+                x1=xs[i + 1],
+                y0=y_center - half_height,
+                y1=y_center + half_height,
+                fillcolor="rgba(200,200,200,0.2)",
+                line=dict(width=0),
+                layer="below"
+            )
+
+        # ✅ linea benchmark a 1
         fig.add_shape(
-            type="rect",
-            x0=x0,
-            x1=x1,
-            y0=y_center - half_height,
-            y1=y_center + half_height,
-            fillcolor=color,
-            line=dict(width=0),
+            type="line",
+            x0=1,
+            x1=1,
+            y0=y_center - half_height - 0.05,
+            y1=y_center + half_height + 0.05,
+            line=dict(color="white", width=1, dash="dot"),
             layer="below"
         )
 
-    # helper clamp
+    # =========================
+    # ✅ clamp
+    # =========================
     def clamp(v):
         return max(0, min(v, x_max))
 
     p_val = clamp(portfolio_value)
 
-    # marker portfolio
+    # =========================
+    # ✅ MARKER PORTFOLIO
+    # =========================
     fig.add_trace(go.Scatter(
         x=[p_val],
         y=[y_center],
@@ -698,7 +732,9 @@ def ratio_bar_gradient_compare(
         yanchor="bottom"
     )
 
-    # marker benchmark
+    # =========================
+    # ✅ MARKER BENCHMARK
+    # =========================
     if benchmark_value is not None:
         b_val = clamp(benchmark_value)
 
@@ -725,6 +761,9 @@ def ratio_bar_gradient_compare(
             yanchor="top"
         )
 
+    # =========================
+    # ✅ LAYOUT
+    # =========================
     fig.update_layout(
         height=120,
         margin=dict(l=20, r=20, t=10, b=5),
