@@ -162,6 +162,7 @@ sidebar_options = "Opzioni"
 sidebar_benchmark_label = "Ticker benchmark Yahoo (opzionale)"
 sidebar_benchmark_help = "Esempio: CSSPX.MI, VWCE.DE, SPY"
 sidebar_show_benchmark = "Mostra benchmark normalizzato"
+sidebar_use_risk_free = "Usa tasso risk-free"
 sidebar_min_date = "Data minima"
 
 # colonnper tae belle in output 
@@ -363,6 +364,7 @@ sidebar_options = "Options"
 sidebar_benchmark_label = "Yahoo benchmark ticker (optional)"
 sidebar_benchmark_help = "Example: CSSPX.MI, VWCE.DE, SPY"
 sidebar_show_benchmark = "Show normalized benchmark"
+sidebar_use_risk_free = "Use risk-free rate"
 sidebar_min_date = "Start date"
 
 # colonnper tae belle in output 
