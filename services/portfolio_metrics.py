@@ -228,3 +228,30 @@ def compute_sortino_ratio(
     sortino_annual = sortino_daily * np.sqrt(periods_per_year)
 
     return sortino_annual
+
+def compute_beta(portfolio_returns, benchmark_returns):
+    """
+    Calcola il Beta del portafoglio rispetto al benchmark
+    """
+
+    if portfolio_returns is None or benchmark_returns is None:
+        return None
+
+    # allinea serie
+    df = portfolio_returns.to_frame("p").join(
+        benchmark_returns.to_frame("b"),
+        how="inner"
+    ).dropna()
+
+    if df.empty:
+        return None
+
+    cov = np.cov(df["p"], df["b"])[0][1]
+    var = np.var(df["b"])
+
+    if var == 0:
+        return None
+
+    beta = cov / var
+
+    return beta
