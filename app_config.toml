@@ -433,6 +433,7 @@ analysis_title = "Analysis"
 sharpe_title = "Sharpe Ratio (historical)"
 sortino_value = "Sortino Ratio"
 beta_title = "Beta vs Benchmark"
+beta_description = "Beta measures how your portfolio moves relative to the market. A value of 1 means it behaves like the benchmark. Above 1 = more volatile, below 1 = more stable."
 
 # Risk-free info
 
