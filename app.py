@@ -511,6 +511,14 @@ with tab_unrealized:
 with tab_analysis:
     # st.subheader(t("analysis_title"))
 
+    fig_beta = ratio_bar_gradient_compare(
+        portfolio_value=beta,
+        benchmark_value=1.0,
+        title=t("beta_title"),
+        x_max=2.0,
+        mode="gray"
+    )
+
     #  (risk-free info)
     if use_risk_free:
         st.caption(t("rf_enabled"))
