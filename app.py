@@ -168,7 +168,7 @@ xirr_value, xirr_flows = compute_portfolio_xirr(
     valuation_date=series.index.max()
 )
 # =========================
-# sharpe ratio
+# sharpe and sortino ratio
 # =========================
 #   not correct   sharpe = compute_sharpe_ratio(series["Valore portafoglio"])
 
@@ -329,34 +329,13 @@ tab_perf, tab_daily, tab_unrealized, tab_analysis = st.tabs([
 ])
 
 with tab_perf:
-    # fig = portfolio_chart(
-    #     series,
-    #     bench_norm=bench_norm,
-    #     benchmark_name=benchmark
-    # )
     
     min_date = min_filter_date or default_start
     
     filtered_series = series[
         series.index >= pd.Timestamp(min_date)
     ]
-    # benchmark filtrato (vista) old bench_norm tutto invertito il primo giorno 
-    # if bench_norm is not None:
-    #     filtered_bench_norm = bench_norm[
-    #         bench_norm.index >= pd.Timestamp(min_date)
-    #     ]
-    
-    #     # allineamento (molto importante)
-    #     filtered_bench_norm = filtered_bench_norm.reindex(filtered_series.index)
-    #     filtered_bench_norm = filtered_bench_norm.ffill()
-    # else:
-    #     filtered_bench_norm = None
-    #
-    # fig = portfolio_chart(
-    #     filtered_series,
-    #     bench_norm=filtered_bench_norm,
-    #     benchmark_name=benchmark
-    # )
+
     if bench_series is not None:
         filtered_bench = bench_series[bench_series.index >= pd.Timestamp(min_date)]
     
@@ -505,9 +484,21 @@ with tab_unrealized:
 with tab_analysis:
     # st.subheader(t("analysis_title"))
 
-    # fig = sharpe_gauge(sharpe)
+    # fig = sharpe ratio bar (sharpe)
+    values = [3.0, sharpe] 
+    if show_benchmark:
+        if bench_sharpe is not None and not np.isnan(bench_sharpe):
+            values.append(bench_sharpe)
+    sharpe_max = np.ceil(max(values) + 0.5)
+    
     st.markdown(t("analysis_title"))
-    fig = sharpe_bar_gradient(sharpe)
+    # fig = sharpe_bar_gradient(sharpe)  old bar whithout benchmark
+    fig = ratio_bar_gradient_compare(
+        portfolio_value=sharpe,
+        benchmark_value=bench_sharpe,
+        title=t("analysis_title"),
+        x_max= sharpe_max
+    )
 
     if fig:
         st.plotly_chart(fig, use_container_width=True,key="sharpe_chart")
