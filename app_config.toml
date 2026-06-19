@@ -220,6 +220,7 @@ currency_label = "Euro"
 pl_label = "P/L"
 analysis_title ="Indice di Sharpe (storico)"
 sortino_value = "Indice di Sortino"
+beta_title = "Beta vs Benchmark"
 
 # Risk-free info
 rf_enabled = "Metriche calcolate con tasso risk-free reale"
@@ -427,6 +428,7 @@ currency_label = "Euro"
 pl_label = "P/L"
 analysis_title = "Sharpe Ratio (historical)"
 sortino_value = "Sortino Ratio"
+beta_title = "Beta vs Benchmark"
 
 # Risk-free info
 
