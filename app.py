@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from utils.i18n import init_language, t
+from utils.ui import title_with_tooltip
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
@@ -527,8 +528,9 @@ with tab_analysis:
     # =========================
     if beta is not None:
 
-        st.markdown(f"### {t('beta_title')}")
-
+        # st.markdown(f"### {t('beta_title')}")
+        title_with_tooltip(title=t("beta_title"),tooltip=t("beta_description"))
+        
         fig_beta = ratio_bar_gradient_compare(
             portfolio_value=beta,
             benchmark_value=1.0,
