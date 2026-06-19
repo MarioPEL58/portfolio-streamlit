@@ -1,3 +1,4 @@
+import numpy as np
 def annual_to_daily_rate(r_annual: float, periods_per_year: int = 252) -> float:
     """
     Converte un tasso annuale in tasso giornaliero composto.
