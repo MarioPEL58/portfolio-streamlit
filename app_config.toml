@@ -222,6 +222,7 @@ analysis_title ="Analisi"
 sharpe_title = "Indice di Sharpe (storico)"
 sortino_value = "Indice di Sortino"
 beta_title = "Beta vs Benchmark"
+beta_description = "Il Beta misura quanto il portafoglio si muove rispetto al mercato. Un valore di 1 indica un comportamento simile al benchmark. Sopra 1 = più volatile, sotto 1 = più stabile."
 
 # Risk-free info
 rf_enabled = "Metriche calcolate con tasso risk-free reale"
