@@ -722,10 +722,15 @@ def ratio_bar_gradient_compare(
         showlegend=True
     ))
 
+    if mode == "gray":
+        bench_text = t("beta_market_label")
+    else:
+        bench_text = f"{benchmark_value:.2f}"
+
     fig.add_annotation(
         x=p_val,
         y=y_center + half_height + 0.12,
-        text=f"{portfolio_value:.2f}",
+        text=bench_text,
         showarrow=False,
         font=dict(color="white", size=12),
         xanchor="center",
