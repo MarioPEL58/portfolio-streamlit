@@ -221,6 +221,10 @@ pl_label = "P/L"
 analysis_title ="Indice di Sharpe (storico)"
 sortino_value = "Indice di Sortino"
 
+# Risk-free info
+rf_enabled = "Metriche calcolate con tasso risk-free reale"
+rf_disabled = "Metriche calcolate con risk-free = 0%"
+
 [lang.en]
 
 # HEADER
@@ -422,3 +426,7 @@ currency_label = "Euro"
 pl_label = "P/L"
 analysis_title = "Sharpe Ratio (historical)"
 sortino_value = "Sortino Ratio"
+
+# Risk-free info
+rf_enabled = "Metrics calculated using real risk-free rate"
+rf_disabled = "Metrics calculated with risk-free = 0%
