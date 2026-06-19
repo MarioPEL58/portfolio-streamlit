@@ -1,5 +1,5 @@
 [app]
-version = "1.1"
+version = "1.1.01"
 
 [ui]
 # puoi tenerlo vuoto o usarlo per defaults comuni in futuro
@@ -162,6 +162,7 @@ sidebar_options = "Opzioni"
 sidebar_benchmark_label = "Ticker benchmark Yahoo (opzionale)"
 sidebar_benchmark_help = "Esempio: CSSPX.MI, VWCE.DE, SPY"
 sidebar_show_benchmark = "Mostra benchmark normalizzato"
+sidebar_use_risk_free = "Usa tasso risk-free"
 sidebar_min_date = "Data minima"
 
 # colonnper tae belle in output 
@@ -217,6 +218,16 @@ col_trading_pl = "P/L trading"
 benchmark_label = "Benchmark"
 currency_label = "Euro"
 pl_label = "P/L"
+analysis_title ="Analisi"
+sharpe_title = "Indice di Sharpe (storico)"
+sortino_value = "Indice di Sortino"
+beta_title = "Beta vs Benchmark"
+
+# Risk-free info
+rf_enabled = "Metriche calcolate con tasso risk-free reale"
+rf_disabled = "Metriche calcolate con risk-free uguale a zero"
+rf_value = "Tasso risk-free"
+beta_market_label = "Mercato"
 
 [lang.en]
 
@@ -361,6 +372,7 @@ sidebar_options = "Options"
 sidebar_benchmark_label = "Yahoo benchmark ticker (optional)"
 sidebar_benchmark_help = "Example: CSSPX.MI, VWCE.DE, SPY"
 sidebar_show_benchmark = "Show normalized benchmark"
+sidebar_use_risk_free = "Use risk-free rate"
 sidebar_min_date = "Start date"
 
 # colonnper tae belle in output 
@@ -416,4 +428,14 @@ col_trading_pl = "Trading P/L"
 benchmark_label = "Benchmark"
 currency_label = "Euro"
 pl_label = "P/L"
+analysis_title = "Analysis"
+sharpe_title = "Sharpe Ratio (historical)"
+sortino_value = "Sortino Ratio"
+beta_title = "Beta vs Benchmark"
 
+# Risk-free info
+
+rf_enabled = "Metrics calculated using real risk-free rate"
+rf_disabled = "Metrics calculated with risk-free set to zero"
+rf_value = "Risk-free rate"
+beta_market_label = "Market"

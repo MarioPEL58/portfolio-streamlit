@@ -43,7 +43,11 @@ def render_sidebar():
             t("sidebar_show_benchmark"),
             value=True
         )
-
+        
+        use_risk_free= st.sidebar.checkbox(
+            t("sidebar_use_risk_free"),
+            value=False
+        )
         min_filter_date = st.date_input(
             t("sidebar_min_date"),
             value=None
@@ -53,6 +57,7 @@ def render_sidebar():
         "uploaded_file": uploaded_file,
         "benchmark": benchmark,
         "show_benchmark": show_benchmark,
+        "use_risk_free": use_risk_free,
         "min_filter_date": min_filter_date,
     }
 

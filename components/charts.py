@@ -1,6 +1,7 @@
 import plotly.graph_objects as go
 import plotly.express as px
 from config import UI_CHART_STYLE as STYLE
+import numpy as np
 from utils.i18n import t
 from utils.display import get_display_columns
 import pandas as pd
@@ -344,5 +345,458 @@ def daily_pl_bar_chart_by_sign(
                 ticktext=ticktext
             )
         )
+
+    return fig
+
+def sharpe_gauge(sharpe_value: float | None):
+
+    if sharpe_value is None:
+        return None
+
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=sharpe_value,
+        number={'suffix': ""},
+
+        title={'text': "Sharpe Ratio"},
+
+        gauge={
+            'axis': {'range': [0, 3]},
+            'bar': {'color': "black"},  # ✅ pallino/indicatore
+
+            'steps': [
+                {'range': [0, 1], 'color': "#ef5350"},   # rosso
+                {'range': [1, 2], 'color': "#fdd835"},   # giallo
+                {'range': [2, 3], 'color': "#66bb6a"},   # verde
+            ],
+
+            'threshold': {
+                'line': {'color': "black", 'width': 4},
+                'thickness': 1.0,
+                'value': sharpe_value
+            }
+        }
+    ))
+
+    fig.update_layout(
+        height=300,
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
+
+    return fig
+
+# =========================
+# ✅ helpers colore
+# =========================
+def _interp_color(c1, c2, x):
+    return (
+        int(c1[0] + (c2[0] - c1[0]) * x),
+        int(c1[1] + (c2[1] - c1[1]) * x),
+        int(c1[2] + (c2[2] - c1[2]) * x),
+    )
+
+
+def _rgb_str(rgb):
+    return f"rgb({rgb[0]},{rgb[1]},{rgb[2]})"
+
+
+# =========================
+# ✅ funzione principale
+# =========================
+def sharpe_bar_gradient(sharpe_value: float | None, x_max: float = 3.0):
+
+    if sharpe_value is None:
+        return None
+
+    x_val = max(0, min(sharpe_value, x_max))
+
+    fig = go.Figure()
+
+    y_center = 0
+    half_height = 0.2
+
+    red = (239, 83, 80)
+    yellow = (253, 216, 53)
+    green = (102, 187, 106)
+
+    # =========================
+    # ✅ gradiente (STABILE)
+    # =========================
+    steps = 100
+    xs = np.linspace(0, x_max, steps + 1)
+
+    for i in range(steps):
+        x0 = xs[i]
+        x1 = xs[i + 1]
+        mid = (x0 + x1) / 2
+
+        if mid <= x_max / 2:
+            alpha = mid / (x_max / 2)
+            color = _rgb_str(_interp_color(red, yellow, alpha))
+        else:
+            alpha = (mid - x_max / 2) / (x_max / 2)
+            color = _rgb_str(_interp_color(yellow, green, alpha))
+
+        fig.add_shape(
+            type="rect",
+            x0=x0,
+            x1=x1,
+            y0=y_center - half_height,
+            y1=y_center + half_height,
+            fillcolor=color,
+            line=dict(width=0),
+            layer="below"   # ✅ IMPORTANTISSIMO
+        )
+
+    # =========================
+    # ✅ PALLINO (SOPRA)
+    # =========================
+    fig.add_trace(go.Scatter(
+        x=[x_val],
+        y=[y_center],
+        mode="markers",
+        marker=dict(
+            color="black",
+            size=14,
+            line=dict(color="white", width=1)
+        ),
+        showlegend=False,
+        hovertemplate=f"{t('sharpe_value')}: {sharpe_value:.2f}<extra></extra>"
+    ))
+
+    # =========================
+    # ✅ LABEL SOPRA
+    # =========================
+    fig.add_annotation(
+        x=x_val,
+        y=y_center + half_height + 0.12,
+        text=f"{sharpe_value:.2f}",
+        showarrow=False,
+        font=dict(color="white", size=12),
+        xanchor="center",
+        yanchor="bottom"
+    )
+
+    # =========================
+    # ✅ ASSE X SEMPLICE (fix stabile)
+    # =========================
+    fig.update_layout(
+        height=100,
+        margin=dict(l=20, r=20, t=10, b=5),
+
+        plot_bgcolor="#0E1117",
+        paper_bgcolor="#0E1117",
+
+        xaxis=dict(
+            range=[0, x_max],
+            showgrid=False,
+            zeroline=False,
+            tickmode="array",
+            tickvals=[0, x_max],
+            ticktext=["0", str(int(x_max))],
+            tickfont=dict(color="white"),
+            side="bottom"
+        ),
+
+        yaxis=dict(
+            range=[-0.4, 0.5],
+            showticklabels=False,
+            showgrid=False,
+            zeroline=False
+        )
+    )
+
+    return fig
+
+# =========================
+# ✅ funzione generica
+# =========================
+def ratio_bar_gradient(
+    value: float | None,
+    title: str,
+    x_max: float = 3.0,
+    tick_vals: list[float] | None = None,
+    tick_text: list[str] | None = None,
+):
+    if value is None:
+        return None
+
+    x_val = max(0, min(value, x_max))
+
+    fig = go.Figure()
+
+    y_center = 0
+    half_height = 0.2
+
+    red = (239, 83, 80)
+    yellow = (253, 216, 53)
+    green = (102, 187, 106)
+
+    # =========================
+    # ✅ gradiente
+    # =========================
+    steps = 100
+    xs = np.linspace(0, x_max, steps + 1)
+
+    for i in range(steps):
+        x0 = xs[i]
+        x1 = xs[i + 1]
+        mid = (x0 + x1) / 2
+
+        if mid <= x_max / 2:
+            alpha = mid / (x_max / 2)
+            color = _rgb_str(_interp_color(red, yellow, alpha))
+        else:
+            alpha = (mid - x_max / 2) / (x_max / 2)
+            color = _rgb_str(_interp_color(yellow, green, alpha))
+
+        fig.add_shape(
+            type="rect",
+            x0=x0,
+            x1=x1,
+            y0=y_center - half_height,
+            y1=y_center + half_height,
+            fillcolor=color,
+            line=dict(width=0),
+            layer="below"
+        )
+
+    # =========================
+    # ✅ marker
+    # =========================
+    fig.add_trace(go.Scatter(
+        x=[x_val],
+        y=[y_center],
+        mode="markers",
+        marker=dict(
+            color="black",
+            size=14,
+            line=dict(color="white", width=1)
+        ),
+        showlegend=False,
+        hovertemplate=f"{title}: {value:.2f}<extra></extra>"
+    ))
+
+    # =========================
+    # ✅ label sopra
+    # =========================
+    fig.add_annotation(
+        x=x_val,
+        y=y_center + half_height + 0.12,
+        text=f"{value:.2f}",
+        showarrow=False,
+        font=dict(color="white", size=12),
+        xanchor="center",
+        yanchor="bottom"
+    )
+
+    # =========================
+    # ✅ ticks asse x
+    # =========================
+    if tick_vals is None:
+        tick_vals = [0, x_max]
+
+    if tick_text is None:
+        tick_text = [str(v).rstrip("0").rstrip(".") for v in tick_vals]
+
+    fig.update_layout(
+        height=100,
+        margin=dict(l=20, r=20, t=10, b=5),
+        plot_bgcolor="#0E1117",
+        paper_bgcolor="#0E1117",
+        xaxis=dict(
+            range=[0, x_max],
+            showgrid=False,
+            zeroline=False,
+            tickmode="array",
+            tickvals=tick_vals,
+            ticktext=tick_text,
+            tickfont=dict(color="white")
+        ),
+        yaxis=dict(
+            range=[-0.45, 0.55],
+            showticklabels=False,
+            showgrid=False,
+            zeroline=False
+        )
+    )
+
+    return fig
+
+def ratio_bar_gradient_compare(
+    portfolio_value: float | None,
+    benchmark_value: float | None,
+    title: str,
+    x_max: float = 3.0,
+    mode: str = "gradient"   # ✅ nuovo parametro
+):
+    if portfolio_value is None:
+        return None
+
+    fig = go.Figure()
+
+    y_center = 0
+    half_height = 0.2
+
+    red = (239, 83, 80)
+    yellow = (253, 216, 53)
+    green = (102, 187, 106)
+
+    steps = 100
+    xs = np.linspace(0, x_max, steps + 1)
+
+    # =========================
+    # ✅ BARRA
+    # =========================
+    if mode == "gradient":
+
+        for i in range(steps):
+            x0 = xs[i]
+            x1 = xs[i + 1]
+            mid = (x0 + x1) / 2
+
+            if mid <= x_max / 2:
+                alpha = mid / (x_max / 2)
+                color = _rgb_str(_interp_color(red, yellow, alpha))
+            else:
+                alpha = (mid - x_max / 2) / (x_max / 2)
+                color = _rgb_str(_interp_color(yellow, green, alpha))
+
+            fig.add_shape(
+                type="rect",
+                x0=x0,
+                x1=x1,
+                y0=y_center - half_height,
+                y1=y_center + half_height,
+                fillcolor=color,
+                line=dict(width=0),
+                layer="below"
+            )
+
+    elif mode == "gray":
+
+        for i in range(steps):
+            fig.add_shape(
+                type="rect",
+                x0=xs[i],
+                x1=xs[i + 1],
+                y0=y_center - half_height,
+                y1=y_center + half_height,
+                fillcolor="rgba(200,200,200,0.2)",
+                line=dict(width=0),
+                layer="below"
+            )
+
+        # ✅ linea benchmark a 1
+        fig.add_shape(
+            type="line",
+            x0=1,
+            x1=1,
+            y0=y_center - half_height - 0.05,
+            y1=y_center + half_height + 0.05,
+            line=dict(color="white", width=1, dash="dot"),
+            layer="below"
+        )
+
+    # =========================
+    # ✅ clamp
+    # =========================
+    def clamp(v):
+        return max(0, min(v, x_max))
+
+    p_val = clamp(portfolio_value)
+
+    # =========================
+    # ✅ MARKER PORTFOLIO
+    # =========================
+    fig.add_trace(go.Scatter(
+        x=[p_val],
+        y=[y_center],
+        mode="markers",
+        marker=dict(
+            color="black",
+            size=14,
+            line=dict(color="white", width=1)
+        ),
+        name="Portfolio",
+        showlegend=True
+    ))
+
+    fig.add_annotation(
+        x=p_val,
+        y=y_center + half_height + 0.12,
+        text=f"{portfolio_value:.2f}",
+        showarrow=False,
+        font=dict(color="white", size=12),
+        xanchor="center",
+        yanchor="bottom"
+    )
+
+    # =========================
+    # ✅ MARKER BENCHMARK
+    # =========================
+    if benchmark_value is not None:
+        b_val = clamp(benchmark_value)
+        
+        if mode == "gray":
+            bench_text = t("beta_market_label")
+        else:
+            bench_text = f"{benchmark_value:.2f}"
+            
+        fig.add_trace(go.Scatter(
+            x=[b_val],
+            y=[y_center],
+            mode="markers",
+            marker=dict(
+                color="white",
+                size=12,
+                line=dict(color="black", width=1)
+            ),
+            name="Benchmark",
+            showlegend=True
+        ))
+
+        fig.add_annotation(
+            x=b_val,
+            y=y_center - half_height - 0.12,
+            text=bench_text,
+            showarrow=False,
+            font=dict(color="white", size=11),
+            xanchor="center",
+            yanchor="top"
+        )
+
+    # =========================
+    # ✅ LAYOUT
+    # =========================
+    fig.update_layout(
+        height=120,
+        margin=dict(l=20, r=20, t=10, b=5),
+        plot_bgcolor="#0E1117",
+        paper_bgcolor="#0E1117",
+        xaxis=dict(
+            range=[0, x_max],
+            showgrid=False,
+            zeroline=False,
+            tickmode="array",
+            tickvals=[0, x_max],
+            ticktext=["0", str(int(x_max))],
+            tickfont=dict(color="white")
+        ),
+        yaxis=dict(
+            range=[-0.6, 0.6],
+            showticklabels=False,
+            showgrid=False,
+            zeroline=False
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.05,
+            xanchor="right",
+            x=1,
+            font=dict(color="white")
+        )
+    )
 
     return fig

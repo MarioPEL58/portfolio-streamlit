@@ -84,3 +84,174 @@ def compute_portfolio_xirr(ops_enriched, dividends, final_value, valuation_date=
             return mid, df
 
     return None, df
+
+def compute_sharpe_ratio(
+    portfolio_series: pd.Series,
+    risk_free_rate: float = 0.0,
+    periods_per_year: int = 252
+):
+    """
+    Calcola Sharpe ratio annualizzato.
+
+    portfolio_series:
+        Serie del valore portafoglio nel tempo (es: series["Valore portafoglio"])
+    risk_free_rate:
+        tasso risk-free giornaliero (default 0)
+    periods_per_year:
+        252 per dati giornalieri
+
+    Ritorna:
+        Sharpe ratio annualizzato
+    """
+
+    if portfolio_series is None or len(portfolio_series) < 2:
+        return None
+
+    # ✅ rendimenti giornalieri
+    returns = portfolio_series.pct_change().dropna()
+
+    if returns.empty:
+        return None
+
+    # ✅ media e volatilità
+    mean_return = returns.mean()
+    std_return = returns.std()
+
+    if std_return == 0 or np.isnan(std_return):
+        return None
+
+    # ✅ Sharpe giornaliero
+    sharpe_daily = (mean_return - risk_free_rate) / std_return
+
+    # ✅ annualizzazione
+    sharpe_annualized = sharpe_daily * np.sqrt(periods_per_year)
+
+    return sharpe_annualized
+
+def compute_flow_adjusted_returns(
+    portfolio_value: pd.Series,
+    flows_df: pd.DataFrame,
+    flow_col: str = "Operazioni"
+):
+    """
+    Calcola rendimenti giornalieri netti dai flussi esterni.
+
+    portfolio_value:
+        Serie del valore portafoglio nel tempo (index=datetime)
+
+    flows_df:
+        DataFrame con almeno:
+        - Data
+        - flow_col (es. Operazioni)
+
+    flow_col:
+        colonna dei flussi esterni da neutralizzare
+
+    Ritorna:
+        Serie dei rendimenti giornalieri netti dai flussi
+    """
+
+    if portfolio_value is None or portfolio_value.empty:
+        return pd.Series(dtype=float)
+
+    pv = portfolio_value.copy().sort_index()
+    pv.index = pd.to_datetime(pv.index).normalize()
+
+    flows = flows_df.copy()
+    flows["Data"] = pd.to_datetime(flows["Data"]).dt.normalize()
+
+    # aggrega flussi per data
+    daily_flows = flows.groupby("Data")[flow_col].sum().sort_index()
+
+    # riallinea i flussi alle date del portafoglio
+    daily_flows = daily_flows.reindex(pv.index).fillna(0.0)
+
+    prev_value = pv.shift(1)
+
+    # rendimento netto dai flussi
+    returns = (pv - prev_value + daily_flows) / prev_value
+    returns = returns.replace([np.inf, -np.inf], np.nan).dropna()
+
+    return returns
+    
+def compute_sharpe_from_returns(
+    returns: pd.Series,
+    risk_free_rate: float = 0.0,
+    periods_per_year: int = 252
+):
+    if returns is None or returns.empty:
+        return None
+
+    mean_return = returns.mean()
+    std_return = returns.std()
+
+    if std_return == 0 or np.isnan(std_return):
+        return None
+
+    sharpe_daily = (mean_return - risk_free_rate) / std_return
+    return sharpe_daily * np.sqrt(periods_per_year)
+
+def compute_sortino_ratio(
+    returns: pd.Series,
+    risk_free_rate: float = 0.0,
+    periods_per_year: int = 252
+):
+    """
+    Calcola Sortino ratio annualizzato.
+
+    returns:
+        Serie rendimenti (meglio se già flow-adjusted ✅)
+    """
+
+    if returns is None or returns.empty:
+        return None
+
+    # ✅ rendimento medio
+    mean_return = returns.mean()
+
+    # ✅ seleziona solo rendimenti negativi rispetto al target
+    downside_returns = returns[returns < risk_free_rate]
+
+    if downside_returns.empty:
+        return None
+
+    # ✅ downside deviation
+    downside_std = np.sqrt((downside_returns ** 2).mean())
+
+    if downside_std == 0 or np.isnan(downside_std):
+        return None
+
+    # ✅ Sortino giornaliero
+    sortino_daily = (mean_return - risk_free_rate) / downside_std
+
+    # ✅ annualizzazione
+    sortino_annual = sortino_daily * np.sqrt(periods_per_year)
+
+    return sortino_annual
+
+def compute_beta(portfolio_returns, benchmark_returns):
+    """
+    Calcola il Beta del portafoglio rispetto al benchmark
+    """
+
+    if portfolio_returns is None or benchmark_returns is None:
+        return None
+
+    # allinea serie
+    df = portfolio_returns.to_frame("p").join(
+        benchmark_returns.to_frame("b"),
+        how="inner"
+    ).dropna()
+
+    if df.empty:
+        return None
+
+    cov = np.cov(df["p"], df["b"])[0][1]
+    var = np.var(df["b"])
+
+    if var == 0:
+        return None
+
+    beta = cov / var
+
+    return beta

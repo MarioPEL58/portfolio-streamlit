@@ -8,16 +8,19 @@ from utils.i18n import init_language, t
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
-from components.charts import daily_pl_bar_chart_by_sign
+from components.charts import daily_pl_bar_chart_by_sign, sharpe_gauge
+from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
-
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel
 from services.market_data import download_close_prices, download_last_intraday_timestamp
 from services.portfolio import build_portfolio
-from services.portfolio_metrics import compute_portfolio_xirr
+from services.portfolio_metrics import compute_portfolio_xirr, compute_sharpe_ratio
+from services.portfolio_metrics import compute_flow_adjusted_returns, compute_sharpe_from_returns, compute_sortino_ratio, compute_beta
 from services.market_status import compute_market_update_label
 from services.benchmark import build_flow_adjusted_benchmark
+from services.risk_free import get_euro_risk_free_rate
+from utils.finance import annual_to_daily_rate, get_dynamic_max
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 from utils.display import get_display_columns
@@ -62,6 +65,7 @@ sidebar_cfg = render_sidebar()
 uploaded_file = sidebar_cfg["uploaded_file"]
 benchmark = sidebar_cfg["benchmark"]
 show_benchmark = sidebar_cfg["show_benchmark"]
+use_risk_free = sidebar_cfg["use_risk_free"]
 min_filter_date = sidebar_cfg["min_filter_date"]
 
 # Input source
@@ -167,6 +171,29 @@ xirr_value, xirr_flows = compute_portfolio_xirr(
     valuation_date=series.index.max()
 )
 # =========================
+# risk Free evaluation
+# =========================
+rf_daily = 0.0
+rf_annual = None
+
+if use_risk_free:
+    rf_annual = get_euro_risk_free_rate()
+    if rf_annual is not None:
+        rf_daily = annual_to_daily_rate(rf_annual)
+# =========================
+# sharpe and sortino ratio
+# =========================
+#   not correct   sharpe = compute_sharpe_ratio(series["Valore portafoglio"])
+
+flow_adjusted_returns = compute_flow_adjusted_returns(
+    portfolio_value=series["Valore portafoglio"],
+    flows_df=xirr_flows,
+    flow_col="Operazioni"
+)
+sharpe = compute_sharpe_from_returns(flow_adjusted_returns, risk_free_rate=rf_daily)
+sortino = compute_sortino_ratio(flow_adjusted_returns, risk_free_rate=rf_daily)
+
+# =========================
 # Benchmark
 # =========================
 bench_norm = None
@@ -210,6 +237,33 @@ if show_benchmark and benchmark.strip():
                 flows_df=flows_input,
                 benchmark_prices=b
             )
+
+bench_sharpe = None
+bench_sortino = None
+bench_returns = None
+
+if show_benchmark and bench_series is not None:
+
+    bench_returns = compute_flow_adjusted_returns(
+        portfolio_value=bench_series,
+        flows_df=xirr_flows,
+        flow_col="Operazioni"
+    )
+
+    bench_sharpe = compute_sharpe_from_returns(
+        bench_returns,
+        risk_free_rate=rf_daily
+    )
+
+    bench_sortino = compute_sortino_ratio(
+        bench_returns,
+        risk_free_rate=rf_daily
+    )
+
+beta = None
+
+if show_benchmark and bench_returns is not None:
+    beta = compute_beta(flow_adjusted_returns, bench_returns)
 
 # =========================
 # Breakdown P/L
@@ -294,41 +348,21 @@ st.caption(update_label)
 
 st.subheader(t("charts_title"))
 
-tab_perf, tab_daily, tab_unrealized = st.tabs([
+tab_perf, tab_daily, tab_unrealized, tab_analysis = st.tabs([
     t("tab_perf"),
     t("tab_daily"),
-    t("tab_unrealized")
+    t("tab_unrealized"),
+    t("tab_analysis")
 ])
 
 with tab_perf:
-    # fig = portfolio_chart(
-    #     series,
-    #     bench_norm=bench_norm,
-    #     benchmark_name=benchmark
-    # )
     
     min_date = min_filter_date or default_start
     
     filtered_series = series[
         series.index >= pd.Timestamp(min_date)
     ]
-    # benchmark filtrato (vista) old bench_norm tutto invertito il primo giorno 
-    # if bench_norm is not None:
-    #     filtered_bench_norm = bench_norm[
-    #         bench_norm.index >= pd.Timestamp(min_date)
-    #     ]
-    
-    #     # allineamento (molto importante)
-    #     filtered_bench_norm = filtered_bench_norm.reindex(filtered_series.index)
-    #     filtered_bench_norm = filtered_bench_norm.ffill()
-    # else:
-    #     filtered_bench_norm = None
-    #
-    # fig = portfolio_chart(
-    #     filtered_series,
-    #     bench_norm=filtered_bench_norm,
-    #     benchmark_name=benchmark
-    # )
+
     if bench_series is not None:
         filtered_bench = bench_series[bench_series.index >= pd.Timestamp(min_date)]
     
@@ -474,6 +508,79 @@ with tab_unrealized:
     else:
         st.caption(t("no_loss_open"))
 
+with tab_analysis:
+
+    # st.subheader(t("analysis_title"))
+
+    # =========================
+    # ✅ Risk-free info
+    # =========================
+    if use_risk_free:
+        st.caption(t("rf_enabled"))
+        if rf_annual is not None:
+            st.caption(f"{t('rf_value')}: {rf_annual*100:.2f}%")
+    else:
+        st.caption(t("rf_disabled"))
+
+    # =========================
+    # ✅ BETA
+    # =========================
+    if beta is not None:
+
+        st.markdown(f"### {t('beta_title')}")
+
+        fig_beta = ratio_bar_gradient_compare(
+            portfolio_value=beta,
+            benchmark_value=1.0,
+            title=t("beta_title"),
+            x_max=2.0,
+            mode="gray"
+        )
+
+        if fig_beta:
+            st.plotly_chart(fig_beta, use_container_width=True, key="beta_chart")
+
+    # =========================
+    # ✅ SHARPE
+    # =========================
+    st.markdown(f"### {t('sharpe_title')}")
+
+    sharpe_max = get_dynamic_max(
+        base=3.0,
+        value=sharpe,
+        benchmark=bench_sharpe if show_benchmark else None
+    )
+
+    fig_sharpe = ratio_bar_gradient_compare(
+        portfolio_value=sharpe,
+        benchmark_value=bench_sharpe if show_benchmark else None,
+        title=t("sharpe_title"),
+        x_max=sharpe_max
+    )
+
+    if fig_sharpe:
+        st.plotly_chart(fig_sharpe, use_container_width=True, key="sharpe_chart")
+
+    # =========================
+    # ✅ SORTINO
+    # =========================
+    st.markdown(f"### {t('sortino_value')}")
+
+    sortino_max = get_dynamic_max(
+        base=4.0,
+        value=sortino,
+        benchmark=bench_sortino if show_benchmark else None
+    )
+
+    fig_sortino = ratio_bar_gradient_compare(
+        portfolio_value=sortino,
+        benchmark_value=bench_sortino if show_benchmark else None,
+        title=t("sortino_value"),
+        x_max=sortino_max
+    )
+
+    if fig_sortino:
+        st.plotly_chart(fig_sortino, use_container_width=True, key="sortino_chart")
 # Tabs
 tab_pos, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
     [t("tab_positions"), t("tab_exposure"), t("tab_flows"), t("tab_operations"), t("tab_download")]
