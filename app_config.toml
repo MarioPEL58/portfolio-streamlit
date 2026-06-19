@@ -226,6 +226,7 @@ beta_title = "Beta vs Benchmark"
 rf_enabled = "Metriche calcolate con tasso risk-free reale"
 rf_disabled = "Metriche calcolate con risk-free uguale a zero"
 rf_value = "Tasso risk-free"
+beta_market_label = "Mercato"
 
 [lang.en]
 
@@ -435,4 +436,4 @@ beta_title = "Beta vs Benchmark"
 rf_enabled = "Metrics calculated using real risk-free rate"
 rf_disabled = "Metrics calculated with risk-free set to zero"
 rf_value = "Risk-free rate"
-
+beta_market_label = "Market"
