@@ -510,7 +510,7 @@ with tab_unrealized:
 
 with tab_analysis:
 
-    st.subheader(t("analysis_title"))
+    # st.subheader(t("analysis_title"))
 
     # =========================
     # ✅ Risk-free info
