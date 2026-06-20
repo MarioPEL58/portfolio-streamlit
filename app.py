@@ -86,7 +86,18 @@ try:
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
 
-    ops["Data"] = pd.to_datetime(ops["Data"])
+    # ✅ normalizzazione date
+    ops["Data"] = pd.to_datetime(ops["Data"], errors="coerce")
+    
+    # ✅ ordine stabile (importantissimo)
+    ops["_rowid"] = np.arange(len(ops))
+    
+    # ✅ SORT CORRETTO (fix principale)
+    ops = (
+        ops
+        .sort_values(["PositionKey", "Data", "_rowid"])
+        .reset_index(drop=True)
+    )
 
     data_min = ops["Data"].min()
     data_max = ops["Data"].max()
