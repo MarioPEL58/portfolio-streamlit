@@ -154,7 +154,7 @@ render_operations_preview(ops_enriched)
 # KPIs
 # =========================
 # latest_value = float(series["Valore portafoglio"].iloc[-1])
-latest_value = latest_value = float(current["Valore"].sum())
+latest_value = float(current["Valore"].sum())
 # latest_invested = float(series["Capitale investito"].iloc[-1])
 latest_invested = float(current["Costo Totale Stimato"].sum())
 # latest_pnl = float(series["P/L trading"].iloc[-1]) non serve più
