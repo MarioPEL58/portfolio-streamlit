@@ -146,6 +146,14 @@ if series.empty:
     st.error(t("portfolio_error"))
     st.stop()
 
+st.subheader("DEBUG COERENZA VALORI")
+
+st.write({
+    "Valore serie": ts["Valore portafoglio"].iloc[-1],
+    "Valore current": current["Valore"].sum(),
+    "Differenza": ts["Valore portafoglio"].iloc[-1] - current["Valore"].sum()
+})
+
 render_operations_preview(ops_enriched)
 # with st.expander("Anteprima operazioni", expanded=False):
 #    st.dataframe(ops_enriched, use_container_width=True)
