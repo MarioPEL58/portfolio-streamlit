@@ -155,8 +155,9 @@ render_operations_preview(ops_enriched)
 # =========================
 # latest_value = float(series["Valore portafoglio"].iloc[-1])
 latest_value = latest_value = float(current["Valore"].sum())
-latest_invested = float(series["Capitale investito"].iloc[-1])
-# latest_pnl = float(series["P/L trading"].iloc[-1])
+# latest_invested = float(series["Capitale investito"].iloc[-1])
+latest_invested = float(current["Costo Totale Stimato"].sum()
+# latest_pnl = float(series["P/L trading"].iloc[-1]) non serve più
 
 latest_daily_pl = float(series["P/L Giornaliero"].iloc[-1])
 latest_daily_pl_pct = float(series["P/L Giornaliero %"].iloc[-1])
