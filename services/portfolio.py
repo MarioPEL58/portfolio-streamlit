@@ -252,9 +252,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         axis=1
     )
 
-    last_qty = holdings.iloc[-1]
-    last_close_eur = position_closes_eur.iloc[-1]
-    last_daily_pl = daily_pl_positions.iloc[-1]
+    # last_qty = holdings.iloc[-1]
+    # last_close_eur = position_closes_eur.iloc[-1]
+    # last_daily_pl = daily_pl_positions.iloc[-1]
 
     meta = (
         ops.sort_values("Data")
@@ -283,9 +283,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
 
     # ✅ usa la quantità residua reale del motore costi
-    # last_qty = cost_state["NetQty"]
-    # last_close_eur = position_closes_eur.iloc[-1]
-    # last_daily_pl = daily_pl_positions.iloc[-1]
+    last_qty = cost_state["NetQty"]
+    last_close_eur = position_closes_eur.iloc[-1]
+    last_daily_pl = daily_pl_positions.iloc[-1]
 
     current = pd.concat([
             last_qty.rename("Quantita"),
