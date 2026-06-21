@@ -153,20 +153,25 @@ if series.empty:
 #     "Differenza": series["Valore portafoglio"].iloc[-1] - current["Valore"].sum()
 # })
 
+
 st.subheader("DEBUG Capitale investito")
 
+capitale_serie = series["Capitale investito"].iloc[-1]
+costo_current = current["Costo Totale Stimato"].sum()
+
 st.write({
-    "Capitale serie (ultimo giorno)": series["Capitale investito"].iloc[-1],
-    "Costo totale current": current["Costo Totale Stimato"].sum(),
-    "Differenza": series["Capitale investito"].iloc[-1] - current["Costo Totale Stimato"].sum()
+    "Capitale investito (serie)": capitale_serie,
+    "Costo totale stimato (current)": costo_current,
+    "Differenza": capitale_serie - costo_current
 })
 
 st.subheader("DEBUG Flussi vs Investito")
 
 st.write({
     "Capitale versato (flussi)": series["Capitale versato"].iloc[-1],
-    "Capitale investito (open)": series["Capitale investito"].iloc[-1],
+    "Capitale investito (open)": series["Capitale investito"].iloc[-1]
 })
+
 
 
 render_operations_preview(ops_enriched)
