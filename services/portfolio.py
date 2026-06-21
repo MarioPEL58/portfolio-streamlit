@@ -144,7 +144,13 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     ops_all = ops.copy()
 
     if ops_all.empty:
-        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+        return (
+            pd.DataFrame(),
+            pd.DataFrame(),
+            pd.DataFrame(),
+            pd.DataFrame(),
+            pd.DataFrame()
+        )
 
     # =========================
     # 1. Arricchimento cost engine
@@ -157,71 +163,89 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     valid_tickers = [t for t in ops_all["Ticker"].unique() if t in closes.columns]
     ops = ops_all[ops_all["Ticker"].isin(valid_tickers)].copy()
 
+    # Se non ho nemmeno date valide, esco
+    if ops_all["Data"].dropna().empty:
+        return (
+            pd.DataFrame(),
+            pd.DataFrame(),
+            pd.DataFrame(),
+            pd.DataFrame(),
+            pd.DataFrame()
+        )
+
     # =========================
-    # COSTRUZIONE INDICE TEMPORALE COMPLETO
+    # 3. Costruzione indice temporale completo
     # =========================
     start_date = ops_all["Data"].min().normalize()
     end_date = closes.index.max()
-    
+
     idx = pd.date_range(start=start_date, end=end_date, freq="D")
 
     # =========================
-    # 3. Quantità storiche coerenti con il cost engine
-    #    (invece di  su Quantita)
+    # 4. Se non ci sono ticker validi, costruisco serie vuote
     # =========================
+    if ops.empty:
+        holdings = pd.DataFrame(index=idx)
+        position_closes_eur = pd.DataFrame(index=idx)
+        position_values = pd.DataFrame(index=idx)
+        total_value = pd.Series(np.nan, index=idx, name="Valore portafoglio")
+    else:
+        # =========================
+        # 5. Quantità storiche coerenti con il cost engine
+        # =========================
+        qty_history = (
+            ops.sort_values(["PositionKey", "Data"])
+            .groupby(["PositionKey", "Data"])["QtyOpenAfter"]
+            .last()
+            .unstack(level=0)
+            .reindex(idx)
+            .ffill()
+        )
 
-    qty_history = (
-        ops.sort_values(["PositionKey", "Data"])
-        .groupby(["PositionKey", "Data"])["QtyOpenAfter"]
-        .last()
-        .unstack(level=0)              # ✅ più esplicito
-        .reindex(idx)
-        .ffill()                      # ✅ propaga valori corretti
-    )
-    
-    # ✅ SOLO DOPO → riempi i NaN iniziali
-    qty_history = qty_history.fillna(0.0)
+        qty_history = qty_history.fillna(0.0)
 
+        # Manteniamo il nome "holdings" per compatibilità
+        holdings = qty_history.copy()
 
-    # manteniamo il nome holdings per compatibilità col resto della app
-    holdings = qty_history.copy()
+        # =========================
+        # 6. Prezzi ticker / conversione EUR
+        # =========================
+        closes_ticker = (
+            closes[valid_tickers]
+            .reindex(idx)
+            .ffill()
+        )
+
+        closes_eur_ticker, _ = convert_closes_to_eur(
+            closes_ticker,
+            ops,
+            start_date,
+            end_date
+        )
+
+        # =========================
+        # 7. Prezzi EUR per PositionKey
+        # =========================
+        position_to_ticker = ops.groupby("PositionKey")["Ticker"].last()
+        position_closes_eur = pd.DataFrame(index=idx)
+
+        for pos_key in holdings.columns:
+            ticker = position_to_ticker.loc[pos_key]
+            if ticker in closes_eur_ticker.columns:
+                position_closes_eur[pos_key] = closes_eur_ticker[ticker]
+
+        position_closes_eur = position_closes_eur.reindex(columns=holdings.columns)
+
+        # =========================
+        # 8. Valore storico portafoglio
+        # =========================
+        position_values = holdings * position_closes_eur
+
+        # min_count=1 evita che tutte-NaN diventino 0
+        total_value = position_values.sum(axis=1, min_count=1).rename("Valore portafoglio")
 
     # =========================
-    # 4. Prezzi ticker / conversione EUR
-    # =========================
-    closes_ticker = closes[valid_tickers].reindex(idx).ffill()
-
-    start_date = ops["Data"].min().normalize()
-    end_date = pd.Timestamp.today().normalize()
-
-    closes_eur_ticker, _ = convert_closes_to_eur(
-        closes_ticker,
-        ops,
-        start_date,
-        end_date
-    )
-
-    # =========================
-    # 5. Prezzi EUR per PositionKey
-    # =========================
-    position_to_ticker = ops.groupby("PositionKey")["Ticker"].last()
-    position_closes_eur = pd.DataFrame(index=idx)
-
-    for pos_key in holdings.columns:
-        ticker = position_to_ticker.loc[pos_key]
-        if ticker in closes_eur_ticker.columns:
-            position_closes_eur[pos_key] = closes_eur_ticker[ticker]
-
-    position_closes_eur = position_closes_eur.reindex(columns=holdings.columns)
-
-    # =========================
-    # 6. Valore storico portafoglio
-    # =========================
-    position_values = holdings * position_closes_eur
-    total_value = position_values.sum(axis=1).rename("Valore portafoglio")
-
-# =========================
-    # 7. Cashflow / realized su tutte le operazioni
+    # 9. Cashflow / realized su tutte le operazioni
     # =========================
     ops_cf = ops_all.copy()
     ops_cf["Cashflow"] = ops_cf["CashflowCalc"]
@@ -248,24 +272,25 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     pl_realizzato = realized_daily.cumsum().rename("P/L realizzato")
 
     # =========================
-    # 8. Capitale investito reale (costo residuo aperto storico)
+    # 10. Capitale investito reale (costo residuo aperto storico)
     # =========================
-    
-    cost_history = (
-        ops.sort_values(["PositionKey", "Data"])
-        .groupby(["PositionKey", "Data"])["CostOpenAfter"]
-        .last()
-        .unstack(level=0)
-        .reindex(idx)
-        .ffill()
-    )
-    
-    cost_history = cost_history.fillna(0.0)
+    if ops.empty:
+        invested = pd.Series(0.0, index=idx, name="Capitale investito")
+    else:
+        cost_history = (
+            ops.sort_values(["PositionKey", "Data"])
+            .groupby(["PositionKey", "Data"])["CostOpenAfter"]
+            .last()
+            .unstack(level=0)
+            .reindex(idx)
+            .ffill()
+        )
 
-    invested = cost_history.sum(axis=1).rename("Capitale investito")
+        cost_history = cost_history.fillna(0.0)
+        invested = cost_history.sum(axis=1).rename("Capitale investito")
 
     # =========================
-    # 8b. Capitale versato (flussi netti cumulati)
+    # 11. Capitale versato (flussi netti cumulati)
     # =========================
     daily_cf_total = (
         ops_cf.groupby("Data")["Cashflow"]
@@ -276,28 +301,35 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     capital_versato = (-daily_cf_total.cumsum()).rename("Capitale versato")
 
     # =========================
-    # 9. P/L giornaliero per posizione
+    # 12. P/L giornaliero per posizione
     # =========================
-    daily_cf_positions = (
-        ops_cf.groupby(["Data", "PositionKey"])["Cashflow"]
-        .sum()
-        .unstack(fill_value=0.0)
-        .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
-    )
+    if ops.empty:
+        daily_pl_positions = pd.DataFrame(index=idx)
+        daily_pl = pd.Series(0.0, index=idx, name="P/L Giornaliero")
+        daily_pl_pct = pd.Series(np.nan, index=idx, name="P/L Giornaliero %")
+    else:
+        daily_cf_positions = (
+            ops_cf.groupby(["Data", "PositionKey"])["Cashflow"]
+            .sum()
+            .unstack(fill_value=0.0)
+            .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
+        )
 
-    daily_pl_positions = (
-        position_values.diff().fillna(0.0)
-        .add(daily_cf_positions, fill_value=0.0)
-    )
+        daily_pl_positions = (
+            position_values.diff().fillna(0.0)
+            .add(daily_cf_positions, fill_value=0.0)
+        )
 
-    daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
-    daily_pl_pct = (daily_pl / total_value.shift(1)).rename("P/L Giornaliero %")
+        daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
+        daily_pl_pct = (daily_pl / total_value.shift(1)).rename("P/L Giornaliero %")
 
-    # P/L trading = valore attuale - costo residuo aperto
+    # =========================
+    # 13. P/L trading = valore portafoglio - costo residuo aperto
+    # =========================
     pnl = (total_value - invested).rename("P/L trading")
 
     # =========================
-    # 10. Serie storica finale
+    # 14. Serie storica finale
     # =========================
     ts = pd.concat(
         [
@@ -314,7 +346,15 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     )
 
     # =========================
-    # 11. Metadati posizioni
+    # 15. Se non ci sono ticker validi → niente current/exposure
+    # =========================
+    if ops.empty:
+        current = pd.DataFrame()
+        exposure = pd.DataFrame()
+        return ts, current, holdings, exposure, ops_all
+
+    # =========================
+    # 16. Metadati posizioni
     # =========================
     meta = (
         ops.sort_values("Data")
@@ -343,7 +383,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     )
 
     # =========================
-    # 12. Stato attuale posizioni aperte
+    # 17. Stato attuale posizioni aperte
     # =========================
     last_qty = cost_state["NetQty"]
     last_close_eur = position_closes_eur.iloc[-1]
@@ -386,7 +426,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     current = current.copy()
 
     # =========================
-    # 13. Dividendi incassati per posizione
+    # 18. Dividendi incassati per posizione
     # =========================
     if dividends is not None and not dividends.empty:
         dividends = dividends.copy()
@@ -409,7 +449,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         current["Dividendi Netti Incassati"] = 0.0
 
     # filtro posizioni realmente aperte
-    current = current[current["Quantita"].abs() > 1e-12].sort_values("Valore", ascending=False)
+    current = current[
+        (current["Quantita"].abs() > 1e-12) &
+        (current["Prezzo Attuale"].notna())
+    ].sort_values("Valore", ascending=False)
 
     exposure = current.reset_index().rename(columns={"index": "PositionKey"})
 
