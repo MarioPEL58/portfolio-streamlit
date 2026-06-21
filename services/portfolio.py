@@ -128,6 +128,15 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
     ops["CashflowCalc"] = cashflow_list
     ops["TaxEuroCalc"] = tax_euro_list
 
+    # ✅ Prezzo medio s/carico:
+    # se esiste nel file → lo mantieni
+    # se manca → lo calcoli dal cost engine
+    
+    if "Prezzo medio s/carico" in ops.columns:
+        ops["Prezzo medio s/carico"] = ops["Prezzo medio s/carico"].fillna(ops["AvgCostAfter"])
+    else:
+        ops["Prezzo medio s/carico"] = ops["AvgCostAfter"]
+
     return ops
 
 def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
