@@ -146,11 +146,26 @@ if series.empty:
     st.error(t("portfolio_error"))
     st.stop()
 
-st.subheader("DEBUG COERENZA VALORI")
+# st.subheader("DEBUG COERENZA VALORI")
+# st.write({
+#     "Valore serie": series["Valore portafoglio"].iloc[-1],
+#     "Valore current": current["Valore"].sum(),
+#     "Differenza": series["Valore portafoglio"].iloc[-1] - current["Valore"].sum()
+# })
+
+st.subheader("DEBUG Capitale investito")
+
 st.write({
-    "Valore serie": series["Valore portafoglio"].iloc[-1],
-    "Valore current": current["Valore"].sum(),
-    "Differenza": series["Valore portafoglio"].iloc[-1] - current["Valore"].sum()
+    "Capitale serie (ultimo giorno)": series["Capitale investito"].iloc[-1],
+    "Costo totale current": current["Costo Totale Stimato"].sum(),
+    "Differenza": series["Capitale investito"].iloc[-1] - current["Costo Totale Stimato"].sum()
+})
+
+st.subheader("DEBUG Flussi vs Investito")
+
+st.write({
+    "Capitale versato (flussi)": series["Capitale versato"].iloc[-1],
+    "Capitale investito (open)": series["Capitale investito"].iloc[-1],
 })
 
 
