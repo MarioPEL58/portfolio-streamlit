@@ -157,26 +157,31 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     valid_tickers = [t for t in ops_all["Ticker"].unique() if t in closes.columns]
     ops = ops_all[ops_all["Ticker"].isin(valid_tickers)].copy()
 
-    if ops.empty:
-        idx = pd.DatetimeIndex(sorted(ops_all["Data"].dropna().unique()))
-        if len(idx) == 0:
-            return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-    else:
-        idx = closes.index
+    # =========================
+    # COSTRUZIONE INDICE TEMPORALE COMPLETO
+    # =========================
+    start_date = ops_all["Data"].min().normalize()
+    end_date = closes.index.max()
+    
+    idx = pd.date_range(start=start_date, end=end_date, freq="D")
 
     # =========================
     # 3. Quantità storiche coerenti con il cost engine
     #    (invece di  su Quantita)
     # =========================
+
     qty_history = (
         ops.sort_values(["PositionKey", "Data"])
-        .groupby(["Data", "PositionKey"])["QtyOpenAfter"]
+        .groupby(["PositionKey", "Data"])["QtyOpenAfter"]
         .last()
-        .unstack(fill_value=np.nan)
+        .unstack(level=0)              # ✅ più esplicito
         .reindex(idx)
-        .ffill()
-        .fillna(0.0)
+        .ffill()                      # ✅ propaga valori corretti
     )
+    
+    # ✅ SOLO DOPO → riempi i NaN iniziali
+    qty_history = qty_history.fillna(0.0)
+
 
     # manteniamo il nome holdings per compatibilità col resto della app
     holdings = qty_history.copy()
@@ -245,15 +250,17 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # =========================
     # 8. Capitale investito reale (costo residuo aperto storico)
     # =========================
+    
     cost_history = (
         ops.sort_values(["PositionKey", "Data"])
-        .groupby(["Data", "PositionKey"])["CostOpenAfter"]
+        .groupby(["PositionKey", "Data"])["CostOpenAfter"]
         .last()
-        .unstack(fill_value=np.nan)
+        .unstack(level=0)
         .reindex(idx)
         .ffill()
-        .fillna(0.0)
     )
+    
+    cost_history = cost_history.fillna(0.0)
 
     invested = cost_history.sum(axis=1).rename("Capitale investito")
 
