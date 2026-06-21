@@ -154,25 +154,23 @@ if series.empty:
 # })
 
 
-st.subheader("DEBUG Capitale investito")
+# st.subheader("DEBUG Capitale investito")
 
-capitale_serie = series["Capitale investito"].iloc[-1]
-costo_current = current["Costo Totale Stimato"].sum()
+# capitale_serie = series["Capitale investito"].iloc[-1]
+# costo_current = current["Costo Totale Stimato"].sum()
 
-st.write({
-    "Capitale investito (serie)": capitale_serie,
-    "Costo totale stimato (current)": costo_current,
-    "Differenza": capitale_serie - costo_current
-})
+# st.write({
+#     "Capitale investito (serie)": capitale_serie,
+#     "Costo totale stimato (current)": costo_current,
+#     "Differenza": capitale_serie - costo_current
+# })
 
-st.subheader("DEBUG Flussi vs Investito")
+# st.subheader("DEBUG Flussi vs Investito")
 
-st.write({
-    "Capitale versato (flussi)": series["Capitale versato"].iloc[-1],
-    "Capitale investito (open)": series["Capitale investito"].iloc[-1]
-})
-
-
+# st.write({
+#     "Capitale versato (flussi)": series["Capitale versato"].iloc[-1],
+#     "Capitale investito (open)": series["Capitale investito"].iloc[-1]
+# })
 
 render_operations_preview(ops_enriched)
 # with st.expander("Anteprima operazioni", expanded=False):
