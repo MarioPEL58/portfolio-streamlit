@@ -36,6 +36,7 @@ kpi_title = "📊 KPI Portafoglio"
 
 # GRAFICI
 charts_title = "📊 Portafoglio"
+market_data_available_from = "Dati di mercato disponibili dal"
 tab_perf = "📈 Andamento portafoglio"
 tab_daily = "📅 Giornaliero"
 tab_unrealized = "💼 P/L non realizzato"
@@ -252,6 +253,7 @@ kpi_title = "📊 Portfolio KPIs"
 
 # GRAFICI
 charts_title = "📊 Portfolio"
+market_data_available_from = "Market data available from"
 tab_perf = "📈 Portfolio performance"
 tab_daily = "📅 Daily"
 tab_unrealized = "💼 Open P/L"
