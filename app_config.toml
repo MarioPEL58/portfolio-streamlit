@@ -117,6 +117,8 @@ no_dividends_filtered = "ℹ️ Nessun dividendo per il filtro selezionato"
 # KPI CARDS
 portfolio_value = "Valore del portafoglio"
 invested_capital = "Capitale inv."
+contributed_capital = "Capital contributed"
+contributed_capital = "Capitale versato"
 unrealized_profit = "Profitto non realizzato"
 last_day = "Ultimo giorno"
 realized_profit = "Profitto realizzato"
