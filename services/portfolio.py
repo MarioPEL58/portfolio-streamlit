@@ -215,7 +215,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     position_values = holdings * position_closes_eur
     total_value = position_values.sum(axis=1).rename("Valore portafoglio")
 
-    # =========================
+# =========================
     # 7. Cashflow / realized su tutte le operazioni
     # =========================
     ops_cf = ops_all.copy()
@@ -243,7 +243,22 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     pl_realizzato = realized_daily.cumsum().rename("P/L realizzato")
 
     # =========================
-    # 8. Flussi netti cumulati
+    # 8. Capitale investito reale (costo residuo aperto storico)
+    # =========================
+    cost_history = (
+        ops.sort_values(["PositionKey", "Data"])
+        .groupby(["Data", "PositionKey"])["CostOpenAfter"]
+        .last()
+        .unstack(fill_value=np.nan)
+        .reindex(idx)
+        .ffill()
+        .fillna(0.0)
+    )
+
+    invested = cost_history.sum(axis=1).rename("Capitale investito")
+
+    # =========================
+    # 8b. Capitale versato (flussi netti cumulati)
     # =========================
     daily_cf_total = (
         ops_cf.groupby("Data")["Cashflow"]
@@ -251,7 +266,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         .reindex(idx, fill_value=0.0)
     )
 
-    invested = daily_cf_total.cumsum().rename("Capitale investito")
+    capital_versato = (-daily_cf_total.cumsum()).rename("Capitale versato")
 
     # =========================
     # 9. P/L giornaliero per posizione
@@ -271,14 +286,23 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
     daily_pl_pct = (daily_pl / total_value.shift(1)).rename("P/L Giornaliero %")
 
-    # P/L trading = realized + unrealized (ESCLUSI dividendi)
-    pnl = (total_value + invested).rename("P/L trading")
+    # P/L trading = valore attuale - costo residuo aperto
+    pnl = (total_value - invested).rename("P/L trading")
 
     # =========================
     # 10. Serie storica finale
     # =========================
     ts = pd.concat(
-        [total_value, invested, pnl, daily_pl, daily_pl_pct, daily_dividends, pl_realizzato],
+        [
+            total_value,
+            invested,
+            capital_versato,
+            pnl,
+            daily_pl,
+            daily_pl_pct,
+            daily_dividends,
+            pl_realizzato
+        ],
         axis=1
     )
 
