@@ -6,7 +6,7 @@ from utils.i18n import t
 from utils.display import get_display_columns
 import pandas as pd
 
-def portfolio_chart(series, bench_norm=None, benchmark_name=""):
+def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
 
     columns_map = get_display_columns()
 
@@ -42,6 +42,19 @@ def portfolio_chart(series, bench_norm=None, benchmark_name=""):
             name=f"{t('benchmark_label')}: {benchmark_name}"
         ))
 
+    # ✅ Nota dati di mercato
+    if note_text:
+        fig.add_annotation(
+            xref="paper",
+            yref="paper",
+            x=0.01,
+            y=0.02,
+            text=f"<i>{note_text}</i>",
+            showarrow=False,
+            font=dict(size=11, color="gray"),
+            align="left"
+        )
+        
     fig.update_layout(
         height=540,
         xaxis_title=t("col_date"),
