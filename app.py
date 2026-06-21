@@ -403,11 +403,19 @@ with tab_perf:
         filtered_bench = filtered_bench.ffill()
     else:
         filtered_bench = None
+        
+    first_valid_price_date = series["Valore portafoglio"].first_valid_index()
     
+    note_text = None
+    if first_valid_price_date is not None:
+        prefix = CONFIG["lang"][LANG]["market_data_available_from"]
+        note_text = f"{prefix} {first_valid_price_date.strftime('%d/%m/%Y')}"
+
     fig = portfolio_chart(
         filtered_series,
         bench_norm=filtered_bench,   # nome parametro puoi cambiarlo dopo
-        benchmark_name=benchmark
+        benchmark_name=benchmark,
+        note_text=note_text
     )
 
     st.plotly_chart(fig, use_container_width=True)
