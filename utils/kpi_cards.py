@@ -26,19 +26,16 @@ def render_value_card(value, invested, contributed):
         <div style="margin-top:6px;font-size:1.8em;font-weight:600;">
             {fmt_eur(value)}
         </div>
-
         <!-- Capitale investito -->
         <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
             <span>{t("invested_capital")}</span>
             <span style="margin-left:8px;">{fmt_eur(invested)}</span>
         </div>
-
         <!-- Capitale versato -->
         <div style="margin-top:4px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
             <span>{t("contributed_capital")}</span>
             <span style="margin-left:8px;">{fmt_eur(contributed)}</span>
         </div>
-
     </div>
     """, unsafe_allow_html=True)
 # =========================
