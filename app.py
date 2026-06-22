@@ -27,6 +27,7 @@ from utils.demo import create_demo_file
 from utils.display import get_display_columns
 from components.tables import render_positions_table, render_operations_table
 from components.downloads import render_download_tab
+from components.market_status import render_market_data_status
 
 from utils.kpi_cards import (
     render_value_card,
@@ -353,29 +354,35 @@ with c4:
         annualized_pct=xirr_value
     )
 
-# ✅ timestamp intraday per il solo label
-intraday_last_ts = download_last_intraday_timestamp(
-    filtered_tickers
-)
+# # ✅ timestamp intraday per il solo label
+# intraday_last_ts = download_last_intraday_timestamp(
+#     filtered_tickers
+# )
 
-markets = []
-if "Mercato" in ops_filtered.columns:
-    markets = (
-        ops_filtered["Mercato"]
-        .dropna()
-        .astype(str)
-        .str.strip()
-        .tolist()
-    )
+# markets = []
+# if "Mercato" in ops_filtered.columns:
+#     markets = (
+#         ops_filtered["Mercato"]
+#         .dropna()
+#         .astype(str)
+#         .str.strip()
+#         .tolist()
+#     )
 
-update_label = compute_market_update_label(
+# update_label = compute_market_update_label(
+#     closes=closes,
+#     intraday_last_ts=intraday_last_ts,
+#     markets=markets,
+#     tz_name="Europe/Rome"
+# )
+
+# st.caption(update_label)
+
+render_market_data_status(
     closes=closes,
-    intraday_last_ts=intraday_last_ts,
-    markets=markets,
-    tz_name="Europe/Rome"
+    filtered_tickers=filtered_tickers,
+    ops_filtered=ops_filtered
 )
-
-st.caption(update_label)
 
 # Main chart
 
