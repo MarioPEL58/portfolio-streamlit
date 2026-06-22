@@ -1,9 +1,7 @@
-import streamlit as st
 from datetime import datetime, time
 import pandas as pd
 import pytz
 from utils.i18n import t
-from services.market_data import download_intraday_range
 
 MARKET_HOURS = {
     "MILANO": {"open": (9, 0), "close": (17, 30)},
@@ -172,35 +170,5 @@ def compute_data_quality_label(
         "intraday_max": intraday_max,
     }
 
-
-def render_market_data_status(
-    closes,
-    filtered_tickers,
-    ops_filtered,
-    tz_name="Europe/Rome"
-):
-    # intraday
-    intraday_range = download_intraday_range(filtered_tickers)
-
-    # mercati
-    markets = []
-    if "Mercato" in ops_filtered.columns:
-        markets = (
-            ops_filtered["Mercato"]
-            .dropna()
-            .astype(str)
-            .str.strip()
-            .tolist()
-        )
-
-    # label
-    label, meta = compute_data_quality_label(
-        closes=closes,
-        intraday_range=intraday_range,
-        markets=markets,
-        tz_name=tz_name
-    )
-
-    st.caption(label)
 
     return meta
