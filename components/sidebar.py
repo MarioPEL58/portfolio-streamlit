@@ -13,7 +13,7 @@ def render_sidebar():
     
     options = {
         t("sidebar_label_ticker"): "Ticker",
-        t("sidebar_label_name"): "Name"
+        t("sidebar_label_name"): "Nome"
     }
     with st.sidebar:
 
