@@ -65,7 +65,8 @@ if ENV == "DEV":
 sidebar_cfg = render_sidebar()
 uploaded_file = sidebar_cfg["uploaded_file"]
 benchmark = sidebar_cfg["benchmark"]
-label_choice = sidebar_cfg["label_choice"]
+# label_choice = sidebar_cfg["label_choice"]
+label_choice = st.session_state["label_choice"]
 show_benchmark = sidebar_cfg["show_benchmark"]
 use_risk_free = sidebar_cfg["use_risk_free"]
 min_filter_date = sidebar_cfg["min_filter_date"]
