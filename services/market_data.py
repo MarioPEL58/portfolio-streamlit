@@ -238,3 +238,49 @@ def download_last_intraday_timestamp(tickers: list[str]):
         return None
 
     return max(timestamps)
+
+def download_intraday_range(tickers: list[str]):
+
+    tickers = [t for t in tickers if isinstance(t, str) and t.strip()]
+    if not tickers:
+        return None, None
+
+    try:
+        raw = yf.download(
+            tickers=tickers,
+            period="1d",
+            interval="5m",
+            progress=False,
+            group_by="ticker"
+        )
+    except Exception:
+        return None, None
+
+    if raw is None or len(raw) == 0:
+        return None, None
+
+    timestamps = []
+
+    try:
+        if isinstance(raw.columns, pd.MultiIndex):
+            for t in tickers:
+                if t in raw.columns.get_level_values(0):
+                    sub = raw[t]
+                    col = "Close" if "Close" in sub.columns else None
+                    if col:
+                        s = sub[col].dropna()
+                        if not s.empty:
+                            timestamps.extend([s.index.min(), s.index.max()])
+        else:
+            col = "Close" if "Close" in raw.columns else None
+            if col:
+                s = raw[col].dropna()
+                if not s.empty:
+                    timestamps.extend([s.index.min(), s.index.max()])
+    except Exception:
+        return None, None
+
+    if not timestamps:
+        return None, None
+
+    return min(timestamps), max(timestamps)
