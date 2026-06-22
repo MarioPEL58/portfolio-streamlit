@@ -81,8 +81,7 @@ else:
 if file_source is None:
     st.info(t("upload_prompt"))
     st.stop()
-# debug     
-st.write("Label scelta:", label_choice)
+
 # Load data
 try:
     ops = load_operations_from_excel(file_source)
@@ -431,7 +430,8 @@ with tab_daily:
     )
     # copia df base
     df_view = current.copy()
-    
+    # debug     
+    st.write(df_view.columns)
     if view_mode == t("view_top"):
         # NON filtrare qui per segno — lo fa già la funzione
         top_n = 10
