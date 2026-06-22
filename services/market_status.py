@@ -1,8 +1,9 @@
+import streamlit as st
 from datetime import datetime, time
 import pandas as pd
 import pytz
 from utils.i18n import t
-
+from services.market_data import download_intraday_range
 
 MARKET_HOURS = {
     "MILANO": {"open": (9, 0), "close": (17, 30)},
@@ -117,3 +118,89 @@ def compute_market_update_label(closes, intraday_last_ts=None, markets=None, tz_
         status = f"⚠️ {t('old_data')} ({days_diff} {t('days')})"
 
     return f"{t('last_update_label')}: {last_update} • {status}"
+
+def compute_data_quality_label(
+    closes: pd.DataFrame,
+    intraday_range,
+    markets=None,
+    tz_name="Europe/Rome"
+):
+    tz = pytz.timezone(tz_name)
+    now = datetime.now(tz)
+
+    # ===== storico =====
+    price_min = None
+    price_max = None
+
+    if closes is not None and not closes.empty:
+        valid = closes.dropna(how="all")
+        if not valid.empty:
+            price_min = valid.index.min()
+            price_max = valid.index.max()
+
+    # ===== intraday =====
+    intraday_min, intraday_max = intraday_range if intraday_range else (None, None)
+
+    # ===== label =====
+    parts = []
+
+    if intraday_max is not None:
+        parts.append(f"Ultimo aggiornamento: {intraday_max:%H:%M:%S}")
+    elif price_max is not None:
+        parts.append(f"Ultimo prezzo: {price_max:%d/%m/%Y}")
+
+    # stato mercato
+    if intraday_max is not None and intraday_max.date() == now.date():
+        parts.append("🟢 LIVE")
+    else:
+        parts.append("🕒 mercato chiuso")
+
+    # storico
+    if price_min and price_max:
+        parts.append(f"📅 {price_min:%d/%m/%Y} → {price_max:%d/%m/%Y}")
+
+    # intraday
+    if intraday_min and intraday_max:
+        parts.append(f"📡 {intraday_min:%H:%M} → {intraday_max:%H:%M}")
+
+    label = " • ".join(parts)
+
+    return label, {
+        "price_min": price_min,
+        "price_max": price_max,
+        "intraday_min": intraday_min,
+        "intraday_max": intraday_max,
+    }
+
+
+def render_market_data_status(
+    closes,
+    filtered_tickers,
+    ops_filtered,
+    tz_name="Europe/Rome"
+):
+    # intraday
+    intraday_range = download_intraday_range(filtered_tickers)
+
+    # mercati
+    markets = []
+    if "Mercato" in ops_filtered.columns:
+        markets = (
+            ops_filtered["Mercato"]
+            .dropna()
+            .astype(str)
+            .str.strip()
+            .tolist()
+        )
+
+    # label
+    label, meta = compute_data_quality_label(
+        closes=closes,
+        intraday_range=intraday_range,
+        markets=markets,
+        tz_name=tz_name
+    )
+
+    st.caption(label)
+
+    return meta
