@@ -81,7 +81,8 @@ else:
 if file_source is None:
     st.info(t("upload_prompt"))
     st.stop()
-
+# debug     
+st.write("Label scelta:", label_choice)
 # Load data
 try:
     ops = load_operations_from_excel(file_source)
