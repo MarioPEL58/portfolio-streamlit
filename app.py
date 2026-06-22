@@ -65,6 +65,7 @@ if ENV == "DEV":
 sidebar_cfg = render_sidebar()
 uploaded_file = sidebar_cfg["uploaded_file"]
 benchmark = sidebar_cfg["benchmark"]
+label_choice = sidebar_cfg["label_choice"]
 show_benchmark = sidebar_cfg["show_benchmark"]
 use_risk_free = sidebar_cfg["use_risk_free"]
 min_filter_date = sidebar_cfg["min_filter_date"]
@@ -452,7 +453,7 @@ with tab_daily:
     fig_pos = daily_pl_bar_chart_by_sign(
         current=df_view,
         positive=True,
-        label_col="Ticker",    
+        label_col=label_choice if label_choice in df_view.columns else "Ticker",    
         pl_col="P/L Giornaliero",
         pl_pct_col="P/L Giornaliero %",
         max_abs_pct=max_abs_pct,
@@ -470,7 +471,7 @@ with tab_daily:
     fig_neg = daily_pl_bar_chart_by_sign(
         current=df_view,
         positive=False,
-        label_col="Ticker",
+        label_col=label_choice if label_choice in df_view.columns else "Ticker",
         pl_col="P/L Giornaliero",
         pl_pct_col="P/L Giornaliero %",
         max_abs_pct=max_abs_pct,
@@ -517,7 +518,7 @@ with tab_unrealized:
     fig_pos = daily_pl_bar_chart_by_sign(
         current=df_view,
         positive=True,
-        label_col="Ticker",
+        label_col=label_choice if label_choice in df_view.columns else "Ticker",
         pl_col="P/L",
         pl_pct_col="P/L %",
         max_abs_pct=max_abs_pct,
@@ -535,7 +536,7 @@ with tab_unrealized:
     fig_neg = daily_pl_bar_chart_by_sign(
         current=df_view,
         positive=False,
-        label_col="Ticker",
+        label_col=label_choice if label_choice in df_view.columns else "Ticker",
         pl_col="P/L",
         pl_pct_col="P/L %",
         max_abs_pct=max_abs_pct,
