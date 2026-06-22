@@ -33,7 +33,7 @@ def render_filters(ops, dividends):
         st.multiselect(
             t("filter_brokers"),
             options=all_brokers,
-            # default=st.session_state.selected_brokers,
+            default=st.session_state.selected_brokers,
             key="selected_brokers"
         )
 
