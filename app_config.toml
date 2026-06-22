@@ -164,6 +164,10 @@ sidebar_benchmark_help = "Esempio: CSSPX.MI, VWCE.DE, SPY"
 sidebar_show_benchmark = "Mostra benchmark normalizzato"
 sidebar_use_risk_free = "Usa tasso risk-free"
 sidebar_min_date = "Data minima"
+sidebar_label_choice_title = "Etichetta grafici"
+sidebar_label_ticker = "Ticker"
+sidebar_label_name = "Nome"
+
 
 # colonnper tae belle in output 
 col_date = "Data"
@@ -375,6 +379,11 @@ sidebar_benchmark_help = "Example: CSSPX.MI, VWCE.DE, SPY"
 sidebar_show_benchmark = "Show normalized benchmark"
 sidebar_use_risk_free = "Use risk-free rate"
 sidebar_min_date = "Start date"
+
+sidebar_label_choice_title = "Chart labels"
+sidebar_label_ticker = "Ticker"
+sidebar_label_name = "Name"
+
 
 # colonnper tae belle in output 
 col_date = "Date"
