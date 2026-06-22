@@ -6,10 +6,19 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 import pytz
+from utils.state import init_state, get_state, set_state
 
 from utils.i18n import t
 
 def render_sidebar():
+    
+    DEFAULTS = {
+        "label_choice": "Ticker",
+        "show_benchmark": True,
+        "use_risk_free": False,
+        "benchmark": "CSSPX.MI"
+    }
+    init_state(DEFAULTS)
     
     options = {
         t("sidebar_label_ticker"): "Ticker",
@@ -37,31 +46,34 @@ def render_sidebar():
         st.caption(f"{t('sidebar_last_update')}: {last_update}")
 
         st.header(t("sidebar_options"))
-        
+
         label_choice_ui = st.radio(
             t("sidebar_label_choice_title"),
             list(options.keys()),
+            index=list(options.values()).index(get_state("label_choice")),
             horizontal=True,
             key="label_choice_radio"
-        )
-        
-        st.session_state["label_choice"] = options[label_choice_ui]
+        )        
+        set_state("label_choice", options[label_choice_ui])
 
         benchmark = st.text_input(
             t("sidebar_benchmark_label"),
-            value="CSSPX.MI",
-            help=t("sidebar_benchmark_help")
+            value=get_state("benchmark")
         )
+        set_state("benchmark", benchmark)
 
         show_benchmark = st.checkbox(
             t("sidebar_show_benchmark"),
-            value=True
+            value=get_state("show_benchmark")
         )
+        set_state("show_benchmark", show_benchmark)
         
-        use_risk_free= st.sidebar.checkbox(
+        use_risk_free = st.checkbox(
             t("sidebar_use_risk_free"),
-            value=False
+            value=get_state("use_risk_free")
         )
+        set_state("use_risk_free", use_risk_free)
+
         min_filter_date = st.date_input(
             t("sidebar_min_date"),
             value=None
@@ -69,13 +81,12 @@ def render_sidebar():
 
     return {
         "uploaded_file": uploaded_file,
-        "benchmark": benchmark,
-        "show_benchmark": show_benchmark,
-        "use_risk_free": use_risk_free,
+        "benchmark": get_state("benchmark"),
+        "show_benchmark": get_state("show_benchmark"),
+        "use_risk_free": get_state("use_risk_free"),
         "min_filter_date": min_filter_date,
-        "label_choice": st.session_state.get("label_choice", "Ticker"),
+        "label_choice": get_state("label_choice")
     }
-
 
 def resolve_file_source(uploaded_file):
     if uploaded_file is not None:
