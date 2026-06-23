@@ -813,6 +813,7 @@ def ratio_bar_gradient_compare(
     )
 
     return fig
+
 def daily_pl_treemap(current: pd.DataFrame, label_col="Ticker"):
 
     if current is None or current.empty:
@@ -820,74 +821,62 @@ def daily_pl_treemap(current: pd.DataFrame, label_col="Ticker"):
 
     df = current.copy()
 
-    # =========================
-    # colonne necessarie
-    # =========================
     required = ["Valore", "P/L Giornaliero %", "P/L Giornaliero", "Intermediario"]
     for col in required:
         if col not in df.columns:
             return None
 
-    # =========================
-    # pulizia dati
-    # =========================
     df = df.dropna(subset=["Valore", "P/L Giornaliero %"]).copy()
 
-    # fallback label
     if label_col not in df.columns:
         label_col = "Ticker"
 
-    # =========================
-    # colore = rendimento %
-    # =========================
     df["color_val"] = df["P/L Giornaliero %"]
 
-    # =========================
-    # label arricchita
-    # =========================
+    # ✅ LABEL SU DUE RIGHE
     df["label_full"] = df.apply(
-        lambda row: f"{row[label_col]} ({row['P/L Giornaliero']:.0f}€)",
+        lambda row: f"{row[label_col]}<br>{row['P/L Giornaliero']:+.0f}€",
         axis=1
     )
 
-    # =========================
-    # TREEMAP (con grouping)
-    # =========================
+    max_abs = df["color_val"].abs().max()
+
     fig = px.treemap(
         df,
-        path=["Intermediario", "label_full"],   # ✅ grouping qui
+        path=["Intermediario", "label_full"],
         values="Valore",
         color="color_val",
         color_continuous_scale=[
-            "#8b0000",
-            "#f4a3a3",
-            "#f0f0f0",
-            "#a6e3a1",
-            "#006400"
+            (0.0, "#5a0000"),
+            (0.25, "#d73027"),
+            (0.5, "#2b2b2b"),   # neutro tipo finviz
+            (0.75, "#1a9850"),
+            (1.0, "#00441b")
         ],
+        range_color=[-max_abs, max_abs]
     )
 
-    # =========================
+    # ✅ TESTO CENTRATO
+    fig.update_traces(
+        textinfo="label",
+        textposition="middle center"
+    )
+
     # hover
-    # =========================
     fig.update_traces(
         hovertemplate=
         "<b>%{label}</b><br>" +
         "Intermediario: %{parent}<br>" +
         "Valore: %{value:.2f}€<br>" +
-        "P/L giornaliero: %{customdata[0]:.2f}€<br>" +
-        "P/L %: %{color:.2%}" +
-        "<extra></extra>",
+        "P/L giornaliero: %{customdata.2f}€<br>" +
+        "P/L %: %{color:.2%}<extra></extra>",
         customdata=df[["P/L Giornaliero"]]
     )
 
-    # =========================
-    # layout
-    # =========================
     fig.update_layout(
-        margin=dict(t=40, l=10, r=10, b=10),
-        title="Heatmap P/L Giornaliero",
+        margin=dict(t=10, l=10, r=10, b=10),
         coloraxis_colorbar=dict(title="P/L %")
     )
 
     return fig
+
