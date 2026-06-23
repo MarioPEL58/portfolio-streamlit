@@ -9,7 +9,7 @@ from utils.ui import title_with_tooltip
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
-from components.charts import daily_pl_bar_chart_by_sign, sharpe_gauge
+from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, sharpe_gauge
 from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
