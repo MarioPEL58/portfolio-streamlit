@@ -52,6 +52,7 @@ profit_section = "#### 🟢 Posizioni in profitto"
 loss_section = "#### 🔴 Posizioni in perdita"
 no_profit_today = "Nessuna posizione in profitto oggi"
 no_loss_today = "Nessuna posizione in perdita oggi"
+heatmap_title = "🧊 Heatmap P/L Giornaliero"
 # daily bars
 bar_profit = "Posizioni in profitto"
 bar_loss = "Posizioni in perdita"
@@ -274,6 +275,8 @@ profit_section = "#### 🟢 Winning positions"
 loss_section = "#### 🔴 Losing positions"
 no_profit_today = "No winning positions today"
 no_loss_today = "No losing positions today"
+heatmap_title = "🧊 Daily P/L Heatmap"
+
 # daily bars
 bar_profit = "Profitable positions"
 bar_loss = "Losing positions"
