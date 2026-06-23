@@ -354,29 +354,7 @@ with c4:
         annualized_pct=xirr_value
     )
 
-# # ✅ timestamp intraday per il solo label
-# intraday_last_ts = download_last_intraday_timestamp(
-#     filtered_tickers
-# )
-
-# markets = []
-# if "Mercato" in ops_filtered.columns:
-#     markets = (
-#         ops_filtered["Mercato"]
-#         .dropna()
-#         .astype(str)
-#         .str.strip()
-#         .tolist()
-#     )
-
-# update_label = compute_market_update_label(
-#     closes=closes,
-#     intraday_last_ts=intraday_last_ts,
-#     markets=markets,
-#     tz_name="Europe/Rome"
-# )
-
-# st.caption(update_label)
+# # ✅ label che descive il market status 
 
 render_market_data_status(
     closes=closes,
@@ -388,10 +366,11 @@ render_market_data_status(
 
 st.subheader(t("charts_title"))
 
-tab_perf, tab_daily, tab_unrealized, tab_analysis = st.tabs([
+tab_perf, tab_daily, tab_unrealized, tab_heatmap, tab_analysis = st.tabs([
     t("tab_perf"),
     t("tab_daily"),
     t("tab_unrealized"),
+    t("tab_heatmap"),
     t("tab_analysis")
 ])
 
@@ -555,6 +534,17 @@ with tab_unrealized:
         st.plotly_chart(fig_neg, use_container_width=True)
     else:
         st.caption(t("no_loss_open"))
+with tab_heatmap:
+    
+    st.markdown("### 📦 Heatmap P/L Giornaliero")
+
+    fig_treemap = daily_pl_treemap(
+        current,
+        label_col=label_choice
+    )
+
+    if fig_treemap:
+        st.plotly_chart(fig_treemap, use_container_width=True)
 
 with tab_analysis:
 
