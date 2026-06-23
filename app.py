@@ -536,7 +536,7 @@ with tab_unrealized:
         st.caption(t("no_loss_open"))
 with tab_heatmap:
     
-    st.markdown("### 📦 Heatmap P/L Giornaliero")
+    st.markdown(f"### {t('heatmap_title')}")
 
     fig_treemap = daily_pl_treemap(
         current,
