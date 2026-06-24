@@ -538,15 +538,12 @@ with tab_heatmap:
     
     st.markdown(f"### {t('heatmap_title')}")
 
-    if "pl_mode" not in st.session_state:
-        st.session_state["pl_mode"] = "daily"  # default
-
-    st.session_state["pl_mode"] = st.radio(
+    pl_mode = st.radio(
         t("radio_select_pl_mode"),
         ["daily", "total"],
-        index=0 if st.session_state["pl_mode"] == "daily" else 1,
         format_func=lambda x: t("radio_pl_daily") if x == "daily" else t("radio_pl_total"),
-        horizontal=True
+        horizontal=True,
+        key="pl_mode"  # ✅ QUESTO è il punto chiave
     )
 
     # fig_treemap = daily_pl_treemap(
@@ -556,7 +553,6 @@ with tab_heatmap:
     
     # costruzione grafico
     
-    pl_mode = st.session_state["pl_mode"]
     fig_treemap = pl_treemap(
         current,
         label_col=label_choice,
