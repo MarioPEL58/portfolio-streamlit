@@ -58,6 +58,11 @@ bar_profit = "Posizioni in profitto"
 bar_loss = "Posizioni in perdita"
 bar_pl_pct = "P/L %"
 bar_pl_abs = "P/L"
+# mdde slection radio
+radio_select_pl_mode = "Seleziona metrica"
+radio_pl_daily = "P/L Giornaliero"
+radio_pl_total = "P/L Totale"
+
 
 # TABS
 compact_view = "Vista compatta"
@@ -282,6 +287,12 @@ bar_profit = "Profitable positions"
 bar_loss = "Losing positions"
 bar_pl_pct = "P/L %"
 bar_pl_abs = "P/L"
+
+# mode selection radio
+radio_select_pl_mode = "Select metric"
+radio_pl_daily = "Daily P/L"
+radio_pl_total = "Total P/L"
+
 
 # TABS
 current_view = "Compact view"
