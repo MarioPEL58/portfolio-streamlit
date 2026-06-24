@@ -1038,11 +1038,11 @@ def pl_treemap(
         values="Valore",
         color="color_val",
         color_continuous_scale=[
-            (0.0, "#5a0000"),
-            (0.25, "#d73027"),
-            (0.5, "#2b2b2b"),
-            (0.75, "#1a9850"),
-            (1.0, "#00441b")
+            (0.0, "#ff3b30"),   # rosso brillante
+            (0.25, "#7a1f1f"),  # rosso scuro
+            (0.5, "#3a3a3a"),   # neutro grigio
+            (0.75, "#1e7f3a"),  # verde scuro
+            (1.0, "#00e676")    # verde brillante
         ],
         range_color=[-max_abs, max_abs]
     )
