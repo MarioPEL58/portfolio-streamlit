@@ -1076,7 +1076,7 @@ def pl_treemap(
     # =========================
     fig.update_layout(
         margin=dict(t=10, l=10, r=10, b=10),
-        coloraxis_colorbar=dict(title=pl_pct_col, tickformat=".2%")
+        coloraxis_colorbar=dict(title=pl_pct_col, tickformat=".0%")
     )
 
     return fig
