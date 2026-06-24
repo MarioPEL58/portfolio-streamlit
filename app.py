@@ -9,7 +9,7 @@ from utils.ui import title_with_tooltip
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
-from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, sharpe_gauge
+from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, pl_treemap, sharpe_gauge
 from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
@@ -538,9 +538,29 @@ with tab_heatmap:
     
     st.markdown(f"### {t('heatmap_title')}")
 
-    fig_treemap = daily_pl_treemap(
+    if "pl_mode" not in st.session_state:
+        st.session_state["pl_mode"] = "daily"  # default
+
+    st.session_state["pl_mode"] = st.radio(
+        t("radio_select_pl_mode"),
+        ["daily", "total"],
+        index=0 if st.session_state["pl_mode"] == "daily" else 1,
+        format_func=lambda x: t("radio_pl_daily") if x == "daily" else t("radio_pl_total"),
+        horizontal=True
+    )
+
+    # fig_treemap = daily_pl_treemap(
+    #     current,
+    #     label_col=label_choice
+    # )
+    
+    # costruzione grafico
+    
+    pl_mode = st.session_state["pl_mode"]
+    fig_treemap = pl_treemap(
         current,
-        label_col=label_choice
+        label_col=label_choice,
+        pl_mode=pl_mode
     )
 
     if fig_treemap:
