@@ -225,8 +225,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # start_date = ops_all["Data"].min().normalize()
     # end_date = closes.index.max()
     
+    today = pd.Timestamp.today().normalize()
     start_date = ops_all["DateOnly"].min() - pd.Timedelta(days=5)
-    end_date = ops_all["DateOnly"].max() + pd.Timedelta(days=5)
+    end_date = today
     
     idx = pd.date_range(start=start_date, end=end_date, freq="D")
 
