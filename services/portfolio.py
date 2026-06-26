@@ -108,31 +108,31 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
             # =========================
             elif qty < 0:
                 sell_qty = abs(qty)
-
-                # ✅ 🔥 CASO CRITICO: apertura SHORT
-                if open_qty == 0:
+            
+                # ✅ SHORT (open o estensione)
+                if open_qty <= 0:
                     gross_proceeds = sell_qty * price * fx
-
+            
                     cashflow = gross_proceeds - fees
                     realized_trade_pl = 0.0
-
+            
                     open_qty -= sell_qty
-                    open_cost -= gross_proceeds  # ✅ COST NEGATIVO
-
+                    open_cost -= gross_proceeds
+            
                 else:
-                    # ✅ CHIUSURA LONG (come prima)
+                    # ✅ CHIUSURA LONG
                     cost_basis_sold = sell_qty * avg_cost_before
-
+            
                     gross_proceeds = sell_qty * price * fx
                     realized_gross = gross_proceeds - fees - cost_basis_sold
-
+            
                     tax_euro = max(realized_gross, 0.0) * tax_rate
                     cashflow = gross_proceeds - fees - tax_euro
-
-                    realized_trade_pl = cashflow - cost_basis_sold
-
-                    open_qty = open_qty - sell_qty
-                    open_cost = open_cost - cost_basis_sold
+            
+                    realized_trade_pl = realized_gross - tax_euro
+            
+                    open_qty -= sell_qty
+                    open_cost -= cost_basis_sold
 
                     # pulizia floating
                     if abs(open_qty) < 1e-12:
