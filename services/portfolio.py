@@ -23,18 +23,11 @@ def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
     return holdings
 def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
     """
-    Calcola in Python, per ogni operazione:
-    - AvgCostBefore
-    - AvgCostAfter
-    - CostOpenAfter
-    - QtyOpenAfter
-    - CashflowCalc
-    - RealizedTradePL
-
-    Logica:
-    - acquisto: aumenta quantità e costo residuo
-    - vendita: realizza P/L sul costo medio residuo
-    - tassa applicata solo a vendite con profitto positivo
+    Cost engine completo:
+    - supporto LONG + SHORT
+    - gestione chiusure parziali
+    - gestione transizioni (long → short / short → long)
+    - tassazione solo su profitti positivi
     """
 
     ops = ops.copy().sort_values(["PositionKey", "Data"]).reset_index(drop=True)
@@ -67,51 +60,118 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
             tax_rate = float(row["Tassa"])
 
             avg_cost_before = open_cost / open_qty if open_qty != 0 else 0.0
+
             realized_trade_pl = 0.0
             tax_euro = 0.0
+            cashflow = 0.0
 
+            # =========================
+            # ✅ BUY
+            # =========================
             if qty > 0:
-                # ACQUISTO
-                buy_cost = qty * price * fx + fees
-                open_qty = open_qty + qty
-                open_cost = open_cost + buy_cost
 
-                cashflow = -buy_cost
+                # --------
+                # CHIUSURA SHORT
+                # --------
+                if open_qty < 0:
+                    close_qty = min(abs(open_qty), qty)
 
+                    avg_cost_short = abs(avg_cost_before)
+                    cost_basis = close_qty * avg_cost_short
+                    buy_cost = close_qty * price * fx
+
+                    # ✅ P/L corretto short
+                    realized_gross = cost_basis - buy_cost
+
+                    tax_euro = max(realized_gross, 0.0) * tax_rate
+                    cashflow = -(buy_cost + fees + tax_euro)
+
+                    realized_trade_pl = realized_gross - tax_euro
+
+                    open_qty += close_qty
+                    open_cost += cost_basis
+
+                    # --------
+                    # eventuale LONG residuo
+                    # --------
+                    remaining_qty = qty - close_qty
+
+                    if remaining_qty > 0:
+                        buy_cost_extra = remaining_qty * price * fx + fees
+                        open_qty += remaining_qty
+                        open_cost += buy_cost_extra
+
+                # --------
+                # ACQUISTO LONG
+                # --------
+                else:
+                    buy_cost = qty * price * fx + fees
+
+                    open_qty += qty
+                    open_cost += buy_cost
+
+                    cashflow = -buy_cost
+                    realized_trade_pl = 0.0
+
+            # =========================
+            # ✅ SELL
+            # =========================
             elif qty < 0:
-                # VENDITA
                 sell_qty = abs(qty)
 
-                # costo storico della quantità venduta
-                cost_basis_sold = sell_qty * avg_cost_before
+                # --------
+                # CHIUSURA LONG
+                # --------
+                if open_qty > 0:
+                    close_qty = min(open_qty, sell_qty)
 
-                gross_proceeds = sell_qty * price * fx
-                realized_gross = gross_proceeds - fees - cost_basis_sold
+                    cost_basis_sold = close_qty * avg_cost_before
+                    gross_proceeds = close_qty * price * fx
 
-                # tassa solo su profitto positivo
-                tax_euro = max(realized_gross, 0.0) * tax_rate
+                    realized_gross = gross_proceeds - cost_basis_sold
 
-                # cashflow netto vendita
-                cashflow = gross_proceeds - fees - tax_euro
+                    tax_euro = max(realized_gross, 0.0) * tax_rate
+                    cashflow = gross_proceeds - fees - tax_euro
 
-                realized_trade_pl = cashflow - cost_basis_sold
+                    realized_trade_pl = realized_gross - tax_euro
 
-                # scarico costo residuo
-                open_qty = open_qty - sell_qty
-                open_cost = open_cost - cost_basis_sold
+                    open_qty -= close_qty
+                    open_cost -= cost_basis_sold
 
-                # anti floating residuals
-                if abs(open_qty) < 1e-12:
-                    open_qty = 0.0
-                if abs(open_cost) < 1e-12:
-                    open_cost = 0.0
+                    # --------
+                    # eventuale SHORT residuo
+                    # --------
+                    remaining_qty = sell_qty - close_qty
 
+                    if remaining_qty > 0:
+                        short_proceeds = remaining_qty * price * fx
+                        open_qty -= remaining_qty
+                        open_cost -= short_proceeds  # ✅ COST NEGATIVO
+
+                # --------
+                # APERTURA / ESTENSIONE SHORT
+                # --------
+                else:
+                    gross_proceeds = sell_qty * price * fx
+
+                    cashflow = gross_proceeds - fees
+                    realized_trade_pl = 0.0
+
+                    open_qty -= sell_qty
+                    open_cost -= gross_proceeds  # ✅ COST NEGATIVO
+
+            # =========================
+            # qty == 0
+            # =========================
             else:
-                # qty == 0
                 cashflow = 0.0
 
+            # =========================
+            # avg dopo
+            # =========================
             avg_cost_after = open_cost / open_qty if open_qty != 0 else 0.0
 
+            # salva
             avg_before_list.append(avg_cost_before)
             avg_after_list.append(avg_cost_after)
             qty_after_list.append(open_qty)
