@@ -184,7 +184,10 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
 
 def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
 
-    ops_all = ops.copy()
+    # ✅ normalizzazione date
+    ops_all = ops_all.copy()
+    ops_all["Data"] = pd.to_datetime(ops_all["Data"], errors="coerce")
+    ops_all["DateOnly"] = ops_all["Data"].dt.normalize()
 
     if ops_all.empty:
         return (
@@ -296,8 +299,11 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     if dividends is None or dividends.empty:
         daily_dividends = pd.Series(0.0, index=idx, name="Dividendi netti")
     else:
+        dividends = dividends.copy()
+        dividends["DateOnly"] = pd.to_datetime(dividends["Data"], errors="coerce").dt.normalize()
+        
         daily_dividends = (
-            dividends.groupby("Data")["DividendoNetto"]
+            dividends.groupby("DateOnly")["DividendoNetto"]
             .sum()
             .reindex(idx, fill_value=0.0)
             .rename("Dividendi netti")
@@ -306,7 +312,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     sell_ops = ops_cf.loc[ops_cf["Quantita"] < 0].copy()
 
     realized_from_trades = (
-        sell_ops.groupby("Data")["RealizedTradePL"]
+        sell_ops.groupby("DateOnly")["RealizedTradePL"]
         .sum()
         .reindex(idx, fill_value=0.0)
     )
@@ -336,7 +342,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # 11. Capitale versato (flussi netti cumulati)
     # =========================
     daily_cf_total = (
-        ops_cf.groupby("Data")["Cashflow"]
+        ops_cf.groupby("DateOnly")["Cashflow"]
         .sum()
         .reindex(idx, fill_value=0.0)
     )
@@ -352,7 +358,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_pl_pct = pd.Series(np.nan, index=idx, name="P/L Giornaliero %")
     else:
         daily_cf_positions = (
-            ops_cf.groupby(["Data", "PositionKey"])["Cashflow"]
+            ops_cf.groupby(["DateOnly", "PositionKey"])["Cashflow"]
             .sum()
             .unstack(fill_value=0.0)
             .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
