@@ -67,13 +67,41 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
             # ✅ BUY
             # =========================
             if qty > 0:
-                # (per ora solo LONG)
-                buy_cost = qty * price * fx + fees
-
-                open_qty += qty
-                open_cost += buy_cost
-
-                cashflow = -buy_cost
+            
+                # ✅ CHIUSURA SHORT
+                if open_qty < 0:
+                    close_qty = min(abs(open_qty), qty)
+            
+                    avg_cost_short = abs(avg_cost_before)
+            
+                    cost_basis = close_qty * avg_cost_short
+                    buy_cost = close_qty * price * fx
+            
+                    realized_gross = cost_basis - buy_cost
+            
+                    tax_euro = max(realized_gross, 0.0) * tax_rate
+                    cashflow = -(buy_cost + fees + tax_euro)
+            
+                    realized_trade_pl = realized_gross - tax_euro
+            
+                    open_qty += close_qty
+                    open_cost += cost_basis
+            
+                    # eventuale long residuo
+                    remaining_qty = qty - close_qty
+            
+                    if remaining_qty > 0:
+                        buy_cost_extra = remaining_qty * price * fx + fees
+                        open_qty += remaining_qty
+                        open_cost += buy_cost_extra
+            
+                else:
+                    # ✅ ACQUISTO LONG
+                    buy_cost = qty * price * fx + fees
+                    open_qty += qty
+                    open_cost += buy_cost
+            
+                    cashflow = -buy_cost
 
             # =========================
             # ✅ SELL
