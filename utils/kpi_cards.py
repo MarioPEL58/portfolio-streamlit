@@ -44,6 +44,10 @@ def render_value_card(value, invested):
 def render_unrealized_card(value, pct, daily_value=None, daily_pct=None):
 
     color = "#26a69a" if value >= 0 else "#ef5350"
+    
+    has_value = pct is not None and not pd.isna(pct)
+    if not has_value:
+        pct = 0.0
     pct_color = "#26a69a" if pct >= 0 else "#ef5350"
 
     daily_color = "#26a69a" if (daily_value is not None and daily_value >= 0) else "#ef5350"
