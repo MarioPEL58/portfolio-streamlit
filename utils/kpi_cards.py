@@ -120,6 +120,9 @@ def render_realized_card(realized_total, dividends_total):
 def render_total_pl_card(total_pl, total_pct, annualized_pct=None):
 
     color = "#26a69a" if total_pl >= 0 else "#ef5350"
+    
+    if total_pct is None or pd.isna(total_pct):
+        total_pct = 0.0
     pct_color = "#26a69a" if total_pct >= 0 else "#ef5350"
 
     st.markdown(
