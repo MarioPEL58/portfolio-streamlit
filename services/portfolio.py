@@ -185,7 +185,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
 def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
 
     # ✅ normalizzazione date
-    ops_all = ops_all.copy()
+    ops_all = ops.copy()
     ops_all["Data"] = pd.to_datetime(ops_all["Data"], errors="coerce")
     ops_all["DateOnly"] = ops_all["Data"].dt.normalize()
 
