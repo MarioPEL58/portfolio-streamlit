@@ -6,16 +6,21 @@ def compute_portfolio_xirr(ops_enriched, dividends, final_value, valuation_date=
     ops = ops_enriched.copy()
     ops["Data"] = pd.to_datetime(ops["Data"])
     ops["CashflowCalc"] = pd.to_numeric(ops["CashflowCalc"], errors="coerce").fillna(0.0)
+    
+    if "DateOnly" not in ops.columns:
+        ops["DateOnly"] = ops["Data"].dt.normalize()
 
     # --- flussi operazioni
-    ops_flows = ops.groupby("Data")["CashflowCalc"].sum().rename("Operazioni")
+    ops_flows = ops.groupby("DataOnly")["CashflowCalc"].sum().rename("Operazioni")
 
     # --- flussi dividendi
     if dividends is not None and not dividends.empty:
         div = dividends.copy()
         div["Data"] = pd.to_datetime(div["Data"])
+        if "DateOnly" not in div.columns:
+            div["DateOnly"] = div["Data"].dt.normalize()
         div["DividendoNetto"] = pd.to_numeric(div["DividendoNetto"], errors="coerce").fillna(0.0)
-        div_flows = div.groupby("Data")["DividendoNetto"].sum().rename("Dividendi")
+        div_flows = div.groupby("DataOnly")["DividendoNetto"].sum().rename("Dividendi")
     else:
         div_flows = pd.Series(dtype=float, name="Dividendi")
 
