@@ -23,18 +23,10 @@ def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
     return holdings
 def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
     """
-    Calcola in Python, per ogni operazione:
-    - AvgCostBefore
-    - AvgCostAfter
-    - CostOpenAfter
-    - QtyOpenAfter
-    - CashflowCalc
-    - RealizedTradePL
-
-    Logica:
-    - acquisto: aumenta quantità e costo residuo
-    - vendita: realizza P/L sul costo medio residuo
-    - tassa applicata solo a vendite con profitto positivo
+    Cost engine (step 1):
+    - supporto LONG ✅
+    - supporto apertura SHORT ✅
+    - chiusura short NON ancora gestita (step 2)
     """
 
     ops = ops.copy().sort_values(["PositionKey", "Data"]).reset_index(drop=True)
@@ -69,46 +61,72 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
             avg_cost_before = open_cost / open_qty if open_qty != 0 else 0.0
             realized_trade_pl = 0.0
             tax_euro = 0.0
+            cashflow = 0.0
 
+            # =========================
+            # ✅ BUY
+            # =========================
             if qty > 0:
-                # ACQUISTO
+                # (per ora solo LONG)
                 buy_cost = qty * price * fx + fees
-                open_qty = open_qty + qty
-                open_cost = open_cost + buy_cost
+
+                open_qty += qty
+                open_cost += buy_cost
 
                 cashflow = -buy_cost
 
+            # =========================
+            # ✅ SELL
+            # =========================
             elif qty < 0:
-                # VENDITA
                 sell_qty = abs(qty)
 
-                # costo storico della quantità venduta
-                cost_basis_sold = sell_qty * avg_cost_before
+                # ✅ 🔥 CASO CRITICO: apertura SHORT
+                if open_qty == 0:
+                    gross_proceeds = sell_qty * price * fx
 
-                gross_proceeds = sell_qty * price * fx
-                realized_gross = gross_proceeds - fees - cost_basis_sold
+                    cashflow = gross_proceeds - fees
+                    realized_trade_pl = 0.0
 
-                # tassa solo su profitto positivo
-                tax_euro = max(realized_gross, 0.0) * tax_rate
+                    open_qty -= sell_qty
+                    open_cost -= gross_proceeds  # ✅ COST NEGATIVO
 
-                # cashflow netto vendita
-                cashflow = gross_proceeds - fees - tax_euro
+                else:
+                    # ✅ CHIUSURA LONG (come prima)
+                    cost_basis_sold = sell_qty * avg_cost_before
 
-                realized_trade_pl = cashflow - cost_basis_sold
+                    gross_proceeds = sell_qty * price * fx
+                    realized_gross = gross_proceeds - fees - cost_basis_sold
 
-                # scarico costo residuo
-                open_qty = open_qty - sell_qty
-                open_cost = open_cost - cost_basis_sold
+                    tax_euro = max(realized_gross, 0.0) * tax_rate
+                    cashflow = gross_proceeds - fees - tax_euro
 
-                # anti floating residuals
-                if abs(open_qty) < 1e-12:
-                    open_qty = 0.0
-                if abs(open_cost) < 1e-12:
-                    open_cost = 0.0
+                    realized_trade_pl = cashflow - cost_basis_sold
+
+                    open_qty = open_qty - sell_qty
+                    open_cost = open_cost - cost_basis_sold
+
+                    # pulizia floating
+                    if abs(open_qty) < 1e-12:
+                        open_qty = 0.0
+                    if abs(open_cost) < 1e-12:
+                        open_cost = 0.0
 
             else:
-                # qty == 0
                 cashflow = 0.0
+
+            # =========================
+            # ✅ DEBUG (puoi attivarlo)
+            # =========================
+            # st.write({
+            #     "Data": row["Data"],
+            #     "qty": qty,
+            #     "open_qty": open_qty,
+            #     "open_cost": open_cost,
+            #     "avg_cost_before": avg_cost_before,
+            #     "cashflow": cashflow,
+            #     "realized": realized_trade_pl
+            # })
 
             avg_cost_after = open_cost / open_qty if open_qty != 0 else 0.0
 
@@ -128,10 +146,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
     ops["CashflowCalc"] = cashflow_list
     ops["TaxEuroCalc"] = tax_euro_list
 
-    # ✅ Prezzo medio s/carico:
-    # se esiste nel file → lo mantieni
-    # se manca → lo calcoli dal cost engine
-    
+    # prezzo medio fallback
     if "Prezzo medio s/carico" in ops.columns:
         ops["Prezzo medio s/carico"] = ops["Prezzo medio s/carico"].fillna(ops["AvgCostAfter"])
     else:
