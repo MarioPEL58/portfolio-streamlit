@@ -222,9 +222,12 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # =========================
     # 3. Costruzione indice temporale completo
     # =========================
-    start_date = ops_all["Data"].min().normalize()
-    end_date = closes.index.max()
-
+    # start_date = ops_all["Data"].min().normalize()
+    # end_date = closes.index.max()
+    
+    start_date = ops_all["DateOnly"].min()
+    end_date = ops_all["DateOnly"].max()
+    
     idx = pd.date_range(start=start_date, end=end_date, freq="D")
 
     # =========================
