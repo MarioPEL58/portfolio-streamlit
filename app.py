@@ -306,12 +306,13 @@ if show_benchmark and bench_returns is not None:
 # =========================
 # Breakdown P/L
 # =========================
-sell_ops = ops_enriched.loc[ops_enriched["Quantita"] < 0].copy()
+# sell_ops = ops_enriched.loc[ops_enriched["Quantita"] < 0].copy()
 
-realized_trading = (
-    sell_ops["RealizedTradePL"].sum()
-    if not sell_ops.empty else 0.0
-)
+# realized_trading = (
+#     sell_ops["RealizedTradePL"].sum()
+#     if not sell_ops.empty else 0.0
+# )
+realized_trading = ops_enriched["RealizedTradePL"].sum()
 
 realized_dividends = latest_dividends
 realized_total = realized_trading + realized_dividends
