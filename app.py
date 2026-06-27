@@ -134,6 +134,7 @@ closes, missing = download_close_prices(
     start_date,
     end_date
 )
+market_last_date = closes.index.max()
 
 if closes.empty:
     st.error(t("no_prices"))
@@ -144,6 +145,9 @@ if missing:
 
 # Portfolio
 series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
+
+# ✅ taglia serie alla data reale
+series = series.loc[:market_last_date]
 
 if series.empty:
     st.error(t("portfolio_error"))
