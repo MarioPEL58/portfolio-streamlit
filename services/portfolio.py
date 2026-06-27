@@ -317,8 +317,14 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
 
     # sell_ops = ops_cf.loc[ops_cf["Quantita"] < 0].copy()
 
+    # realized_from_trades = (
+    #     sell_ops.groupby("DateOnly")["RealizedTradePL"]
+    #     .sum()
+    #     .reindex(idx, fill_value=0.0)
+    # )
+    
     realized_from_trades = (
-        sell_ops.groupby("DateOnly")["RealizedTradePL"]
+        ops_cf.groupby("DateOnly")["RealizedTradePL"]
         .sum()
         .reindex(idx, fill_value=0.0)
     )
