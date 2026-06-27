@@ -126,6 +126,15 @@ def render_total_pl_card(total_pl, total_pct, annualized_pct=None):
         total_pct = 0.0
     pct_color = "#26a69a" if total_pct >= 0 else "#ef5350"
 
+    has_xirr = annualized_pct is not None and not pd.isna(annualized_pct)
+    
+    if has_xirr:
+        xirr_text = fmt_pct(annualized_pct)
+        xirr_color = "#26a69a" if annualized_pct >= 0 else "#ef5350"
+    else:
+        xirr_text = "—"
+        xirr_color = "#9aa0a6"
+
     st.markdown(
         f"""
         <div style="
@@ -153,9 +162,9 @@ def render_total_pl_card(total_pl, total_pct, annualized_pct=None):
             </div>
             <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
                 <span>{t("annualized_return")}</span>
-                <span style="margin-left:8px;">
-                    {fmt_pct(annualized_pct) if annualized_pct is not None else ""}
-                </span>
+                    <span style="margin-left:8px; color: {xirr_color};">
+                        {xirr_text}
+                    </span>
             </div>
         </div>
         """,
