@@ -229,7 +229,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     start_date = ops_all["DateOnly"].min() - pd.Timedelta(days=5)
     end_date = today
     
-    idx = pd.date_range(start=start_date, end=end_date, freq="D")
+    market_last_date = closes.index.max()
+    
+    idx = pd.date_range(start=start_date, end=market_last_date, freq="D")
 
     # =========================
     # 4. Se non ci sono ticker validi, costruisco serie vuote
@@ -270,7 +272,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             closes_ticker,
             ops,
             start_date,
-            end_date
+            market_last_date
         )
 
         # =========================
