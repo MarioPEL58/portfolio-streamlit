@@ -1,5 +1,6 @@
 import streamlit as st
 from utils.i18n import t
+import pandas as pd
 from utils.formatting import fmt_eur, fmt_pct
 
 # =========================
