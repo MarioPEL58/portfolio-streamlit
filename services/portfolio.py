@@ -269,7 +269,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .rename("Dividendi netti")
         )
 
-    sell_ops = ops_cf.loc[ops_cf["Quantita"] < 0].copy()
+    # sell_ops = ops_cf.loc[ops_cf["Quantita"] < 0].copy()
 
     realized_from_trades = (
         sell_ops.groupby("Data")["RealizedTradePL"]
