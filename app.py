@@ -13,7 +13,7 @@ from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, pl_t
 from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
-from services.excel_loader import load_dividends_from_excel, load_operations_from_excel
+from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
 from services.market_data import download_close_prices, download_last_intraday_timestamp
 from services.portfolio import build_portfolio
 from services.portfolio_metrics import compute_portfolio_xirr, compute_sharpe_ratio
