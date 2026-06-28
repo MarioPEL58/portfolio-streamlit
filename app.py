@@ -155,12 +155,11 @@ if series.empty:
     st.stop()
 
 # st.subheader("DEBUG COERENZA VALORI")
-# st.write({
-#     "Valore serie": series["Valore portafoglio"].iloc[-1],
-#     "Valore current": current["Valore"].sum(),
-#     "Differenza": series["Valore portafoglio"].iloc[-1] - current["Valore"].sum()
-# })
-
+st.write({
+    "Valore serie": series["Valore portafoglio"].iloc[-1],
+    "Valore current": current["Valore"].sum(),
+    "Differenza": series["Valore portafoglio"].iloc[-1] - current["Valore"].sum()
+})
 
 # st.subheader("DEBUG Capitale investito")
 
