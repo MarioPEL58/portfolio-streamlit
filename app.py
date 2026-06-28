@@ -89,6 +89,11 @@ if file_source is None:
 try:
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
+    start_ops = load_start_from_excel(file_source)
+    
+    if not start_ops.empty:
+        ops = pd.concat([start_ops, ops], ignore_index=True)
+        ops = ops.sort_values(["Data", "Ticker"]).reset_index(drop=True)
 
     ops["Data"] = pd.to_datetime(ops["Data"])
 
