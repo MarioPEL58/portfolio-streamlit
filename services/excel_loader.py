@@ -200,7 +200,30 @@ def detect_excel_structure(file_obj) -> dict:
         if dividends_sheet is not None
         else REQUIRED_DIVIDEND_COLUMNS.copy()
     )
+    # -------------------------
+    # Start (snapshot iniziale)
+    # -------------------------
+    start_sheet = find_sheet_name(
+        xls.sheet_names,
+        ["start"]
+    )
+    
+    start_is_valid = False
+    
+    if start_sheet is not None:
+        tmp = pd.read_excel(
+            BytesIO(excel_bytes),
+            sheet_name=start_sheet,
+            engine="openpyxl",
+            nrows=30
+        )
+    
+        tmp = tmp.dropna(axis=0, how="all").dropna(axis=1, how="all")
+        tmp.columns = tmp.columns.str.strip()
+    
+        required_start_cols = ["Data", "Ticker", "Quantita", "Prezzo"]
 
+    start_is_valid = all(col in tmp.columns for col in required_start_cols)
     return {
         "sheet_names": xls.sheet_names,
         "operations": {
@@ -214,6 +237,10 @@ def detect_excel_structure(file_obj) -> dict:
             "columns": dividends_columns,
             "missing_required": dividends_missing,
             "is_valid": dividends_sheet is not None and len(dividends_missing) == 0,
+        },
+        "start": {
+            "sheet_name": start_sheet,
+            "is_valid": start_is_valid,
         },
     }
 
@@ -333,5 +360,86 @@ def load_dividends_from_excel(file_obj) -> pd.DataFrame:
         out["ID"].astype(str).str.strip(),
         out["Nome"].astype(str).str.strip()
     )
+
+    return out
+    
+def load_start_from_excel(file_obj) -> pd.DataFrame:
+    excel_bytes = read_excel_safely(file_obj)
+    xls = pd.ExcelFile(BytesIO(excel_bytes), engine="openpyxl")
+
+    # ✅ trova foglio Start
+    start_sheet = find_sheet_name(xls.sheet_names, ["start"])
+
+    # ✅ fallback vuoto (importante per non rompere app)
+    if start_sheet is None:
+        return pd.DataFrame(columns=[
+            "Ticker", "Data", "Quantita", "Prezzo",
+            "FlussoNetto", "ID", "Intermediario",
+            "SpeseEuro", "Tassa", "Cambio",
+            "Nome", "Tipo", "Area", "Settore",
+            "Emittente", "Valuta", "PositionKey"
+        ])
+
+    df = pd.read_excel(BytesIO(excel_bytes), sheet_name=start_sheet, engine="openpyxl")
+    df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
+
+    # ✅ normalizza colonne
+    df.columns = df.columns.str.strip()
+
+    # ✅ VALIDAZIONE MINIMA
+    required = ["Data", "Ticker", "Quantita", "Prezzo"]
+    missing = [c for c in required if c not in df.columns]
+
+    if missing:
+        raise ValueError(f"Foglio Start mancante colonne obbligatorie: {missing}")
+
+    # =========================
+    # ✅ COSTRUZIONE OUTPUT
+    # =========================
+    out = pd.DataFrame()
+
+    out["Ticker"] = df["Ticker"].astype(str).str.strip()
+    out["Data"] = pd.to_datetime(df["Data"], errors="coerce")
+    out["Quantita"] = parse_numeric(df["Quantita"])
+    out["Prezzo"] = parse_numeric(df["Prezzo"])
+
+    # ✅ Flusso: se non presente lo calcolo
+    if "FlussoNetto" in df.columns:
+        out["FlussoNetto"] = parse_numeric(df["FlussoNetto"])
+    else:
+        out["FlussoNetto"] = - out["Quantita"] * out["Prezzo"]
+
+    # =========================
+    # ✅ CAMPI STANDARD
+    # =========================
+    out["ID"] = df["ID"] if "ID" in df.columns else np.nan
+    out["Intermediario"] = df["Intermediario"] if "Intermediario" in df.columns else ""
+
+    out["SpeseEuro"] = 0.0
+    out["Tassa"] = 0.0
+    out["Cambio"] = 1.0
+
+    out["Nome"] = df["Nome"] if "Nome" in df.columns else out["Ticker"]
+    out["Tipo"] = "INIT"   # ✅ distinguibile
+    out["Area"] = ""
+    out["Settore"] = ""
+    out["Emittente"] = ""
+    out["Valuta"] = df["Valuta"] if "Valuta" in df.columns else "EUR"
+
+    # =========================
+    # ✅ POSITION KEY
+    # =========================
+    out["PositionKey"] = np.where(
+        out["ID"].notna(),
+        out["ID"].astype(str).str.strip(),
+        out["Ticker"].astype(str).str.strip()
+    )
+
+    # =========================
+    # ✅ PULIZIA FINALE
+    # =========================
+    out = out.dropna(subset=["Ticker", "Data", "Quantita"])
+    out = out[out["Ticker"] != ""]
+    out = out.sort_values(["Data", "Ticker"]).reset_index(drop=True)
 
     return out
