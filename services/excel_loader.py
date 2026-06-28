@@ -223,7 +223,8 @@ def detect_excel_structure(file_obj) -> dict:
     
         required_start_cols = ["Data", "Ticker", "Quantita", "Prezzo"]
 
-    start_is_valid = all(col in tmp.columns for col in required_start_cols)
+        start_is_valid = all(col in tmp.columns for col in required_start_cols)
+        
     return {
         "sheet_names": xls.sheet_names,
         "operations": {
