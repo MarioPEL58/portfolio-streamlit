@@ -396,26 +396,27 @@ def load_start_from_excel(file_obj) -> pd.DataFrame:
     out["Data"] = pd.to_datetime(df["Data"], errors="coerce")
     out["Quantita"] = parse_numeric(df["Quantita"])
     out["Prezzo"] = parse_numeric(df["Prezzo"])
+    # ✅ default cambio
+    out["Cambio"] = parse_numeric(df["Cambio"]) if "Cambio" in df.columns else 1.0
 
     # ✅ flusso
     if "FlussoNetto" in df.columns:
         out["FlussoNetto"] = parse_numeric(df["FlussoNetto"])
     else:
-        out["FlussoNetto"] = - out["Quantita"] * out["Prezzo"]
+        out["FlussoNetto"] = - out["Quantita"] * out["Prezzo"] * out["Cambio"]
 
     # ✅ campi standard
     out["ID"] = df["ID"] if "ID" in df.columns else np.nan
     out["Intermediario"] = df["Intermediario"] if "Intermediario" in df.columns else ""
-    out["SpeseEuro"] = 0.0
+    out["SpeseEuro"] = df["SpeseEuro"] if "SpeseEuro" in df.columns else 0.0
     out["Tassa"] = 0.0
-    out["Cambio"] = 1.0
 
     out["Nome"] = df["Nome"] if "Nome" in df.columns else out["Ticker"]
     out["Tipo"] = "INIT"
 
     out["Area"] = ""
     out["Settore"] = ""
-    out["Emittente"] = ""
+    out["Emittente"] = df["Emittente"] if "Emittente" in df.columns else ""
     out["Valuta"] = df["Valuta"] if "Valuta" in df.columns else "EUR"
 
     out["PositionKey"] = np.where(
