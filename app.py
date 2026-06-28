@@ -376,6 +376,10 @@ with tab_perf:
     ]
 
     if bench_series is not None:
+        
+        if not isinstance(bench_series.index, pd.DatetimeIndex):
+            bench_series.index = pd.to_datetime(bench_series.index, errors="coerce")
+
         filtered_bench = bench_series[bench_series.index >= pd.Timestamp(min_date)]
     
         # ✅ allinea al portafoglio
