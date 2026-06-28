@@ -364,14 +364,10 @@ def load_dividends_from_excel(file_obj) -> pd.DataFrame:
     return out
     
 def load_start_from_excel(file_obj) -> pd.DataFrame:
-    excel_bytes = read_excel_safely(file_obj)
-    xls = pd.ExcelFile(BytesIO(excel_bytes), engine="openpyxl")
+    structure = detect_excel_structure(file_obj)
 
-    # ✅ trova foglio Start
-    start_sheet = find_sheet_name(xls.sheet_names, ["start"])
-
-    # ✅ fallback vuoto (importante per non rompere app)
-    if start_sheet is None:
+    # ✅ Early exit se non esiste o non valido
+    if not structure.get("start", {}).get("is_valid", False):
         return pd.DataFrame(columns=[
             "Ticker", "Data", "Quantita", "Prezzo",
             "FlussoNetto", "ID", "Intermediario",
@@ -380,22 +376,20 @@ def load_start_from_excel(file_obj) -> pd.DataFrame:
             "Emittente", "Valuta", "PositionKey"
         ])
 
-    df = pd.read_excel(BytesIO(excel_bytes), sheet_name=start_sheet, engine="openpyxl")
-    df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
+    excel_bytes = read_excel_safely(file_obj)
+    sheet_name = structure["start"]["sheet_name"]
 
-    # ✅ normalizza colonne
+    df = pd.read_excel(BytesIO(excel_bytes), sheet_name=sheet_name, engine="openpyxl")
+    df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
     df.columns = df.columns.str.strip()
 
-    # ✅ VALIDAZIONE MINIMA
+    # ✅ VALIDAZIONE
     required = ["Data", "Ticker", "Quantita", "Prezzo"]
     missing = [c for c in required if c not in df.columns]
 
     if missing:
-        raise ValueError(f"Foglio Start mancante colonne obbligatorie: {missing}")
+        raise ValueError(f"Foglio Start mancante colonne: {missing}")
 
-    # =========================
-    # ✅ COSTRUZIONE OUTPUT
-    # =========================
     out = pd.DataFrame()
 
     out["Ticker"] = df["Ticker"].astype(str).str.strip()
@@ -403,41 +397,33 @@ def load_start_from_excel(file_obj) -> pd.DataFrame:
     out["Quantita"] = parse_numeric(df["Quantita"])
     out["Prezzo"] = parse_numeric(df["Prezzo"])
 
-    # ✅ Flusso: se non presente lo calcolo
+    # ✅ flusso
     if "FlussoNetto" in df.columns:
         out["FlussoNetto"] = parse_numeric(df["FlussoNetto"])
     else:
         out["FlussoNetto"] = - out["Quantita"] * out["Prezzo"]
 
-    # =========================
-    # ✅ CAMPI STANDARD
-    # =========================
+    # ✅ campi standard
     out["ID"] = df["ID"] if "ID" in df.columns else np.nan
     out["Intermediario"] = df["Intermediario"] if "Intermediario" in df.columns else ""
-
     out["SpeseEuro"] = 0.0
     out["Tassa"] = 0.0
     out["Cambio"] = 1.0
 
     out["Nome"] = df["Nome"] if "Nome" in df.columns else out["Ticker"]
-    out["Tipo"] = "INIT"   # ✅ distinguibile
+    out["Tipo"] = "INIT"
+
     out["Area"] = ""
     out["Settore"] = ""
     out["Emittente"] = ""
     out["Valuta"] = df["Valuta"] if "Valuta" in df.columns else "EUR"
 
-    # =========================
-    # ✅ POSITION KEY
-    # =========================
     out["PositionKey"] = np.where(
         out["ID"].notna(),
         out["ID"].astype(str).str.strip(),
         out["Ticker"].astype(str).str.strip()
     )
 
-    # =========================
-    # ✅ PULIZIA FINALE
-    # =========================
     out = out.dropna(subset=["Ticker", "Data", "Quantita"])
     out = out[out["Ticker"] != ""]
     out = out.sort_values(["Data", "Ticker"]).reset_index(drop=True)
