@@ -380,95 +380,40 @@ tab_perf, tab_daily, tab_unrealized, tab_heatmap, tab_analysis = st.tabs([
     t("tab_analysis")
 ])
 
-# old tab not workinf with date tutte uguali
-# with tab_perf:
-    
-#     min_date = min_filter_date or default_start
-    
-#     filtered_series = series[
-#         series.index >= pd.Timestamp(min_date)
-#     ]
-
-#     if bench_series is not None:
-#         filtered_bench = bench_series[bench_series.index >= pd.Timestamp(min_date)]
-    
-#         # ✅ allinea al portafoglio
-#         filtered_bench = filtered_bench.reindex(filtered_series.index)
-#         filtered_bench = filtered_bench.ffill()
-#     else:
-#         filtered_bench = None
-        
-#     first_valid_price_date = series["Valore portafoglio"].first_valid_index()
-    
-#     note_text = None
-#     if first_valid_price_date is not None:
-#         prefix = CONFIG["lang"][LANG]["market_data_available_from"]
-#         note_text = f"{prefix} {first_valid_price_date.strftime('%d/%m/%Y')}"
-
-#     fig = portfolio_chart(
-#         filtered_series,
-#         bench_norm=filtered_bench,   # nome parametro puoi cambiarlo dopo
-#         benchmark_name=benchmark,
-#         note_text=note_text
-#     )
-
-#     st.plotly_chart(fig, use_container_width=True)
-
+# tab not working with date tutte uguali
 with tab_perf:
-
+    
     min_date = min_filter_date or default_start
+    
+    filtered_series = series[
+        series.index >= pd.Timestamp(min_date)
+    ]
 
-    # ✅ normalizza serie portafoglio
-    filtered_series = ensure_datetime_series(
-        series,
-        value_col="Valore portafoglio" if hasattr(series, "columns") else None
-    )
-
-    if filtered_series is not None:
-        filtered_series = filtered_series[
-            filtered_series.index >= pd.Timestamp(min_date)
-        ]
-    else:
-        st.warning("Serie portafoglio non valida")
-        st.stop()
-
-    # ✅ normalizza benchmark
     if bench_series is not None:
-        filtered_bench = ensure_datetime_series(bench_series)
-
-        if filtered_bench is not None:
-            filtered_bench = filtered_bench[
-                filtered_bench.index >= pd.Timestamp(min_date)
-            ]
-
-            # ✅ allinea al portafoglio
-            filtered_bench = filtered_bench.reindex(filtered_series.index)
-            filtered_bench = filtered_bench.ffill()
-        else:
-            filtered_bench = None
+        filtered_bench = bench_series[bench_series.index >= pd.Timestamp(min_date)]
+    
+        # ✅ allinea al portafoglio
+        filtered_bench = filtered_bench.reindex(filtered_series.index)
+        filtered_bench = filtered_bench.ffill()
     else:
         filtered_bench = None
-
-    # ✅ gestione data primo valore valido
-    try:
-        first_valid_price_date = filtered_series.first_valid_index()
-    except:
-        first_valid_price_date = None
-
+        
+    first_valid_price_date = series["Valore portafoglio"].first_valid_index()
+    
     note_text = None
     if first_valid_price_date is not None:
         prefix = CONFIG["lang"][LANG]["market_data_available_from"]
         note_text = f"{prefix} {first_valid_price_date.strftime('%d/%m/%Y')}"
 
-    # ✅ grafico
     fig = portfolio_chart(
         filtered_series,
-        bench_norm=filtered_bench,
+        bench_norm=filtered_bench,   # nome parametro puoi cambiarlo dopo
         benchmark_name=benchmark,
         note_text=note_text
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 with tab_daily:
     st.subheader(t("daily_title"))
     view_mode = st.radio(
