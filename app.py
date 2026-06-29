@@ -90,7 +90,10 @@ try:
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
     start_ops = load_start_from_excel(file_source)
-    
+    # debug 
+    st.write("START KEYS:", start_ops["PositionKey"].unique())
+    st.write("OPS KEYS:", ops["PositionKey"].unique())
+
     if not start_ops.empty:
         ops = pd.concat([start_ops, ops], ignore_index=True)
         ops = ops.sort_values(["Data", "Ticker"]).reset_index(drop=True)
