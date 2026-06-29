@@ -208,6 +208,7 @@ def detect_excel_structure(file_obj) -> dict:
         ["start"]
     )
     
+    start_columns = {}
     start_is_valid = False
     
     if start_sheet is not None:
@@ -219,11 +220,15 @@ def detect_excel_structure(file_obj) -> dict:
         )
     
         tmp = tmp.dropna(axis=0, how="all").dropna(axis=1, how="all")
-        tmp.columns = tmp.columns.str.strip()
+    
+        # ✅ mapping con schema
+        start_columns = map_columns(tmp, COLUMN_ALIASES)
     
         required_start_cols = ["Data", "Ticker", "Quantita", "Prezzo"]
-
-        start_is_valid = all(col in tmp.columns for col in required_start_cols)
+    
+        missing = missing_required(start_columns, required_start_cols)
+    
+        start_is_valid = len(missing) == 0
         
     return {
         "sheet_names": xls.sheet_names,
@@ -241,6 +246,7 @@ def detect_excel_structure(file_obj) -> dict:
         },
         "start": {
             "sheet_name": start_sheet,
+            "columns": start_columns,
             "is_valid": start_is_valid,
         },
     }
@@ -379,53 +385,58 @@ def load_start_from_excel(file_obj) -> pd.DataFrame:
 
     excel_bytes = read_excel_safely(file_obj)
     sheet_name = structure["start"]["sheet_name"]
+    cols = structure["start"]["columns"]   # ✅ CRITICO: usa mapping detect
 
     df = pd.read_excel(BytesIO(excel_bytes), sheet_name=sheet_name, engine="openpyxl")
     df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
-    df.columns = df.columns.str.strip()
-
-    # ✅ VALIDAZIONE
-    required = ["Data", "Ticker", "Quantita", "Prezzo"]
-    missing = [c for c in required if c not in df.columns]
-
-    if missing:
-        raise ValueError(f"Foglio Start mancante colonne: {missing}")
 
     out = pd.DataFrame()
 
-    out["Ticker"] = df["Ticker"].astype(str).str.strip()
-    out["Data"] = pd.to_datetime(df["Data"], errors="coerce")
-    out["Quantita"] = parse_numeric(df["Quantita"])
-    out["Prezzo"] = parse_numeric(df["Prezzo"])
-    # ✅ default cambio
-    out["Cambio"] = parse_numeric(df["Cambio"]) if "Cambio" in df.columns else 1.0
+    out["Ticker"] = df[cols["Ticker"]].astype(str).str.strip()
+    out["Data"] = pd.to_datetime(df[cols["Data"]], errors="coerce")
+    out["Quantita"] = parse_numeric(df[cols["Quantita"]])
+    out["Prezzo"] = parse_numeric(df[cols["Prezzo"]])
 
-    # ✅ flusso
-    if "FlussoNetto" in df.columns:
-        out["FlussoNetto"] = parse_numeric(df["FlussoNetto"])
+    # ✅ Cambio (default coerente)
+    out["Cambio"] = (
+        parse_numeric(df[cols["Cambio"]])
+        if cols.get("Cambio") is not None else 1.0
+    )
+
+    # ✅ Flusso (con cambio corretto)
+    if cols.get("FlussoNetto") is not None:
+        out["FlussoNetto"] = parse_numeric(df[cols["FlussoNetto"]])
     else:
         out["FlussoNetto"] = - out["Quantita"] * out["Prezzo"] * out["Cambio"]
 
-    # ✅ campi standard
-    out["ID"] = df["ID"] if "ID" in df.columns else np.nan
-    out["Intermediario"] = df["Intermediario"] if "Intermediario" in df.columns else ""
-    out["SpeseEuro"] = df["SpeseEuro"] if "SpeseEuro" in df.columns else 0.0
+    # ✅ campi standard (mantengo tuoi default)
+    out["ID"] = df[cols["ID"]] if cols.get("ID") is not None else np.nan
+    out["Intermediario"] = df[cols["Intermediario"]] if cols.get("Intermediario") else ""
+
+    out["SpeseEuro"] = (
+        parse_numeric(df[cols["SpeseEuro"]]).fillna(0.0)
+        if cols.get("SpeseEuro") else 0.0
+    )
+
     out["Tassa"] = 0.0
 
-    out["Nome"] = df["Nome"] if "Nome" in df.columns else out["Ticker"]
+    out["Nome"] = df[cols["Nome"]] if cols.get("Nome") else out["Ticker"]
     out["Tipo"] = "INIT"
 
     out["Area"] = ""
     out["Settore"] = ""
-    out["Emittente"] = df["Emittente"] if "Emittente" in df.columns else ""
-    out["Valuta"] = df["Valuta"] if "Valuta" in df.columns else "EUR"
+    out["Emittente"] = df[cols["Emittente"]] if cols.get("Emittente") else ""
+    out["Valuta"] = df[cols["Valuta"]] if cols.get("Valuta") else "EUR"
 
+    # ✅ PositionKey COERENTE con operations (fix fondamentale)
     out["PositionKey"] = np.where(
         out["ID"].notna(),
         out["ID"].astype(str).str.strip(),
-        out["Ticker"].astype(str).str.strip()
+        out["Ticker"].astype(str).str.strip() + "|" +
+        out["Intermediario"].astype(str).str.strip()
     )
 
+    # ✅ pulizia finale
     out = out.dropna(subset=["Ticker", "Data", "Quantita"])
     out = out[out["Ticker"] != ""]
     out = out.sort_values(["Data", "Ticker"]).reset_index(drop=True)
