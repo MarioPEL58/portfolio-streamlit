@@ -224,9 +224,7 @@ def detect_excel_structure(file_obj) -> dict:
         # ✅ mapping con schema
         start_columns = map_columns(tmp, COLUMN_ALIASES)
     
-        required_start_cols = ["Data", "Ticker", "Quantita", "Prezzo"]
-    
-        missing = missing_required(start_columns, required_start_cols)
+        missing = missing_required(start_columns, REQUIRED_START_COLUMNS)
     
         start_is_valid = len(missing) == 0
         
