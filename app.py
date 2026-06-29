@@ -90,9 +90,9 @@ try:
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
     start_ops = load_start_from_excel(file_source)
-    # debug 
-    st.write("START KEYS:", start_ops["PositionKey"].unique())
-    st.write("OPS KEYS:", ops["PositionKey"].unique())
+    # # debug 
+    # st.write("START KEYS:", start_ops["PositionKey"].unique())
+    # st.write("OPS KEYS:", ops["PositionKey"].unique())
 
     if not start_ops.empty:
         ops = pd.concat([start_ops, ops], ignore_index=True)
@@ -163,11 +163,11 @@ if series.empty:
     st.stop()
 
 # st.subheader("DEBUG COERENZA VALORI")
-st.write({
-    "Valore serie": series["Valore portafoglio"].iloc[-1],
-    "Valore current": current["Valore"].sum(),
-    "Differenza": series["Valore portafoglio"].iloc[-1] - current["Valore"].sum()
-})
+# st.write({
+#     "Valore serie": series["Valore portafoglio"].iloc[-1],
+#     "Valore current": current["Valore"].sum(),
+#     "Differenza": series["Valore portafoglio"].iloc[-1] - current["Valore"].sum()
+# })
 
 # st.subheader("DEBUG Capitale investito")
 
