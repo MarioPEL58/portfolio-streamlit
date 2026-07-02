@@ -145,6 +145,10 @@ closes, missing = download_close_prices(
 )
 market_last_date = closes.index.max()
 
+st.write("DOWNLOAD CLOSES")
+st.write(closes.tail(10))
+st.write(closes.index)
+
 if closes.empty:
     st.error(t("no_prices"))
     st.stop()
