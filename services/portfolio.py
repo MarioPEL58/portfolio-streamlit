@@ -393,25 +393,25 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
 
         # debug
-        st.write("CLOSES RAW")
-        st.dataframe(
-            closes.loc["2026-06-30":"2026-07-02", ["LDO.MI"]]
-        )
+        # st.write("CLOSES RAW")
+        # st.dataframe(
+        #     closes.loc["2026-06-30":"2026-07-02", ["LDO.MI"]]
+        # )
         
-        st.write("CLOSES_TICKER")
-        st.dataframe(
-            closes_ticker.loc["2026-06-30":"2026-07-02"]
-        )
+        # st.write("CLOSES_TICKER")
+        # st.dataframe(
+        #     closes_ticker.loc["2026-06-30":"2026-07-02"]
+        # )
         
-        st.write("CLOSES_EUR_TICKER")
-        st.dataframe(
-            closes_eur_ticker.loc["2026-06-30":"2026-07-02"]
-        )
+        # st.write("CLOSES_EUR_TICKER")
+        # st.dataframe(
+        #     closes_eur_ticker.loc["2026-06-30":"2026-07-02"]
+        # )
         
-        st.write("POSITION_CLOSES_EUR")
-        st.dataframe(
-            position_closes_eur.loc["2026-06-30":"2026-07-02"]
-        )
+        # st.write("POSITION_CLOSES_EUR")
+        # st.dataframe(
+        #     position_closes_eur.loc["2026-06-30":"2026-07-02"]
+        # )
         
         # st.write("position_values")
         # st.write(position_values.tail(10))
