@@ -146,15 +146,15 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
             # =========================
             # ✅ DEBUG (puoi attivarlo)
             # =========================
-            st.write({
-                "Data": row["Data"],
-                "qty": qty,
-                "open_qty": open_qty,
-                "open_cost": open_cost,
-                "avg_cost_before": avg_cost_before,
-                "cashflow": cashflow,
-                "realized": realized_trade_pl
-            })
+            # st.write({
+            #     "Data": row["Data"],
+            #     "qty": qty,
+            #     "open_qty": open_qty,
+            #     "open_cost": open_cost,
+            #     "avg_cost_before": avg_cost_before,
+            #     "cashflow": cashflow,
+            #     "realized": realized_trade_pl
+            # })
 
             avg_cost_after = open_cost / open_qty if open_qty != 0 else 0.0
 
@@ -202,6 +202,21 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # 1. Arricchimento cost engine
     # =========================
     ops_all = enrich_ops_with_cost_engine(ops_all)
+
+    st.write("OPS_ALL")
+    st.dataframe(
+        ops_all[
+            [
+                "Data",
+                "Ticker",
+                "Quantita",
+                "QtyOpenAfter",
+                "CostOpenAfter",
+                "CashflowCalc",
+                "RealizedTradePL"
+            ]
+        ]
+    )
 
     # =========================
     # 2. Ticker validi (solo quelli con prezzi disponibili)
