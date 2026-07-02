@@ -392,14 +392,35 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
         )
 
-        st.write("position_values")
-        st.write(position_values.tail(10))
+        # debug
+        st.write("CLOSES RAW")
+        st.dataframe(
+            closes.loc["2026-06-30":"2026-07-02", ["LDO.MI"]]
+        )
         
-        st.write("position_values.diff()")
-        st.write(position_values.diff().tail(10))
+        st.write("CLOSES_TICKER")
+        st.dataframe(
+            closes_ticker.loc["2026-06-30":"2026-07-02"]
+        )
         
-        st.write("daily_cf_positions")
-        st.write(daily_cf_positions.tail(10))
+        st.write("CLOSES_EUR_TICKER")
+        st.dataframe(
+            closes_eur_ticker.loc["2026-06-30":"2026-07-02"]
+        )
+        
+        st.write("POSITION_CLOSES_EUR")
+        st.dataframe(
+            position_closes_eur.loc["2026-06-30":"2026-07-02"]
+        )
+        
+        # st.write("position_values")
+        # st.write(position_values.tail(10))
+        
+        # st.write("position_values.diff()")
+        # st.write(position_values.diff().tail(10))
+        
+        # st.write("daily_cf_positions")
+        # st.write(daily_cf_positions.tail(10))
 
         # daily_pl_positions = (
         #     position_values.diff().fillna(0.0)
