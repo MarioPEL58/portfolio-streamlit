@@ -391,6 +391,15 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
         )
 
+        st.write("position_values")
+        st.write(position_values.tail(10))
+        
+        st.write("position_values.diff()")
+        st.write(position_values.diff().tail(10))
+        
+        st.write("daily_cf_positions")
+        st.write(daily_cf_positions.tail(10))
+
         daily_pl_positions = (
             position_values.diff().fillna(0.0)
             .add(daily_cf_positions, fill_value=0.0)
