@@ -203,20 +203,20 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # =========================
     ops_all = enrich_ops_with_cost_engine(ops_all)
 
-    st.write("OPS_ALL")
-    st.dataframe(
-        ops_all[
-            [
-                "Data",
-                "Ticker",
-                "Quantita",
-                "QtyOpenAfter",
-                "CostOpenAfter",
-                "CashflowCalc",
-                "RealizedTradePL"
-            ]
-        ]
-    )
+    # st.write("OPS_ALL")
+    # st.dataframe(
+    #     ops_all[
+    #         [
+    #             "Data",
+    #             "Ticker",
+    #             "Quantita",
+    #             "QtyOpenAfter",
+    #             "CostOpenAfter",
+    #             "CashflowCalc",
+    #             "RealizedTradePL"
+    #         ]
+    #     ]
+    # )
 
     # =========================
     # 2. Ticker validi (solo quelli con prezzi disponibili)
