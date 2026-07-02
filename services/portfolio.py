@@ -384,11 +384,26 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_pl = pd.Series(0.0, index=idx, name="P/L Giornaliero")
         daily_pl_pct = pd.Series(np.nan, index=idx, name="P/L Giornaliero %")
     else:
-        daily_cf_positions = (
-            ops_cf.groupby(["DateOnly", "PositionKey"])["Cashflow"]
-            .sum()
-            .unstack(fill_value=0.0)
-            .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
+        #old 
+        # daily_cf_positions = (
+        #     ops_cf.groupby(["DateOnly", "PositionKey"])["Cashflow"]
+        #     .sum()
+        #     .unstack(fill_value=0.0)
+        #     .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
+        # )
+
+        market_move = position_values.diff()
+        
+        first_day = (
+            position_values.notna()
+            & position_values.shift(1).isna()
+        )
+        
+        market_move[first_day] = position_values[first_day]
+        
+        daily_pl_positions = (
+            market_move
+            .add(daily_cf_positions, fill_value=0.0)
         )
 
         st.write("position_values")
