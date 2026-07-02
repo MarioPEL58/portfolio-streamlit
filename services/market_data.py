@@ -21,6 +21,9 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         threads=True,
     )
 
+    st.write(raw.tail(10))
+    st.write(raw.index)
+
     if raw is None or len(raw) == 0:
         return pd.DataFrame(), tickers
 
