@@ -384,12 +384,26 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_pl = pd.Series(0.0, index=idx, name="P/L Giornaliero")
         daily_pl_pct = pd.Series(np.nan, index=idx, name="P/L Giornaliero %")
     else:
-        #old 
-        # daily_cf_positions = (
-        #     ops_cf.groupby(["DateOnly", "PositionKey"])["Cashflow"]
-        #     .sum()
-        #     .unstack(fill_value=0.0)
-        #     .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
+        
+        daily_cf_positions = (
+            ops_cf.groupby(["DateOnly", "PositionKey"])["Cashflow"]
+            .sum()
+            .unstack(fill_value=0.0)
+            .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
+        )
+
+        st.write("position_values")
+        st.write(position_values.tail(10))
+        
+        st.write("position_values.diff()")
+        st.write(position_values.diff().tail(10))
+        
+        st.write("daily_cf_positions")
+        st.write(daily_cf_positions.tail(10))
+
+        # daily_pl_positions = (
+        #     position_values.diff().fillna(0.0)
+        #     .add(daily_cf_positions, fill_value=0.0)
         # )
 
         market_move = position_values.diff()
@@ -405,21 +419,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             market_move
             .add(daily_cf_positions, fill_value=0.0)
         )
-
-        st.write("position_values")
-        st.write(position_values.tail(10))
         
-        st.write("position_values.diff()")
-        st.write(position_values.diff().tail(10))
-        
-        st.write("daily_cf_positions")
-        st.write(daily_cf_positions.tail(10))
-
-        daily_pl_positions = (
-            position_values.diff().fillna(0.0)
-            .add(daily_cf_positions, fill_value=0.0)
-        )
-
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
         daily_pl_pct = (daily_pl / total_value.shift(1)).rename("P/L Giornaliero %")
 
