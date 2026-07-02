@@ -156,13 +156,13 @@ if missing:
 series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
 
 #debug
- st.write(series.tail(5))
+st.write(series.tail(5))
 
 # ✅ taglia serie alla data reale
 series = series.loc[:market_last_date]
 
 #debug
- st.write(series.tail(5))
+st.write(series.tail(5))
 
 if series.empty:
     st.error(t("portfolio_error"))
