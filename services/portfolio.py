@@ -146,15 +146,15 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
             # =========================
             # ✅ DEBUG (puoi attivarlo)
             # =========================
-            st.write({
-                "Data": row["Data"],
-                "qty": qty,
-                "open_qty": open_qty,
-                "open_cost": open_cost,
-                "avg_cost_before": avg_cost_before,
-                "cashflow": cashflow,
-                "realized": realized_trade_pl
-            })
+            st.write(
+                row["Data"],
+                qty,
+                open_qty,
+                open_cost,
+                avg_cost_before,
+                cashflow,
+                realized_trade_pl
+            )
 
             avg_cost_after = open_cost / open_qty if open_qty != 0 else 0.0
 
