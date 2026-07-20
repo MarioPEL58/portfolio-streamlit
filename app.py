@@ -98,7 +98,18 @@ try:
         ops = pd.concat([start_ops, ops], ignore_index=True)
         ops = ops.sort_values(["Data", "Ticker"]).reset_index(drop=True)
 
-    ops["Data"] = pd.to_datetime(ops["Data"])
+    # ✅ normalizzazione date
+    ops["Data"] = pd.to_datetime(ops["Data"], errors="coerce")
+    
+    # ✅ ordine stabile (importantissimo)
+    ops["_rowid"] = np.arange(len(ops))
+    
+    # ✅ SORT CORRETTO (fix principale)
+    ops = (
+        ops
+        .sort_values(["PositionKey", "Data", "_rowid"])
+        .reset_index(drop=True)
+    )
 
     data_min = ops["Data"].min()
     data_max = ops["Data"].max()
@@ -407,6 +418,10 @@ with tab_perf:
     ]
 
     if bench_series is not None:
+        
+        if not isinstance(bench_series.index, pd.DatetimeIndex):
+            bench_series.index = pd.to_datetime(bench_series.index, errors="coerce")
+
         filtered_bench = bench_series[bench_series.index >= pd.Timestamp(min_date)]
     
         # ✅ allinea al portafoglio

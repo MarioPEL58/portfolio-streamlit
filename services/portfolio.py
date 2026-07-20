@@ -59,6 +59,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
             tax_rate = float(row["Tassa"])
 
             avg_cost_before = open_cost / open_qty if open_qty != 0 else 0.0
+
             realized_trade_pl = 0.0
             tax_euro = 0.0
             cashflow = 0.0
@@ -140,6 +141,9 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
                     if abs(open_cost) < 1e-12:
                         open_cost = 0.0
 
+            # =========================
+            # qty == 0
+            # =========================
             else:
                 cashflow = 0.0
 
@@ -158,6 +162,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
 
             avg_cost_after = open_cost / open_qty if open_qty != 0 else 0.0
 
+            # salva
             avg_before_list.append(avg_cost_before)
             avg_after_list.append(avg_cost_after)
             qty_after_list.append(open_qty)
@@ -506,6 +511,11 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # =========================
     # 17. Stato attuale posizioni aperte
     # =========================
+    last_qty = cost_state["NetQty"]
+    last_close_eur = position_closes_eur.iloc[-1]
+    last_daily_pl = daily_pl_positions.iloc[-1]
+
+    # ✅ usa la quantità residua reale del motore costi
     last_qty = cost_state["NetQty"]
     last_close_eur = position_closes_eur.iloc[-1]
     last_daily_pl = daily_pl_positions.iloc[-1]
