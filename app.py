@@ -9,11 +9,11 @@ from utils.ui import title_with_tooltip
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
-from components.charts import daily_pl_bar_chart_by_sign, sharpe_gauge
+from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, pl_treemap, sharpe_gauge
 from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
-from services.excel_loader import load_dividends_from_excel, load_operations_from_excel
+from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
 from services.market_data import download_close_prices, download_last_intraday_timestamp
 from services.portfolio import build_portfolio
 from services.portfolio_metrics import compute_portfolio_xirr, compute_sharpe_ratio
@@ -25,8 +25,10 @@ from utils.finance import annual_to_daily_rate, get_dynamic_max
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 from utils.display import get_display_columns
+from utils.series_utils import ensure_datetime_series
 from components.tables import render_positions_table, render_operations_table
 from components.downloads import render_download_tab
+from components.market_status import render_market_data_status
 
 from utils.kpi_cards import (
     render_value_card,
@@ -65,6 +67,8 @@ if ENV == "DEV":
 sidebar_cfg = render_sidebar()
 uploaded_file = sidebar_cfg["uploaded_file"]
 benchmark = sidebar_cfg["benchmark"]
+# label_choice = sidebar_cfg["label_choice"]
+label_choice = st.session_state["label_choice"]
 show_benchmark = sidebar_cfg["show_benchmark"]
 use_risk_free = sidebar_cfg["use_risk_free"]
 min_filter_date = sidebar_cfg["min_filter_date"]
@@ -85,6 +89,14 @@ if file_source is None:
 try:
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
+    start_ops = load_start_from_excel(file_source)
+    # # debug 
+    # st.write("START KEYS:", start_ops["PositionKey"].unique())
+    # st.write("OPS KEYS:", ops["PositionKey"].unique())
+
+    if not start_ops.empty:
+        ops = pd.concat([start_ops, ops], ignore_index=True)
+        ops = ops.sort_values(["Data", "Ticker"]).reset_index(drop=True)
 
     # ✅ normalizzazione date
     ops["Data"] = pd.to_datetime(ops["Data"], errors="coerce")
@@ -142,6 +154,11 @@ closes, missing = download_close_prices(
     start_date,
     end_date
 )
+market_last_date = closes.index.max()
+
+# st.write("DOWNLOAD CLOSES")
+# st.write(closes.tail(10))
+# st.write(closes.index)
 
 if closes.empty:
     st.error(t("no_prices"))
@@ -154,11 +171,42 @@ if missing:
 series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
 
 #debug
- st.write(series.tail(5))
+# st.write(series.tail(5))
+
+# ✅ taglia serie alla data reale
+series = series.loc[:market_last_date]
+
+#debug
+# st.write(series.tail(5))
 
 if series.empty:
     st.error(t("portfolio_error"))
     st.stop()
+
+# st.subheader("DEBUG COERENZA VALORI")
+# st.write({
+#     "Valore serie": series["Valore portafoglio"].iloc[-1],
+#     "Valore current": current["Valore"].sum(),
+#     "Differenza": series["Valore portafoglio"].iloc[-1] - current["Valore"].sum()
+# })
+
+# st.subheader("DEBUG Capitale investito")
+
+# capitale_serie = series["Capitale investito"].iloc[-1]
+# costo_current = current["Costo Totale Stimato"].sum()
+
+# st.write({
+#     "Capitale investito (serie)": capitale_serie,
+#     "Costo totale stimato (current)": costo_current,
+#     "Differenza": capitale_serie - costo_current
+# })
+
+# st.subheader("DEBUG Flussi vs Investito")
+
+# st.write({
+#     "Capitale versato (flussi)": series["Capitale versato"].iloc[-1],
+#     "Capitale investito (open)": series["Capitale investito"].iloc[-1]
+# })
 
 render_operations_preview(ops_enriched)
 # with st.expander("Anteprima operazioni", expanded=False):
@@ -167,14 +215,18 @@ render_operations_preview(ops_enriched)
 # =========================
 # KPIs
 # =========================
-latest_value = float(series["Valore portafoglio"].iloc[-1])
-latest_invested = float(series["Capitale investito"].iloc[-1])
-latest_pnl = float(series["P/L trading"].iloc[-1])
+# latest_value = float(series["Valore portafoglio"].iloc[-1])
+latest_value = float(current["Valore"].sum())
+# latest_invested = float(series["Capitale investito"].iloc[-1])
+latest_invested = float(current["Costo Totale Stimato"].sum())
+# latest_pnl = float(series["P/L trading"].iloc[-1]) non serve più
+
 latest_daily_pl = float(series["P/L Giornaliero"].iloc[-1])
 latest_daily_pl_pct = float(series["P/L Giornaliero %"].iloc[-1])
 
 latest_realized = float(series["P/L realizzato"].iloc[-1])
 latest_dividends = float(series["Dividendi netti"].sum())
+latest_contributed = series["Capitale versato"].iloc[-1]
 
 # =========================
 # XIRR + flussi
@@ -283,12 +335,13 @@ if show_benchmark and bench_returns is not None:
 # =========================
 # Breakdown P/L
 # =========================
-sell_ops = ops_enriched.loc[ops_enriched["Quantita"] < 0].copy()
+# sell_ops = ops_enriched.loc[ops_enriched["Quantita"] < 0].copy()
 
-realized_trading = (
-    sell_ops["RealizedTradePL"].sum()
-    if not sell_ops.empty else 0.0
-)
+# realized_trading = (
+#     sell_ops["RealizedTradePL"].sum()
+#     if not sell_ops.empty else 0.0
+# )
+realized_trading = ops_enriched["RealizedTradePL"].sum()
 
 realized_dividends = latest_dividends
 realized_total = realized_trading + realized_dividends
@@ -335,41 +388,27 @@ with c4:
         annualized_pct=xirr_value
     )
 
-# ✅ timestamp intraday per il solo label
-intraday_last_ts = download_last_intraday_timestamp(
-    filtered_tickers
-)
+# # ✅ label che descive il market status 
 
-markets = []
-if "Mercato" in ops_filtered.columns:
-    markets = (
-        ops_filtered["Mercato"]
-        .dropna()
-        .astype(str)
-        .str.strip()
-        .tolist()
-    )
-
-update_label = compute_market_update_label(
+render_market_data_status(
     closes=closes,
-    intraday_last_ts=intraday_last_ts,
-    markets=markets,
-    tz_name="Europe/Rome"
+    filtered_tickers=filtered_tickers,
+    ops_filtered=ops_filtered
 )
-
-st.caption(update_label)
 
 # Main chart
 
 st.subheader(t("charts_title"))
 
-tab_perf, tab_daily, tab_unrealized, tab_analysis = st.tabs([
+tab_perf, tab_daily, tab_unrealized, tab_heatmap, tab_analysis = st.tabs([
     t("tab_perf"),
     t("tab_daily"),
     t("tab_unrealized"),
+    t("tab_heatmap"),
     t("tab_analysis")
 ])
 
+# tab not working with date tutte uguali
 with tab_perf:
     
     min_date = min_filter_date or default_start
@@ -390,11 +429,19 @@ with tab_perf:
         filtered_bench = filtered_bench.ffill()
     else:
         filtered_bench = None
+        
+    first_valid_price_date = series["Valore portafoglio"].first_valid_index()
     
+    note_text = None
+    if first_valid_price_date is not None:
+        prefix = CONFIG["lang"][LANG]["market_data_available_from"]
+        note_text = f"{prefix} {first_valid_price_date.strftime('%d/%m/%Y')}"
+
     fig = portfolio_chart(
         filtered_series,
         bench_norm=filtered_bench,   # nome parametro puoi cambiarlo dopo
-        benchmark_name=benchmark
+        benchmark_name=benchmark,
+        note_text=note_text
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -409,7 +456,7 @@ with tab_daily:
     )
     # copia df base
     df_view = current.copy()
-    
+
     if view_mode == t("view_top"):
         # NON filtrare qui per segno — lo fa già la funzione
         top_n = 10
@@ -432,7 +479,7 @@ with tab_daily:
     fig_pos = daily_pl_bar_chart_by_sign(
         current=df_view,
         positive=True,
-        label_col="Ticker",    
+        label_col=label_choice if label_choice in df_view.columns else "Ticker",    
         pl_col="P/L Giornaliero",
         pl_pct_col="P/L Giornaliero %",
         max_abs_pct=max_abs_pct,
@@ -450,7 +497,7 @@ with tab_daily:
     fig_neg = daily_pl_bar_chart_by_sign(
         current=df_view,
         positive=False,
-        label_col="Ticker",
+        label_col=label_choice if label_choice in df_view.columns else "Ticker",
         pl_col="P/L Giornaliero",
         pl_pct_col="P/L Giornaliero %",
         max_abs_pct=max_abs_pct,
@@ -497,7 +544,7 @@ with tab_unrealized:
     fig_pos = daily_pl_bar_chart_by_sign(
         current=df_view,
         positive=True,
-        label_col="Ticker",
+        label_col=label_choice if label_choice in df_view.columns else "Ticker",
         pl_col="P/L",
         pl_pct_col="P/L %",
         max_abs_pct=max_abs_pct,
@@ -515,7 +562,7 @@ with tab_unrealized:
     fig_neg = daily_pl_bar_chart_by_sign(
         current=df_view,
         positive=False,
-        label_col="Ticker",
+        label_col=label_choice if label_choice in df_view.columns else "Ticker",
         pl_col="P/L",
         pl_pct_col="P/L %",
         max_abs_pct=max_abs_pct,
@@ -526,6 +573,33 @@ with tab_unrealized:
         st.plotly_chart(fig_neg, use_container_width=True)
     else:
         st.caption(t("no_loss_open"))
+with tab_heatmap:
+    
+    st.markdown(f"### {t('heatmap_title')}")
+
+    pl_mode = st.radio(
+        t("radio_select_pl_mode"),
+        ["daily", "total"],
+        format_func=lambda x: t("radio_pl_daily") if x == "daily" else t("radio_pl_total"),
+        horizontal=True,
+        key="pl_mode"  # ✅ QUESTO è il punto chiave
+    )
+
+    # fig_treemap = daily_pl_treemap(
+    #     current,
+    #     label_col=label_choice
+    # )
+    
+    # costruzione grafico
+    
+    fig_treemap = pl_treemap(
+        current,
+        label_col=label_choice,
+        pl_mode=pl_mode
+    )
+
+    if fig_treemap:
+        st.plotly_chart(fig_treemap, use_container_width=True)
 
 with tab_analysis:
 
@@ -548,7 +622,7 @@ with tab_analysis:
 
         # st.markdown(f"### {t('beta_title')}")
         title_with_tooltip(title=t("beta_title"),tooltip=t("beta_description"))
-
+        
         fig_beta = ratio_bar_gradient_compare(
             portfolio_value=beta,
             benchmark_value=1.0,
@@ -563,7 +637,8 @@ with tab_analysis:
     # =========================
     # ✅ SHARPE
     # =========================
-    st.markdown(f"### {t('sharpe_title')}")
+    # st.markdown(f"### {t('sharpe_title')}")
+    title_with_tooltip(title=t("sharpe_title"),tooltip=t("sharpe_description"))
 
     sharpe_max = get_dynamic_max(
         base=3.0,
@@ -584,7 +659,8 @@ with tab_analysis:
     # =========================
     # ✅ SORTINO
     # =========================
-    st.markdown(f"### {t('sortino_value')}")
+    # st.markdown(f"### {t('sortino_value')}")
+    title_with_tooltip(title=t("sortino_value"),tooltip=t("sortino_description"))
 
     sortino_max = get_dynamic_max(
         base=4.0,

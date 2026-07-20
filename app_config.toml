@@ -36,9 +36,11 @@ kpi_title = "📊 KPI Portafoglio"
 
 # GRAFICI
 charts_title = "📊 Portafoglio"
+market_data_available_from = "Dati di mercato disponibili dal"
 tab_perf = "📈 Andamento portafoglio"
 tab_daily = "📅 Giornaliero"
 tab_unrealized = "💼 P/L non realizzato"
+tab_heatmap = "🧊 Heatmap"
 tab_analysis = "📐 Analisi"
 
 daily_title = "📅 Performance giornaliera del portafoglio"
@@ -50,11 +52,17 @@ profit_section = "#### 🟢 Posizioni in profitto"
 loss_section = "#### 🔴 Posizioni in perdita"
 no_profit_today = "Nessuna posizione in profitto oggi"
 no_loss_today = "Nessuna posizione in perdita oggi"
+heatmap_title = "🧊 Heatmap P/L Giornaliero"
 # daily bars
 bar_profit = "Posizioni in profitto"
 bar_loss = "Posizioni in perdita"
 bar_pl_pct = "P/L %"
 bar_pl_abs = "P/L"
+# mdde slection radio
+radio_select_pl_mode = "Seleziona metrica"
+radio_pl_daily = "P/L Giornaliero"
+radio_pl_total = "P/L Totale"
+
 
 # TABS
 compact_view = "Vista compatta"
@@ -116,6 +124,7 @@ no_dividends_filtered = "ℹ️ Nessun dividendo per il filtro selezionato"
 # KPI CARDS
 portfolio_value = "Valore del portafoglio"
 invested_capital = "Capitale inv."
+contributed_capital = "Capitale versato"
 unrealized_profit = "Profitto non realizzato"
 last_day = "Ultimo giorno"
 realized_profit = "Profitto realizzato"
@@ -167,7 +176,6 @@ sidebar_min_date = "Data minima"
 sidebar_label_choice_title = "Etichetta grafici"
 sidebar_label_ticker = "Ticker"
 sidebar_label_name = "Nome"
-
 
 # colonnper tae belle in output 
 col_date = "Data"
@@ -227,6 +235,8 @@ sharpe_title = "Indice di Sharpe (storico)"
 sortino_value = "Indice di Sortino"
 beta_title = "Beta vs Benchmark"
 beta_description = "Il Beta misura quanto il portafoglio si muove rispetto al mercato. Un valore di 1 indica un comportamento simile al benchmark. Sopra 1 = più volatile, sotto 1 = più stabile."
+sharpe_description = "Misura il rendimento rispetto al rischio totale. Più alto = migliore efficienza."
+sortino_description = "Simile allo Sharpe ma considera solo le perdite. Più alto = migliori risultati con minori drawdown."
 
 # Risk-free info
 rf_enabled = "Metriche calcolate con tasso risk-free reale"
@@ -254,9 +264,11 @@ kpi_title = "📊 Portfolio KPIs"
 
 # GRAFICI
 charts_title = "📊 Portfolio"
+market_data_available_from = "Market data available from"
 tab_perf = "📈 Portfolio performance"
 tab_daily = "📅 Daily"
 tab_unrealized = "💼 Open P/L"
+tab_heatmap = "🧊 Heatmap"
 tab_analysis = "📐 Analysis"
 
 daily_title = "📅 Daily portfolio performance"
@@ -268,11 +280,19 @@ profit_section = "#### 🟢 Winning positions"
 loss_section = "#### 🔴 Losing positions"
 no_profit_today = "No winning positions today"
 no_loss_today = "No losing positions today"
+heatmap_title = "🧊 Daily P/L Heatmap"
+
 # daily bars
 bar_profit = "Profitable positions"
 bar_loss = "Losing positions"
 bar_pl_pct = "P/L %"
 bar_pl_abs = "P/L"
+
+# mode selection radio
+radio_select_pl_mode = "Select metric"
+radio_pl_daily = "Daily P/L"
+radio_pl_total = "Total P/L"
+
 
 # TABS
 current_view = "Compact view"
@@ -331,6 +351,7 @@ no_dividends_filtered = "ℹ️ No dividends for selected filters"
 # KPI CARDS
 portfolio_value = "Portfolio value"
 invested_capital = "Invested capital"
+contributed_capital = "Capital contributed"
 unrealized_profit = "Unrealized profit"
 last_day = "Last day"
 realized_profit = "Realized profit"
@@ -379,6 +400,9 @@ sidebar_benchmark_help = "Example: CSSPX.MI, VWCE.DE, SPY"
 sidebar_show_benchmark = "Show normalized benchmark"
 sidebar_use_risk_free = "Use risk-free rate"
 sidebar_min_date = "Start date"
+sidebar_label_choice_title = "Chart labels"
+sidebar_label_ticker = "Ticker"
+sidebar_label_name = "Name"
 
 sidebar_label_choice_title = "Chart labels"
 sidebar_label_ticker = "Ticker"
@@ -443,6 +467,8 @@ sharpe_title = "Sharpe Ratio (historical)"
 sortino_value = "Sortino Ratio"
 beta_title = "Beta vs Benchmark"
 beta_description = "Beta measures how your portfolio moves relative to the market. A value of 1 means it behaves like the benchmark. Above 1 = more volatile, below 1 = more stable."
+sharpe_description = "Measures return relative to total risk. Higher = more efficient."
+sortino_description = "Similar to Sharpe but considers only downside risk. Higher = better performance with fewer losses."
 
 # Risk-free info
 

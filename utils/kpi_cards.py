@@ -1,5 +1,6 @@
 import streamlit as st
 from utils.i18n import t
+import pandas as pd
 from utils.formatting import fmt_eur, fmt_pct
 
 # =========================
@@ -18,13 +19,36 @@ def render_value_card(value, invested):
         </div>
     </div>
     """, unsafe_allow_html=True)
-
+    
+# def render_value_card(value, invested, contributed):
+#     st.markdown(f"""
+#     <div style="padding:16px;border-radius:12px;background-color:#1f1f1f;border:1px solid #2a2a2a;">
+#         <div style="color:#ffffff;font-size:0.9em;">{t("portfolio_value")}</div>
+#         <div style="margin-top:6px;font-size:1.8em;font-weight:600;">
+#             {fmt_eur(value)}
+#         </div>
+#         <!-- Capitale investito -->
+#         <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
+#             <span>{t("invested_capital")}</span>
+#             <span style="margin-left:8px;">{fmt_eur(invested)}</span>
+#         </div>
+#         <!-- Capitale versato -->
+#         <div style="margin-top:4px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
+#             <span>{t("contributed_capital")}</span>
+#             <span style="margin-left:8px;">{fmt_eur(contributed)}</span>
+#         </div>
+#     </div>
+#     """, unsafe_allow_html=True)
 # =========================
 # 2️⃣ NON REALIZZATO
 # =========================
 def render_unrealized_card(value, pct, daily_value=None, daily_pct=None):
 
     color = "#26a69a" if value >= 0 else "#ef5350"
+    
+    has_value = pct is not None and not pd.isna(pct)
+    if not has_value:
+        pct = 0.0
     pct_color = "#26a69a" if pct >= 0 else "#ef5350"
 
     daily_color = "#26a69a" if (daily_value is not None and daily_value >= 0) else "#ef5350"
@@ -97,7 +121,19 @@ def render_realized_card(realized_total, dividends_total):
 def render_total_pl_card(total_pl, total_pct, annualized_pct=None):
 
     color = "#26a69a" if total_pl >= 0 else "#ef5350"
+    
+    if total_pct is None or pd.isna(total_pct):
+        total_pct = 0.0
     pct_color = "#26a69a" if total_pct >= 0 else "#ef5350"
+
+    has_xirr = annualized_pct is not None and not pd.isna(annualized_pct)
+    
+    if has_xirr:
+        xirr_text = fmt_pct(annualized_pct)
+        xirr_color = "#26a69a" if annualized_pct >= 0 else "#ef5350"
+    else:
+        xirr_text = "—"
+        xirr_color = "#9aa0a6"
 
     st.markdown(
         f"""
@@ -126,9 +162,9 @@ def render_total_pl_card(total_pl, total_pct, annualized_pct=None):
             </div>
             <div style="margin-top:10px;font-size:0.85em;color:#9aa0a6;display:flex;align-items:center;">
                 <span>{t("annualized_return")}</span>
-                <span style="margin-left:8px;">
-                    {fmt_pct(annualized_pct) if annualized_pct is not None else ""}
-                </span>
+                    <span style="margin-left:8px; color: {xirr_color};">
+                        {xirr_text}
+                    </span>
             </div>
         </div>
         """,
