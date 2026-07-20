@@ -6,7 +6,7 @@ from utils.i18n import t
 from utils.display import get_display_columns
 import pandas as pd
 
-def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
+def portfolio_chart(series, bench_norm=None, benchmark_name=""):
 
     columns_map = get_display_columns()
 
@@ -42,19 +42,6 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
             name=f"{t('benchmark_label')}: {benchmark_name}"
         ))
 
-    # ✅ Nota dati di mercato
-    if note_text:
-        fig.add_annotation(
-            xref="paper",
-            yref="paper",
-            x=0.01,
-            y=0.02,
-            text=f"<i>{note_text}</i>",
-            showarrow=False,
-            font=dict(size=11, color="gray"),
-            align="left"
-        )
-        
     fig.update_layout(
         height=540,
         xaxis_title=t("col_date"),
@@ -821,66 +808,76 @@ def ratio_bar_gradient_compare(
 
 #     df = current.copy()
 
+#     # =========================
+#     # colonne necessarie
+#     # =========================
 #     required = ["Valore", "P/L Giornaliero %", "P/L Giornaliero", "Intermediario"]
 #     for col in required:
 #         if col not in df.columns:
 #             return None
 
+#     # =========================
+#     # pulizia dati
+#     # =========================
 #     df = df.dropna(subset=["Valore", "P/L Giornaliero %"]).copy()
 
+#     # fallback label
 #     if label_col not in df.columns:
 #         label_col = "Ticker"
 
+#     # =========================
+#     # colore = rendimento %
+#     # =========================
 #     df["color_val"] = df["P/L Giornaliero %"]
 
-#     # ✅ LABEL SU DUE RIGHE
+#     # =========================
+#     # label arricchita
+#     # =========================
 #     df["label_full"] = df.apply(
-#         lambda row: f"{row[label_col]}<br>{row['P/L Giornaliero']:+.0f}€",
+#         lambda row: f"{row[label_col]} ({row['P/L Giornaliero']:.0f}€)",
 #         axis=1
 #     )
 
-#     max_abs = df["color_val"].abs().max()
-
+#     # =========================
+#     # TREEMAP (con grouping)
+#     # =========================
 #     fig = px.treemap(
 #         df,
-#         path=["Intermediario", "label_full"],
+#         path=["Intermediario", "label_full"],   # ✅ grouping qui
 #         values="Valore",
 #         color="color_val",
 #         color_continuous_scale=[
-#             (0.0, "#5a0000"),
-#             (0.25, "#d73027"),
-#             (0.5, "#2b2b2b"),   # neutro tipo finviz
-#             (0.75, "#1a9850"),
-#             (1.0, "#00441b")
+#             "#8b0000",
+#             "#f4a3a3",
+#             "#f0f0f0",
+#             "#a6e3a1",
+#             "#006400"
 #         ],
-#         range_color=[-max_abs, max_abs]
 #     )
 
-#     # ✅ TESTO CENTRATO
-#     fig.update_traces(
-#         textinfo="label",
-#         textposition="middle center"
-#     )
-
+#     # =========================
 #     # hover
+#     # =========================
 #     fig.update_traces(
 #         hovertemplate=
 #         "<b>%{label}</b><br>" +
 #         "Intermediario: %{parent}<br>" +
 #         "Valore: %{value:.2f}€<br>" +
-#         "P/L giornaliero: %{customdata.2f}€<br>" +
-#         "P/L %: %{color:.2%}<extra></extra>",
+#         "P/L giornaliero: %{customdata[0]:.2f}€<br>" +
+#         "P/L %: %{color:.2%}" +
+#         "<extra></extra>",
 #         customdata=df[["P/L Giornaliero"]]
 #     )
 
+#     # =========================
+#     # layout
+#     # =========================
 #     fig.update_layout(
-#         margin=dict(t=10, l=10, r=10, b=10),
+#         margin=dict(t=40, l=10, r=10, b=10),
+#         title="Heatmap P/L Giornaliero",
 #         coloraxis_colorbar=dict(title="P/L %")
 #     )
 
-#     return fig
-
-import plotly.express as px
 
 def daily_pl_treemap(current: pd.DataFrame, label_col="Ticker"):
 
@@ -977,106 +974,4 @@ def daily_pl_treemap(current: pd.DataFrame, label_col="Ticker"):
 
     return fig
 
-def pl_treemap(
-    current: pd.DataFrame,
-    label_col: str = "Ticker",
-    pl_mode: str = "daily"
-):
-
-    if current is None or current.empty:
-        return None
-
-    df = current.copy()
-
-    # =========================
-    # mapping colonne robusto
-    # =========================
-    if pl_mode == "total":
-        pl_col = "P/L"
-        pl_pct_col = "P/L %"
-    else:
-        pl_col = "P/L Giornaliero"
-        pl_pct_col = "P/L Giornaliero %"
-
-    required = ["Valore", pl_pct_col, pl_col, "Intermediario", "Tipo"]
-    for col in required:
-        if col not in df.columns:
-            return None
-
-    df = df.dropna(subset=["Valore", pl_pct_col]).copy()
-
-    if label_col not in df.columns:
-        label_col = "Ticker"
-
-    # =========================
-    # colore = rendimento
-    # =========================
-    df["color_val"] = df[pl_pct_col]
-
-    # =========================
-    # ✅ LABEL CON € + %
-    # =========================
-    df["label_full"] = df.apply(
-        lambda row: (
-            f"{row[label_col]}"
-            f"<br>{row[pl_col]:+.0f}€ | {row[pl_pct_col]:+.2%}"
-        ),
-        axis=1
-    )
-
-    # =========================
-    # scala simmetrica
-    # =========================
-    max_abs = df["color_val"].abs().max()
-
-    # =========================
-    # TREEMAP
-    # =========================
-    fig = px.treemap(
-        df,
-        path=["Intermediario", "Tipo", "label_full"],
-        values="Valore",
-        color="color_val",
-        color_continuous_scale = [
-            (0.0,  "#F23636"),  # rosso acceso
-            (0.16, "#B53C3C"),  # rosso mattone
-            (0.33, "#7E3E47"),  # rosso bordeaux
-            (0.5,  "#3F4350"),  # grigio neutro
-            (0.66, "#2E6C4A"),  # verde scuro
-            (0.83, "#289F51"),  # verde medio
-            (1.0,  "#23CE5F")   # verde acceso
-        ],
-        range_color=[-max_abs, max_abs]
-    )
-
-    # =========================
-    # stile
-    # =========================
-    fig.update_traces(
-        marker=dict(line=dict(color="black", width=1.2)),
-        textinfo="label",
-        textposition="middle center"
-    )
-
-    # =========================
-    # hover
-    # =========================
-    fig.update_traces(
-        hovertemplate=
-        "<b>%{label}</b><br>" +
-        "Intermediario: %{parent}<br>" +
-        "Valore: %{value:.2f}€<br>" +
-        f"P/L: %{{customdata.2f}}€<br>" +
-        f"P/L %: %{{color:.2%}}<extra></extra>",
-        customdata=df[[pl_col]]
-    )
-
-    # =========================
-    # layout
-    # =========================
-    fig.update_layout(
-        margin=dict(t=10, l=10, r=10, b=10),
-        coloraxis_colorbar=dict(title=pl_pct_col, tickformat=".0%")
-    )
-
-    return fig
+#     return fig

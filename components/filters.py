@@ -16,22 +16,13 @@ def render_filters(ops, dividends):
     )
 
     # -------------------------
-    # init state (safe)
+    # init state
     # -------------------------
     if "selected_brokers" not in st.session_state:
         st.session_state.selected_brokers = all_brokers
 
     if "selected_types" not in st.session_state:
         st.session_state.selected_types = all_types
-
-    # ✅ FIX: tieni solo valori ancora validi
-    st.session_state.selected_brokers = [
-        b for b in st.session_state.selected_brokers if b in all_brokers
-    ]
-
-    st.session_state.selected_types = [
-        t_ for t_ in st.session_state.selected_types if t_ in all_types
-    ]
 
     # -------------------------
     # widgets
@@ -74,25 +65,23 @@ def render_filters(ops, dividends):
         ]
 
     ops_filtered = ops_filtered.copy()
-
     # =========================
-    # ✅ FEEDBACK FILTRI (fix quote bug)
+    # ✅ FEEDBACK FILTRI
     # =========================
     active_filters = []
-
+    
     if set(st.session_state.selected_brokers) != set(all_brokers):
         active_filters.append(
-            f"{t('filter_brokers')} ({', '.join(st.session_state.selected_brokers)})"
+            f"{t("filter_brokers")} ({', '.join(st.session_state.selected_brokers)})"
         )
-
+    
     if set(st.session_state.selected_types) != set(all_types):
         active_filters.append(
             f"{t('filter_types')} ({', '.join(st.session_state.selected_types)})"
         )
-
+    
     if active_filters:
         st.caption(f"{t('active_filters')}: {', '.join(active_filters)}")
-
     # =========================
     # FILTER DIVIDENDS
     # =========================
@@ -118,11 +107,11 @@ def render_filters(ops, dividends):
         ].copy()
     else:
         dividends_filtered = dividends
-
+        
+    # ✅ dividendi mancanti
     if dividends is not None and not dividends.empty:
         if dividends_filtered is not None and dividends_filtered.empty:
             st.caption(t("no_dividends_filtered"))
-
     # =========================
     # CONTEXT ✅
     # =========================

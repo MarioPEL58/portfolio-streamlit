@@ -12,7 +12,6 @@ from services.schema import (
     SHEET_ALIASES,
     REQUIRED_OPERATION_COLUMNS,
     REQUIRED_DIVIDEND_COLUMNS,
-    REQUIRED_START_COLUMNS,
 )
 
 
@@ -201,34 +200,7 @@ def detect_excel_structure(file_obj) -> dict:
         if dividends_sheet is not None
         else REQUIRED_DIVIDEND_COLUMNS.copy()
     )
-    # -------------------------
-    # Start (snapshot iniziale)
-    # -------------------------
-    start_sheet = find_sheet_name(
-        xls.sheet_names,
-        ["start"]
-    )
-    
-    start_columns = {}
-    start_is_valid = False
-    
-    if start_sheet is not None:
-        tmp = pd.read_excel(
-            BytesIO(excel_bytes),
-            sheet_name=start_sheet,
-            engine="openpyxl",
-            nrows=30
-        )
-    
-        tmp = tmp.dropna(axis=0, how="all").dropna(axis=1, how="all")
-    
-        # ✅ mapping con schema
-        start_columns = map_columns(tmp, COLUMN_ALIASES)
-    
-        missing = missing_required(start_columns, REQUIRED_START_COLUMNS)
-    
-        start_is_valid = len(missing) == 0
-        
+
     return {
         "sheet_names": xls.sheet_names,
         "operations": {
@@ -242,11 +214,6 @@ def detect_excel_structure(file_obj) -> dict:
             "columns": dividends_columns,
             "missing_required": dividends_missing,
             "is_valid": dividends_sheet is not None and len(dividends_missing) == 0,
-        },
-        "start": {
-            "sheet_name": start_sheet,
-            "columns": start_columns,
-            "is_valid": start_is_valid,
         },
     }
 
@@ -366,78 +333,5 @@ def load_dividends_from_excel(file_obj) -> pd.DataFrame:
         out["ID"].astype(str).str.strip(),
         out["Nome"].astype(str).str.strip()
     )
-
-    return out
-    
-def load_start_from_excel(file_obj) -> pd.DataFrame:
-    structure = detect_excel_structure(file_obj)
-
-    # ✅ Early exit se non esiste o non valido
-    if not structure.get("start", {}).get("is_valid", False):
-        return pd.DataFrame(columns=[
-            "Ticker", "Data", "Quantita", "Prezzo",
-            "FlussoNetto", "ID", "Intermediario",
-            "SpeseEuro", "Tassa", "Cambio",
-            "Nome", "Tipo", "Area", "Settore",
-            "Emittente", "Valuta", "PositionKey"
-        ])
-
-    excel_bytes = read_excel_safely(file_obj)
-    sheet_name = structure["start"]["sheet_name"]
-    cols = structure["start"]["columns"]   # ✅ CRITICO: usa mapping detect
-
-    df = pd.read_excel(BytesIO(excel_bytes), sheet_name=sheet_name, engine="openpyxl")
-    df = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
-
-    out = pd.DataFrame()
-
-    out["Ticker"] = df[cols["Ticker"]].astype(str).str.strip()
-    out["Data"] = pd.to_datetime(df[cols["Data"]], errors="coerce")
-    out["Quantita"] = parse_numeric(df[cols["Quantita"]])
-    out["Prezzo"] = parse_numeric(df[cols["Prezzo"]])
-
-    # ✅ Cambio (default coerente)
-    out["Cambio"] = (
-        parse_numeric(df[cols["Cambio"]])
-        if cols.get("Cambio") is not None else 1.0
-    )
-
-    # ✅ Flusso (con cambio corretto)
-    if cols.get("FlussoNetto") is not None:
-        out["FlussoNetto"] = parse_numeric(df[cols["FlussoNetto"]])
-    else:
-        out["FlussoNetto"] = - out["Quantita"] * out["Prezzo"] * out["Cambio"]
-
-    # ✅ campi standard (mantengo tuoi default)
-    out["ID"] = df[cols["ID"]] if cols.get("ID") is not None else np.nan
-    out["Intermediario"] = df[cols["Intermediario"]] if cols.get("Intermediario") else ""
-
-    out["SpeseEuro"] = (
-        parse_numeric(df[cols["SpeseEuro"]]).fillna(0.0)
-        if cols.get("SpeseEuro") else 0.0
-    )
-
-    out["Tassa"] = 0.0
-
-    out["Nome"] = df[cols["Nome"]] if cols.get("Nome") else out["Ticker"]
-    out["Tipo"] = "INIT"
-
-    out["Area"] = ""
-    out["Settore"] = ""
-    out["Emittente"] = df[cols["Emittente"]] if cols.get("Emittente") else ""
-    out["Valuta"] = df[cols["Valuta"]] if cols.get("Valuta") else "EUR"
-
-    # ✅ PositionKey COERENTE con operations (fix fondamentale)
-    out["PositionKey"] = np.where(
-        out["ID"].notna(),
-        out["ID"].astype(str).str.strip(),
-        out["Ticker"].astype(str).str.strip() + "|" +
-        out["Intermediario"].astype(str).str.strip()
-    )
-
-    # ✅ pulizia finale
-    out = out.dropna(subset=["Ticker", "Data", "Quantita"])
-    out = out[out["Ticker"] != ""]
-    out = out.sort_values(["Data", "Ticker"]).reset_index(drop=True)
 
     return out

@@ -35,7 +35,6 @@ DIVIDEND_ALIASES = {
 }
 REQUIRED_OPERATION_COLUMNS = ["Ticker", "Data", "Quantita"]
 REQUIRED_DIVIDEND_COLUMNS = ["Data", "DividendoNetto"]
-REQUIRED_START_COLUMNS = ["Data", "Ticker", "Quantita", "Prezzo"]
 SHEET_ALIASES = {
     "Operazioni": [
         "operazioni",
@@ -53,14 +52,5 @@ SHEET_ALIASES = {
         "dividends",
         "coupons",
         "income"
-    ],
-    # ✅ NUOVO
-    "Start": [
-        "start",
-        "iniziale",
-        "posizioni iniziali",
-        "portafoglio iniziale",
-        "baseline",
-        "opening"
     ]
 }
