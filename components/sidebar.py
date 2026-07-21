@@ -47,13 +47,13 @@ def render_sidebar():
 
         st.header(t("sidebar_options"))
         
-        label_choice_ui = st.radio(
-            t("sidebar_label_choice_title"),
-            list(options.keys()),
-            horizontal=True
-        )
+        # label_choice_ui = st.radio(
+        #     t("sidebar_label_choice_title"),
+        #     list(options.keys()),
+        #     horizontal=True
+        # )
         
-        label_choice = options[label_choice_ui]
+        # label_choice = options[label_choice_ui]
 
         label_choice_ui = st.radio(
             t("sidebar_label_choice_title"),
