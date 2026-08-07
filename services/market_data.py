@@ -334,7 +334,9 @@ def download_intraday_range(tickers: list[str]):
 def load_bond_csv(isin: str) -> pd.DataFrame:
 
     file = Path("data/bonds") / f"{isin}.csv"
-
+    st.write("Cerco file:", file)
+    st.write("Esiste?", file.exists())
+    
     if not file.exists():
         return pd.DataFrame()
 
