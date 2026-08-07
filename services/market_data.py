@@ -123,11 +123,12 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     closes = closes.sort_index().ffill()
     st.write(closes.columns.tolist())
 
-    st.write(
+    if "IT0005494239" in closes.columns:
+        st.write(
             closes["IT0005494239"]
             .dropna()
             .tail()
-    )
+        )
     return closes, missing
 
 
