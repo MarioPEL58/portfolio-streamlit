@@ -97,14 +97,14 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # missing = [t for t in tickers if t not in closes.columns]
     missing = [t for t in tickers if (t not in closes.columns or closes[t].dropna().empty )]
     
-    st.write("Ticker mancanti:", missing)
+    # st.write("Ticker mancanti:", missing)
     
     #
     # per i missing cerca il CSV in data/bonds
     #
     
     for ticker in missing:
-        st.write ( "sono nel for")
+        
         bond_df = load_bond_csv(ticker)
     
         if not bond_df.empty:
@@ -121,14 +121,23 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     
             st.write(f"Caricato bond da CSV: {ticker}")
     closes = closes.sort_index().ffill()
-    st.write(closes.columns.tolist())
 
-    if "IT0005494239" in closes.columns:
-        st.write(
-            closes["IT0005494239"]
-            .dropna()
-            .tail()
+    missing = [
+        t for t in tickers
+        if (
+            t not in closes.columns
+            or closes[t].dropna().empty
         )
+    ]
+
+    # st.write(closes.columns.tolist())
+
+    # if "IT0005494239" in closes.columns:
+    #     st.write(
+    #         closes["IT0005494239"]
+    #         .dropna()
+    #         .tail()
+    #     )
     return closes, missing
 
 
@@ -334,8 +343,8 @@ def download_intraday_range(tickers: list[str]):
 def load_bond_csv(isin: str) -> pd.DataFrame:
 
     file = Path("data/bonds") / f"{isin}.csv"
-    st.write("Cerco file:", file)
-    st.write("Esiste?", file.exists())
+    # st.write("Cerco file:", file)
+    # st.write("Esiste?", file.exists())
     
     if not file.exists():
         return pd.DataFrame()
