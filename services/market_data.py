@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 import yfinance as yf
 import numpy as np
+from pathlib import Path
 
 @st.cache_data(show_spinner=False)
 def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp):
@@ -289,3 +290,35 @@ def download_intraday_range(tickers: list[str]):
         return None, None
 
     return min(timestamps), max(timestamps)
+
+
+def load_bond_csv(isin: str) -> pd.DataFrame:
+
+    file = Path("data/bonds") / f"{isin}.csv"
+
+    if not file.exists():
+        return pd.DataFrame()
+
+    df = pd.read_csv(file)
+
+    # Data tipo 07.08.2026
+    df["Data"] = pd.to_datetime(
+        df["Data"],
+        format="%d.%m.%Y",
+        errors="coerce"
+    )
+
+    # Prezzo tipo 94,880 -> 94.880
+    df[isin] = (
+        df["Ultimo"]
+        .astype(str)
+        .str.replace(",", ".", regex=False)
+        .astype(float)
+    )
+
+    return (
+        df[["Data", isin]]
+        .dropna(subset=["Data"])
+        .set_index("Data")
+        .sort_index()
+    )
