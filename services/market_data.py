@@ -88,7 +88,12 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # =========================
     # ✅ Missing ticker
     # =========================
+    st.write("Ticker richiesti:", tickers)
+    st.write("Ticker trovati:", closes.columns.tolist())
+
     missing = [t for t in tickers if t not in closes.columns]
+    
+    st.write("Ticker mancanti:", missing)
     
     return closes, missing
 
