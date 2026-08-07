@@ -77,9 +77,9 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # ✅ Fill
     # =========================
     closes = closes.ffill()
-    st.write(closes.columns.tolist())
-    if "IT0005494239" in closes.columns:
-        st.write(closes["IT0005494239"].tail())
+    # st.write(closes.columns.tolist())
+    # if "IT0005494239" in closes.columns:
+    #     st.write(closes["IT0005494239"].tail())
     # =========================
     # ✅ Controllo qualità
     # =========================
@@ -92,9 +92,10 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # ✅ Missing ticker
     # =========================
     st.write("Ticker richiesti:", tickers)
-    st.write("Ticker trovati:", closes.columns.tolist())
+    # st.write("Ticker trovati:", closes.columns.tolist())
 
-    missing = [t for t in tickers if t not in closes.columns]
+    # missing = [t for t in tickers if t not in closes.columns]
+    missing = [t for t in tickers if (t not in closes.columns or closes[t].dropna().empty )]
     
     st.write("Ticker mancanti:", missing)
     
