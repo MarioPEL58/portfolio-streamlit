@@ -105,28 +105,28 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     
     for ticker in missing:
 
-    bond_df = load_bond_csv(ticker)
-
-    if not bond_df.empty:
-
-        closes = closes.drop(
-            columns=[ticker],
-            errors="ignore"
-        )
-
-        closes = closes.join(
-            bond_df,
-            how="outer"
-        )
-
-        st.write(f"Caricato bond da CSV: {ticker}")
+        bond_df = load_bond_csv(ticker)
+    
+        if not bond_df.empty:
+    
+            closes = closes.drop(
+                columns=[ticker],
+                errors="ignore"
+            )
+    
+            closes = closes.join(
+                bond_df,
+                how="outer"
+            )
+    
+            st.write(f"Caricato bond da CSV: {ticker}")
     closes = closes.sort_index().ffill()
     st.write(closes.columns.tolist())
 
     st.write(
-        closes["IT0005494239"]
-        .dropna()
-        .tail()
+            closes["IT0005494239"]
+            .dropna()
+            .tail()
     )
     return closes, missing
 
