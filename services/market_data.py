@@ -104,7 +104,7 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     #
     
     for ticker in missing:
-
+        st.write ( "sono nel for")
         bond_df = load_bond_csv(ticker)
     
         if not bond_df.empty:
