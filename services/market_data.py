@@ -25,8 +25,7 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # st.write("START", start_date.strftime("%Y-%m-%d"))
     # st.write("END", (end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"))
     # st.write(raw)
-    st.write(raw.columns)
-    st.write(closes["IT0005494239"].dropna().tail())
+    # st.write(raw.columns)
 
 
     if raw is None or len(raw) == 0:
@@ -78,7 +77,9 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # ✅ Fill
     # =========================
     closes = closes.ffill()
-    
+    st.write(closes.columns.tolist())
+    if "IT0005494239" in closes.columns:
+        st.write(closes["IT0005494239"].tail())
     # =========================
     # ✅ Controllo qualità
     # =========================
