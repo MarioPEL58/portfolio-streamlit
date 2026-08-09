@@ -29,65 +29,65 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
 
 
     if raw is None or len(raw) == 0:
-        return pd.DataFrame(), tickers
-
-    closes = pd.DataFrame(index=raw.index)
-
-    if isinstance(raw.columns, pd.MultiIndex):
-        lvl0 = set(raw.columns.get_level_values(0))
-
-        if all(t in lvl0 for t in tickers):
-            for t in tickers:
-                if "Close" in raw[t].columns:
-                    closes[t] = raw[t]["Close"]
-                elif "Adj Close" in raw[t].columns:
-                    closes[t] = raw[t]["Adj Close"]
-        else:
-            field = "Close" if "Close" in lvl0 else ("Adj Close" if "Adj Close" in lvl0 else None)
-            if field is not None:
-                sub = raw[field]
-                for t in tickers:
-                    if t in sub.columns:
-                        closes[t] = sub[t]
+        closes =pd.DataFrame()
     else:
-        t = tickers[0]
-        if "Close" in raw.columns:
-            closes[t] = raw["Close"]
-        elif "Adj Close" in raw.columns:
-            closes[t] = raw["Adj Close"]
-
-    closes = closes.sort_index()
+        closes = pd.DataFrame(index=raw.index)
     
-    # =========================
-    # ✅ Pulizia base
-    # =========================
-    closes = closes.replace([0, np.inf, -np.inf], np.nan)
+        if isinstance(raw.columns, pd.MultiIndex):
+            lvl0 = set(raw.columns.get_level_values(0))
     
-    # =========================
-    # ✅ Rimozione outlier (glitch)
-    # =========================
-    returns = closes.pct_change()
+            if all(t in lvl0 for t in tickers):
+                for t in tickers:
+                    if "Close" in raw[t].columns:
+                        closes[t] = raw[t]["Close"]
+                    elif "Adj Close" in raw[t].columns:
+                        closes[t] = raw[t]["Adj Close"]
+            else:
+                field = "Close" if "Close" in lvl0 else ("Adj Close" if "Adj Close" in lvl0 else None)
+                if field is not None:
+                    sub = raw[field]
+                    for t in tickers:
+                        if t in sub.columns:
+                            closes[t] = sub[t]
+        else:
+            t = tickers[0]
+            if "Close" in raw.columns:
+                closes[t] = raw["Close"]
+            elif "Adj Close" in raw.columns:
+                closes[t] = raw["Adj Close"]
     
-    threshold = 0.3  # 30% giornaliero
-    outliers = returns.abs() > threshold
-    
-    closes[outliers] = np.nan
-    
-    # =========================
-    # ✅ Fill
-    # =========================
-    closes = closes.ffill()
-    # st.write(closes.columns.tolist())
-    # if "IT0005494239" in closes.columns:
-    #     st.write(closes["IT0005494239"].tail())
-    # =========================
-    # ✅ Controllo qualità
-    # =========================
-    invalid_points = outliers.sum().sum()
-    
-    if invalid_points > 0:
-        st.caption(f"⚠️ Correzione automatica di {invalid_points} prezzi anomali")
-    
+        closes = closes.sort_index()
+        
+        # =========================
+        # ✅ Pulizia base
+        # =========================
+        closes = closes.replace([0, np.inf, -np.inf], np.nan)
+        
+        # =========================
+        # ✅ Rimozione outlier (glitch)
+        # =========================
+        returns = closes.pct_change()
+        
+        threshold = 0.3  # 30% giornaliero
+        outliers = returns.abs() > threshold
+        
+        closes[outliers] = np.nan
+        
+        # =========================
+        # ✅ Fill
+        # =========================
+        closes = closes.ffill()
+        # st.write(closes.columns.tolist())
+        # if "IT0005494239" in closes.columns:
+        #     st.write(closes["IT0005494239"].tail())
+        # =========================
+        # ✅ Controllo qualità
+        # =========================
+        invalid_points = outliers.sum().sum()
+        
+        if invalid_points > 0:
+            st.caption(f"⚠️ Correzione automatica di {invalid_points} prezzi anomali")
+        
     # =========================
     # ✅ Missing ticker
     # =========================
