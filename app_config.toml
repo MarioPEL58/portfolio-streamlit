@@ -1,5 +1,5 @@
 [app]
-version = "1.1.01"
+version = "1.2.00"
 
 [ui]
 # puoi tenerlo vuoto o usarlo per defaults comuni in futuro
