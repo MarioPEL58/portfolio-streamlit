@@ -138,6 +138,12 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     #         .dropna()
     #         .tail()
     #     )
+    st.write("Closes finale:")
+    st.write(closes.tail())
+    st.write("Colonne finali:")
+    st.write(closes.columns.tolist())
+    st.write("Missing finale:")
+    st.write(missing)
     return closes, missing
 
 
