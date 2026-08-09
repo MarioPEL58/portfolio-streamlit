@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 import yfinance as yf
 import numpy as np
+from pathlib import Path
 
 @st.cache_data(show_spinner=False)
 def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp):
@@ -24,70 +25,125 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # st.write("START", start_date.strftime("%Y-%m-%d"))
     # st.write("END", (end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"))
     # st.write(raw)
+    # st.write(raw.columns)
 
 
     if raw is None or len(raw) == 0:
-        return pd.DataFrame(), tickers
-
-    closes = pd.DataFrame(index=raw.index)
-
-    if isinstance(raw.columns, pd.MultiIndex):
-        lvl0 = set(raw.columns.get_level_values(0))
-
-        if all(t in lvl0 for t in tickers):
-            for t in tickers:
-                if "Close" in raw[t].columns:
-                    closes[t] = raw[t]["Close"]
-                elif "Adj Close" in raw[t].columns:
-                    closes[t] = raw[t]["Adj Close"]
-        else:
-            field = "Close" if "Close" in lvl0 else ("Adj Close" if "Adj Close" in lvl0 else None)
-            if field is not None:
-                sub = raw[field]
-                for t in tickers:
-                    if t in sub.columns:
-                        closes[t] = sub[t]
+        closes =pd.DataFrame()
     else:
-        t = tickers[0]
-        if "Close" in raw.columns:
-            closes[t] = raw["Close"]
-        elif "Adj Close" in raw.columns:
-            closes[t] = raw["Adj Close"]
-
-    closes = closes.sort_index()
+        closes = pd.DataFrame(index=raw.index)
     
-    # =========================
-    # ✅ Pulizia base
-    # =========================
-    closes = closes.replace([0, np.inf, -np.inf], np.nan)
+        if isinstance(raw.columns, pd.MultiIndex):
+            lvl0 = set(raw.columns.get_level_values(0))
     
-    # =========================
-    # ✅ Rimozione outlier (glitch)
-    # =========================
-    returns = closes.pct_change()
+            if all(t in lvl0 for t in tickers):
+                for t in tickers:
+                    if "Close" in raw[t].columns:
+                        closes[t] = raw[t]["Close"]
+                    elif "Adj Close" in raw[t].columns:
+                        closes[t] = raw[t]["Adj Close"]
+            else:
+                field = "Close" if "Close" in lvl0 else ("Adj Close" if "Adj Close" in lvl0 else None)
+                if field is not None:
+                    sub = raw[field]
+                    for t in tickers:
+                        if t in sub.columns:
+                            closes[t] = sub[t]
+        else:
+            t = tickers[0]
+            if "Close" in raw.columns:
+                closes[t] = raw["Close"]
+            elif "Adj Close" in raw.columns:
+                closes[t] = raw["Adj Close"]
     
-    threshold = 0.3  # 30% giornaliero
-    outliers = returns.abs() > threshold
-    
-    closes[outliers] = np.nan
-    
-    # =========================
-    # ✅ Fill
-    # =========================
-    closes = closes.ffill()
-    
-    # =========================
-    # ✅ Controllo qualità
-    # =========================
-    invalid_points = outliers.sum().sum()
-    
-    if invalid_points > 0:
-        st.caption(f"⚠️ Correzione automatica di {invalid_points} prezzi anomali")
-    
+        closes = closes.sort_index()
+        
+        # =========================
+        # ✅ Pulizia base
+        # =========================
+        closes = closes.replace([0, np.inf, -np.inf], np.nan)
+        
+        # =========================
+        # ✅ Rimozione outlier (glitch)
+        # =========================
+        returns = closes.pct_change()
+        
+        threshold = 0.3  # 30% giornaliero
+        outliers = returns.abs() > threshold
+        
+        closes[outliers] = np.nan
+        
+        # =========================
+        # ✅ Fill
+        # =========================
+        closes = closes.ffill()
+        # st.write(closes.columns.tolist())
+        # if "IT0005494239" in closes.columns:
+        #     st.write(closes["IT0005494239"].tail())
+        # =========================
+        # ✅ Controllo qualità
+        # =========================
+        invalid_points = outliers.sum().sum()
+        
+        if invalid_points > 0:
+            st.caption(f"⚠️ Correzione automatica di {invalid_points} prezzi anomali")
+        
     # =========================
     # ✅ Missing ticker
     # =========================
-    missing = [t for t in tickers if t not in closes.columns]
+    # st.write("Ticker richiesti:", tickers)
+    # st.write("Ticker trovati:", closes.columns.tolist())
+
+    # missing = [t for t in tickers if t not in closes.columns]
+    missing = [t for t in tickers if (t not in closes.columns or closes[t].dropna().empty )]
+    
+    # st.write("Ticker mancanti:", missing)
+    
+    #
+    # per i missing cerca il CSV in data/bonds
+    #
+    
+    for ticker in missing:
+        
+        bond_df = load_bond_csv(ticker)
+    
+        if not bond_df.empty:
+    
+            closes = closes.drop(
+                columns=[ticker],
+                errors="ignore"
+            )
+    
+            closes = closes.join(
+                bond_df,
+                how="outer"
+            )
+    
+            st.write(f"Caricato bond da CSV: {ticker}")
+    closes = closes.sort_index().ffill()
+
+    missing = [
+        t for t in tickers
+        if (
+            t not in closes.columns
+            or closes[t].dropna().empty
+        )
+    ]
+
+    # st.write(closes.columns.tolist())
+
+    # if "IT0005494239" in closes.columns:
+    #     st.write(
+    #         closes["IT0005494239"]
+    #         .dropna()
+    #         .tail()
+    #     )
+    # st.write("Closes finale:")
+    # st.write(closes.tail())
+    # st.write("Colonne finali:")
+    # st.write(closes.columns.tolist())
+    # st.write("Missing finale:")
+    # st.write(missing)
     
     return closes, missing
 
@@ -289,3 +345,37 @@ def download_intraday_range(tickers: list[str]):
         return None, None
 
     return min(timestamps), max(timestamps)
+
+
+def load_bond_csv(isin: str) -> pd.DataFrame:
+
+    file = Path("data/bonds") / f"{isin}.csv"
+    # st.write("Cerco file:", file)
+    # st.write("Esiste?", file.exists())
+    
+    if not file.exists():
+        return pd.DataFrame()
+
+    df = pd.read_csv(file)
+
+    # Data tipo 07.08.2026
+    df["Data"] = pd.to_datetime(
+        df["Data"],
+        format="%d.%m.%Y",
+        errors="coerce"
+    )
+
+    # Prezzo tipo 94,880 -> 94.880
+    df[isin] = (
+        df["Ultimo"]
+        .astype(str)
+        .str.replace(",", ".", regex=False)
+        .astype(float)
+    )
+
+    return (
+        df[["Data", isin]]
+        .dropna(subset=["Data"])
+        .set_index("Data")
+        .sort_index()
+    )
