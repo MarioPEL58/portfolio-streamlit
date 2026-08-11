@@ -6,7 +6,7 @@ import yfinance as yf
 import numpy as np
 from pathlib import Path
 
-@st.cache_data(show_spinner=False)
+# @st.cache_data(show_spinner=False)
 def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp):
     tickers = [t for t in tickers if isinstance(t, str) and t.strip()]
     if not tickers:
