@@ -123,8 +123,8 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         
         bond_df = load_bond_csv(ticker)
         
-        st.write("Ticker:", ticker)
-        st.write("Vuoto:", bond_df.empty)
+        # st.write("Ticker:", ticker)
+        # st.write("Vuoto:", bond_df.empty)
     
         if not bond_df.empty:
     
