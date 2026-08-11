@@ -145,6 +145,22 @@ ops_filtered = filter_ctx["ops"]
 dividends_filtered = filter_ctx["dividends"]
 filtered_tickers = filter_ctx["tickers"]
 
+st.write(
+    ops_filtered.loc[
+        ops_filtered["Ticker"].str.contains("5547408", na=False),
+        "Ticker"
+    ].unique()
+)
+
+st.write(
+    [
+        repr(x)
+        for x in ops_filtered.loc[
+            ops_filtered["Ticker"].str.contains("5547408", na=False),
+            "Ticker"
+        ].unique()
+    ]
+)
 # Price download
 start_date = ops["Data"].min().normalize()
 end_date = pd.Timestamp.today().normalize()
