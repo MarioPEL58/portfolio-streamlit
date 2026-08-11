@@ -41,12 +41,20 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         if isinstance(raw.columns, pd.MultiIndex):
             lvl0 = set(raw.columns.get_level_values(0))
     
-            if all(t in lvl0 for t in tickers):
-                for t in tickers:
-                    if "Close" in raw[t].columns:
-                        closes[t] = raw[t]["Close"]
-                    elif "Adj Close" in raw[t].columns:
-                        closes[t] = raw[t]["Adj Close"]
+            # if all(t in lvl0 for t in tickers):
+            #     for t in tickers:
+            #         if "Close" in raw[t].columns:
+            #             closes[t] = raw[t]["Close"]
+            #         elif "Adj Close" in raw[t].columns:
+            #             closes[t] = raw[t]["Adj Close"]
+            for t in tickers:
+                if t not in lvl0:
+                    continue
+            
+                if "Close" in raw[t].columns:
+                    closes[t] = raw[t]["Close"]
+                elif "Adj Close" in raw[t].columns:
+                    closes[t] = raw[t]["Adj Close"]
             else:
                 field = "Close" if "Close" in lvl0 else ("Adj Close" if "Adj Close" in lvl0 else None)
                 if field is not None:
