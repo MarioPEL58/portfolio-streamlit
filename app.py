@@ -156,6 +156,13 @@ closes, missing = download_close_prices(
 )
 market_last_date = closes.index.max()
 
+st.write("=== FILTERED TICKERS ===")
+st.write(sorted(filtered_tickers))
+st.write("=== CLOSES COLUMNS ===")
+st.write(sorted(closes.columns.tolist()))
+st.write("=== MISSING ===")
+st.write(sorted(missing))
+
 # st.write("DOWNLOAD CLOSES")
 # st.write(closes.tail(10))
 # st.write(closes.index)
