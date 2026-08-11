@@ -25,10 +25,10 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # st.write("START", start_date.strftime("%Y-%m-%d"))
     # st.write("END", (end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"))
     # st.write(raw)
-    st.write("RAW COLS")
-    st.write(raw.columns)
+    # st.write("RAW COLS")
+    # st.write(raw.columns)
 
-    st.write("LEVEL0")
+    # st.write("LEVEL0")
     if isinstance(raw.columns, pd.MultiIndex):
         st.write(sorted(set(raw.columns.get_level_values(0))))
 
@@ -116,8 +116,8 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # per i missing cerca il CSV in data/bonds
     #
     
-    st.write("PRIMA DEL JOIN")
-    st.write(closes.columns.tolist())
+    # st.write("PRIMA DEL JOIN")
+    # st.write(closes.columns.tolist())
     
     for ticker in missing:
         
@@ -140,8 +140,8 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     
             st.write(f"Caricato bond da CSV: {ticker}")
             
-    st.write("DOPO DEL JOIN")
-    st.write(closes.columns.tolist())
+    # st.write("DOPO DEL JOIN")
+    # st.write(closes.columns.tolist())   
     
     closes = closes.sort_index().ffill()
 
