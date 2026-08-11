@@ -29,8 +29,8 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # st.write(raw.columns)
 
     # st.write("LEVEL0")
-    if isinstance(raw.columns, pd.MultiIndex):
-        st.write(sorted(set(raw.columns.get_level_values(0))))
+    # if isinstance(raw.columns, pd.MultiIndex):
+    #     st.write(sorted(set(raw.columns.get_level_values(0))))
 
 
     if raw is None or len(raw) == 0:
