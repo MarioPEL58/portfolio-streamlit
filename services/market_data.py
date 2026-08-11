@@ -108,6 +108,9 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # per i missing cerca il CSV in data/bonds
     #
     
+    st.write("PRIMA DEL JOIN")
+    st.write(closes.columns.tolist())
+    
     for ticker in missing:
         
         bond_df = load_bond_csv(ticker)
@@ -128,6 +131,10 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
             )
     
             st.write(f"Caricato bond da CSV: {ticker}")
+            
+    st.write("DOPO DEL JOIN")
+    st.write(closes.columns.tolist())
+    
     closes = closes.sort_index().ffill()
 
     missing = [
