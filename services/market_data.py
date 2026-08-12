@@ -370,35 +370,91 @@ def download_intraday_range(tickers: list[str]):
     return min(timestamps), max(timestamps)
 
 
-def load_bond_csv(isin: str) -> pd.DataFrame:
+# def load_bond_csv(isin: str) -> pd.DataFrame:
 
-    file = Path("data/bonds") / f"{isin}.csv"
-    # st.write("Cerco file:", file)
-    # st.write("Esiste?", file.exists())
+#     file = Path("data/bonds") / f"{isin}.csv"
+#     # st.write("Cerco file:", file)
+#     # st.write("Esiste?", file.exists())
     
+#     if not file.exists():
+#         return pd.DataFrame()
+
+#     df = pd.read_csv(file)
+
+#     # Data tipo 07.08.2026
+#     df["Data"] = pd.to_datetime(
+#         df["Data"],
+#         format="%d.%m.%Y",
+#         errors="coerce"
+#     )
+
+#     # Prezzo tipo 94,880 -> 94.880
+#     df[isin] = (
+#         df["Ultimo"]
+#         .astype(str)
+#         .str.replace(",", ".", regex=False)
+#         .astype(float)
+#     )
+
+#     return (
+#         df[["Data", isin]]
+#         .dropna(subset=["Data"])
+#         .set_index("Data")
+#         .sort_index()
+#     )
+
+def load_bond_csv(isin: str) -> pd.DataFrame:
+    file = Path("data/bonds") / f"{isin}.csv"
+
     if not file.exists():
         return pd.DataFrame()
 
     df = pd.read_csv(file)
 
-    # Data tipo 07.08.2026
-    df["Data"] = pd.to_datetime(
-        df["Data"],
-        format="%d.%m.%Y",
-        errors="coerce"
-    )
+    # Formato 1:
+    # Data, Ultimo
+    if {"Data", "Ultimo"}.issubset(df.columns):
 
-    # Prezzo tipo 94,880 -> 94.880
-    df[isin] = (
-        df["Ultimo"]
-        .astype(str)
-        .str.replace(",", ".", regex=False)
-        .astype(float)
-    )
+        df["Data"] = pd.to_datetime(
+            df["Data"],
+            format="%d.%m.%Y",
+            errors="coerce"
+        )
+
+        df[isin] = (
+            df["Ultimo"]
+            .astype(str)
+            .str.replace(",", ".", regex=False)
+            .astype(float)
+        )
+
+        date_col = "Data"
+
+    # Formato 2:
+    # Date, Close
+    elif {"Date", "Close"}.issubset(df.columns):
+
+        df["Date"] = pd.to_datetime(
+            df["Date"],
+            format="%d/%m/%Y",
+            errors="coerce"
+        )
+
+        df[isin] = pd.to_numeric(
+            df["Close"],
+            errors="coerce"
+        )
+
+        date_col = "Date"
+
+    else:
+        raise ValueError(
+            f"Formato CSV non riconosciuto per {file}"
+        )
 
     return (
-        df[["Data", isin]]
-        .dropna(subset=["Data"])
-        .set_index("Data")
+        df[[date_col, isin]]
+        .dropna(subset=[date_col])
+        .set_index(date_col)
         .sort_index()
     )
