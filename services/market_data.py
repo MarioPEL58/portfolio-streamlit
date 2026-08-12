@@ -411,9 +411,7 @@ def load_bond_csv(isin: str) -> pd.DataFrame:
 
     df = pd.read_csv(file)
 
-    # Formato 1:
-    # Data, Ultimo
-    if {"Data", "Ultimo"}.issubset(df.columns):
+    if "Data" in df.columns and "Ultimo" in df.columns:
 
         df["Data"] = pd.to_datetime(
             df["Data"],
@@ -428,11 +426,9 @@ def load_bond_csv(isin: str) -> pd.DataFrame:
             .astype(float)
         )
 
-        date_col = "Data"
+        result = df[["Data", isin]]
 
-    # Formato 2:
-    # Date, Close
-    elif {"Date", "Close"}.issubset(df.columns):
+    elif "Date" in df.columns and "Close" in df.columns:
 
         df["Date"] = pd.to_datetime(
             df["Date"],
@@ -440,21 +436,20 @@ def load_bond_csv(isin: str) -> pd.DataFrame:
             errors="coerce"
         )
 
-        df[isin] = pd.to_numeric(
-            df["Close"],
-            errors="coerce"
-        )
+        df[isin] = pd.to_numeric(df["Close"], errors="coerce")
 
-        date_col = "Date"
+        result = df[["Date", isin]].rename(
+            columns={"Date": "Data"}
+        )
 
     else:
         raise ValueError(
-            f"Formato CSV non riconosciuto per {file}"
+            f"Formato CSV non riconosciuto: {df.columns.tolist()}"
         )
 
     return (
-        df[[date_col, isin]]
-        .dropna(subset=[date_col])
-        .set_index(date_col)
+        result
+        .dropna(subset=["Data"])
+        .set_index("Data")
         .sort_index()
     )
