@@ -14,7 +14,16 @@ def render_filters(ops, dividends):
     all_types = sorted(
         ops["Tipo"].dropna().astype(str).str.strip().unique().tolist()
     )
-
+    
+    ops["OperationLabel"] = (
+        ops["ID"].astype(str).str.replace(".0", "", regex=False)
+        + " - "
+        + ops["Nome"].fillna("").astype(str).str.strip()
+    )
+    
+    all_operations = sorted(
+        ops["OperationLabel"].dropna().unique().tolist()
+    )
     # -------------------------
     # init state (safe)
     # -------------------------
@@ -23,6 +32,9 @@ def render_filters(ops, dividends):
 
     if "selected_types" not in st.session_state:
         st.session_state.selected_types = all_types
+
+    if "selected_operations" not in st.session_state:
+        st.session_state.selected_operations = all_operations
 
     # ✅ FIX: tieni solo valori ancora validi
     st.session_state.selected_brokers = [
@@ -33,10 +45,13 @@ def render_filters(ops, dividends):
         t_ for t_ in st.session_state.selected_types if t_ in all_types
     ]
 
+    st.session_state.selected_operations = [
+        op for op in st.session_state.selected_operations if op in all_operations
+    ]
     # -------------------------
     # widgets
     # -------------------------
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
 
     with col1:
         st.multiselect(
@@ -54,6 +69,13 @@ def render_filters(ops, dividends):
             key="selected_types"
         )
 
+    with col3:
+        st.multiselect(
+            "Operazione",
+            options=all_operations,
+            default=st.session_state.selected_operations,
+            key="selected_operations"
+        )
     # =========================
     # FILTER OPS
     # =========================
@@ -73,6 +95,13 @@ def render_filters(ops, dividends):
             )
         ]
 
+    if st.session_state.selected_operations:
+        ops_filtered = ops_filtered[
+            ops_filtered["OperationLabel"].isin(
+                st.session_state.selected_operations
+            )
+        ]
+    
     ops_filtered = ops_filtered.copy()
 
     # =========================
@@ -89,7 +118,12 @@ def render_filters(ops, dividends):
         active_filters.append(
             f"{t('filter_types')} ({', '.join(st.session_state.selected_types)})"
         )
-
+    
+    if set(st.session_state.selected_operations) != set(all_operations):
+        active_filters.append(
+            f"Operazioni ({len(st.session_state.selected_operations)})"
+        )
+        
     if active_filters:
         st.caption(f"{t('active_filters')}: {', '.join(active_filters)}")
 
@@ -132,6 +166,7 @@ def render_filters(ops, dividends):
         "tickers": sorted(ops_filtered["Ticker"].dropna().unique().tolist()),
         "brokers": st.session_state.selected_brokers,
         "types": st.session_state.selected_types,
+        "operations": st.session_state.selected_operations,
     }
 
     return filter_context
