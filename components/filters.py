@@ -15,14 +15,25 @@ def render_filters(ops, dividends):
         ops["Tipo"].dropna().astype(str).str.strip().unique().tolist()
     )
     
-    ops["OperationLabel"] = (
-        ops["ID"].astype(str).str.replace(".0", "", regex=False)
+    ops_for_operations = ops.copy()
+    if st.session_state.selected_types:
+        ops_for_operations = ops_for_operations[
+            ops_for_operations["Tipo"].astype(str).str.strip().isin(
+                st.session_state.selected_types
+            )
+        ]
+    
+    ops_for_operations["OperationLabel"] = (
+        ops_for_operations["ID"].astype(str).str.replace(".0", "", regex=False)
         + " - "
-        + ops["Nome"].fillna("").astype(str).str.strip()
+        + ops_for_operations["Nome"].fillna("").astype(str).str.strip()
     )
     
     all_operations = sorted(
-        ops["OperationLabel"].dropna().unique().tolist()
+        ops_for_operations["OperationLabel"]
+        .dropna()
+        .unique()
+        .tolist()
     )
     # -------------------------
     # init state (safe)
