@@ -71,7 +71,7 @@ def render_filters(ops, dividends):
 
     with col3:
         st.multiselect(
-            "Operazione",
+            t("filter_operations"),
             options=all_operations,
             default=st.session_state.selected_operations,
             key="selected_operations"
@@ -121,7 +121,7 @@ def render_filters(ops, dividends):
     
     if set(st.session_state.selected_operations) != set(all_operations):
         active_filters.append(
-            f"Operazioni ({len(st.session_state.selected_operations)})"
+            f"{t('filter_operations')} ({len(st.session_state.selected_operations)})"
         )
         
     if active_filters:
