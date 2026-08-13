@@ -114,6 +114,7 @@ show_all_columns = "Mostra tutte le colonne"
 filters_title = "### 🎛️ Filtri"
 filter_brokers = "Intermediari"
 filter_types = "Tipo"
+filter_operations = "Operazioni"
 
 # FEEDBACK FILTRI
 active_filters = "Filtri attivi"
@@ -343,7 +344,9 @@ show_all_columns = "Show all columns"
 filters_title = "### 🎛️ Filters"
 filter_brokers = "Brokers"
 filter_types = "Type"
+filter_operations = "Operations"
 
+# FEEDBACK FILTRI
 active_filters = "Active filters"
 
 no_dividends_filtered = "ℹ️ No dividends for selected filters"
