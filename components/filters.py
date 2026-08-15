@@ -50,6 +50,9 @@ def render_filters(ops, dividends):
 
     if "selected_operations" not in st.session_state:
         st.session_state.selected_operations = all_operations
+        
+    if "only_active" not in st.session_state:
+        st.session_state.only_active = False
 
     # ✅ FIX: tieni solo valori ancora validi
     st.session_state.selected_brokers = [
@@ -91,6 +94,11 @@ def render_filters(ops, dividends):
             default=st.session_state.selected_operations,
             key="selected_operations"
         )
+        
+    st.toggle(
+        t("filter_active_only"),
+        key="only_active"
+    )
     # =========================
     # FILTER OPS
     # =========================
@@ -116,7 +124,19 @@ def render_filters(ops, dividends):
                 st.session_state.selected_operations
             )
         ]
+    if st.session_state.only_active:
+        
+        active_ids = (
+            ops.groupby("ID")["Quantita"]
+            .sum()
+            .loc[lambda s: s != 0]
+            .index
+        )
     
+        ops_filtered = ops_filtered[
+            ops_filtered["ID"].isin(active_ids)
+        ]
+        
     ops_filtered = ops_filtered.copy()
 
     # =========================
@@ -137,6 +157,10 @@ def render_filters(ops, dividends):
     if set(st.session_state.selected_operations) != set(all_operations):
         active_filters.append(
             f"{t('filter_operations')} ({len(st.session_state.selected_operations)})"
+        )
+    if st.session_state.only_active:
+        active_filters.append(
+            t("filter_active_only")
         )
         
     if active_filters:
@@ -182,6 +206,7 @@ def render_filters(ops, dividends):
         "brokers": st.session_state.selected_brokers,
         "types": st.session_state.selected_types,
         "operations": st.session_state.selected_operations,
+        "only_active": st.session_state.only_active,
     }
 
     return filter_context
