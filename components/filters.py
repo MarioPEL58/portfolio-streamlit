@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 from utils.i18n import t
 
