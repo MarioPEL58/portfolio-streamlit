@@ -127,7 +127,13 @@ def render_filters(ops, dividends):
     if st.session_state.only_active:
         
         active_ids = (
-            ops.groupby("ID")["Quantita"]
+            ops.assign(
+                Quantita=pd.to_numeric(
+                    ops["Quantita"],
+                    errors="coerce"
+                ).fillna(0)
+            )
+            .groupby("ID")["Quantita"]
             .sum()
             .loc[lambda s: s != 0]
             .index
@@ -156,7 +162,7 @@ def render_filters(ops, dividends):
     
     if set(st.session_state.selected_operations) != set(all_operations):
         active_filters.append(
-            f"{t('filter_operations')} ({len(st.session_state.selected_operations)})"
+            f"{t('filter_operations')} ({len(st.session_state.selected_operations)}/{len(all_operations)})"
         )
     if st.session_state.only_active:
         active_filters.append(
