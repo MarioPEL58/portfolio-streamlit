@@ -4,7 +4,11 @@ from utils.i18n import t
 
 def render_filters(ops, dividends):
     st.markdown(t("filters_title"))
-
+    
+    st.toggle(
+        t("filter_active_only"),
+        key="only_active"
+    )
     # -------------------------
     # liste disponibili
     # -------------------------
@@ -25,6 +29,25 @@ def render_filters(ops, dividends):
     )
     
     ops_for_operations = ops.copy()
+    
+    if st.session_state.only_active:
+    
+        active_ids = (
+            ops.assign(
+                Quantita=pd.to_numeric(
+                    ops["Quantita"],
+                    errors="coerce"
+                ).fillna(0)
+            )
+            .groupby("ID")["Quantita"]
+            .sum()
+            .loc[lambda s: s != 0]
+            .index
+        )
+
+        ops_for_operations = ops_for_operations[
+            ops_for_operations["ID"].isin(active_ids)
+        ]
     
     if selected_types and len(selected_types) < len(all_types):
         ops_for_operations = ops_for_operations[
@@ -96,10 +119,6 @@ def render_filters(ops, dividends):
             key="selected_operations"
         )
         
-    st.toggle(
-        t("filter_active_only"),
-        key="only_active"
-    )
     # =========================
     # FILTER OPS
     # =========================
