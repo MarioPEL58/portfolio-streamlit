@@ -115,6 +115,7 @@ filters_title = "### 🎛️ Filtri"
 filter_brokers = "Intermediari"
 filter_types = "Tipo"
 filter_operations = "Operazioni"
+filter_active_only = "Solo posizioni attive"
 
 # FEEDBACK FILTRI
 active_filters = "Filtri attivi"
@@ -345,6 +346,7 @@ filters_title = "### 🎛️ Filters"
 filter_brokers = "Brokers"
 filter_types = "Type"
 filter_operations = "Operations"
+filter_active_only = "Active positions only"
 
 # FEEDBACK FILTRI
 active_filters = "Active filters"
