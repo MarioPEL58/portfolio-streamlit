@@ -38,6 +38,7 @@ def render_positions_table(current):
             "Quantita",
             "Prezzo Attuale",
             "Costo Medio Stimato",
+            "Valore",
             "P/L",
             "P/L %",
             "P/L Giornaliero",
