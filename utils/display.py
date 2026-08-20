@@ -26,6 +26,8 @@ def get_display_columns():
         "P/L Netto Stimato": t("col_pl_net"),
         "P/L Giornaliero": t("col_pl_daily"),
         "P/L Giornaliero %": t("col_pl_daily_pct"),
+        "P/L 7 Giorni": t("col_pl_7d"),
+        "P/L 7 Giorni %": t("col_pl_7d_pct"),
         "AvgCostBefore": t("col_avg_cost_before"),
         "RealizedTradePL": t("col_realized_trade_pl"),
 
