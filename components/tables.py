@@ -102,7 +102,7 @@ def render_performance_table(current):
 
     fmt = get_format_dict_positions(
         df,
-        available_cols
+        get_display_columns()
     )
 
     styled = (
