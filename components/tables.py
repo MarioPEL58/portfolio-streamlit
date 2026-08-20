@@ -74,6 +74,47 @@ def render_positions_table(current):
     )
 
     st.dataframe(styled, use_container_width=True)
+    
+def render_performance_table(current):
+
+    cols = [
+        "Ticker",
+        "Nome",
+        "Valore",
+        "P/L Giornaliero",
+        "P/L Giornaliero %",
+        "P/L 7 Giorni",
+        "P/L 7 Giorni %",
+    ]
+
+    available_cols = [c for c in cols if c in current.columns]
+
+    df = (
+        current[available_cols]
+        .sort_values(
+            "P/L 7 Giorni",
+            ascending=False
+        )
+        .copy()
+    )
+
+    st.subheader("📈 Performance")
+
+    fmt = get_format_dict_positions(
+        df,
+        get_display_columns()
+    )
+
+    styled = (
+        df.style
+        .format(fmt)
+        .apply(style_pl_column, axis=0)
+    )
+
+    st.dataframe(
+        styled,
+        use_container_width=True
+    )
 
 def render_operations_table(ops_enriched):
 
