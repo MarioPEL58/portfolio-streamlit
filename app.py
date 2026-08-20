@@ -26,7 +26,7 @@ from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 from utils.display import get_display_columns
 from utils.series_utils import ensure_datetime_series
-from components.tables import render_positions_table, render_operations_table
+from components.tables import render_positions_table, render_performance_table, render_operations_table
 from components.downloads import render_download_tab
 from components.market_status import render_market_data_status
 
