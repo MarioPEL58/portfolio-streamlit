@@ -152,7 +152,7 @@ def get_format_dict_positions(df_base, columns_map=None, lang=None):
         # =========================
         # ✅ PERCENTUALI (incl. Tassa)
         # =========================
-        elif col_lower in ["p/l %", "p/l giornaliero %", "tassa", "tax"]:
+        elif col_lower in ["p/l %", "p/l giornaliero %", "p/l 7 giorni %", "tassa", "tax"]:
             fmt[display_col] = "{:.2%}"
 
         # =========================
