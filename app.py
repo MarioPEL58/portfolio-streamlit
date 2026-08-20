@@ -685,14 +685,16 @@ with tab_analysis:
     if fig_sortino:
         st.plotly_chart(fig_sortino, use_container_width=True, key="sortino_chart")
 # Tabs
-tab_pos, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
-    [t("tab_positions"), t("tab_exposure"), t("tab_flows"), t("tab_operations"), t("tab_download")]
+tab_pos, tab_perfo, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
+    [t("tab_positions"),t("tab_performance"), t("tab_exposure"), t("tab_flows"), t("tab_operations"), t("tab_download")]
 )
 
 with tab_pos:
     st.subheader(t("positions_title"))
     render_positions_table(current)
-    
+
+with tab_perfo:
+    render_performance_table(current)
 with tab_exp:
     st.subheader(t("allocation_title"))
     
