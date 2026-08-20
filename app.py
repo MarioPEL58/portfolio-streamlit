@@ -694,6 +694,7 @@ with tab_pos:
     render_positions_table(current)
 
 with tab_perfo:
+    st.subheader(t("performance_title"))
     render_performance_table(current)
 with tab_exp:
     st.subheader(t("allocation_title"))
