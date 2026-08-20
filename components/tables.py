@@ -98,11 +98,11 @@ def render_performance_table(current):
         .copy()
     )
 
-    st.subheader("📈 Performance")
+    # st.subheader("📈 Performance")
 
     fmt = get_format_dict_positions(
         df,
-        get_display_columns()
+        available_cols
     )
 
     styled = (
