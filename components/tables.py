@@ -77,6 +77,8 @@ def render_positions_table(current):
     
 def render_performance_table(current):
 
+    columns_map = get_display_columns()
+
     cols = [
         "Ticker",
         "Nome",
@@ -87,27 +89,28 @@ def render_performance_table(current):
         "P/L 7 Giorni %",
     ]
 
-    available_cols = [c for c in cols if c in current.columns]
+    cols = [c for c in cols if c in current.columns]
 
-    df = (
-        current[available_cols]
-        .sort_values(
+    df_base = current[cols].copy()
+
+    if "P/L 7 Giorni" in df_base.columns:
+        df_base = df_base.sort_values(
             "P/L 7 Giorni",
             ascending=False
         )
-        .copy()
-    )
 
-    # st.subheader("📈 Performance")
+    # stesso approccio di render_positions_table
+    df_display = df_base.rename(columns=columns_map)
 
-    fmt = get_format_dict_positions(
-        df,
-        get_display_columns()
+    fmt_dict = get_format_dict_positions(
+        df_base,
+        columns_map
     )
 
     styled = (
-        df.style
-        .format(fmt)
+        df_display
+        .style
+        .format(fmt_dict)
         .apply(style_pl_column, axis=0)
     )
 
@@ -115,7 +118,7 @@ def render_performance_table(current):
         styled,
         use_container_width=True
     )
-
+    
 def render_operations_table(ops_enriched):
 
     columns_map = get_display_columns()
