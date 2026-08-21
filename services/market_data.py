@@ -6,7 +6,7 @@ import yfinance as yf
 import numpy as np
 from pathlib import Path
 
-@st.cache_data(show_spinner=False)
+# @st.cache_data(show_spinner=False)
 def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp):
     tickers = [t for t in tickers if isinstance(t, str) and t.strip()]
     if not tickers:
@@ -25,7 +25,12 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # st.write("START", start_date.strftime("%Y-%m-%d"))
     # st.write("END", (end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"))
     # st.write(raw)
+    # st.write("RAW COLS")
     # st.write(raw.columns)
+
+    # st.write("LEVEL0")
+    # if isinstance(raw.columns, pd.MultiIndex):
+    #     st.write(sorted(set(raw.columns.get_level_values(0))))
 
 
     if raw is None or len(raw) == 0:
@@ -36,12 +41,20 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         if isinstance(raw.columns, pd.MultiIndex):
             lvl0 = set(raw.columns.get_level_values(0))
     
-            if all(t in lvl0 for t in tickers):
-                for t in tickers:
-                    if "Close" in raw[t].columns:
-                        closes[t] = raw[t]["Close"]
-                    elif "Adj Close" in raw[t].columns:
-                        closes[t] = raw[t]["Adj Close"]
+            # if all(t in lvl0 for t in tickers):
+            #     for t in tickers:
+            #         if "Close" in raw[t].columns:
+            #             closes[t] = raw[t]["Close"]
+            #         elif "Adj Close" in raw[t].columns:
+            #             closes[t] = raw[t]["Adj Close"]
+            for t in tickers:
+                if t not in lvl0:
+                    continue
+            
+                if "Close" in raw[t].columns:
+                    closes[t] = raw[t]["Close"]
+                elif "Adj Close" in raw[t].columns:
+                    closes[t] = raw[t]["Adj Close"]
             else:
                 field = "Close" if "Close" in lvl0 else ("Adj Close" if "Adj Close" in lvl0 else None)
                 if field is not None:
@@ -103,9 +116,15 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # per i missing cerca il CSV in data/bonds
     #
     
+    # st.write("PRIMA DEL JOIN")
+    # st.write(closes.columns.tolist())
+    
     for ticker in missing:
         
         bond_df = load_bond_csv(ticker)
+        
+        # st.write("Ticker:", ticker)
+        # st.write("Vuoto:", bond_df.empty)
     
         if not bond_df.empty:
     
@@ -120,6 +139,10 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
             )
     
             st.write(f"Caricato bond da CSV: {ticker}")
+            
+    # st.write("DOPO DEL JOIN")
+    # st.write(closes.columns.tolist())   
+    
     closes = closes.sort_index().ffill()
 
     missing = [
@@ -347,34 +370,85 @@ def download_intraday_range(tickers: list[str]):
     return min(timestamps), max(timestamps)
 
 
-def load_bond_csv(isin: str) -> pd.DataFrame:
+# def load_bond_csv(isin: str) -> pd.DataFrame:
 
-    file = Path("data/bonds") / f"{isin}.csv"
-    # st.write("Cerco file:", file)
-    # st.write("Esiste?", file.exists())
+#     file = Path("data/bonds") / f"{isin}.csv"
+#     # st.write("Cerco file:", file)
+#     # st.write("Esiste?", file.exists())
     
+#     if not file.exists():
+#         return pd.DataFrame()
+
+#     df = pd.read_csv(file)
+
+#     # Data tipo 07.08.2026
+#     df["Data"] = pd.to_datetime(
+#         df["Data"],
+#         format="%d.%m.%Y",
+#         errors="coerce"
+#     )
+
+#     # Prezzo tipo 94,880 -> 94.880
+#     df[isin] = (
+#         df["Ultimo"]
+#         .astype(str)
+#         .str.replace(",", ".", regex=False)
+#         .astype(float)
+#     )
+
+#     return (
+#         df[["Data", isin]]
+#         .dropna(subset=["Data"])
+#         .set_index("Data")
+#         .sort_index()
+#     )
+
+def load_bond_csv(isin: str) -> pd.DataFrame:
+    file = Path("data/bonds") / f"{isin}.csv"
+
     if not file.exists():
         return pd.DataFrame()
 
     df = pd.read_csv(file)
 
-    # Data tipo 07.08.2026
-    df["Data"] = pd.to_datetime(
-        df["Data"],
-        format="%d.%m.%Y",
-        errors="coerce"
-    )
+    if "Data" in df.columns and "Ultimo" in df.columns:
 
-    # Prezzo tipo 94,880 -> 94.880
-    df[isin] = (
-        df["Ultimo"]
-        .astype(str)
-        .str.replace(",", ".", regex=False)
-        .astype(float)
-    )
+        df["Data"] = pd.to_datetime(
+            df["Data"],
+            format="%d.%m.%Y",
+            errors="coerce"
+        )
+
+        df[isin] = (
+            df["Ultimo"]
+            .astype(str)
+            .str.replace(",", ".", regex=False)
+            .astype(float)
+        )
+
+        result = df[["Data", isin]]
+
+    elif "Date" in df.columns and "Close" in df.columns:
+
+        df["Date"] = pd.to_datetime(
+            df["Date"],
+            format="%d/%m/%Y",
+            errors="coerce"
+        )
+
+        df[isin] = pd.to_numeric(df["Close"], errors="coerce")
+
+        result = df[["Date", isin]].rename(
+            columns={"Date": "Data"}
+        )
+
+    else:
+        raise ValueError(
+            f"Formato CSV non riconosciuto: {df.columns.tolist()}"
+        )
 
     return (
-        df[["Data", isin]]
+        result
         .dropna(subset=["Data"])
         .set_index("Data")
         .sort_index()

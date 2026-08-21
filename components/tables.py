@@ -38,6 +38,7 @@ def render_positions_table(current):
             "Quantita",
             "Prezzo Attuale",
             "Costo Medio Stimato",
+            "Valore",
             "P/L",
             "P/L %",
             "P/L Giornaliero",
@@ -73,7 +74,52 @@ def render_positions_table(current):
     )
 
     st.dataframe(styled, use_container_width=True)
+    
+def render_performance_table(current):
 
+    columns_map = get_display_columns()
+
+    cols = [
+        "Ticker",
+        "Nome",
+        "P/L Giornaliero",
+        "P/L Giornaliero %",
+        "P/L 7 Giorni",
+        "P/L 7 Giorni %",
+        "P/L 30 Giorni",
+        "P/L 30 Giorni %",
+    ]
+
+    cols = [c for c in cols if c in current.columns]
+
+    df_base = current[cols].copy()
+
+    if "P/L 7 Giorni" in df_base.columns:
+        df_base = df_base.sort_values(
+            "P/L 7 Giorni",
+            ascending=False
+        )
+
+    # stesso approccio di render_positions_table
+    df_display = df_base.rename(columns=columns_map)
+
+    fmt_dict = get_format_dict_positions(
+        df_base,
+        columns_map
+    )
+
+    styled = (
+        df_display
+        .style
+        .format(fmt_dict)
+        .apply(style_pl_column, axis=0)
+    )
+
+    st.dataframe(
+        styled,
+        use_container_width=True
+    )
+    
 def render_operations_table(ops_enriched):
 
     columns_map = get_display_columns()

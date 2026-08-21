@@ -26,6 +26,10 @@ def get_display_columns():
         "P/L Netto Stimato": t("col_pl_net"),
         "P/L Giornaliero": t("col_pl_daily"),
         "P/L Giornaliero %": t("col_pl_daily_pct"),
+        "P/L 7 Giorni": t("col_pl_7d"),
+        "P/L 7 Giorni %": t("col_pl_7d_pct"),
+        "P/L 30 Giorni": t("col_pl_30d"),
+        "P/L 30 Giorni %": t("col_pl_30d_pct"),
         "AvgCostBefore": t("col_avg_cost_before"),
         "RealizedTradePL": t("col_realized_trade_pl"),
 
@@ -152,7 +156,7 @@ def get_format_dict_positions(df_base, columns_map=None, lang=None):
         # =========================
         # ✅ PERCENTUALI (incl. Tassa)
         # =========================
-        elif col_lower in ["p/l %", "p/l giornaliero %", "tassa", "tax"]:
+        elif col_lower in ["p/l %", "p/l giornaliero %", "p/l 7 giorni %", "p/l 30 giorni %", "tassa", "tax"]:
             fmt[display_col] = "{:.2%}"
 
         # =========================

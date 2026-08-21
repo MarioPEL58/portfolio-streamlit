@@ -1,0 +1,11 @@
+# File temporanei di Python
+**/__pycache__/
+*.pyc
+
+# Cartelle dell'ambiente virtuale (se presenti)
+.venv/
+venv/
+env/
+
+# Configurazione locale di VS Code (quella che abbiamo cancellato prima)
+.vscode/

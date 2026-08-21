@@ -386,8 +386,13 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # =========================
     if ops.empty:
         daily_pl_positions = pd.DataFrame(index=idx)
+        weekly_pl_positions = pd.DataFrame(index=idx)
+        monthly_pl_positions = pd.DataFrame(index=idx)
         daily_pl = pd.Series(0.0, index=idx, name="P/L Giornaliero")
         daily_pl_pct = pd.Series(np.nan, index=idx, name="P/L Giornaliero %")
+        
+        weekly_pl = pd.Series(0.0, index=idx, name="P/L 7 Giorni")
+        weekly_pl_pct = pd.Series(np.nan, index=idx, name="P/L 7 Giorni %")
     else:
         
         daily_cf_positions = (
@@ -446,9 +451,46 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .add(daily_cf_positions, fill_value=0.0)
         )
         
+        weekly_pl_positions = (
+            daily_pl_positions
+            .rolling("7D")
+            .sum()
+        )
+        
+        monthly_pl_positions = (
+            daily_pl_positions
+            .rolling("30D")
+            .sum()
+        )
+        
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
         daily_pl_pct = (daily_pl / total_value.shift(1)).rename("P/L Giornaliero %")
+        
+        # P/L rolling 7 giorni
+        weekly_pl = (
+            daily_pl
+            .rolling("7D")
+            .sum()
+            .rename("P/L 7 Giorni")
+        )
+        
+        weekly_pl_pct = (
+            weekly_pl
+            / total_value.shift(7)
+        ).rename("P/L 7 Giorni %")
 
+         # P/L rolling 30 days
+        monthly_pl = (
+            daily_pl
+            .rolling("30D")
+            .sum()
+            .rename("P/L 30 Giorni")
+        )
+        
+        monthly_pl_pct = (
+            monthly_pl
+            / total_value.shift(30)
+        ).rename("P/L 30 Giorni %")
     # =========================
     # 13. P/L trading = valore portafoglio - costo residuo aperto
     # =========================
@@ -465,6 +507,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             pnl,
             daily_pl,
             daily_pl_pct,
+            weekly_pl,
+            weekly_pl_pct,
+            monthly_pl,
+            monthly_pl_pct,
             daily_dividends,
             pl_realizzato
         ],
@@ -511,19 +557,24 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # =========================
     # 17. Stato attuale posizioni aperte
     # =========================
-    last_qty = cost_state["NetQty"]
-    last_close_eur = position_closes_eur.iloc[-1]
-    last_daily_pl = daily_pl_positions.iloc[-1]
-
     # ✅ usa la quantità residua reale del motore costi
     last_qty = cost_state["NetQty"]
     last_close_eur = position_closes_eur.iloc[-1]
     last_daily_pl = daily_pl_positions.iloc[-1]
+    last_weekly_pl = weekly_pl_positions.iloc[-1]
+    last_monthly_pl = monthly_pl_positions.iloc[-1]
+
+   
+    # last_qty = cost_state["NetQty"]
+    # last_close_eur = position_closes_eur.iloc[-1]
+    # last_daily_pl = daily_pl_positions.iloc[-1]
 
     current = pd.concat([
         last_qty.rename("Quantita"),
         last_close_eur.rename("Prezzo Attuale"),
         last_daily_pl.rename("P/L Giornaliero"),
+        last_weekly_pl.rename("P/L 7 Giorni"),
+        last_monthly_pl.rename("P/L 30 Giorni"),
     ], axis=1)
 
     current["Ultimo Close Storico"] = last_close_eur
@@ -553,7 +604,17 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         if (row["Valore"] - row["P/L Giornaliero"]) != 0 else np.nan,
         axis=1
     )
-
+    current["P/L 7 Giorni %"] = current.apply(
+        lambda row: row["P/L 7 Giorni"] / (row["Valore"] - row["P/L 7 Giorni"])
+        if (row["Valore"] - row["P/L 7 Giorni"]) != 0 else np.nan,
+        axis=1
+    )
+    current["P/L 30 Giorni %"] = current.apply(
+        lambda row: row["P/L 30 Giorni"] / (row["Valore"] - row["P/L 30 Giorni"])
+        if (row["Valore"] - row["P/L 30 Giorni"]) != 0 else np.nan,
+        axis=1
+    )
+    
     current = current.copy()
 
     # =========================
