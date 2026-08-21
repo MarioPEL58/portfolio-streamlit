@@ -82,11 +82,12 @@ def render_performance_table(current):
     cols = [
         "Ticker",
         "Nome",
-        "Valore",
         "P/L Giornaliero",
         "P/L Giornaliero %",
         "P/L 7 Giorni",
         "P/L 7 Giorni %",
+        "P/L 30 Giorni",
+        "P/L 30 Giorni %",
     ]
 
     cols = [c for c in cols if c in current.columns]
