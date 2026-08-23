@@ -55,7 +55,7 @@ def style_pl_column(col):
         style = ""
 
         if is_7d:
-            style += "background-color: #F3F4F6;"
+            style += "background-color: #4B4C4D;"
 
         try:
             if pd.notna(v):
