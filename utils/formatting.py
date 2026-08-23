@@ -44,21 +44,29 @@ def color_pl(val):
 def style_pl_column(col):
     name = str(col.name).lower()
 
-    styles = []
+    if "p/l" not in name:
+        return [""] * len(col)
 
     is_7d = name in ["p/l 7 giorni", "p/l 7 giorni %"]
+
+    styles = []
 
     for v in col:
         style = ""
 
         if is_7d:
-            style += "background-color: #4B4C4D;"
+            style += "background-color: #F3F4F6;"
 
-        if pd.notna(v):
-            if v >= 0:
-                style += "color:#16A34A;font-weight:bold;"
-            else:
-                style += "color:#DC2626;font-weight:bold;"
+        try:
+            if pd.notna(v):
+                val = float(v)
+
+                if val >= 0:
+                    style += "color:#16A34A;font-weight:bold;"
+                else:
+                    style += "color:#DC2626;font-weight:bold;"
+        except (TypeError, ValueError):
+            pass
 
         styles.append(style)
 
