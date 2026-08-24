@@ -697,7 +697,7 @@ with tab_pos:
 
 with tab_perfo:
     st.subheader(t("performance_title"))
-    render_performance_cards_old(series)
+    # render_performance_cards_old(series) non è correta perche non contiene dividendie e profitto delle posizioni vendute 
     render_performance_cards(current)
     render_performance_table(current)
 with tab_exp:
