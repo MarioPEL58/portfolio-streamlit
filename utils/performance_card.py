@@ -61,7 +61,6 @@ def render_performance_cards(ts: pd.DataFrame):
             ts[column_name]
             .dropna()
             .iloc[-1]
-            * 100
         )
 
         with col:
