@@ -37,7 +37,7 @@ from utils.kpi_cards import (
     render_total_pl_card
 )
 
-from utils.performance_card import render_performance_cards
+from utils.performance_card import render_performance_cards_old, render_performance_cards
 
 from config.config import load_config
 
@@ -697,7 +697,8 @@ with tab_pos:
 
 with tab_perfo:
     st.subheader(t("performance_title"))
-    render_performance_cards(series)
+    render_performance_cards_old(series)
+    render_performance_cards(current)
     render_performance_table(current)
 with tab_exp:
     st.subheader(t("allocation_title"))
