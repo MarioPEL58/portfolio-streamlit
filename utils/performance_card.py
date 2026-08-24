@@ -33,7 +33,6 @@ def render_performance_card(value, label):
             ">
                 {fmt_pct(value)}
             </div>
-
             <div style="
                 color:#d0d0d0;
                 font-size:1.2rem;
