@@ -45,3 +45,25 @@ def render_performance_card(value, label):
         """,
         unsafe_allow_html=True
     )
+    
+def render_performance_cards(ts: pd.DataFrame):
+
+    cards = [
+        ("P/L Giornaliero %", "1D"),
+        ("P/L 7 Giorni %", "1W"),
+        ("P/L 30 Giorni %", "1M"),
+    ]
+
+    cols = st.columns(len(cards))
+
+    for col, (column_name, label) in zip(cols, cards):
+
+        value = (
+            ts[column_name]
+            .dropna()
+            .iloc[-1]
+            * 100
+        )
+
+        with col:
+            render_performance_card(value, label)
