@@ -37,7 +37,7 @@ from utils.kpi_cards import (
     render_total_pl_card
 )
 
-from utils.performance_cards import render_performance_cards
+from utils.performance_card import render_performance_cards
 
 from config.config import load_config
 
