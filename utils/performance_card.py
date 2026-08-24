@@ -45,7 +45,7 @@ def render_performance_card(value, label):
         unsafe_allow_html=True
     )
     
-def render_performance_cards(ts: pd.DataFrame):
+def render_performance_cards_old(ts: pd.DataFrame):
 
     cards = [
         ("P/L Giornaliero %", "1D"),
@@ -63,5 +63,33 @@ def render_performance_cards(ts: pd.DataFrame):
             .iloc[-1]
         )
 
+        with col:
+            render_performance_card(value, label)
+
+def render_performance_cards(current):
+
+    open_value = float(current["Valore"].sum())
+
+    cards = [
+        (
+            current["P/L Giornaliero"].sum() /
+            (open_value - current["P/L Giornaliero"].sum()),
+            "1D"
+        ),
+        (
+            current["P/L 7 Giorni"].sum() /
+            (open_value - current["P/L 7 Giorni"].sum()),
+            "1W"
+        ),
+        (
+            current["P/L 30 Giorni"].sum() /
+            (open_value - current["P/L 30 Giorni"].sum()),
+            "1M"
+        ),
+    ]
+
+    cols = st.columns(len(cards))
+
+    for col, (value, label) in zip(cols, cards):
         with col:
             render_performance_card(value, label)
