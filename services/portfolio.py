@@ -6,6 +6,7 @@ import streamlit as st
 from services.market_data import convert_closes_to_eur
 
 def build_period_performance(
+    daily_total_pl: pd.Series,
     total_value: pd.Series,
     months: int | None = None,
     years: int | None = None,
@@ -23,21 +24,27 @@ def build_period_performance(
         else:
             continue
 
-        hist = total_value.loc[:ref_date].dropna()
+        # rendimento economico del periodo
+        period_pl = (
+            daily_total_pl.loc[ref_date:dt]
+            .sum()
+        )
 
-        if hist.empty:
+        # valore portfolio a inizio periodo
+        history = total_value.loc[:ref_date].dropna()
+
+        if history.empty:
             continue
 
-        start_value = hist.iloc[-1]
-        current_value = total_value.loc[dt]
+        start_value = history.iloc[-1]
 
-        if start_value != 0 and pd.notna(current_value):
+        if start_value != 0:
             perf.loc[dt] = (
-                current_value / start_value
-            ) - 1
+                period_pl / start_value
+            )
 
     return perf.rename(name)
-
+    
 def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
     keys = sorted(ops["PositionKey"].unique().tolist())
     holdings = pd.DataFrame(0.0, index=idx, columns=keys)
