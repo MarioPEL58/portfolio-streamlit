@@ -406,6 +406,26 @@ render_market_data_status(
 )
 
 st.subheader(t("performance_total"))
+
+# debug 3M
+today = series.index.max()
+ref_3m = today - pd.DateOffset(months=3)
+
+base = (
+    series["Valore portafoglio"]
+    .loc[:ref_3m]
+    .dropna()
+    .iloc[-1]
+)
+
+current = series["Valore portafoglio"].iloc[-1]
+
+st.write({
+    "base_3m": base,
+    "current": current,
+    "performance": (current / base) - 1
+})
+
 render_performance_cards_tot(series) #  contiene anche dividendie e profitto delle posizioni vendute nel frattempo
 st.caption(t("performance_total_desc"))
 
