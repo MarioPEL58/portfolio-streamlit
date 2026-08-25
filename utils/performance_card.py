@@ -45,12 +45,12 @@ def render_performance_card(value, label):
         unsafe_allow_html=True
     )
     
-def render_performance_cards_old(ts: pd.DataFrame):
+def render_performance_cards_tot(ts: pd.DataFrame):
 
     cards = [
-        ("P/L Giornaliero %", "1D"),
-        ("P/L 7 Giorni %", "1W"),
-        ("P/L 30 Giorni %", "1M"),
+        ("P/L Totale Giornaliero %", "1D"),
+        ("P/L Totale 7 Giorni %", "1W"),
+        ("P/L Totale 30 Giorni %", "1M"),
     ]
 
     cols = st.columns(len(cards))
