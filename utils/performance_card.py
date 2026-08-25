@@ -51,6 +51,7 @@ def render_performance_cards_tot(ts: pd.DataFrame):
         ("P/L Totale Giornaliero %", "1D"),
         ("P/L Totale 7 Giorni %", "1W"),
         ("P/L Totale 30 Giorni %", "1M"),
+        ("Performance 3M %", "3M"),
     ]
 
     cols = st.columns(len(cards))
