@@ -397,7 +397,6 @@ with c4:
         annualized_pct=xirr_value
     )
     
-render_performance_cards_tot(series) #  contiene anche dividendie e profitto delle posizioni vendute nel frattempo
 # # ✅ label che descive il market status 
 
 render_market_data_status(
@@ -405,6 +404,10 @@ render_market_data_status(
     filtered_tickers=filtered_tickers,
     ops_filtered=ops_filtered
 )
+
+st.subheader(t("performance_total"))
+render_performance_cards_tot(series) #  contiene anche dividendie e profitto delle posizioni vendute nel frattempo
+st.caption(t("performance_total_desc"))
 
 # Main chart
 
