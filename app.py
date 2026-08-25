@@ -408,18 +408,19 @@ render_market_data_status(
 st.subheader(t("performance_total"))
 
 # debug 3M
-st.write({
-    "1D": series["P/L Totale Giornaliero %"].iloc[-1],
-    "1W": series["P/L Totale 7 Giorni %"].iloc[-1],
-    "1M": series["P/L Totale 30 Giorni %"].iloc[-1],
-    "3M": series["Performance 3M %"].iloc[-1],
-})
-st.write(series[[
-    "P/L Totale Giornaliero %",
-    "P/L Totale 7 Giorni %",
-    "P/L Totale 30 Giorni %",
-    "Performance 3M %"
-]].tail(30))
+# st.write({
+#     "1D": series["P/L Totale Giornaliero %"].iloc[-1],
+#     "1W": series["P/L Totale 7 Giorni %"].iloc[-1],
+#     "1M": series["P/L Totale 30 Giorni %"].iloc[-1],
+#     "3M": series["Performance 3M %"].iloc[-1],
+# })
+# st.write(series[[
+#     "P/L Totale Giornaliero %",
+#     "P/L Totale 7 Giorni %",
+#     "P/L Totale 30 Giorni %",
+#     "Performance 3M %"
+# ]].tail(30))
+
 render_performance_cards_tot(series) #  contiene anche dividendie e profitto delle posizioni vendute nel frattempo
 st.caption(t("performance_total_desc"))
 
