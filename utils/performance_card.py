@@ -3,7 +3,13 @@ from utils.formatting import fmt_pct
 
 
 def render_performance_card(value, label):
-    positive = value >= 0
+
+    if value is None:
+        pct_text = "—"
+        positive = True
+    else:
+        pct_text = fmt_pct(value)
+        positive = value >= 0
 
     text_color = "#14c8b8" if positive else "#ff4d67"
 
@@ -31,7 +37,7 @@ def render_performance_card(value, label):
                 font-size:2rem;
                 font-weight:700;
             ">
-                {fmt_pct(value)}
+                {pct_text}
             </div>
             <div style="
                 color:#d0d0d0;
@@ -58,13 +64,14 @@ def render_performance_cards_tot(ts: pd.DataFrame):
     cols = st.columns(len(cards))
 
     for col, (column_name, label) in zip(cols, cards):
-
-        value = (
-            ts[column_name]
-            .dropna()
-            .iloc[-1]
-        )
-
+    
+        series = ts[column_name].dropna()
+    
+        if series.empty:
+            value = None
+        else:
+            value = float(series.iloc[-1])
+    
         with col:
             render_performance_card(value, label)
 
