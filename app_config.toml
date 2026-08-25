@@ -34,6 +34,9 @@ portfolio_error = "Non è stato possibile costruire il portafoglio con i dati di
 # KPI
 kpi_title = "📊 KPI Portafoglio"
 
+performance_total = "Performance totale del portafoglio"
+performance_total_desc = "Include posizioni aperte, plusvalenze realizzate e dividendi."
+
 # GRAFICI
 charts_title = "📊 Portafoglio"
 market_data_available_from = "Dati di mercato disponibili dal"
@@ -271,6 +274,9 @@ portfolio_error = "Unable to build the portfolio with available data."
 
 # KPI
 kpi_title = "📊 Portfolio KPIs"
+
+performance_total = "Total portfolio performance"
+performance_total_desc = "Includes open positions, realized gains and dividends."
 
 # GRAFICI
 charts_title = "📊 Portfolio"
