@@ -396,7 +396,8 @@ with c4:
         total_pct=total_pct,
         annualized_pct=xirr_value
     )
-
+    
+render_performance_cards_tot(series) #  contiene anche dividendie e profitto delle posizioni vendute nel frattempo
 # # ✅ label che descive il market status 
 
 render_market_data_status(
@@ -697,7 +698,6 @@ with tab_pos:
 
 with tab_perfo:
     st.subheader(t("performance_title"))
-    render_performance_cards_tot(series) #  contiene anche dividendie e profitto delle posizioni vendute nel frattempo
     render_performance_cards(current)
     render_performance_table(current)
 with tab_exp:
