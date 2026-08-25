@@ -34,7 +34,7 @@ def render_performance_card(value, label):
         ">
             <div style="
                 color:{text_color};
-                font-size:2rem;
+                font-size:1.6rem;
                 font-weight:700;
             ">
                 {pct_text}
