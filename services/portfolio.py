@@ -393,6 +393,18 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         weekly_pl = pd.Series(0.0, index=idx, name="P/L 7 Giorni")
         weekly_pl_pct = pd.Series(np.nan, index=idx, name="P/L 7 Giorni %")
+        
+        monthly_pl = pd.Series(0.0, index=idx, name="P/L 30 Giorni")
+        monthly_pl_pct = pd.Series(np.nan, index=idx, name="P/L 30 Giorni %")
+        
+        daily_total_pl = pd.Series(0.0, index=idx, name="P/L Totale Giornaliero")
+        daily_total_pl_pct = pd.Series(np.nan, index=idx, name="P/L Totale Giornaliero %")
+        
+        weekly_total_pl = pd.Series(0.0, index=idx, name="P/L Totale 7 Giorni")
+        weekly_total_pl_pct = pd.Series(np.nan, index=idx, name="P/L Totale 7 Giorni %")
+        
+        monthly_total_pl = pd.Series(0.0, index=idx, name="P/L Totale 30 Giorni")
+        monthly_total_pl_pct = pd.Series(np.nan, index=idx, name="P/L Totale 30 Giorni %")
     else:
         
         daily_cf_positions = (
