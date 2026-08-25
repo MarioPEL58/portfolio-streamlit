@@ -53,7 +53,7 @@ def render_performance_card(value, label):
     
 def render_performance_cards_tot(ts: pd.DataFrame):
     
-    st.write(ts.columns.tolist()) # DEBUG
+    # st.write(ts.columns.tolist()) # DEBUG
     cards = [
         ("P/L Totale Giornaliero %", "1D"),
         ("P/L Totale 7 Giorni %", "1W"),
@@ -61,6 +61,7 @@ def render_performance_cards_tot(ts: pd.DataFrame):
         ("Performance 3M %", "3M"),
         ("Performance 6M %", "6M"),
         ("Performance YTD %", "YTD"),
+        ("Performance 1Y %", "1Y"),
     ]
 
     cols = st.columns(len(cards))
