@@ -352,6 +352,41 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     realized_daily = realized_from_trades.add(daily_dividends, fill_value=0.0)
     pl_realizzato = realized_daily.cumsum().rename("P/L realizzato")
 
+    # ==================================================
+    # Performance totale portafoglio
+    # (unrealized + realized + dividendi)
+    # ==================================================
+    
+    daily_total_pl = (
+        daily_pl + realized_daily
+    ).rename("P/L Totale Giornaliero")
+    
+    daily_total_pl_pct = (
+        daily_total_pl / total_value.shift(1)
+    ).rename("P/L Totale Giornaliero %")
+    
+    weekly_total_pl = (
+        daily_total_pl
+        .rolling("7D")
+        .sum()
+        .rename("P/L Totale 7 Giorni")
+    )
+    
+    weekly_total_pl_pct = (
+        weekly_total_pl / total_value.shift(7)
+    ).rename("P/L Totale 7 Giorni %")
+    
+    monthly_total_pl = (
+        daily_total_pl
+        .rolling("30D")
+        .sum()
+        .rename("P/L Totale 30 Giorni")
+    )
+    
+    monthly_total_pl_pct = (
+        monthly_total_pl / total_value.shift(30)
+    ).rename("P/L Totale 30 Giorni %")
+    
     # =========================
     # 10. Capitale investito reale (costo residuo aperto storico)
     # =========================
@@ -511,6 +546,12 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             weekly_pl_pct,
             monthly_pl,
             monthly_pl_pct,
+            daily_total_pl,
+            daily_total_pl_pct,
+            weekly_total_pl,
+            weekly_total_pl_pct,
+            monthly_total_pl,
+            monthly_total_pl_pct,
             daily_dividends,
             pl_realizzato
         ],
