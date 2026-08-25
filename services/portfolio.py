@@ -5,6 +5,38 @@ import pandas as pd
 import streamlit as st
 from services.market_data import convert_closes_to_eur
 
+def build_period_performance(
+    total_value: pd.Series,
+    months: int | None = None,
+    years: int | None = None,
+    name: str = ""
+) -> pd.Series:
+
+    perf = pd.Series(index=total_value.index, dtype=float)
+
+    for dt in total_value.index:
+
+        if months is not None:
+            ref_date = dt - pd.DateOffset(months=months)
+        elif years is not None:
+            ref_date = dt - pd.DateOffset(years=years)
+        else:
+            continue
+
+        hist = total_value.loc[:ref_date].dropna()
+
+        if hist.empty:
+            continue
+
+        start_value = hist.iloc[-1]
+        current_value = total_value.loc[dt]
+
+        if start_value != 0 and pd.notna(current_value):
+            perf.loc[dt] = (
+                current_value / start_value
+            ) - 1
+
+    return perf.rename(name)
 
 def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
     keys = sorted(ops["PositionKey"].unique().tolist())
@@ -405,6 +437,12 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         monthly_total_pl = pd.Series(0.0, index=idx, name="P/L Totale 30 Giorni")
         monthly_total_pl_pct = pd.Series(np.nan, index=idx, name="P/L Totale 30 Giorni %")
+
+        perf_3m_pct = pd.Series(np.nan, index=idx, name="P/L Totale 3 Mesi %")
+        perf_6m_pct = pd.Series(np.nan, index=idx, name="P/L Totale 6 Mesi %")
+        perf_ytd_pct = pd.Series(np.nan, index=idx, name="P/L Totale YTD %")
+        perf_1y_pct = pd.Series(np.nan, index=idx, name="P/L Totale 1 Anno %")
+        
     else:
         
         daily_cf_positions = (
@@ -538,7 +576,47 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         monthly_total_pl_pct = (
             monthly_total_pl / total_value.shift(30)
         ).rename("P/L Totale 30 Giorni %")
+        # ==========================================
+        # Performance storiche portafoglio
+        # ==========================================
         
+        perf_3m_pct = build_period_performance(
+            total_value,
+            months=3,
+            name="Performance 3M %"
+        )
+        
+        perf_6m_pct = build_period_performance(
+            total_value,
+            months=6,
+            name="Performance 6M %"
+        )
+        
+        perf_1y_pct = build_period_performance(
+            total_value,
+            years=1,
+            name="Performance 1Y %"
+        )
+        perf_ytd_pct = pd.Series(
+            index=total_value.index,
+            dtype=float,
+            name="Performance YTD %"
+        )
+        
+        for year in total_value.index.year.unique():
+        
+            mask = total_value.index.year == year
+        
+            values = total_value.loc[mask].dropna()
+        
+            if values.empty:
+                continue
+        
+            first_value = values.iloc[0]
+        
+            perf_ytd_pct.loc[mask] = (
+                total_value.loc[mask] / first_value
+            ) - 1
     # =========================
     # 13. P/L trading = valore portafoglio - costo residuo aperto
     # =========================
@@ -565,6 +643,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             weekly_total_pl_pct,
             monthly_total_pl,
             monthly_total_pl_pct,
+            perf_3m_pct,
+            perf_6m_pct,
+            perf_ytd_pct,
+            perf_1y_pct,
             daily_dividends,
             pl_realizzato
         ],
