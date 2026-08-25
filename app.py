@@ -707,7 +707,9 @@ with tab_exp:
     st.subheader(t("allocation_title"))
     
     # ✅ PIE (Ticker)
-    fig = allocation_pie_chart(exposure, column="Ticker")
+    fig = allocation_pie_chart(exposure,
+        column=label_choice if label_choice in exposure.columns else "Ticker"
+        )
     if fig:
         st.plotly_chart(fig, use_container_width=True)
     
