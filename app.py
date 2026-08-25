@@ -414,7 +414,12 @@ st.write({
     "1M": series["P/L Totale 30 Giorni %"].iloc[-1],
     "3M": series["Performance 3M %"].iloc[-1],
 })
-
+st.write(series[[
+    "P/L Totale Giornaliero %",
+    "P/L Totale 7 Giorni %",
+    "P/L Totale 30 Giorni %",
+    "Performance 3M %"
+]].tail(30))
 render_performance_cards_tot(series) #  contiene anche dividendie e profitto delle posizioni vendute nel frattempo
 st.caption(t("performance_total_desc"))
 
