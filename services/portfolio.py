@@ -445,10 +445,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         monthly_total_pl = pd.Series(0.0, index=idx, name="P/L Totale 30 Giorni")
         monthly_total_pl_pct = pd.Series(np.nan, index=idx, name="P/L Totale 30 Giorni %")
 
-        perf_3m_pct = pd.Series(np.nan, index=idx, name="P/L Totale 3 Mesi %")
-        perf_6m_pct = pd.Series(np.nan, index=idx, name="P/L Totale 6 Mesi %")
-        perf_ytd_pct = pd.Series(np.nan, index=idx, name="P/L Totale YTD %")
-        perf_1y_pct = pd.Series(np.nan, index=idx, name="P/L Totale 1 Anno %")
+        perf_3m_pct = pd.Series(np.nan, index=idx, name="Performance 3M %")
+        perf_6m_pct = pd.Series(np.nan, index=idx, name="Performance 6M %")
+        perf_ytd_pct = pd.Series(np.nan, index=idx, name="Performance YTD %"")
+        perf_1y_pct = pd.Series(np.nan, index=idx, name="Performance 1Y %")
         
     else:
         
