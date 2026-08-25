@@ -52,7 +52,8 @@ def render_performance_card(value, label):
     )
     
 def render_performance_cards_tot(ts: pd.DataFrame):
-
+    
+    st.write(ts.columns.tolist()) # DEBUG
     cards = [
         ("P/L Totale Giornaliero %", "1D"),
         ("P/L Totale 7 Giorni %", "1W"),
