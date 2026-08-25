@@ -588,22 +588,26 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # ==========================================
         
         perf_3m_pct = build_period_performance(
+            daily_total_pl,
             total_value,
             months=3,
             name="Performance 3M %"
         )
         
         perf_6m_pct = build_period_performance(
+            daily_total_pl,
             total_value,
             months=6,
             name="Performance 6M %"
         )
         
         perf_1y_pct = build_period_performance(
+            daily_total_pl,
             total_value,
             years=1,
             name="Performance 1Y %"
         )
+        
         perf_ytd_pct = pd.Series(
             index=total_value.index,
             dtype=float,
@@ -619,11 +623,17 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             if values.empty:
                 continue
         
-            first_value = values.iloc[0]
+            start_value = values.iloc[0]
         
-            perf_ytd_pct.loc[mask] = (
-                total_value.loc[mask] / first_value
-            ) - 1
+            ytd_pl = (
+                daily_total_pl.loc[mask]
+                .cumsum()
+            )
+        
+            if start_value != 0:
+                perf_ytd_pct.loc[mask] = (
+                    ytd_pl / start_value
+                )
     # =========================
     # 13. P/L trading = valore portafoglio - costo residuo aperto
     # =========================
