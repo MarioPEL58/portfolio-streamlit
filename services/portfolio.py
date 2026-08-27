@@ -6,6 +6,45 @@ import time
 import streamlit as st
 from services.market_data import convert_closes_to_eur
 
+# def build_period_performance(
+#     daily_total_pl: pd.Series,
+#     total_value: pd.Series,
+#     months: int | None = None,
+#     years: int | None = None,
+#     name: str = ""
+# ) -> pd.Series:
+
+#     perf = pd.Series(index=total_value.index, dtype=float)
+
+#     for dt in total_value.index:
+
+#         if months is not None:
+#             ref_date = dt - pd.DateOffset(months=months)
+#         elif years is not None:
+#             ref_date = dt - pd.DateOffset(years=years)
+#         else:
+#             continue
+
+#         # rendimento economico del periodo
+#         period_pl = (
+#             daily_total_pl.loc[ref_date:dt]
+#             .sum()
+#         )
+
+#         # valore portfolio a inizio periodo
+#         history = total_value.loc[:ref_date].dropna()
+
+#         if history.empty:
+#             continue
+
+#         start_value = history.iloc[-1]
+
+#         if start_value != 0:
+#             perf.loc[dt] = (
+#                 period_pl / start_value
+#             )
+
+#     return perf.rename(name)
 def build_period_performance(
     daily_total_pl: pd.Series,
     total_value: pd.Series,
@@ -16,6 +55,9 @@ def build_period_performance(
 
     perf = pd.Series(index=total_value.index, dtype=float)
 
+    cum_pl = daily_total_pl.cumsum()
+    cum_pl_prev = cum_pl.shift(1).fillna(0)
+
     for dt in total_value.index:
 
         if months is not None:
@@ -25,24 +67,21 @@ def build_period_performance(
         else:
             continue
 
-        # rendimento economico del periodo
-        period_pl = (
-            daily_total_pl.loc[ref_date:dt]
-            .sum()
-        )
-
-        # valore portfolio a inizio periodo
         history = total_value.loc[:ref_date].dropna()
 
         if history.empty:
             continue
 
+        start_dt = history.index[-1]
         start_value = history.iloc[-1]
 
+        period_pl = (
+            cum_pl.loc[dt]
+            - cum_pl_prev.loc[start_dt]
+        )
+
         if start_value != 0:
-            perf.loc[dt] = (
-                period_pl / start_value
-            )
+            perf.loc[dt] = period_pl / start_value
 
     return perf.rename(name)
     
