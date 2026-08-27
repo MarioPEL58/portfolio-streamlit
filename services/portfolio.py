@@ -625,7 +625,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             name="Performance 1Y %"
         )
         
-        st.write(f"3M: {time.perf_counter()-t0:.2f} sec")
+        st.write(f"1Y: {time.perf_counter()-t0:.2f} sec")
         t0 = time.perf_counter()
         
         perf_ytd_pct = pd.Series(
