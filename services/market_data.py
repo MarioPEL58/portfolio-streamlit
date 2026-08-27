@@ -21,9 +21,9 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         else:
             yahoo_tickers.append(symbol)
     if isins:
-    st.warning(
-        f"ISIN esclusi dal download Yahoo: {', '.join(isins)}"
-    )
+        st.warning(
+            f"ISIN esclusi dal download Yahoo: {', '.join(isins)}"
+        )
     
     raw = yf.download(
         tickers=yahoo_tickers,
