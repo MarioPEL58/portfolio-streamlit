@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import time
 import streamlit as st
 from services.market_data import convert_closes_to_eur
 
@@ -228,6 +229,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
 
 def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
 
+    t = time.perf_counter()
     # ✅ normalizzazione date
     ops_all = ops.copy()
     ops_all["Data"] = pd.to_datetime(ops_all["Data"], errors="coerce")
@@ -246,7 +248,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # 1. Arricchimento cost engine
     # =========================
     ops_all = enrich_ops_with_cost_engine(ops_all)
-
+    
+    st.write(f"⏱️ Cost engine: {time.perf_counter() - t:.2f} sec")
+    t = time.perf_counter()
+    
     # st.write("OPS_ALL")
     # st.dataframe(
     #     ops_all[
@@ -333,7 +338,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             start_date,
             market_last_date
         )
-
+        
+        st.write(f"⏱️ Conversione EUR: {time.perf_counter() - t:.2f} sec")
+        t = time.perf_counter()
         # =========================
         # 7. Prezzi EUR per PositionKey
         # =========================
@@ -351,7 +358,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # 8. Valore storico portafoglio
         # =========================
         position_values = holdings * position_closes_eur
-
+        
+        st.write(f"⏱️ Position values: {time.perf_counter() - t:.2f} sec")
+        t = time.perf_counter()
+        
         # min_count=1 evita che tutte-NaN diventino 0
         total_value = position_values.sum(axis=1, min_count=1).rename("Valore portafoglio")
 
@@ -638,7 +648,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # 13. P/L trading = valore portafoglio - costo residuo aperto
     # =========================
     pnl = (total_value - invested).rename("P/L trading")
-
+    
+    st.write(f"⏱️ Metriche portfolio: {time.perf_counter() - t:.2f} sec")
+    t = time.perf_counter()
     # =========================
     # 14. Serie storica finale
     # =========================
@@ -800,5 +812,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     ].sort_values("Valore", ascending=False)
 
     exposure = current.reset_index().rename(columns={"index": "PositionKey"})
-
+    
+    st.write(f"⏱️ Current/Exposure: {time.perf_counter() - t:.2f} sec")
+    
     return ts, current, holdings, exposure, ops_all
