@@ -294,8 +294,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # =========================
     ops_all = enrich_ops_with_cost_engine(ops_all)
     
-    st.write(f"⏱️ Cost engine: {time.perf_counter() - t:.2f} sec")
-    t = time.perf_counter()
+    # st.write(f"⏱️ Cost engine: {time.perf_counter() - t:.2f} sec")
+    # t = time.perf_counter()
     
     # st.write("OPS_ALL")
     # st.dataframe(
@@ -404,8 +404,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # =========================
         position_values = holdings * position_closes_eur
         
-        st.write(f"⏱️ Position values: {time.perf_counter() - t:.2f} sec")
-        t = time.perf_counter()
+        # st.write(f"⏱️ Position values: {time.perf_counter() - t:.2f} sec")
+        # t = time.perf_counter()
         
         # min_count=1 evita che tutte-NaN diventino 0
         total_value = position_values.sum(axis=1, min_count=1).rename("Valore portafoglio")
