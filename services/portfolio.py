@@ -45,49 +45,8 @@ from services.market_data import convert_closes_to_eur
 #             )
 
 #     return perf.rename(name)
-# def build_period_performance(
-#     daily_total_pl: pd.Series,
-#     total_value: pd.Series,
-#     months: int | None = None,
-#     years: int | None = None,
-#     name: str = ""
-# ) -> pd.Series:
 
-#     perf = pd.Series(index=total_value.index, dtype=float)
-
-#     cum_pl = daily_total_pl.cumsum()
-#     cum_pl_prev = cum_pl.shift(1).fillna(0)
-    
-#     x = time.perf_counter()
-#     for dt in total_value.index:
-
-#         if months is not None:
-#             ref_date = dt - pd.DateOffset(months=months)
-#         elif years is not None:
-#             ref_date = dt - pd.DateOffset(years=years)
-#         else:
-#             continue
-
-#         history = total_value.loc[:ref_date].dropna()
-
-#         if history.empty:
-#             continue
-
-#         start_dt = history.index[-1]
-#         start_value = history.iloc[-1]
-
-#         period_pl = (
-#             cum_pl.loc[dt]
-#             - cum_pl_prev.loc[start_dt]
-#         )
-        
-#         t_sum += time.perf_counter() - x
-#         x = time.perf_counter()
-
-#         if start_value != 0:
-#             perf.loc[dt] = period_pl / start_value
-
-#     return perf.rename(name)
+#  funzione ottimizzate per ridurre i tempi di calcolo della precednte 
 
 def build_period_performance(
     daily_total_pl: pd.Series,
@@ -315,7 +274,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
 
 def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
 
-    t = time.perf_counter()
+    # t = time.perf_counter()
     # ✅ normalizzazione date
     ops_all = ops.copy()
     ops_all["Data"] = pd.to_datetime(ops_all["Data"], errors="coerce")
@@ -425,8 +384,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             market_last_date
         )
         
-        st.write(f"⏱️ Conversione EUR: {time.perf_counter() - t:.2f} sec")
-        t = time.perf_counter()
+        # st.write(f"⏱️ Conversione EUR: {time.perf_counter() - t:.2f} sec")
+        # t = time.perf_counter()
         # =========================
         # 7. Prezzi EUR per PositionKey
         # =========================
@@ -682,7 +641,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # ==========================================
         # Performance storiche portafoglio
         # ==========================================
-        t0 = time.perf_counter()
+        # t0 = time.perf_counter()
         
         perf_3m_pct = build_period_performance(
             daily_total_pl,
@@ -691,8 +650,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             name="Performance 3M %"
         )
         
-        st.write(f"3M: {time.perf_counter()-t0:.2f} sec")
-        t0 = time.perf_counter()
+        # st.write(f"3M: {time.perf_counter()-t0:.2f} sec")
+        # t0 = time.perf_counter()
         
         perf_6m_pct = build_period_performance(
             daily_total_pl,
@@ -701,8 +660,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             name="Performance 6M %"
         )
         
-        st.write(f"6M: {time.perf_counter()-t0:.2f} sec")
-        t0 = time.perf_counter()
+        # st.write(f"6M: {time.perf_counter()-t0:.2f} sec")
+        # t0 = time.perf_counter()
         
         perf_1y_pct = build_period_performance(
             daily_total_pl,
@@ -711,8 +670,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             name="Performance 1Y %"
         )
         
-        st.write(f"1Y: {time.perf_counter()-t0:.2f} sec")
-        t0 = time.perf_counter()
+        # st.write(f"1Y: {time.perf_counter()-t0:.2f} sec")
+        # t0 = time.perf_counter()
         
         perf_ytd_pct = pd.Series(
             index=total_value.index,
@@ -720,7 +679,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             name="Performance YTD %"
         )
 
-        t0 = time.perf_counter()
+        # t0 = time.perf_counter()
         for year in total_value.index.year.unique():
         
             mask = total_value.index.year == year
@@ -742,14 +701,14 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
                     ytd_pl / start_value
                 )
                 
-    st.write(f"YTD: {time.perf_counter()-t0:.2f} sec")
+    # st.write(f"YTD: {time.perf_counter()-t0:.2f} sec")
     # =========================
     # 13. P/L trading = valore portafoglio - costo residuo aperto
     # =========================
     pnl = (total_value - invested).rename("P/L trading")
     
-    st.write(f"⏱️ Metriche portfolio: {time.perf_counter() - t:.2f} sec")
-    t = time.perf_counter()
+    # st.write(f"⏱️ Metriche portfolio: {time.perf_counter() - t:.2f} sec")
+    # t = time.perf_counter()
     # =========================
     # 14. Serie storica finale
     # =========================
@@ -912,6 +871,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
 
     exposure = current.reset_index().rename(columns={"index": "PositionKey"})
     
-    st.write(f"⏱️ Current/Exposure: {time.perf_counter() - t:.2f} sec")
+    # st.write(f"⏱️ Current/Exposure: {time.perf_counter() - t:.2f} sec")
     
     return ts, current, holdings, exposure, ops_all
