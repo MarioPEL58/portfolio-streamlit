@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 import yfinance as yf
 import numpy as np
+import time
 from pathlib import Path
 
 # @st.cache_data(ttl=3600, show_spinner=False)
@@ -25,6 +26,7 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     #     st.warning(
     #         f"ISIN esclusi dal download Yahoo: {', '.join(isins)}"
     #     )
+    start = time.time()
     
     raw = yf.download(
         tickers=yahoo_tickers,
@@ -35,6 +37,8 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         group_by="ticker",
         threads=True,
     )
+
+    st.write(f"Download Yahoo: {time.time() - start:.2f} sec")
     
     # st.write("START", start_date.strftime("%Y-%m-%d"))
     # st.write("END", (end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"))
