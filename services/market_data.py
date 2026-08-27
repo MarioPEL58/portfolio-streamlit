@@ -11,9 +11,22 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     tickers = [t for t in tickers if isinstance(t, str) and t.strip()]
     if not tickers:
         return pd.DataFrame(), []
-
+        
+    yahoo_tickers = []
+    isins = []
+    
+    for symbol in tickers:
+        if is_isin(symbol):
+            isins.append(symbol)
+        else:
+            yahoo_tickers.append(symbol)
+    if isins:
+    st.warning(
+        f"ISIN esclusi dal download Yahoo: {', '.join(isins)}"
+    )
+    
     raw = yf.download(
-        tickers=tickers,
+        tickers=yahoo_tickers,
         start=start_date.strftime("%Y-%m-%d"),
         end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
         auto_adjust=False,
@@ -453,3 +466,12 @@ def load_bond_csv(isin: str) -> pd.DataFrame:
         .set_index("Data")
         .sort_index()
     )
+
+import re
+
+ISIN_PATTERN = re.compile(
+    r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$"
+)
+
+def is_isin(value: str) -> bool:
+    return bool(ISIN_PATTERN.match(str(value).strip().upper()))
