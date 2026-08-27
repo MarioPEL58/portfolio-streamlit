@@ -132,6 +132,8 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # st.write("PRIMA DEL JOIN")
     # st.write(closes.columns.tolist())
     
+    isins_caricati = []
+    
     for ticker in missing:
         
         bond_df = load_bond_csv(ticker)
@@ -140,7 +142,9 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         # st.write("Vuoto:", bond_df.empty)
     
         if not bond_df.empty:
-    
+            
+            isins_caricati.append(ticker)
+            
             closes = closes.drop(
                 columns=[ticker],
                 errors="ignore"
@@ -151,8 +155,8 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
                 how="outer"
             )
     
-            st.write(f"Caricato bond da CSV: {ticker}")
-            
+    if isins_caricati:
+        st.write(" Bond caricati bond da CSV:", ", ".join(isins_caricati) )
     # st.write("DOPO DEL JOIN")
     # st.write(closes.columns.tolist())   
     
