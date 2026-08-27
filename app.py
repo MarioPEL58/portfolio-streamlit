@@ -2,6 +2,7 @@ import os
 import streamlit as st
 import numpy as np
 import pandas as pd
+import time
 import plotly.express as px
 import plotly.graph_objects as go
 from utils.i18n import init_language, t
@@ -175,12 +176,14 @@ if closes.empty:
 
 if missing:
     st.warning(t("missing_tickers") + ", ".join(missing))
-
+    
+start= time.time()
 # Portfolio
 series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
 
 #debug
 # st.write(series.tail(5))
+st.write(f"Download Yahoo: {time.time() - start:.2f} sec")
 
 # ✅ taglia serie alla data reale
 series = series.loc[:market_last_date]
