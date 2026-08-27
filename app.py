@@ -183,7 +183,7 @@ series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered
 
 #debug
 # st.write(series.tail(5))
-st.write(f"Download Yahoo: {time.time() - start:.2f} sec")
+st.write(f"time to build Portfolio: {time.time() - start:.2f} sec")
 
 # ✅ taglia serie alla data reale
 series = series.loc[:market_last_date]
