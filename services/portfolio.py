@@ -45,6 +45,50 @@ from services.market_data import convert_closes_to_eur
 #             )
 
 #     return perf.rename(name)
+# def build_period_performance(
+#     daily_total_pl: pd.Series,
+#     total_value: pd.Series,
+#     months: int | None = None,
+#     years: int | None = None,
+#     name: str = ""
+# ) -> pd.Series:
+
+#     perf = pd.Series(index=total_value.index, dtype=float)
+
+#     cum_pl = daily_total_pl.cumsum()
+#     cum_pl_prev = cum_pl.shift(1).fillna(0)
+    
+#     x = time.perf_counter()
+#     for dt in total_value.index:
+
+#         if months is not None:
+#             ref_date = dt - pd.DateOffset(months=months)
+#         elif years is not None:
+#             ref_date = dt - pd.DateOffset(years=years)
+#         else:
+#             continue
+
+#         history = total_value.loc[:ref_date].dropna()
+
+#         if history.empty:
+#             continue
+
+#         start_dt = history.index[-1]
+#         start_value = history.iloc[-1]
+
+#         period_pl = (
+#             cum_pl.loc[dt]
+#             - cum_pl_prev.loc[start_dt]
+#         )
+        
+#         t_sum += time.perf_counter() - x
+#         x = time.perf_counter()
+
+#         if start_value != 0:
+#             perf.loc[dt] = period_pl / start_value
+
+#     return perf.rename(name)
+
 def build_period_performance(
     daily_total_pl: pd.Series,
     total_value: pd.Series,
@@ -58,6 +102,9 @@ def build_period_performance(
     cum_pl = daily_total_pl.cumsum()
     cum_pl_prev = cum_pl.shift(1).fillna(0)
 
+    valid_values = total_value.dropna()
+    valid_index = valid_values.index
+
     for dt in total_value.index:
 
         if months is not None:
@@ -67,13 +114,13 @@ def build_period_performance(
         else:
             continue
 
-        history = total_value.loc[:ref_date].dropna()
+        pos = valid_index.searchsorted(ref_date, side="right") - 1
 
-        if history.empty:
+        if pos < 0:
             continue
 
-        start_dt = history.index[-1]
-        start_value = history.iloc[-1]
+        start_dt = valid_index[pos]
+        start_value = valid_values.iloc[pos]
 
         period_pl = (
             cum_pl.loc[dt]
@@ -84,7 +131,7 @@ def build_period_performance(
             perf.loc[dt] = period_pl / start_value
 
     return perf.rename(name)
-    
+
 def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
     keys = sorted(ops["PositionKey"].unique().tolist())
     holdings = pd.DataFrame(0.0, index=idx, columns=keys)
