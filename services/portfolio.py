@@ -596,6 +596,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # ==========================================
         # Performance storiche portafoglio
         # ==========================================
+        t0 = time.perf_counter()
         
         perf_3m_pct = build_period_performance(
             daily_total_pl,
@@ -604,12 +605,18 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             name="Performance 3M %"
         )
         
+        st.write(f"3M: {time.perf_counter()-t0:.2f} sec")
+        t0 = time.perf_counter()
+        
         perf_6m_pct = build_period_performance(
             daily_total_pl,
             total_value,
             months=6,
             name="Performance 6M %"
         )
+        
+        st.write(f"6M: {time.perf_counter()-t0:.2f} sec")
+        t0 = time.perf_counter()
         
         perf_1y_pct = build_period_performance(
             daily_total_pl,
@@ -618,12 +625,16 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             name="Performance 1Y %"
         )
         
+        st.write(f"3M: {time.perf_counter()-t0:.2f} sec")
+        t0 = time.perf_counter()
+        
         perf_ytd_pct = pd.Series(
             index=total_value.index,
             dtype=float,
             name="Performance YTD %"
         )
-        
+
+        t0 = time.perf_counter()
         for year in total_value.index.year.unique():
         
             mask = total_value.index.year == year
@@ -644,6 +655,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
                 perf_ytd_pct.loc[mask] = (
                     ytd_pl / start_value
                 )
+                
+    st.write(f"YTD: {time.perf_counter()-t0:.2f} sec")
     # =========================
     # 13. P/L trading = valore portafoglio - costo residuo aperto
     # =========================
