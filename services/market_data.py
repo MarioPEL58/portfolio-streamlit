@@ -28,16 +28,18 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     #     )
     # start = time.time()
     
-    raw = yf.download(
-        tickers=yahoo_tickers,
-        start=start_date.strftime("%Y-%m-%d"),
-        end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
-        auto_adjust=False,
-        progress=False,
-        group_by="ticker",
-        threads=True,
-    )
-
+    if yahoo_tickers:
+        raw = yf.download(
+            tickers=yahoo_tickers,
+            start=start_date.strftime("%Y-%m-%d"),
+            end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
+            auto_adjust=False,
+            progress=False,
+            group_by="ticker",
+            threads=True,
+        )
+    else: 
+        raw = pd.DataFrame()
     # st.write(f"Download Yahoo: {time.time() - start:.2f} sec")
     
     # st.write("START", start_date.strftime("%Y-%m-%d"))
