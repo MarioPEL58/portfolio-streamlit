@@ -4,23 +4,43 @@ import pandas as pd
 import streamlit as st
 import yfinance as yf
 import numpy as np
+import time
 from pathlib import Path
 
-# @st.cache_data(show_spinner=False)
+# @st.cache_data(ttl=3600, show_spinner=False)
 def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp):
     tickers = [t for t in tickers if isinstance(t, str) and t.strip()]
     if not tickers:
         return pd.DataFrame(), []
-
-    raw = yf.download(
-        tickers=tickers,
-        start=start_date.strftime("%Y-%m-%d"),
-        end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
-        auto_adjust=False,
-        progress=False,
-        group_by="ticker",
-        threads=True,
-    )
+        
+    yahoo_tickers = []
+    isins = []
+    
+    for symbol in tickers:
+        if is_isin(symbol):
+            isins.append(symbol)
+        else:
+            yahoo_tickers.append(symbol)
+            
+    # if isins:
+    #     st.warning(
+    #         f"ISIN esclusi dal download Yahoo: {', '.join(isins)}"
+    #     )
+    # start = time.time()
+    
+    if yahoo_tickers:
+        raw = yf.download(
+            tickers=yahoo_tickers,
+            start=start_date.strftime("%Y-%m-%d"),
+            end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
+            auto_adjust=False,
+            progress=False,
+            group_by="ticker",
+            threads=True,
+        )
+    else: 
+        raw = pd.DataFrame()
+    # st.write(f"Download Yahoo: {time.time() - start:.2f} sec")
     
     # st.write("START", start_date.strftime("%Y-%m-%d"))
     # st.write("END", (end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"))
@@ -119,6 +139,8 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     # st.write("PRIMA DEL JOIN")
     # st.write(closes.columns.tolist())
     
+    isins_caricati = []
+    
     for ticker in missing:
         
         bond_df = load_bond_csv(ticker)
@@ -127,7 +149,9 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         # st.write("Vuoto:", bond_df.empty)
     
         if not bond_df.empty:
-    
+            
+            isins_caricati.append(ticker)
+            
             closes = closes.drop(
                 columns=[ticker],
                 errors="ignore"
@@ -138,8 +162,8 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
                 how="outer"
             )
     
-            st.write(f"Caricato bond da CSV: {ticker}")
-            
+    if isins_caricati:
+        st.write(" Bond caricati bond da CSV:", ", ".join(isins_caricati) )
     # st.write("DOPO DEL JOIN")
     # st.write(closes.columns.tolist())   
     
@@ -171,7 +195,7 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     return closes, missing
 
 
-@st.cache_data(show_spinner=False)
+# @st.cache_data(show_spinner=False)
 def download_fx_series(currencies: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd.DataFrame:
     currencies = sorted(set([c for c in currencies if isinstance(c, str) and c and c != "EUR"]))
     if not currencies:
@@ -453,3 +477,12 @@ def load_bond_csv(isin: str) -> pd.DataFrame:
         .set_index("Data")
         .sort_index()
     )
+
+import re
+
+ISIN_PATTERN = re.compile(
+    r"^[A-Z]{2}[A-Z0-9]{9}[0-9]$"
+)
+
+def is_isin(value: str) -> bool:
+    return bool(ISIN_PATTERN.match(str(value).strip().upper()))

@@ -2,9 +2,94 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import time
 import streamlit as st
 from services.market_data import convert_closes_to_eur
 
+# def build_period_performance(
+#     daily_total_pl: pd.Series,
+#     total_value: pd.Series,
+#     months: int | None = None,
+#     years: int | None = None,
+#     name: str = ""
+# ) -> pd.Series:
+
+#     perf = pd.Series(index=total_value.index, dtype=float)
+
+#     for dt in total_value.index:
+
+#         if months is not None:
+#             ref_date = dt - pd.DateOffset(months=months)
+#         elif years is not None:
+#             ref_date = dt - pd.DateOffset(years=years)
+#         else:
+#             continue
+
+#         # rendimento economico del periodo
+#         period_pl = (
+#             daily_total_pl.loc[ref_date:dt]
+#             .sum()
+#         )
+
+#         # valore portfolio a inizio periodo
+#         history = total_value.loc[:ref_date].dropna()
+
+#         if history.empty:
+#             continue
+
+#         start_value = history.iloc[-1]
+
+#         if start_value != 0:
+#             perf.loc[dt] = (
+#                 period_pl / start_value
+#             )
+
+#     return perf.rename(name)
+
+#  funzione ottimizzate per ridurre i tempi di calcolo della precednte 
+
+def build_period_performance(
+    daily_total_pl: pd.Series,
+    total_value: pd.Series,
+    months: int | None = None,
+    years: int | None = None,
+    name: str = ""
+) -> pd.Series:
+
+    perf = pd.Series(index=total_value.index, dtype=float)
+
+    cum_pl = daily_total_pl.cumsum()
+    cum_pl_prev = cum_pl.shift(1).fillna(0)
+
+    valid_values = total_value.dropna()
+    valid_index = valid_values.index
+
+    for dt in total_value.index:
+
+        if months is not None:
+            ref_date = dt - pd.DateOffset(months=months)
+        elif years is not None:
+            ref_date = dt - pd.DateOffset(years=years)
+        else:
+            continue
+
+        pos = valid_index.searchsorted(ref_date, side="right") - 1
+
+        if pos < 0:
+            continue
+
+        start_dt = valid_index[pos]
+        start_value = valid_values.iloc[pos]
+
+        period_pl = (
+            cum_pl.loc[dt]
+            - cum_pl_prev.loc[start_dt]
+        )
+
+        if start_value != 0:
+            perf.loc[dt] = period_pl / start_value
+
+    return perf.rename(name)
 
 def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
     keys = sorted(ops["PositionKey"].unique().tolist())
@@ -189,6 +274,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
 
 def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
 
+    # t = time.perf_counter()
     # ✅ normalizzazione date
     ops_all = ops.copy()
     ops_all["Data"] = pd.to_datetime(ops_all["Data"], errors="coerce")
@@ -207,7 +293,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # 1. Arricchimento cost engine
     # =========================
     ops_all = enrich_ops_with_cost_engine(ops_all)
-
+    
+    # st.write(f"⏱️ Cost engine: {time.perf_counter() - t:.2f} sec")
+    # t = time.perf_counter()
+    
     # st.write("OPS_ALL")
     # st.dataframe(
     #     ops_all[
@@ -294,7 +383,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             start_date,
             market_last_date
         )
-
+        
+        # st.write(f"⏱️ Conversione EUR: {time.perf_counter() - t:.2f} sec")
+        # t = time.perf_counter()
         # =========================
         # 7. Prezzi EUR per PositionKey
         # =========================
@@ -312,7 +403,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # 8. Valore storico portafoglio
         # =========================
         position_values = holdings * position_closes_eur
-
+        
+        # st.write(f"⏱️ Position values: {time.perf_counter() - t:.2f} sec")
+        # t = time.perf_counter()
+        
         # min_count=1 evita che tutte-NaN diventino 0
         total_value = position_values.sum(axis=1, min_count=1).rename("Valore portafoglio")
 
@@ -351,7 +445,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
 
     realized_daily = realized_from_trades.add(daily_dividends, fill_value=0.0)
     pl_realizzato = realized_daily.cumsum().rename("P/L realizzato")
-
+    
     # =========================
     # 10. Capitale investito reale (costo residuo aperto storico)
     # =========================
@@ -393,6 +487,24 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         weekly_pl = pd.Series(0.0, index=idx, name="P/L 7 Giorni")
         weekly_pl_pct = pd.Series(np.nan, index=idx, name="P/L 7 Giorni %")
+        
+        monthly_pl = pd.Series(0.0, index=idx, name="P/L 30 Giorni")
+        monthly_pl_pct = pd.Series(np.nan, index=idx, name="P/L 30 Giorni %")
+        
+        daily_total_pl = pd.Series(0.0, index=idx, name="P/L Totale Giornaliero")
+        daily_total_pl_pct = pd.Series(np.nan, index=idx, name="P/L Totale Giornaliero %")
+        
+        weekly_total_pl = pd.Series(0.0, index=idx, name="P/L Totale 7 Giorni")
+        weekly_total_pl_pct = pd.Series(np.nan, index=idx, name="P/L Totale 7 Giorni %")
+        
+        monthly_total_pl = pd.Series(0.0, index=idx, name="P/L Totale 30 Giorni")
+        monthly_total_pl_pct = pd.Series(np.nan, index=idx, name="P/L Totale 30 Giorni %")
+
+        perf_3m_pct = pd.Series(np.nan, index=idx, name="Performance 3M %")
+        perf_6m_pct = pd.Series(np.nan, index=idx, name="Performance 6M %")
+        perf_ytd_pct = pd.Series(np.nan, index=idx, name="Performance YTD %")
+        perf_1y_pct = pd.Series(np.nan, index=idx, name="Performance 1Y %")
+        
     else:
         
         daily_cf_positions = (
@@ -491,11 +603,112 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             monthly_pl
             / total_value.shift(30)
         ).rename("P/L 30 Giorni %")
+
+        # ==================================================
+        # Performance totale portafoglio
+        # (unrealized + realized + dividendi)
+        # ==================================================
+        
+        daily_total_pl = (
+            daily_pl + realized_daily
+        ).rename("P/L Totale Giornaliero")
+        
+        daily_total_pl_pct = (
+            daily_total_pl / total_value.shift(1)
+        ).rename("P/L Totale Giornaliero %")
+        
+        weekly_total_pl = (
+            daily_total_pl
+            .rolling("7D")
+            .sum()
+            .rename("P/L Totale 7 Giorni")
+        )
+        
+        weekly_total_pl_pct = (
+            weekly_total_pl / total_value.shift(7)
+        ).rename("P/L Totale 7 Giorni %")
+        
+        monthly_total_pl = (
+            daily_total_pl
+            .rolling("30D")
+            .sum()
+            .rename("P/L Totale 30 Giorni")
+        )
+        
+        monthly_total_pl_pct = (
+            monthly_total_pl / total_value.shift(30)
+        ).rename("P/L Totale 30 Giorni %")
+        # ==========================================
+        # Performance storiche portafoglio
+        # ==========================================
+        # t0 = time.perf_counter()
+        
+        perf_3m_pct = build_period_performance(
+            daily_total_pl,
+            total_value,
+            months=3,
+            name="Performance 3M %"
+        )
+        
+        # st.write(f"3M: {time.perf_counter()-t0:.2f} sec")
+        # t0 = time.perf_counter()
+        
+        perf_6m_pct = build_period_performance(
+            daily_total_pl,
+            total_value,
+            months=6,
+            name="Performance 6M %"
+        )
+        
+        # st.write(f"6M: {time.perf_counter()-t0:.2f} sec")
+        # t0 = time.perf_counter()
+        
+        perf_1y_pct = build_period_performance(
+            daily_total_pl,
+            total_value,
+            years=1,
+            name="Performance 1Y %"
+        )
+        
+        # st.write(f"1Y: {time.perf_counter()-t0:.2f} sec")
+        # t0 = time.perf_counter()
+        
+        perf_ytd_pct = pd.Series(
+            index=total_value.index,
+            dtype=float,
+            name="Performance YTD %"
+        )
+
+        # t0 = time.perf_counter()
+        for year in total_value.index.year.unique():
+        
+            mask = total_value.index.year == year
+        
+            values = total_value.loc[mask].dropna()
+        
+            if values.empty:
+                continue
+        
+            start_value = values.iloc[0]
+        
+            ytd_pl = (
+                daily_total_pl.loc[mask]
+                .cumsum()
+            )
+        
+            if start_value != 0:
+                perf_ytd_pct.loc[mask] = (
+                    ytd_pl / start_value
+                )
+                
+    # st.write(f"YTD: {time.perf_counter()-t0:.2f} sec")
     # =========================
     # 13. P/L trading = valore portafoglio - costo residuo aperto
     # =========================
     pnl = (total_value - invested).rename("P/L trading")
-
+    
+    # st.write(f"⏱️ Metriche portfolio: {time.perf_counter() - t:.2f} sec")
+    # t = time.perf_counter()
     # =========================
     # 14. Serie storica finale
     # =========================
@@ -511,6 +724,16 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             weekly_pl_pct,
             monthly_pl,
             monthly_pl_pct,
+            daily_total_pl,
+            daily_total_pl_pct,
+            weekly_total_pl,
+            weekly_total_pl_pct,
+            monthly_total_pl,
+            monthly_total_pl_pct,
+            perf_3m_pct,
+            perf_6m_pct,
+            perf_ytd_pct,
+            perf_1y_pct,
             daily_dividends,
             pl_realizzato
         ],
@@ -647,5 +870,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     ].sort_values("Valore", ascending=False)
 
     exposure = current.reset_index().rename(columns={"index": "PositionKey"})
-
+    
+    # st.write(f"⏱️ Current/Exposure: {time.perf_counter() - t:.2f} sec")
+    
     return ts, current, holdings, exposure, ops_all

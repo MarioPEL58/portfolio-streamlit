@@ -2,6 +2,7 @@ import os
 import streamlit as st
 import numpy as np
 import pandas as pd
+import time
 import plotly.express as px
 import plotly.graph_objects as go
 from utils.i18n import init_language, t
@@ -36,6 +37,8 @@ from utils.kpi_cards import (
     render_realized_card,
     render_total_pl_card
 )
+
+from utils.performance_card import render_performance_cards_tot, render_performance_cards
 
 from config.config import load_config
 
@@ -173,12 +176,14 @@ if closes.empty:
 
 if missing:
     st.warning(t("missing_tickers") + ", ".join(missing))
-
+    
+start= time.time()
 # Portfolio
 series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
 
 #debug
 # st.write(series.tail(5))
+st.write(f"time to build Portfolio: {time.time() - start:.2f} sec")
 
 # ✅ taglia serie alla data reale
 series = series.loc[:market_last_date]
@@ -394,7 +399,7 @@ with c4:
         total_pct=total_pct,
         annualized_pct=xirr_value
     )
-
+    
 # # ✅ label che descive il market status 
 
 render_market_data_status(
@@ -402,6 +407,25 @@ render_market_data_status(
     filtered_tickers=filtered_tickers,
     ops_filtered=ops_filtered
 )
+
+st.subheader(t("performance_total"))
+
+# debug 3M
+# st.write({
+#     "1D": series["P/L Totale Giornaliero %"].iloc[-1],
+#     "1W": series["P/L Totale 7 Giorni %"].iloc[-1],
+#     "1M": series["P/L Totale 30 Giorni %"].iloc[-1],
+#     "3M": series["Performance 3M %"].iloc[-1],
+# })
+# st.write(series[[
+#     "P/L Totale Giornaliero %",
+#     "P/L Totale 7 Giorni %",
+#     "P/L Totale 30 Giorni %",
+#     "Performance 3M %"
+# ]].tail(30))
+
+render_performance_cards_tot(series) #  contiene anche dividendie e profitto delle posizioni vendute nel frattempo
+st.caption(t("performance_total_desc"))
 
 # Main chart
 
@@ -695,12 +719,15 @@ with tab_pos:
 
 with tab_perfo:
     st.subheader(t("performance_title"))
+    render_performance_cards(current)
     render_performance_table(current)
 with tab_exp:
     st.subheader(t("allocation_title"))
     
     # ✅ PIE (Ticker)
-    fig = allocation_pie_chart(exposure, column="Ticker")
+    fig = allocation_pie_chart(exposure,
+        column=label_choice if label_choice in exposure.columns else "Ticker"
+        )
     if fig:
         st.plotly_chart(fig, use_container_width=True)
     
