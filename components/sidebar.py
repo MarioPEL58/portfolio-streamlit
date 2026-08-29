@@ -25,6 +25,10 @@ def render_sidebar():
         t("sidebar_label_name"): "Nome"
     }
     with st.sidebar:
+        
+        _, center, _ = st.columns([1, 3, 1])
+        with center:
+            st.image("assets/Pem_Image_github.png",width=100)
 
         st.markdown("---")
         st.header(t("sidebar_data_source"))
