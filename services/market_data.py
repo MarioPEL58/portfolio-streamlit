@@ -8,20 +8,25 @@ import time
 from pathlib import Path
 
 import pytz
-from requests_cache import CachedSession
+# 🚀 Sostituiamo requests_cache con le estensioni standard di requests
+import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 
 # =====================================================================
-# 🌟 CONFIGURAZIONE SESSIONE GLOBALE (Mettila fuori dalla funzione)
+# 🌟 CONFIGURAZIONE SESSIONE GLOBALE STANDARD (Senza cache SQLite)
 # =====================================================================
-# Memorizza le risposte per 5 minuti per evitare il Rate Limiting di Yahoo
-session = CachedSession('yahoo_cache', expire_after=300)
-retries = Retry(total=3, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+# Creiamo una sessione standard per gestire i tentativi (Retry) e camuffare lo User-Agent
+session = requests.Session()
+retries = Retry(
+    total=3,                # Numero massimo di tentativi prima di fallire
+    backoff_factor=1,       # Tempo di attesa crescente tra i tentativi (1s, 2s, 4s...)
+    status_forcelist=[500, 502, 503, 504] # Riprova se Yahoo risponde con questi errori di server
+)
 session.mount('https://', HTTPAdapter(max_retries=retries))
 session.headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
 
-# Configurazione della cache interna dei fusi orari richiesta dalle ultime versioni di yfinance
+# Configurazione della cache interna nativa dei fusi orari di yfinance
 yf.set_tz_cache_location("yahoo_tz_cache")
 
 def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp):
@@ -39,23 +44,28 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
             yahoo_tickers.append(symbol)
             
     if yahoo_tickers:
-        raw = yf.download(
-            tickers=yahoo_tickers,
-            start=start_date.strftime("%Y-%m-%d"),
-            end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
-            auto_adjust=False,
-            progress=False,
-            group_by="ticker",
-            threads=False,   # 🚀 FIX: Disattivare i thread previene conflitti con sqlite/requests_cache
-            session=session  # 🚀 FONDAMENTALE: Evita il rate limiting passando la cache attiva
-        )
+        try:
+            # 🚀 FIX: Passiamo la sessione standard robusta. yfinance la accetta 
+            # perché non altera i meccanismi interni di memorizzazione dei dati.
+            raw = yf.download(
+                tickers=yahoo_tickers,
+                start=start_date.strftime("%Y-%m-%d"),
+                end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
+                auto_adjust=False,
+                progress=False,
+                group_by="ticker",
+                threads=False,   # Manteniamo False per stabilità con le sessioni
+                session=session  
+            )
+        except Exception as e:
+            st.error(f"Errore critico durante il download da Yahoo: {e}")
+            raw = pd.DataFrame()
     else: 
         raw = pd.DataFrame()
 
     if raw is None or len(raw) == 0:
         closes = pd.DataFrame()
     else:
-        # 🚀 FIX FUSI ORARI: Rimuoviamo il fuso orario di Yahoo per non rompere il successivo .join() con i CSV
         if raw.index.tz is not None:
             raw.index = raw.index.tz_localize(None)
             
@@ -73,7 +83,6 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
                 elif "Adj Close" in raw[t].columns:
                     closes[t] = raw[t]["Adj Close"]
             
-            # ✅ FIX INDENTAZIONE: Ora l'orfanotrofio delle colonne scatta solo se closes è rimasto vuoto
             if closes.empty:
                 field = "Close" if "Close" in lvl0 else ("Adj Close" if "Adj Close" in lvl0 else None)
                 if field is not None:
@@ -91,36 +100,26 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     
         closes = closes.sort_index()
         
-        # ==========================================
-        # ✅ Pulizia base & Rimozione Outlier (Glitch)
-        # ==========================================
+        # Pulizia base & Outlier
         closes = closes.replace([0, np.inf, -np.inf], np.nan)
-        
         returns = closes.pct_change()
-        threshold = 0.3  # 30% giornaliero
+        threshold = 0.3  
         outliers = returns.abs() > threshold
         closes[outliers] = np.nan
         
-        # ==========================================
-        # ✅ Fill & Controllo Qualità
-        # ==========================================
         closes = closes.ffill()
         invalid_points = outliers.sum().sum()
         
         if invalid_points > 0:
             st.caption(f"⚠️ Correzione automatica di {invalid_points} prezzi anomali")
         
-    # ==========================================
-    # ✅ Missing ticker (Gestione Obbligazioni)
-    # ==========================================
+    # Missing ticker (Obbligazioni)
     missing = [t for t in tickers if (t not in closes.columns or closes[t].dropna().empty)]
     isins_caricati = []
     
     for ticker in missing:
         bond_df = load_bond_csv(ticker)
-        
         if not bond_df.empty:
-            # Rimuove il fuso orario anche dall'indice del CSV per accoppiamento perfetto
             if bond_df.index.tz is not None:
                 bond_df.index = bond_df.index.tz_localize(None)
                 
@@ -131,13 +130,10 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
     if isins_caricati:
         st.write(" Bond caricati bond da CSV:", ", ".join(isins_caricati))
     
-    # Finalizzazione con ordinamento stabile
     closes = closes.sort_index().ffill()
-
     missing = [t for t in tickers if (t not in closes.columns or closes[t].dropna().empty)]
     
     return closes, missing
-
 
 # @st.cache_data(show_spinner=False)
 def download_fx_series(currencies: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd.DataFrame:
