@@ -59,7 +59,7 @@ st.set_page_config(
 )
 
 #  🔹 Richiama la funzione subito dopo la page config per lo stile di stampa
- applica_stile_stampa()
+applica_stile_stampa()
 
 LANG = init_language(CONFIG)
 # 🔹 Header
