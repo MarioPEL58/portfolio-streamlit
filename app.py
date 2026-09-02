@@ -39,6 +39,7 @@ from utils.kpi_cards import (
 )
 
 from utils.performance_card import render_performance_cards_tot, render_performance_cards
+from utils.style import applica_stile_stampa
 
 from config.config import load_config
 
@@ -56,6 +57,9 @@ st.set_page_config(
     page_icon=env_cfg["icon"],
     layout="wide"
 )
+
+#  🔹 Richiama la funzione subito dopo la page config per lo stile di stampa
+applica_stile_stampa()
 
 LANG = init_language(CONFIG)
 # 🔹 Header
