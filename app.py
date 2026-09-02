@@ -478,8 +478,8 @@ with tab_perf:
         benchmark_name=benchmark,
         note_text=note_text
     )
-    # st.plotly_chart(fig, use_container_width=True)
-    st.plotly_chart(fig, width="stretch", theme=None)
+    st.plotly_chart(fig, use_container_width=True)
+    # st.plotly_chart(fig, width="stretch", theme=None)
 
 with tab_daily:
     st.subheader(t("daily_title"))
