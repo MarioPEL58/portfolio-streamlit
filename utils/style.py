@@ -11,22 +11,25 @@ def applica_stile_stampa():
         """
         <style>
         @media print {
-            /* 1. Sfondo bianco e testo scuro */
+            /* 1. Sfondo pagina bianco e testo scuro */
             .stApp, body, html, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
                 background-color: white !important;
                 background: white !important;
                 color: #111111 !important;
             }
 
-            /* 2. FORZA LA VISIBILITÀ DI PLOTLY */
-            /* Inverte i colori del grafico scuro rendendolo istantaneamente perfetto su bianco */
-            .stPlotlyChart {
+            /* 2. GESTIONE GRAFICO DINAMICO PLOTLY */
+            /* Non nascondiamo o alteriamo la struttura: applichiamo un filtro di inversione */
+            /* che trasforma istantaneamente i tracciati chiari e lo sfondo scuro in bianco/nero */
+            .stPlotlyChart, iframe, .js-plotly-plot {
+                visibility: visible !important;
+                display: block !important;
                 filter: invert(1) hue-rotate(180deg) !important;
                 background: transparent !important;
             }
 
-            /* Evita che i grafici vengano tagliati a metà tra due pagine */
-            .stPlotlyChart, .element-container {
+            /* Evita blocchi o troncamenti del container interattivo */
+            .element-container {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
             }
@@ -42,7 +45,7 @@ def applica_stile_stampa():
                 color: #111111 !important;
             }
 
-            /* 4. Nascondi elementi inutili */
+            /* 4. Nascondi elementi inutili della UI */
             [data-testid="stSidebar"], header, footer, .stDeployButton, [data-testid="stDecoration"], .stTabs {
                 display: none !important;
             }
