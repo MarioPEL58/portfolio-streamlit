@@ -61,34 +61,59 @@ def applica_stile_stampa():
         <style>
         /* Isola le regole SOLO per il momento della stampa fisica */
         @media print {
-            /* 1. Forza sfondo bianco e scuro solo sul contenitore dei dati */
-            [data-testid="stAppViewContainer"], .stApp {
+            /* 1. Forza sfondo bianco totale ovunque, incluse tutte le pagine successive e i blocchi */
+            .stApp, body, html, 
+            [data-testid="stAppViewContainer"], 
+            [data-testid="stVerticalBlock"],
+            [data-testid="stHeader"],
+            .main .block-container {
                 background-color: white !important;
                 background: white !important;
                 color: #111111 !important;
             }
 
-            /* 2. Inverte solo il contenitore del grafico Plotly senza toccare il resto */
-            .stPlotlyChart {
+            /* 2. GESTIONE GRAFICI PLOTLY MULTIPAGINA */
+            /* Evita il reset del filtro di inversione sulle pagine successive */
+            .stPlotlyChart, .js-plotly-plot, iframe {
                 filter: invert(1) hue-rotate(180deg) !important;
                 background: transparent !important;
                 visibility: visible !important;
                 display: block !important;
+                page-break-inside: avoid !important; /* Impedisce che un grafico si spezzi a metà tra due pagine */
+                break-inside: avoid !important;
             }
 
-            /* 3. Cambia colore ai testi principali del report */
-            .stMarkdown p, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, [data-testid="stCaptionContainer"] {
+            /* 3. RESET TOTALE TABELLE (st.dataframe / st.table) */
+            /* Rimuove lo sfondo nero e forza i bordi e i testi scuri sulle tabelle successive */
+            div[data-testid="stDataFrame"], 
+            div[data-testid="data-grid"], 
+            .stTable, table, th, td, tr {
+                background-color: white !important;
+                background: white !important;
+                color: #111111 !important;
+                border-color: #dee2e6 !important;
+            }
+            
+            /* Sbianca le intestazioni delle tabelle di Streamlit */
+            thead, th, [role="columnheader"] {
+                background-color: #f8f9fa !important;
                 color: #111111 !important;
             }
 
-            /* Box delle metriche finanziarie convertiti in chiaro */
+            /* 4. Cambia colore ai testi principali e caption di tutto il report */
+            h1, h2, h3, h4, h5, h6, p, span, label, li, 
+            .stMarkdown, .stMarkdown p, [data-testid="stCaptionContainer"] {
+                color: #111111 !important;
+            }
+
+            /* Box delle metriche finanziarie (card delle performance) */
             [data-testid="stMetric"], div[style*="background-color"] { 
                 background-color: #f8f9fa !important;
                 border: 1px solid #dee2e6 !important;
                 color: #111111 !important;
             }
 
-            /* 4. Nasconde la sidebar e i menu di controllo nel PDF finale */
+            /* 5. Nasconde la sidebar e i menu di controllo nel PDF finale */
             [data-testid="stSidebar"], header, footer, .stDeployButton, [data-testid="stDecoration"] {
                 display: none !important;
             }
