@@ -90,14 +90,26 @@ def render_sidebar():
             t("sidebar_min_date"),
             value=None
         )
-
+        
+        # 🔹 AGGIUNTA SEZIONE STAMPA con fondo bianco🔹
+        st.markdown("---")     
+        st.header(t("sidebar_print_header"))
+        
+        stampa_attiva = st.toggle(
+            t("sidebar_print_toggle"),
+            value=get_state("stampa_attiva"),
+            key="stampa_attiva_toggle"
+        )
+        set_state("stampa_attiva", stampa_attiva)
+        
     return {
         "uploaded_file": uploaded_file,
         "benchmark": get_state("benchmark"),
         "show_benchmark": get_state("show_benchmark"),
         "use_risk_free": get_state("use_risk_free"),
         "min_filter_date": min_filter_date,
-        "label_choice": get_state("label_choice")
+        "label_choice": get_state("label_choice"),
+        "stampa_attiva": get_state("stampa_attiva")
     }
 
 def resolve_file_source(uploaded_file):
