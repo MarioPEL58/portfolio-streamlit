@@ -48,13 +48,16 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
     if note_text:
         fig.add_annotation(
             xref="paper",
-            yref="paper",
+            # yref="paper",
+            yref="container",  # 🔹 Cambiato da "paper" a "container" per sbloccare i margini esterni
             x=0.01,
-            y=0.02,
+            # y=0.02,
+            y=0.01,            # 🔹 Spostato al limite inferiore del contenitore grafico
             text=f"<i>{note_text}</i>",
             showarrow=False,
             font=dict(size=11, color="gray"),
-            align="left"
+            align="left",
+            yanchor="bottom"   # 🔹 Forziamo l'ancoraggio alla base del testo
         )
         
     fig.update_layout(
