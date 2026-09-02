@@ -86,6 +86,7 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
             xanchor="right",
             x=1
         ),
+        plot_bgcolor="rgba(255, 255, 255, 0.03)", # Crea un leggerissimo velo chiaro sul nero
         margin=dict(l=80, r=80, t=20, b=60)
     )
 
