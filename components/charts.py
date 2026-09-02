@@ -51,7 +51,7 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
             yref="paper",
             x=0.01,
             # y=0.02,
-            y=-0.12,            # 🔹 Valore negativo per spingere il testo SOTTO il grafico
+            y=-0.10,            # 🔹 Valore negativo per spingere il testo SOTTO il grafico
             text=f"<i>{note_text}</i>",
             showarrow=False,
             font=dict(size=11, color="gray"),
