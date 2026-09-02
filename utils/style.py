@@ -62,14 +62,14 @@ def applica_stile_stampa():
         /* Isola le regole SOLO per il momento della stampa fisica */
         @media print {
             
-            /* 1. Forza sfondo bianco su tutta l'applicazione (tutte le pagine del PDF) */
+            /* 1. Forza lo sfondo bianco globale sul contenitore principale */
             html, body, .stApp, [data-testid="stAppViewContainer"] {
                 background-color: white !important;
                 background: white !important;
                 color: #111111 !important;
             }
 
-            /* 2. FILTRO GRAFICO (Il tuo blocco originale che funzionava perfettamente) */
+            /* 2. FILTRO GRAFICO PLOTLY (Mantenuto intatto perché funziona) */
             .stPlotlyChart {
                 filter: invert(1) hue-rotate(180deg) !important;
                 background: transparent !important;
@@ -77,34 +77,35 @@ def applica_stile_stampa():
                 display: block !important;
             }
 
-            /* Evita che i grafici si spezzino a metà tra la pagina 1 e la pagina 2 */
-            .stPlotlyChart, .element-container {
+            /* 3. RISOLUZIONE TABELLE (st.dataframe) */
+            /* Applica lo stesso filtro di inversione hardware del grafico al container del dataframe */
+            [data-testid="stDataFrameResizable"], [role="grid"], .stTable {
+                filter: invert(1) hue-rotate(180deg) !important;
+                background: transparent !important;
+            }
+
+            /* Forza la visibilità e la larghezza del contenitore della tabella */
+            div[data-testid="stDataFrame"] {
+                background-color: transparent !important;
+            }
+
+            /* Evita interruzioni di pagina scomode per grafici e tabelle */
+            .stPlotlyChart, [data-testid="stDataFrameResizable"], .element-container {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
             }
 
-            /* 3. SBANCAMENTO TABELLE E DATAFRAME */
-            /* Forza le tabelle successive a ereditare il fondo bianco e testo nero */
-            div[data-testid="stDataFrame"], .stTable, table, tr, td, th {
-                background-color: white !important;
-                background: white !important;
-                color: #111111 !important;
-                border-color: #dee2e6 !important;
-            }
-
-            /* 4. Forza tutti i testi principali, markdown e didascalie a essere scuri */
+            /* 4. Colore testi, markdown e metriche finanziarie */
             h1, h2, h3, h4, h5, h6, p, span, label, .stMarkdown, [data-testid="stCaptionContainer"] {
                 color: #111111 !important;
             }
-
-            /* Box delle metriche finanziarie convertiti in chiaro */
             [data-testid="stMetric"], div[style*="background-color"] { 
                 background-color: #f8f9fa !important;
                 border: 1px solid #dee2e6 !important;
                 color: #111111 !important;
             }
 
-            /* 5. Nasconde la sidebar e i menu di controllo nel PDF finale */
+            /* 5. Nasconde elementi di controllo e barre laterali */
             [data-testid="stSidebar"], header, footer, .stDeployButton, [data-testid="stDecoration"] {
                 display: none !important;
             }
@@ -113,6 +114,7 @@ def applica_stile_stampa():
         """,
         unsafe_allow_html=True
     )
+
 
 def applica_layout_stampa_chiaro(fig):
     """
