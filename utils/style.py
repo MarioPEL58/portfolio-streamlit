@@ -61,52 +61,43 @@ def applica_stile_stampa():
         <style>
         /* Isola le regole SOLO per il momento della stampa fisica */
         @media print {
-            /* 1. Forza sfondo bianco totale ovunque, incluse tutte le pagine successive e i blocchi */
-            .stApp, body, html, 
-            [data-testid="stAppViewContainer"], 
-            [data-testid="stVerticalBlock"],
-            [data-testid="stHeader"],
-            .main .block-container {
+            
+            /* 1. Forza sfondo bianco su tutta l'applicazione (tutte le pagine del PDF) */
+            html, body, .stApp, [data-testid="stAppViewContainer"] {
                 background-color: white !important;
                 background: white !important;
                 color: #111111 !important;
             }
 
-            /* 2. GESTIONE GRAFICI PLOTLY MULTIPAGINA */
-            /* Evita il reset del filtro di inversione sulle pagine successive */
-            .stPlotlyChart, .js-plotly-plot, iframe {
+            /* 2. FILTRO GRAFICO (Il tuo blocco originale che funzionava perfettamente) */
+            .stPlotlyChart {
                 filter: invert(1) hue-rotate(180deg) !important;
                 background: transparent !important;
                 visibility: visible !important;
                 display: block !important;
-                page-break-inside: avoid !important; /* Impedisce che un grafico si spezzi a metà tra due pagine */
+            }
+
+            /* Evita che i grafici si spezzino a metà tra la pagina 1 e la pagina 2 */
+            .stPlotlyChart, .element-container {
+                page-break-inside: avoid !important;
                 break-inside: avoid !important;
             }
 
-            /* 3. RESET TOTALE TABELLE (st.dataframe / st.table) */
-            /* Rimuove lo sfondo nero e forza i bordi e i testi scuri sulle tabelle successive */
-            div[data-testid="stDataFrame"], 
-            div[data-testid="data-grid"], 
-            .stTable, table, th, td, tr {
+            /* 3. SBANCAMENTO TABELLE E DATAFRAME */
+            /* Forza le tabelle successive a ereditare il fondo bianco e testo nero */
+            div[data-testid="stDataFrame"], .stTable, table, tr, td, th {
                 background-color: white !important;
                 background: white !important;
                 color: #111111 !important;
                 border-color: #dee2e6 !important;
             }
-            
-            /* Sbianca le intestazioni delle tabelle di Streamlit */
-            thead, th, [role="columnheader"] {
-                background-color: #f8f9fa !important;
+
+            /* 4. Forza tutti i testi principali, markdown e didascalie a essere scuri */
+            h1, h2, h3, h4, h5, h6, p, span, label, .stMarkdown, [data-testid="stCaptionContainer"] {
                 color: #111111 !important;
             }
 
-            /* 4. Cambia colore ai testi principali e caption di tutto il report */
-            h1, h2, h3, h4, h5, h6, p, span, label, li, 
-            .stMarkdown, .stMarkdown p, [data-testid="stCaptionContainer"] {
-                color: #111111 !important;
-            }
-
-            /* Box delle metriche finanziarie (card delle performance) */
+            /* Box delle metriche finanziarie convertiti in chiaro */
             [data-testid="stMetric"], div[style*="background-color"] { 
                 background-color: #f8f9fa !important;
                 border: 1px solid #dee2e6 !important;
