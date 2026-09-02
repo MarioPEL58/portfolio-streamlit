@@ -25,13 +25,15 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
         mode="lines",
         name=columns_map.get("Capitale investito", "Invested capital")
     ))
-
+    
+    COLORE_ASSE_DESTRO = "#D63384" # Rosa scuro/intenso, perfetto sia su scuro che su bianco
     fig.add_trace(go.Scatter(
         x=series.index,
         y=series["P/L trading"],
         mode="lines",
         name=columns_map.get("P/L trading", "Trading P/L"),
-        yaxis="y2"
+        yaxis="y2",
+        line=dict(color=COLORE_ASSE_DESTRO, width=2) # 🔹 Linea ugule a colore asse 
     ))
 
     if bench_norm is not None:
@@ -68,7 +70,8 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
             automargin=True
         ),
         yaxis2=dict(
-            title=dict(text=t("pl_label"), standoff=15),
+            title=dict(text=t("pl_label"), standoff=15,font=dict(color=COLORE_ASSE_DESTRO) ), # colore titolo
+            tickfont=dict(color=COLORE_ASSE_DESTRO),  # Numeri dell'asse destro
             overlaying="y",
             side="right",
             showgrid=False,
