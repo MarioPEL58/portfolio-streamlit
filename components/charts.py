@@ -59,11 +59,20 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
         height=540,
         xaxis_title=t("col_date"),
         yaxis_title=t("currency_label"),
+        xaxis=dict(
+            title=dict(standoff=15), # Allontana la scritta "Data" dalle date sotto
+            automargin=True
+        ),
+        yaxis=dict(
+            title=dict(standoff=15), # Allontana la scritta "Euro" dai numeri a sinistra
+            automargin=True
+        ),
         yaxis2=dict(
-            title=t("pl_label"),
+            title=dict(text=t("pl_label"), standoff=15),
             overlaying="y",
             side="right",
-            showgrid=False
+            showgrid=False,
+            automargin=True
         ),
         legend=dict(
             orientation="h",
@@ -72,7 +81,7 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
             xanchor="right",
             x=1
         ),
-        margin=dict(l=20, r=20, t=20, b=20)
+        margin=dict(l=80, r=80, t=20, b=60)
     )
 
     return fig
