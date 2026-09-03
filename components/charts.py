@@ -26,7 +26,7 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
         name=columns_map.get("Capitale investito", "Invested capital")
     ))
     
-    COLORE_ASSE_DESTRO = "#D63384" # Rosa scuro/intenso, perfetto sia su scuro che su bianco
+    COLORE_ASSE_DESTRO ="#1D70B8" # "#1D70B8" Cobalto finanziario "#D63384" # Rosa scuro/intenso, perfetto sia su scuro che su bianco
     fig.add_trace(go.Scatter(
         x=series.index,
         y=series["P/L trading"],
