@@ -99,7 +99,7 @@ def render_filters(ops, dividends):
         st.multiselect(
             t("filter_brokers"),
             options=all_brokers,
-            default=st.session_state.selected_brokers,
+            # default=st.session_state.selected_brokers,
             key="selected_brokers"
         )
 
@@ -107,7 +107,7 @@ def render_filters(ops, dividends):
         st.multiselect(
             t("filter_types"),
             options=all_types,
-            default=st.session_state.selected_types,
+            # default=st.session_state.selected_types,
             key="selected_types"
         )
 
@@ -115,7 +115,7 @@ def render_filters(ops, dividends):
         st.multiselect(
             t("filter_operations"),
             options=all_operations,
-            default=st.session_state.selected_operations,
+            #  default=st.session_state.selected_operations,
             key="selected_operations"
         )
         
