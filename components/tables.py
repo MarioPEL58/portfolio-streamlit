@@ -73,7 +73,8 @@ def render_positions_table(current):
         .apply(style_pl_column, axis=0)
     )
 
-    st.dataframe(styled, use_container_width=True)
+    # st.dataframe(styled, use_container_width=True)    
+    st.dataframe(styled, width="stretch")
     
 def render_performance_table(current):
 
@@ -117,7 +118,8 @@ def render_performance_table(current):
 
     st.dataframe(
         styled,
-        use_container_width=True
+        # use_container_width=True
+        width="stretch"
     )
     
 def render_operations_table(ops_enriched):
@@ -191,4 +193,4 @@ def render_operations_table(ops_enriched):
         .apply(style_pl_column, axis=0)
     )
 
-    st.dataframe(styled, use_container_width=True)
+    st.dataframe(styled, width="stretch")
