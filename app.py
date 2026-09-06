@@ -522,7 +522,8 @@ with tab_daily:
     )
 
     if fig_pos:
-        st.plotly_chart(fig_pos, use_container_width=True)
+        # st.plotly_chart(fig_pos, use_container_width=True)
+        st.plotly_chart(fig_pos, theme=None, width="stretch")
     else:
         st.caption(t("no_profit_today"))
         
@@ -540,7 +541,8 @@ with tab_daily:
     )
 
     if fig_neg:
-        st.plotly_chart(fig_neg, use_container_width=True)
+        # st.plotly_chart(fig_neg, use_container_width=True)
+        st.plotly_chart(fig_neg, theme=None, width="stretch")
     else:
         st.caption(t("no_loss_today"))
         
@@ -587,7 +589,8 @@ with tab_unrealized:
     )
 
     if fig_pos:
-        st.plotly_chart(fig_pos, use_container_width=True)
+        #st.plotly_chart(fig_pos, use_container_width=True)
+        st.plotly_chart(fig_pos, theme=None, width="stretch")
     else:
         st.caption(t("no_profit_open"))
 
@@ -605,7 +608,8 @@ with tab_unrealized:
     )
 
     if fig_neg:
-        st.plotly_chart(fig_neg, use_container_width=True)
+        #st.plotly_chart(fig_neg, use_container_width=True)
+        st.plotly_chart(fig_neg, theme=None, width="stretch")
     else:
         st.caption(t("no_loss_open"))
 with tab_heatmap:
@@ -634,7 +638,8 @@ with tab_heatmap:
     )
 
     if fig_treemap:
-        st.plotly_chart(fig_treemap, use_container_width=True)
+        # st.plotly_chart(fig_treemap, use_container_width=True)
+        st.plotly_chart(fig_treemap, theme=None, width="stretch")
 
 with tab_analysis:
 
@@ -667,7 +672,8 @@ with tab_analysis:
         )
 
         if fig_beta:
-            st.plotly_chart(fig_beta, use_container_width=True, key="beta_chart")
+            # st.plotly_chart(fig_beta, use_container_width=True, key="beta_chart")
+            st.plotly_chart(fig_beta, theme=None, width="stretch", key="beta_chart")
 
     # =========================
     # ✅ SHARPE
@@ -689,7 +695,8 @@ with tab_analysis:
     )
 
     if fig_sharpe:
-        st.plotly_chart(fig_sharpe, use_container_width=True, key="sharpe_chart")
+        # st.plotly_chart(fig_sharpe, use_container_width=True, key="sharpe_chart")
+        st.plotly_chart(fig_sharpe, theme=None, width="stretch", key="sharpe_chart")
 
     # =========================
     # ✅ SORTINO
@@ -711,7 +718,8 @@ with tab_analysis:
     )
 
     if fig_sortino:
-        st.plotly_chart(fig_sortino, use_container_width=True, key="sortino_chart")
+        # st.plotly_chart(fig_sortino, use_container_width=True, key="sortino_chart")
+        st.plotly_chart(fig_sortino, theme=None, width="stretch", key="sortino_chart")
 # Tabs
 tab_pos, tab_perfo, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
     [t("tab_positions"),t("tab_performance"), t("tab_exposure"), t("tab_flows"), t("tab_operations"), t("tab_download")]
@@ -733,21 +741,22 @@ with tab_exp:
         column=label_choice if label_choice in exposure.columns else "Ticker"
         )
     if fig:
-        st.plotly_chart(fig, use_container_width=True)
-    
+        # st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, theme=None, width="stretch")
+
     c1, c2 = st.columns(2)
     
     # ✅ BAR Area
     if "Area" in exposure.columns and exposure["Area"].astype(str).str.strip().any():
         fig_area = allocation_bar_chart(exposure, column="Area", title=t("allocation_area"))
         if fig_area:
-            c1.plotly_chart(fig_area, use_container_width=True)
-    
+            c1.plotly_chart(fig_area, theme=None, width="stretch")
+
     # ✅ BAR Tipo
     if "Tipo" in exposure.columns and exposure["Tipo"].astype(str).str.strip().any():
         fig_tipo = allocation_bar_chart(exposure, column="Tipo", title=t("allocation_type"))
         if fig_tipo:
-            c2.plotly_chart(fig_tipo, use_container_width=True)
+            c2.plotly_chart(fig_tipo, theme=None, width="stretch")
 
 with tab_flu:
     st.subheader(t("flows_title"))
