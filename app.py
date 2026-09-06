@@ -778,7 +778,8 @@ with tab_flu:
     
     st.dataframe(
         df_display.style.format(fmt_dict),
-        use_container_width=True
+        # use_container_width=True
+        width="stretch"
     )
 
 with tab_ops:
