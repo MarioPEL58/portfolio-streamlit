@@ -9,3 +9,8 @@ env/
 
 # Configurazione locale di VS Code (quella che abbiamo cancellato prima)
 .vscode/
+
+# Cache locali di Yahoo Finance e requests
+yahoo_tz_cache/
+yahoo_cache.sqlite
+yahoo_cache.sqlite-journal

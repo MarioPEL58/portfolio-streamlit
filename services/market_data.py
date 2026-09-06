@@ -7,7 +7,28 @@ import numpy as np
 import time
 from pathlib import Path
 
-# @st.cache_data(ttl=3600, show_spinner=False)
+import pytz
+# 🚀 Sostituiamo requests_cache con le estensioni standard di requests
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util import Retry
+
+# =====================================================================
+# 🌟 CONFIGURAZIONE SESSIONE GLOBALE STANDARD (Senza cache SQLite)
+# =====================================================================
+# Creiamo una sessione standard per gestire i tentativi (Retry) e camuffare lo User-Agent
+session = requests.Session()
+retries = Retry(
+    total=3,                # Numero massimo di tentativi prima di fallire
+    backoff_factor=1,       # Tempo di attesa crescente tra i tentativi (1s, 2s, 4s...)
+    status_forcelist=[500, 502, 503, 504] # Riprova se Yahoo risponde con questi errori di server
+)
+session.mount('https://', HTTPAdapter(max_retries=retries))
+session.headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
+
+# Configurazione della cache interna nativa dei fusi orari di yfinance
+yf.set_tz_cache_location("yahoo_tz_cache")
+
 def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp):
     tickers = [t for t in tickers if isinstance(t, str) and t.strip()]
     if not tickers:
@@ -22,51 +43,37 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         else:
             yahoo_tickers.append(symbol)
             
-    # if isins:
-    #     st.warning(
-    #         f"ISIN esclusi dal download Yahoo: {', '.join(isins)}"
-    #     )
-    # start = time.time()
-    
     if yahoo_tickers:
-        raw = yf.download(
-            tickers=yahoo_tickers,
-            start=start_date.strftime("%Y-%m-%d"),
-            end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
-            auto_adjust=False,
-            progress=False,
-            group_by="ticker",
-            threads=True,
-        )
+        try:
+            # 🚀 FIX: Passiamo la sessione standard robusta. yfinance la accetta 
+            # perché non altera i meccanismi interni di memorizzazione dei dati.
+            raw = yf.download(
+                tickers=yahoo_tickers,
+                start=start_date.strftime("%Y-%m-%d"),
+                end=(end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
+                auto_adjust=False,
+                progress=False,
+                group_by="ticker",
+                threads=False,   # Manteniamo False per stabilità con le sessioni
+                session=session  
+            )
+        except Exception as e:
+            st.error(f"Errore critico durante il download da Yahoo: {e}")
+            raw = pd.DataFrame()
     else: 
         raw = pd.DataFrame()
-    # st.write(f"Download Yahoo: {time.time() - start:.2f} sec")
-    
-    # st.write("START", start_date.strftime("%Y-%m-%d"))
-    # st.write("END", (end_date + pd.Timedelta(days=1)).strftime("%Y-%m-%d"))
-    # st.write(raw)
-    # st.write("RAW COLS")
-    # st.write(raw.columns)
-
-    # st.write("LEVEL0")
-    # if isinstance(raw.columns, pd.MultiIndex):
-    #     st.write(sorted(set(raw.columns.get_level_values(0))))
-
 
     if raw is None or len(raw) == 0:
-        closes =pd.DataFrame()
+        closes = pd.DataFrame()
     else:
+        if raw.index.tz is not None:
+            raw.index = raw.index.tz_localize(None)
+            
         closes = pd.DataFrame(index=raw.index)
     
         if isinstance(raw.columns, pd.MultiIndex):
             lvl0 = set(raw.columns.get_level_values(0))
     
-            # if all(t in lvl0 for t in tickers):
-            #     for t in tickers:
-            #         if "Close" in raw[t].columns:
-            #             closes[t] = raw[t]["Close"]
-            #         elif "Adj Close" in raw[t].columns:
-            #             closes[t] = raw[t]["Adj Close"]
             for t in tickers:
                 if t not in lvl0:
                     continue
@@ -75,7 +82,8 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
                     closes[t] = raw[t]["Close"]
                 elif "Adj Close" in raw[t].columns:
                     closes[t] = raw[t]["Adj Close"]
-            else:
+            
+            if closes.empty:
                 field = "Close" if "Close" in lvl0 else ("Adj Close" if "Adj Close" in lvl0 else None)
                 if field is not None:
                     sub = raw[field]
@@ -83,117 +91,49 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
                         if t in sub.columns:
                             closes[t] = sub[t]
         else:
-            t = tickers[0]
-            if "Close" in raw.columns:
-                closes[t] = raw["Close"]
-            elif "Adj Close" in raw.columns:
-                closes[t] = raw["Adj Close"]
+            if len(tickers) > 0:
+                t = tickers[0]
+                if "Close" in raw.columns:
+                    closes[t] = raw["Close"]
+                elif "Adj Close" in raw.columns:
+                    closes[t] = raw["Adj Close"]
     
         closes = closes.sort_index()
         
-        # =========================
-        # ✅ Pulizia base
-        # =========================
+        # Pulizia base & Outlier
         closes = closes.replace([0, np.inf, -np.inf], np.nan)
-        
-        # =========================
-        # ✅ Rimozione outlier (glitch)
-        # =========================
         returns = closes.pct_change()
-        
-        threshold = 0.3  # 30% giornaliero
+        threshold = 0.3  
         outliers = returns.abs() > threshold
-        
         closes[outliers] = np.nan
         
-        # =========================
-        # ✅ Fill
-        # =========================
         closes = closes.ffill()
-        # st.write(closes.columns.tolist())
-        # if "IT0005494239" in closes.columns:
-        #     st.write(closes["IT0005494239"].tail())
-        # =========================
-        # ✅ Controllo qualità
-        # =========================
         invalid_points = outliers.sum().sum()
         
         if invalid_points > 0:
             st.caption(f"⚠️ Correzione automatica di {invalid_points} prezzi anomali")
         
-    # =========================
-    # ✅ Missing ticker
-    # =========================
-    # st.write("Ticker richiesti:", tickers)
-    # st.write("Ticker trovati:", closes.columns.tolist())
-
-    # missing = [t for t in tickers if t not in closes.columns]
-    missing = [t for t in tickers if (t not in closes.columns or closes[t].dropna().empty )]
-    
-    # st.write("Ticker mancanti:", missing)
-    
-    #
-    # per i missing cerca il CSV in data/bonds
-    #
-    
-    # st.write("PRIMA DEL JOIN")
-    # st.write(closes.columns.tolist())
-    
+    # Missing ticker (Obbligazioni)
+    missing = [t for t in tickers if (t not in closes.columns or closes[t].dropna().empty)]
     isins_caricati = []
     
     for ticker in missing:
-        
         bond_df = load_bond_csv(ticker)
-        
-        # st.write("Ticker:", ticker)
-        # st.write("Vuoto:", bond_df.empty)
-    
         if not bond_df.empty:
-            
+            if bond_df.index.tz is not None:
+                bond_df.index = bond_df.index.tz_localize(None)
+                
             isins_caricati.append(ticker)
-            
-            closes = closes.drop(
-                columns=[ticker],
-                errors="ignore"
-            )
-    
-            closes = closes.join(
-                bond_df,
-                how="outer"
-            )
+            closes = closes.drop(columns=[ticker], errors="ignore")
+            closes = closes.join(bond_df, how="outer")
     
     if isins_caricati:
-        st.write(" Bond caricati bond da CSV:", ", ".join(isins_caricati) )
-    # st.write("DOPO DEL JOIN")
-    # st.write(closes.columns.tolist())   
+        st.write(" Bond caricati bond da CSV:", ", ".join(isins_caricati))
     
     closes = closes.sort_index().ffill()
-
-    missing = [
-        t for t in tickers
-        if (
-            t not in closes.columns
-            or closes[t].dropna().empty
-        )
-    ]
-
-    # st.write(closes.columns.tolist())
-
-    # if "IT0005494239" in closes.columns:
-    #     st.write(
-    #         closes["IT0005494239"]
-    #         .dropna()
-    #         .tail()
-    #     )
-    # st.write("Closes finale:")
-    # st.write(closes.tail())
-    # st.write("Colonne finali:")
-    # st.write(closes.columns.tolist())
-    # st.write("Missing finale:")
-    # st.write(missing)
+    missing = [t for t in tickers if (t not in closes.columns or closes[t].dropna().empty)]
     
     return closes, missing
-
 
 # @st.cache_data(show_spinner=False)
 def download_fx_series(currencies: list[str], start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd.DataFrame:

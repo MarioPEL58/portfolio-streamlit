@@ -25,13 +25,15 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
         mode="lines",
         name=columns_map.get("Capitale investito", "Invested capital")
     ))
-
+    
+    COLORE_ASSE_DESTRO ="#1D70B8" # "#1D70B8" Cobalto finanziario "#D63384" # Rosa scuro/intenso, perfetto sia su scuro che su bianco
     fig.add_trace(go.Scatter(
         x=series.index,
         y=series["P/L trading"],
         mode="lines",
         name=columns_map.get("P/L trading", "Trading P/L"),
-        yaxis="y2"
+        yaxis="y2",
+        line=dict(color=COLORE_ASSE_DESTRO, width=2) # 🔹 Linea ugule a colore asse 
     ))
 
     if bench_norm is not None:
@@ -48,22 +50,34 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
             xref="paper",
             yref="paper",
             x=0.01,
-            y=0.02,
+            # y=0.02,
+            y=-0.10,            # 🔹 Valore negativo per spingere il testo SOTTO il grafico
             text=f"<i>{note_text}</i>",
             showarrow=False,
             font=dict(size=11, color="gray"),
-            align="left"
+            align="left",
+            yanchor="top"   # 🔹 Forziamo l'ancoraggio per fare spazio verso il basso
         )
         
     fig.update_layout(
         height=540,
         xaxis_title=t("col_date"),
         yaxis_title=t("currency_label"),
+        xaxis=dict(
+            title=dict(standoff=15), # Allontana la scritta "Data" dalle date sotto
+            automargin=True
+        ),
+        yaxis=dict(
+            title=dict(standoff=15), # Allontana la scritta "Euro" dai numeri a sinistra
+            automargin=True
+        ),
         yaxis2=dict(
-            title=t("pl_label"),
+            title=dict(text=t("pl_label"), standoff=15,font=dict(color=COLORE_ASSE_DESTRO) ), # colore titolo
+            tickfont=dict(color=COLORE_ASSE_DESTRO),  # Numeri dell'asse destro
             overlaying="y",
             side="right",
-            showgrid=False
+            showgrid=False,
+            automargin=True
         ),
         legend=dict(
             orientation="h",
@@ -72,7 +86,8 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
             xanchor="right",
             x=1
         ),
-        margin=dict(l=20, r=20, t=20, b=20)
+        plot_bgcolor="rgba(255, 255, 255, 0.03)", # Crea un leggerissimo velo chiaro sul nero
+        margin=dict(l=80, r=80, t=20, b=60)
     )
 
     return fig
@@ -305,6 +320,7 @@ def daily_pl_bar_chart_by_sign(
             ),
             text=df["label"],
             textposition="outside",
+            textfont=dict(size=12),
             customdata=df[[label_col, pl_pct_col, pl_col]],
             hovertemplate=(
                 "%{customdata[0]}<br>"
@@ -316,26 +332,35 @@ def daily_pl_bar_chart_by_sign(
         )
     )
 
+    # Trova la lunghezza massima dei nomi per calcolare il riempimento dinamico
+    # max_label_len = max([len(str(label)) for label in df[label_col].tolist()]) if not df.empty else 10
+
     common_layout = dict(
-        title=title,
+        # title=dict(text=title,x=0.02,xanchor="left"),
+        title=None,
         showlegend=False,
         height=max(STYLE["min_height"], STYLE["height_factor"] * n),
-        margin=dict(l=20, r=20, t=50, b=20),
+        # margin=dict(l=20, r=20, t=50, b=20),
+        margin=dict(l=100, r=60, t=50, b=40),
         bargap=STYLE["bargap"],
         barmode="overlay",
         yaxis=dict(
             tickmode="array",
             tickvals=y_pos,
             ticktext=df[label_col].tolist(),
+            # ticktext=[f"{label}   " for label in df[label_col].tolist()],
+            # ticktext=[str(label).ljust(max_label_len + 3) for label in df[label_col].tolist()],
             autorange="reversed"
+            ,automargin=True # 🔹 Forza il calcolo dello spazio per i Ticker
         )
+        ,plot_bgcolor="rgba(255, 255, 255, 0.03)" 
     )
 
     if positive:
         fig.update_layout(
             **common_layout,
             xaxis=dict(
-                range=[0, max_x * STYLE["x_padding_factor"]],
+                range=[-max_x * 0.01, max_x * (STYLE["x_padding_factor"]*1.0)],
                 tickformat=".2%"
             )
         )
@@ -352,7 +377,7 @@ def daily_pl_bar_chart_by_sign(
         fig.update_layout(
             **common_layout,
             xaxis=dict(
-                range=[0, max_x * STYLE["x_padding_factor"]],
+                range=[-max_x * 0.01, max_x * (STYLE["x_padding_factor"]*1.0)],
                 tickmode="array",
                 tickvals=tickvals,
                 ticktext=ticktext
@@ -1055,7 +1080,10 @@ def pl_treemap(
     fig.update_traces(
         marker=dict(line=dict(color="black", width=1.2)),
         textinfo="label",
-        textposition="middle center"
+        textposition="middle center",
+        # 🔹 Forza Plotly a calcolare correttamente le dimensioni dei font dentro i rettangoli
+        textfont=dict(size=13),
+        insidetextfont=dict(size=13)
     )
 
     # =========================
@@ -1066,9 +1094,9 @@ def pl_treemap(
         "<b>%{label}</b><br>" +
         "Intermediario: %{parent}<br>" +
         "Valore: %{value:.2f}€<br>" +
-        f"P/L: %{{customdata.2f}}€<br>" +
+        f"P/L: %{{customdata[0]:.2f}}€<br>" +
         f"P/L %: %{{color:.2%}}<extra></extra>",
-        customdata=df[[pl_col]]
+        customdata=df[[pl_col]].values
     )
 
     # =========================
