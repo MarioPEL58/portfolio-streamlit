@@ -70,7 +70,7 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
         yaxis=dict(
             title=dict(standoff=15), # Allontana la scritta "Euro" dai numeri a sinistra
             automargin=True,
-            gridshows=True,
+            showgrid=True,
             gridcolor="rgba(255, 255, 255, 0.03)" # colore griglia
         ),
         yaxis2=dict(
