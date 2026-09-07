@@ -69,7 +69,9 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
         ),
         yaxis=dict(
             title=dict(standoff=15), # Allontana la scritta "Euro" dai numeri a sinistra
-            automargin=True
+            automargin=True,
+            gridshows=True,
+            gridcolor="rgba(255, 255, 255, 0.03)" # colore griglia
         ),
         yaxis2=dict(
             title=dict(text=t("pl_label"), standoff=15,font=dict(color=COLORE_ASSE_DESTRO) ), # colore titolo
@@ -86,7 +88,7 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
             xanchor="right",
             x=1
         ),
-        plot_bgcolor="rgba(255, 255, 255, 0.03)", # Crea un leggerissimo velo chiaro sul nero
+        # plot_bgcolor="rgba(255, 255, 255, 0.03)", # Crea un leggerissimo velo chiaro sul nero
         margin=dict(l=80, r=80, t=20, b=60)
     )
 
