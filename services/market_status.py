@@ -169,6 +169,3 @@ def compute_data_quality_label(
         "intraday_min": intraday_min,
         "intraday_max": intraday_max,
     }
-
-
-    return meta

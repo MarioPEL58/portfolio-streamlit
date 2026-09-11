@@ -185,6 +185,8 @@ sidebar_min_date = "Data minima"
 sidebar_label_choice_title = "Etichetta grafici"
 sidebar_label_ticker = "Ticker"
 sidebar_label_name = "Nome"
+sidebar_print_header = "🖨️ Esportazione PDF"
+sidebar_print_toggle = "Attiva Layout di Stampa (Fondo Bianco)"
 
 # colonnper tae belle in output 
 col_date = "Data"
@@ -426,8 +428,8 @@ sidebar_min_date = "Start date"
 sidebar_label_choice_title = "Chart labels"
 sidebar_label_ticker = "Ticker"
 sidebar_label_name = "Name"
-
-
+sidebar_print_header = "🖨️ PDF Export"
+sidebar_print_toggle = "Enable Print Layout (White Background)"
 
 # colonnper tae belle in output 
 col_date = "Date"
