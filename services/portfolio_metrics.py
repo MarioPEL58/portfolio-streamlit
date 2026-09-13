@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from scipy.stats import norm
 
 def compute_portfolio_xirr(ops_enriched, dividends, final_value, valuation_date=None):
     ops = ops_enriched.copy()
@@ -262,76 +261,35 @@ def compute_beta(portfolio_returns, benchmark_returns):
     return beta
 
 def compute_var_historical(returns: pd.Series, confidence_level: float = 0.95):
-    """
-    Calcola il Value at Risk (VaR) Storico su base periodale (giornaliera).
-    
-    returns: 
-        Serie dei rendimenti (consigliato: output di compute_flow_adjusted_returns).
-    confidence_level: 
-        Livello di confidenza (es. 0.95 per il 95%).
-        
-    Ritorna:
-        Il VaR come valore positivo (es. 0.023 significa perdita massima del 2.3%).
-    """
+    """Calcola il VaR Storico giornaliero (Valore positivo)"""
     if returns is None or returns.empty:
         return None
-        
-    # Isola il percentile associato al livello di rischio (1 - confidenza)
     percentile = (1.0 - confidence_level) * 100
-    
-    #np.percentile estrae il valore esatto. Usiamo il meno (-) per esprimerlo come perdita positiva
-    var_value = -np.percentile(returns, percentile)
-    
-    return var_value
+    return -np.percentile(returns, percentile)
 
-
-def compute_var_parametric(returns: pd.Series, confidence_level: float = 0.95):
-    """
-    Calcola il Value at Risk (VaR) Parametrico (Varianza-Covarianza).
-    Assume una distribuzione normale dei rendimenti.
-    
-    returns: 
-        Serie dei rendimenti.
-    confidence_level: 
-        Livello di confidenza (es. 0.95).
-    """
+def compute_var_parametric_no_scipy(returns: pd.Series, confidence_level: float = 0.95):
+    """Calcola il VaR Parametrico senza dipendenze SciPy"""
     if returns is None or returns.empty:
         return None
-        
+    
     mean_return = returns.mean()
     std_return = returns.std()
     
     if std_return == 0 or np.isnan(std_return):
         return None
         
-    # Calcola il valore Z critico (es. 1.645 per 95%)
-    z_score = norm.ppf(confidence_level)
+    # Z-score pre-calcolati per i livelli standard
+    z_scores = {0.90: 1.28155, 0.95: 1.64485, 0.99: 2.32635}
+    z_score = z_scores.get(confidence_level, 1.64485) 
     
-    # Formula standard: Z * std - mean (restituisce il valore già come perdita)
-    var_value = (z_score * std_return) - mean_return
-    
-    return var_value
-
+    return (z_score * std_return) - mean_return
 
 def compute_conditional_var(returns: pd.Series, confidence_level: float = 0.95):
-    """
-    Calcola il Conditional VaR (CVaR / Expected Shortfall).
-    Rappresenta la perdita media attesa nei casi peggiori che superano il VaR storico.
-    """
+    """Calcola il CVaR (Expected Shortfall) giornaliero"""
     if returns is None or returns.empty:
         return None
-        
-    # Per prima cosa serve il VaR Storico come soglia di rendimento negativo
-    # (Attenzione: invertiamo il segno per confrontarlo direttamente con i rendimenti reali)
     var_threshold = -compute_var_historical(returns, confidence_level)
-    
-    # Isola solo i rendimenti che sono andati peggio della soglia VaR
     beyond_var_returns = returns[returns <= var_threshold]
-    
     if beyond_var_returns.empty:
         return None
-        
-    # Il CVaR è la media di queste perdite estreme
-    cvar_value = -beyond_var_returns.mean()
-    
-    return cvar_value
+    return -beyond_var_returns.mean()
