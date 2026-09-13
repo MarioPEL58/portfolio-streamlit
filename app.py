@@ -722,11 +722,22 @@ with tab_analysis:
         st.plotly_chart(fig_sortino, theme=None, width="stretch", key="sortino_chart")
         
     st.markdown(f"### {t('tail_risk_title')}")
-    
+
+    # debug start
     st.write(flow_adjusted_returns.describe())
     st.write(pd.DataFrame({"skew": [flow_adjusted_returns.skew()],
             "kurtosis": [flow_adjusted_returns.kurtosis()]}))
+    col1, col2 = st.columns(2)
     
+    with col1:
+        st.write("Top 20")
+        st.write(flow_adjusted_returns.nlargest(20))
+    
+    with col2:
+        st.write("Bottom 20")
+        st.write(flow_adjusted_returns.nsmallest(20))
+
+    # end debug 
     fig_rend = create_tail_risk_figure(flow_adjusted_returns)
     
     st.plotly_chart(
