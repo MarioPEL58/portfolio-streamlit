@@ -1110,3 +1110,53 @@ def pl_treemap(
     )
 
     return fig
+
+def create_tail_risk_figure(flow_adjusted_returns):
+
+    var_giornaliero = compute_var_historical(flow_adjusted_returns, 0.95)
+    cvar_giornaliero = compute_conditional_var(flow_adjusted_returns, 0.95)
+
+    fig_rend = go.Figure()
+
+    fig_rend.add_trace(
+        go.Histogram(
+            x=flow_adjusted_returns,
+            nbinsx=50,
+            histnorm="probability density",
+            name=t("tail_risk_histogram_name"),
+            marker_color="#34495e",
+            opacity=0.7,
+        )
+    )
+
+    fig_rend.add_vline(
+        x=-var_giornaliero,
+        line_dash="dash",
+        line_color="#e74c3c",
+        line_width=2,
+        annotation_text=f"{t('tail_risk_var_label')}: {-var_giornaliero:.2%}",
+        annotation_position="top left",
+    )
+
+    fig_rend.add_vline(
+        x=-cvar_giornaliero,
+        line_dash="dot",
+        line_color="#c0392b",
+        line_width=2,
+        annotation_text=f"{t('tail_risk_cvar_label')}: {-cvar_giornaliero:.2%}",
+        annotation_position="bottom left",
+    )
+
+    fig_rend.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        xaxis_title=t("tail_risk_xaxis_title"),
+        yaxis_title=t("tail_risk_yaxis_title"),
+        xaxis_tickformat=".1%",
+        showlegend=False,
+        height=400,
+        margin=dict(l=20, r=20, t=20, b=20),
+    )
+
+    return fig_rend
