@@ -724,6 +724,9 @@ with tab_analysis:
     st.markdown(f"### {t('tail_risk_title')}")
     
     st.write(flow_adjusted_returns.describe())
+    st.write(pd.DataFrame({"skew": [flow_adjusted_returns.skew()],
+            "kurtosis": [flow_adjusted_returns.kurtosis()]}))
+    
     fig_rend = create_tail_risk_figure(flow_adjusted_returns)
     
     st.plotly_chart(
