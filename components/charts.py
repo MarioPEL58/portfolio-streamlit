@@ -5,6 +5,8 @@ import numpy as np
 from utils.i18n import t
 from utils.display import get_display_columns
 import pandas as pd
+from services.portfolio_metrics import compute_var_historical, compute_conditional_var 
+
 
 def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
 
