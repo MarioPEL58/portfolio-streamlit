@@ -722,7 +722,8 @@ with tab_analysis:
         st.plotly_chart(fig_sortino, theme=None, width="stretch", key="sortino_chart")
         
     st.markdown(f"### {t('tail_risk_title')}")
-
+    
+    st.write(flow_adjusted_returns.describe())
     fig_rend = create_tail_risk_figure(flow_adjusted_returns)
     
     st.plotly_chart(
