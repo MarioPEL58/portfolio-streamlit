@@ -259,6 +259,13 @@ rf_disabled = "Metriche calcolate con risk-free uguale a zero"
 rf_value = "Tasso risk-free"
 beta_market_label = "Mercato"
 
+tail_risk_title = "🛡️ Analisi del Rischio Estremo (Tail Risk)"
+tail_risk_histogram_name = "Frequenza Rendimenti"
+tail_risk_var_label = "VaR 95%"
+tail_risk_cvar_label = "CVaR"
+tail_risk_xaxis_title = "Rendimento Giornaliero"
+tail_risk_yaxis_title = "Densità di Frequenza"
+
 [lang.en]
 
 # HEADER
@@ -502,3 +509,10 @@ rf_enabled = "Metrics calculated using real risk-free rate"
 rf_disabled = "Metrics calculated with risk-free set to zero"
 rf_value = "Risk-free rate"
 beta_market_label = "Market"
+
+tail_risk_title = "🛡️ Tail Risk Analysis"
+tail_risk_histogram_name = "Returns Frequency"
+tail_risk_var_label = "95% VaR"
+tail_risk_cvar_label = "CVaR"
+tail_risk_xaxis_title = "Daily Return"
+tail_risk_yaxis_title = "Frequency Density"
