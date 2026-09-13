@@ -11,7 +11,7 @@ from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
 from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, pl_treemap, sharpe_gauge
-from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare
+from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare, create_tail_risk_figure
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
@@ -720,6 +720,17 @@ with tab_analysis:
     if fig_sortino:
         # st.plotly_chart(fig_sortino, use_container_width=True, key="sortino_chart")
         st.plotly_chart(fig_sortino, theme=None, width="stretch", key="sortino_chart")
+        
+    st.markdown(f"### {t('tail_risk_title')}")
+
+    fig_rend = create_tail_risk_figure(flow_adjusted_returns)
+    
+    st.plotly_chart(
+        fig_rend,
+        theme=None,
+        width="stretch",
+        key="rend_chart"
+    )
 # Tabs
 tab_pos, tab_perfo, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
     [t("tab_positions"),t("tab_performance"), t("tab_exposure"), t("tab_flows"), t("tab_operations"), t("tab_download")]
