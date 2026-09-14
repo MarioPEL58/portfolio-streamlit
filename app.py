@@ -15,7 +15,7 @@ from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
-from services.market_data import download_close_prices, download_last_intraday_timestamp, report_late_tickers
+from services.market_data import download_close_prices, download_last_intraday_timestamp, report_late_tickers, fill_late_tickers_with_purchase_price
 from services.portfolio import build_portfolio
 from services.portfolio_metrics import compute_portfolio_xirr, compute_sharpe_ratio
 from services.portfolio_metrics import compute_flow_adjusted_returns, compute_sharpe_from_returns, compute_sortino_ratio, compute_beta
@@ -174,6 +174,8 @@ market_last_date = closes.index.max()
 # st.write(closes.tail(10))
 # st.write(closes.index)
 
+st.dataframe(report_late_tickers(closes, ops))
+closes = fill_late_tickers_with_purchase_price(closes,ops,price_col="Prezzo")
 st.dataframe(report_late_tickers(closes, ops))
 
 if closes.empty:
