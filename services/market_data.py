@@ -459,3 +459,48 @@ def report_late_tickers(closes, ops):
         pd.DataFrame(rows)
         .sort_values("Ritardo giorni", ascending=False)
     )
+    
+def fill_late_tickers_with_purchase_price(
+    closes: pd.DataFrame,
+    ops: pd.DataFrame,
+    price_col: str = "Prezzo"
+) -> pd.DataFrame:
+
+    closes = closes.copy()
+
+    for ticker in closes.columns:
+
+        ops_ticker = (
+            ops[ops["Ticker"] == ticker]
+            .sort_values("Data")
+        )
+
+        if ops_ticker.empty:
+            continue
+
+        first_valid = closes[ticker].first_valid_index()
+
+        if first_valid is None:
+            continue
+
+        first_trade = pd.to_datetime(
+            ops_ticker.iloc[0]["Data"]
+        ).normalize()
+
+        # salta se Yahoo ha già storico precedente
+        if first_valid <= first_trade:
+            continue
+
+        purchase_price = float(
+            ops_ticker.iloc[0][price_col]
+        )
+
+        mask = (
+            (closes.index >= first_trade)
+            & (closes.index < first_valid)
+            & (closes[ticker].isna())
+        )
+
+        closes.loc[mask, ticker] = purchase_price
+
+    return closes
