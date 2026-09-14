@@ -174,6 +174,9 @@ market_last_date = closes.index.max()
 # st.write(closes.tail(10))
 # st.write(closes.index)
 
+st.write(closes.index.min())
+st.write(closes.index.max())
+
 st.dataframe(report_late_tickers(closes, ops))
 ticker = "0P0000M2UJ.F"
 
