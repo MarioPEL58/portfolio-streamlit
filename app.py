@@ -175,7 +175,26 @@ market_last_date = closes.index.max()
 # st.write(closes.index)
 
 st.dataframe(report_late_tickers(closes, ops))
+ticker = "0P0000M2UJ.F"
+
+st.write("OPERAZIONI")
+st.dataframe(
+    ops[ops["Ticker"] == ticker]
+    .sort_values("Data")
+    .head(10)
+)
+
+st.write("CLOSE PRIMA")
+st.write(
+    closes[ticker]
+    .loc["2014":"2015"]
+    .head(20)
+)
+
 closes = fill_late_tickers_with_purchase_price(closes,ops,price_col="Prezzo")
+st.write("CLOSE DOPO")
+st.write(closes_filled[ticker].loc["2014":"2015"].head(20))
+
 st.dataframe(report_late_tickers(closes, ops))
 
 if closes.empty:
