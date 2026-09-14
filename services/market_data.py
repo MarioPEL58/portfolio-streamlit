@@ -461,11 +461,10 @@ def report_late_tickers(closes, ops):
     )
     
 def fill_late_tickers_with_purchase_price(
-    closes: pd.DataFrame,
-    ops: pd.DataFrame,
-    price_col: str = "Prezzo"
-) -> pd.DataFrame:
-
+    closes,
+    ops,
+    price_col="Prezzo"
+):
     closes = closes.copy()
 
     for ticker in closes.columns:
@@ -478,27 +477,27 @@ def fill_late_tickers_with_purchase_price(
         if ops_ticker.empty:
             continue
 
-        first_valid = closes[ticker].first_valid_index()
-
-        if first_valid is None:
-            continue
-
-        first_trade = pd.to_datetime(
+        purchase_date = pd.to_datetime(
             ops_ticker.iloc[0]["Data"]
         ).normalize()
-
-        # salta se Yahoo ha già storico precedente
-        if first_valid <= first_trade:
-            continue
 
         purchase_price = float(
             ops_ticker.iloc[0][price_col]
         )
 
+        s = closes[ticker].replace(0, np.nan)
+
+        first_yahoo = s.first_valid_index()
+
+        if first_yahoo is None:
+            continue
+
+        if first_yahoo <= purchase_date:
+            continue
+
         mask = (
-            (closes.index >= first_trade)
-            & (closes.index < first_valid)
-            & (closes[ticker].isna())
+            (closes.index >= purchase_date)
+            & (closes.index < first_yahoo)
         )
 
         closes.loc[mask, ticker] = purchase_price
