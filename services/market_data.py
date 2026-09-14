@@ -426,3 +426,36 @@ ISIN_PATTERN = re.compile(
 
 def is_isin(value: str) -> bool:
     return bool(ISIN_PATTERN.match(str(value).strip().upper()))
+    
+def report_late_tickers(closes, ops):
+
+    rows = []
+
+    for ticker in closes.columns:
+
+        first_price = closes[ticker].first_valid_index()
+
+        ops_ticker = ops[ops["Ticker"] == ticker]
+
+        if ops_ticker.empty or first_price is None:
+            continue
+
+        first_trade = pd.to_datetime(
+            ops_ticker["Data"].min()
+        )
+
+        rows.append(
+            {
+                "Ticker": ticker,
+                "Prima operazione": first_trade,
+                "Prima quotazione": first_price,
+                "Ritardo giorni": (
+                    first_price - first_trade
+                ).days,
+            }
+        )
+
+    return (
+        pd.DataFrame(rows)
+        .sort_values("Ritardo giorni", ascending=False)
+    )
