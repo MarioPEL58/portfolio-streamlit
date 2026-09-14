@@ -191,7 +191,7 @@ st.write(
     .head(20)
 )
 
-closes = fill_late_tickers_with_purchase_price(closes,ops,price_col="Prezzo")
+closes_filled = fill_late_tickers_with_purchase_price(closes,ops,price_col="Prezzo")
 st.write("CLOSE DOPO")
 st.write(closes_filled[ticker].loc["2014":"2015"].head(20))
 
