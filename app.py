@@ -173,12 +173,12 @@ market_last_date = closes.index.max()
 # st.write("DOWNLOAD CLOSES")
 # st.write(closes.tail(10))
 # st.write(closes.index)
-st.write("ops Data dtype:", ops["Data"].dtype)
-st.write("ops min:", ops["Data"].min())
-st.write("ops min type:", type(ops["Data"].min()))
+# st.write("ops Data dtype:", ops["Data"].dtype)
+# st.write("ops min:", ops["Data"].min())
+# st.write("ops min type:", type(ops["Data"].min()))
 
-st.write("closes max:", closes.index.max())
-st.write("closes max type:", type(closes.index.max()))
+# st.write("closes max:", closes.index.max())
+# st.write("closes max type:", type(closes.index.max()))
 
 full_index = pd.date_range(
     start=ops["Data"].min(),
