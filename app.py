@@ -11,11 +11,11 @@ from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
 from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, pl_treemap, sharpe_gauge
-from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare
+from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare, create_tail_risk_figure
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
-from services.market_data import download_close_prices, download_last_intraday_timestamp
+from services.market_data import download_close_prices, download_last_intraday_timestamp, report_late_tickers, fill_late_tickers_with_purchase_price
 from services.portfolio import build_portfolio
 from services.portfolio_metrics import compute_portfolio_xirr, compute_sharpe_ratio
 from services.portfolio_metrics import compute_flow_adjusted_returns, compute_sharpe_from_returns, compute_sortino_ratio, compute_beta
@@ -39,6 +39,7 @@ from utils.kpi_cards import (
 )
 
 from utils.performance_card import render_performance_cards_tot, render_performance_cards
+from utils.style import applica_stile_stampa
 
 from config.config import load_config
 
@@ -56,6 +57,9 @@ st.set_page_config(
     page_icon=env_cfg["icon"],
     layout="wide"
 )
+
+#  🔹 Richiama la funzione subito dopo la page config per lo stile di stampa
+applica_stile_stampa()
 
 LANG = init_language(CONFIG)
 # 🔹 Header
@@ -169,6 +173,47 @@ market_last_date = closes.index.max()
 # st.write("DOWNLOAD CLOSES")
 # st.write(closes.tail(10))
 # st.write(closes.index)
+# st.write("ops Data dtype:", ops["Data"].dtype)
+# st.write("ops min:", ops["Data"].min())
+# st.write("ops min type:", type(ops["Data"].min()))
+
+# st.write("closes max:", closes.index.max())
+# st.write("closes max type:", type(closes.index.max()))
+
+full_index = pd.date_range(
+    start=ops["Data"].min(),
+    end=closes.index.max(),
+    freq="D"
+)
+
+closes = closes.reindex(full_index)
+
+# st.write(closes.index.min())
+# st.write(closes.index.max())
+
+# st.dataframe(report_late_tickers(closes, ops))
+# ticker = "0P0000M2UJ.F"
+
+# st.write("OPERAZIONI")
+# st.dataframe(
+#     ops[ops["Ticker"] == ticker]
+#     .sort_values("Data")
+#     .head(10)
+# )
+
+# st.write("CLOSE PRIMA")
+# st.write(
+#     closes[ticker]
+#     .loc["2014":"2015"]
+#     .head(20)
+# )
+
+closes = fill_late_tickers_with_purchase_price(closes,ops,price_col="Prezzo")
+
+# st.write("CLOSE DOPO")
+# st.write(closes[ticker].loc["2014":"2015"].head(20))
+
+# st.dataframe(report_late_tickers(closes, ops))
 
 if closes.empty:
     st.error(t("no_prices"))
@@ -474,8 +519,8 @@ with tab_perf:
         benchmark_name=benchmark,
         note_text=note_text
     )
-
-    st.plotly_chart(fig, use_container_width=True)
+    # st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch", theme=None)
 
 with tab_daily:
     st.subheader(t("daily_title"))
@@ -518,7 +563,8 @@ with tab_daily:
     )
 
     if fig_pos:
-        st.plotly_chart(fig_pos, use_container_width=True)
+        # st.plotly_chart(fig_pos, use_container_width=True)
+        st.plotly_chart(fig_pos, theme=None, width="stretch")
     else:
         st.caption(t("no_profit_today"))
         
@@ -536,7 +582,8 @@ with tab_daily:
     )
 
     if fig_neg:
-        st.plotly_chart(fig_neg, use_container_width=True)
+        # st.plotly_chart(fig_neg, use_container_width=True)
+        st.plotly_chart(fig_neg, theme=None, width="stretch")
     else:
         st.caption(t("no_loss_today"))
         
@@ -583,7 +630,8 @@ with tab_unrealized:
     )
 
     if fig_pos:
-        st.plotly_chart(fig_pos, use_container_width=True)
+        #st.plotly_chart(fig_pos, use_container_width=True)
+        st.plotly_chart(fig_pos, theme=None, width="stretch")
     else:
         st.caption(t("no_profit_open"))
 
@@ -601,7 +649,8 @@ with tab_unrealized:
     )
 
     if fig_neg:
-        st.plotly_chart(fig_neg, use_container_width=True)
+        #st.plotly_chart(fig_neg, use_container_width=True)
+        st.plotly_chart(fig_neg, theme=None, width="stretch")
     else:
         st.caption(t("no_loss_open"))
 with tab_heatmap:
@@ -630,7 +679,8 @@ with tab_heatmap:
     )
 
     if fig_treemap:
-        st.plotly_chart(fig_treemap, use_container_width=True)
+        # st.plotly_chart(fig_treemap, use_container_width=True)
+        st.plotly_chart(fig_treemap, theme=None, width="stretch")
 
 with tab_analysis:
 
@@ -663,7 +713,8 @@ with tab_analysis:
         )
 
         if fig_beta:
-            st.plotly_chart(fig_beta, use_container_width=True, key="beta_chart")
+            # st.plotly_chart(fig_beta, use_container_width=True, key="beta_chart")
+            st.plotly_chart(fig_beta, theme=None, width="stretch", key="beta_chart")
 
     # =========================
     # ✅ SHARPE
@@ -685,7 +736,8 @@ with tab_analysis:
     )
 
     if fig_sharpe:
-        st.plotly_chart(fig_sharpe, use_container_width=True, key="sharpe_chart")
+        # st.plotly_chart(fig_sharpe, use_container_width=True, key="sharpe_chart")
+        st.plotly_chart(fig_sharpe, theme=None, width="stretch", key="sharpe_chart")
 
     # =========================
     # ✅ SORTINO
@@ -707,7 +759,34 @@ with tab_analysis:
     )
 
     if fig_sortino:
-        st.plotly_chart(fig_sortino, use_container_width=True, key="sortino_chart")
+        # st.plotly_chart(fig_sortino, use_container_width=True, key="sortino_chart")
+        st.plotly_chart(fig_sortino, theme=None, width="stretch", key="sortino_chart")
+        
+    st.markdown(f"### {t('tail_risk_title')}")
+
+    # debug start
+    # st.write(flow_adjusted_returns.describe())
+    # st.write(pd.DataFrame({"skew": [flow_adjusted_returns.skew()],
+    #         "kurtosis": [flow_adjusted_returns.kurtosis()]}))
+    # col1, col2 = st.columns(2)
+    
+    # with col1:
+    #     st.write("Top 20")
+    #     st.write(flow_adjusted_returns.nlargest(20))
+    
+    # with col2:
+    #     st.write("Bottom 20")
+    #     st.write(flow_adjusted_returns.nsmallest(20))
+
+    # end debug 
+    fig_rend = create_tail_risk_figure(flow_adjusted_returns)
+    
+    st.plotly_chart(
+        fig_rend,
+        theme=None,
+        width="stretch",
+        key="rend_chart"
+    )
 # Tabs
 tab_pos, tab_perfo, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
     [t("tab_positions"),t("tab_performance"), t("tab_exposure"), t("tab_flows"), t("tab_operations"), t("tab_download")]
@@ -729,21 +808,22 @@ with tab_exp:
         column=label_choice if label_choice in exposure.columns else "Ticker"
         )
     if fig:
-        st.plotly_chart(fig, use_container_width=True)
-    
+        # st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, theme=None, width="stretch")
+
     c1, c2 = st.columns(2)
     
     # ✅ BAR Area
     if "Area" in exposure.columns and exposure["Area"].astype(str).str.strip().any():
         fig_area = allocation_bar_chart(exposure, column="Area", title=t("allocation_area"))
         if fig_area:
-            c1.plotly_chart(fig_area, use_container_width=True)
-    
+            c1.plotly_chart(fig_area, theme=None, width="stretch")
+
     # ✅ BAR Tipo
     if "Tipo" in exposure.columns and exposure["Tipo"].astype(str).str.strip().any():
         fig_tipo = allocation_bar_chart(exposure, column="Tipo", title=t("allocation_type"))
         if fig_tipo:
-            c2.plotly_chart(fig_tipo, use_container_width=True)
+            c2.plotly_chart(fig_tipo, theme=None, width="stretch")
 
 with tab_flu:
     st.subheader(t("flows_title"))
@@ -765,7 +845,8 @@ with tab_flu:
     
     st.dataframe(
         df_display.style.format(fmt_dict),
-        use_container_width=True
+        # use_container_width=True
+        width="stretch"
     )
 
 with tab_ops:

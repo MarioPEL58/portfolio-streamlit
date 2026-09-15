@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 
-
 def compute_portfolio_xirr(ops_enriched, dividends, final_value, valuation_date=None):
     ops = ops_enriched.copy()
     ops["Data"] = pd.to_datetime(ops["Data"], errors="coerce")
@@ -260,3 +259,37 @@ def compute_beta(portfolio_returns, benchmark_returns):
     beta = cov / var
 
     return beta
+
+def compute_var_historical(returns: pd.Series, confidence_level: float = 0.95):
+    """Calcola il VaR Storico giornaliero (Valore positivo)"""
+    if returns is None or returns.empty:
+        return None
+    percentile = (1.0 - confidence_level) * 100
+    return -np.percentile(returns, percentile)
+
+def compute_var_parametric_no_scipy(returns: pd.Series, confidence_level: float = 0.95):
+    """Calcola il VaR Parametrico senza dipendenze SciPy"""
+    if returns is None or returns.empty:
+        return None
+    
+    mean_return = returns.mean()
+    std_return = returns.std()
+    
+    if std_return == 0 or np.isnan(std_return):
+        return None
+        
+    # Z-score pre-calcolati per i livelli standard
+    z_scores = {0.90: 1.28155, 0.95: 1.64485, 0.99: 2.32635}
+    z_score = z_scores.get(confidence_level, 1.64485) 
+    
+    return (z_score * std_return) - mean_return
+
+def compute_conditional_var(returns: pd.Series, confidence_level: float = 0.95):
+    """Calcola il CVaR (Expected Shortfall) giornaliero"""
+    if returns is None or returns.empty:
+        return None
+    var_threshold = -compute_var_historical(returns, confidence_level)
+    beyond_var_returns = returns[returns <= var_threshold]
+    if beyond_var_returns.empty:
+        return None
+    return -beyond_var_returns.mean()
