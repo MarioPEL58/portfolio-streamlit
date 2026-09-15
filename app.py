@@ -181,10 +181,10 @@ full_index = pd.date_range(
 
 closes = closes.reindex(full_index)
 
-st.write(closes.index.min())
-st.write(closes.index.max())
+# st.write(closes.index.min())
+# st.write(closes.index.max())
 
-st.dataframe(report_late_tickers(closes, ops))
+# st.dataframe(report_late_tickers(closes, ops))
 # ticker = "0P0000M2UJ.F"
 
 # st.write("OPERAZIONI")
@@ -206,7 +206,7 @@ closes = fill_late_tickers_with_purchase_price(closes,ops,price_col="Prezzo")
 # st.write("CLOSE DOPO")
 # st.write(closes[ticker].loc["2014":"2015"].head(20))
 
-st.dataframe(report_late_tickers(closes, ops))
+# st.dataframe(report_late_tickers(closes, ops))
 
 if closes.empty:
     st.error(t("no_prices"))
