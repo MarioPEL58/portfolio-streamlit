@@ -1131,6 +1131,8 @@ def create_tail_risk_figure(flow_adjusted_returns):
     returns_plot = returns[
         returns.between(q_low, q_high)
     ]
+    # Escludi SOLO DAL GRAFICO i rendimenti nulli
+    returns_plot = returns_plot[returns_plot != 0]
     
     fig_rend = go.Figure()
 
