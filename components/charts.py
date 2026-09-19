@@ -1117,12 +1117,24 @@ def create_tail_risk_figure(flow_adjusted_returns):
 
     var_giornaliero = compute_var_historical(flow_adjusted_returns, 0.95)
     cvar_giornaliero = compute_conditional_var(flow_adjusted_returns, 0.95)
+    
+    # -----------------------------------------
+    # Range grafico: escludiamo solo visivamente
+    # gli estremi strutturali
+    # -----------------------------------------
+    q_low = returns.quantile(0.005)
+    q_high = returns.quantile(0.995)
 
+    returns_plot = returns[
+        returns.between(q_low, q_high)
+    ]
+    
     fig_rend = go.Figure()
 
     fig_rend.add_trace(
         go.Histogram(
-            x=flow_adjusted_returns,
+            # x=flow_adjusted_returns,
+            x=returns_plot,
             nbinsx=50,
             histnorm="probability density",
             name=t("tail_risk_histogram_name"),
