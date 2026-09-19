@@ -4,6 +4,7 @@ import pandas as pd
 from utils.display import get_display_columns, get_format_dict_positions
 from utils.formatting import style_pl_column
 from utils.i18n import t
+from services.portfolio_metrics import compute_var_historical
 
 def render_positions_table(current):
 
