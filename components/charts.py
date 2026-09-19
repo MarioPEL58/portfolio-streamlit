@@ -5,6 +5,8 @@ import numpy as np
 from utils.i18n import t
 from utils.display import get_display_columns
 import pandas as pd
+from services.portfolio_metrics import compute_var_historical, compute_conditional_var 
+
 
 def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
 
@@ -25,13 +27,15 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
         mode="lines",
         name=columns_map.get("Capitale investito", "Invested capital")
     ))
-
+    
+    COLORE_ASSE_DESTRO ="#1D70B8" # "#1D70B8" Cobalto finanziario "#D63384" # Rosa scuro/intenso, perfetto sia su scuro che su bianco
     fig.add_trace(go.Scatter(
         x=series.index,
         y=series["P/L trading"],
         mode="lines",
         name=columns_map.get("P/L trading", "Trading P/L"),
-        yaxis="y2"
+        yaxis="y2",
+        line=dict(color=COLORE_ASSE_DESTRO, width=2) # 🔹 Linea ugule a colore asse 
     ))
 
     if bench_norm is not None:
@@ -48,22 +52,36 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
             xref="paper",
             yref="paper",
             x=0.01,
-            y=0.02,
+            # y=0.02,
+            y=-0.10,            # 🔹 Valore negativo per spingere il testo SOTTO il grafico
             text=f"<i>{note_text}</i>",
             showarrow=False,
             font=dict(size=11, color="gray"),
-            align="left"
+            align="left",
+            yanchor="top"   # 🔹 Forziamo l'ancoraggio per fare spazio verso il basso
         )
         
     fig.update_layout(
         height=540,
         xaxis_title=t("col_date"),
         yaxis_title=t("currency_label"),
+        xaxis=dict(
+            title=dict(standoff=15), # Allontana la scritta "Data" dalle date sotto
+            automargin=True
+        ),
+        yaxis=dict(
+            title=dict(standoff=15), # Allontana la scritta "Euro" dai numeri a sinistra
+            automargin=True,
+            showgrid=True,
+            gridcolor="rgba(255, 255, 255, 0.15)" # colore griglia
+        ),
         yaxis2=dict(
-            title=t("pl_label"),
+            title=dict(text=t("pl_label"), standoff=15,font=dict(color=COLORE_ASSE_DESTRO) ), # colore titolo
+            tickfont=dict(color=COLORE_ASSE_DESTRO),  # Numeri dell'asse destro
             overlaying="y",
             side="right",
-            showgrid=False
+            showgrid=False,
+            automargin=True
         ),
         legend=dict(
             orientation="h",
@@ -72,7 +90,8 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
             xanchor="right",
             x=1
         ),
-        margin=dict(l=20, r=20, t=20, b=20)
+        plot_bgcolor="rgba(255, 255, 255, 0.01)", # Crea un leggerissimo velo chiaro sul nero
+        margin=dict(l=80, r=80, t=20, b=60)
     )
 
     return fig
@@ -305,6 +324,7 @@ def daily_pl_bar_chart_by_sign(
             ),
             text=df["label"],
             textposition="outside",
+            textfont=dict(size=12),
             customdata=df[[label_col, pl_pct_col, pl_col]],
             hovertemplate=(
                 "%{customdata[0]}<br>"
@@ -316,26 +336,35 @@ def daily_pl_bar_chart_by_sign(
         )
     )
 
+    # Trova la lunghezza massima dei nomi per calcolare il riempimento dinamico
+    # max_label_len = max([len(str(label)) for label in df[label_col].tolist()]) if not df.empty else 10
+
     common_layout = dict(
-        title=title,
+        # title=dict(text=title,x=0.02,xanchor="left"),
+        title=None,
         showlegend=False,
         height=max(STYLE["min_height"], STYLE["height_factor"] * n),
-        margin=dict(l=20, r=20, t=50, b=20),
+        # margin=dict(l=20, r=20, t=50, b=20),
+        margin=dict(l=100, r=60, t=50, b=40),
         bargap=STYLE["bargap"],
         barmode="overlay",
         yaxis=dict(
             tickmode="array",
             tickvals=y_pos,
             ticktext=df[label_col].tolist(),
+            # ticktext=[f"{label}   " for label in df[label_col].tolist()],
+            # ticktext=[str(label).ljust(max_label_len + 3) for label in df[label_col].tolist()],
             autorange="reversed"
+            ,automargin=True # 🔹 Forza il calcolo dello spazio per i Ticker
         )
+        ,plot_bgcolor="rgba(255, 255, 255, 0.03)" 
     )
 
     if positive:
         fig.update_layout(
             **common_layout,
             xaxis=dict(
-                range=[0, max_x * STYLE["x_padding_factor"]],
+                range=[-max_x * 0.01, max_x * (STYLE["x_padding_factor"]*1.0)],
                 tickformat=".2%"
             )
         )
@@ -352,7 +381,7 @@ def daily_pl_bar_chart_by_sign(
         fig.update_layout(
             **common_layout,
             xaxis=dict(
-                range=[0, max_x * STYLE["x_padding_factor"]],
+                range=[-max_x * 0.01, max_x * (STYLE["x_padding_factor"]*1.0)],
                 tickmode="array",
                 tickvals=tickvals,
                 ticktext=ticktext
@@ -1055,7 +1084,10 @@ def pl_treemap(
     fig.update_traces(
         marker=dict(line=dict(color="black", width=1.2)),
         textinfo="label",
-        textposition="middle center"
+        textposition="middle center",
+        # 🔹 Forza Plotly a calcolare correttamente le dimensioni dei font dentro i rettangoli
+        textfont=dict(size=13),
+        insidetextfont=dict(size=13)
     )
 
     # =========================
@@ -1066,9 +1098,9 @@ def pl_treemap(
         "<b>%{label}</b><br>" +
         "Intermediario: %{parent}<br>" +
         "Valore: %{value:.2f}€<br>" +
-        f"P/L: %{{customdata.2f}}€<br>" +
+        f"P/L: %{{customdata[0]:.2f}}€<br>" +
         f"P/L %: %{{color:.2%}}<extra></extra>",
-        customdata=df[[pl_col]]
+        customdata=df[[pl_col]].values
     )
 
     # =========================
@@ -1080,3 +1112,91 @@ def pl_treemap(
     )
 
     return fig
+
+def create_tail_risk_figure(flow_adjusted_returns):
+
+    # Serie completa per VaR/CVaR
+    returns = flow_adjusted_returns.dropna()
+    
+    var_giornaliero = compute_var_historical(flow_adjusted_returns, 0.95)
+    cvar_giornaliero = compute_conditional_var(flow_adjusted_returns, 0.95)
+
+    media= flow_adjusted_returns.mean()
+    mediana= flow_adjusted_returns.median()
+    # -----------------------------------------
+    # Range grafico: escludiamo solo visivamente
+    # gli estremi strutturali
+    # -----------------------------------------
+    q_low = returns.quantile(0.005)
+    q_high = returns.quantile(0.995)
+
+    returns_plot = returns[
+        returns.between(q_low, q_high)
+    ]
+    # Escludi SOLO DAL GRAFICO i rendimenti nulli
+    returns_plot = returns_plot[returns_plot != 0]
+    
+    fig_rend = go.Figure()
+
+    fig_rend.add_trace(
+        go.Histogram(
+            # x=flow_adjusted_returns,
+            x=returns_plot,
+            nbinsx=50,
+            histnorm="probability density",
+            name=t("tail_risk_histogram_name"),
+            marker_color="#34495e",
+            opacity=0.7,
+        )
+    )
+
+    fig_rend.add_vline(
+        x=-var_giornaliero,
+        line_dash="dash",
+        line_color="#e74c3c",
+        line_width=2,
+        annotation_text=f"{t('tail_risk_var_label')}: {-var_giornaliero:.2%}",
+        annotation_position="top left",
+    )
+
+    fig_rend.add_vline(
+        x=-cvar_giornaliero,
+        line_dash="dot",
+        line_color="#c0392b",
+        line_width=2,
+        annotation_text=f"{t('tail_risk_cvar_label')}: {-cvar_giornaliero:.2%}",
+        annotation_position="bottom left",
+    )
+    
+    # Linea Media
+    fig_rend.add_vline(
+        x=media,
+        line_dash="dash",
+        line_color="#3498db",
+        line_width=2,
+        annotation_text=f"{t('tail_risk_mean_label')}: {media:.2%}",
+        annotation_position="top right",
+    )
+    
+    # Linea Mediana
+    fig_rend.add_vline(
+        x=mediana,
+        line_dash="dot",
+        line_color="#2ecc71",
+        line_width=2,
+        annotation_text=f"{t('tail_risk_median_label')}: {mediana:.2%}",
+        annotation_position="bottom right",
+    )
+    fig_rend.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        xaxis_title=t("tail_risk_xaxis_title"),
+        yaxis_title=t("tail_risk_yaxis_title"),
+        xaxis_tickformat=".1%",
+        showlegend=False,
+        height=400,
+        margin=dict(l=20, r=20, t=20, b=20),
+    )
+
+    return fig_rend

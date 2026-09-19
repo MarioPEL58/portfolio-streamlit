@@ -1,5 +1,5 @@
 [theme]
-base = "dark"
+# base = "dark"
 
 primaryColor = "#00C896"        # verde elegante
 backgroundColor = "#0e1117"     # sfondo principale (nero/blu)

@@ -185,6 +185,8 @@ sidebar_min_date = "Data minima"
 sidebar_label_choice_title = "Etichetta grafici"
 sidebar_label_ticker = "Ticker"
 sidebar_label_name = "Nome"
+sidebar_print_header = "🖨️ Esportazione PDF"
+sidebar_print_toggle = "Attiva Layout di Stampa (Fondo Bianco)"
 
 # colonnper tae belle in output 
 col_date = "Data"
@@ -256,6 +258,23 @@ rf_enabled = "Metriche calcolate con tasso risk-free reale"
 rf_disabled = "Metriche calcolate con risk-free uguale a zero"
 rf_value = "Tasso risk-free"
 beta_market_label = "Mercato"
+
+tail_risk_title = "🛡️ Analisi del Rischio Estremo (Tail Risk)"
+tail_risk_histogram_name = "Frequenza Rendimenti"
+tail_risk_var_label = "VaR 95%"
+tail_risk_cvar_label = "CVaR"
+tail_risk_mean_label = "Media"
+tail_risk_median_label = "Mediana"
+tail_risk_xaxis_title = "Rendimento Giornaliero"
+tail_risk_yaxis_title = "Densità di Frequenza"
+
+tail_risk_best_worst_days = "📊 Migliori e peggiori giornate"
+tail_risk_period = "Periodo"
+tail_risk_worst_days_title = "Peggiori giornate"
+tail_risk_best_days_title = "Migliori giornate"
+tail_risk_return = "Rendimento"
+tail_risk_date = "Data"
+tail_risk_var_highlight = "Rendimento oltre la soglia VaR 95%"
 
 [lang.en]
 
@@ -426,8 +445,8 @@ sidebar_min_date = "Start date"
 sidebar_label_choice_title = "Chart labels"
 sidebar_label_ticker = "Ticker"
 sidebar_label_name = "Name"
-
-
+sidebar_print_header = "🖨️ PDF Export"
+sidebar_print_toggle = "Enable Print Layout (White Background)"
 
 # colonnper tae belle in output 
 col_date = "Date"
@@ -500,3 +519,20 @@ rf_enabled = "Metrics calculated using real risk-free rate"
 rf_disabled = "Metrics calculated with risk-free set to zero"
 rf_value = "Risk-free rate"
 beta_market_label = "Market"
+
+tail_risk_title = "🛡️ Tail Risk Analysis"
+tail_risk_histogram_name = "Returns Frequency"
+tail_risk_var_label = "95% VaR"
+tail_risk_cvar_label = "CVaR"
+tail_risk_mean_label = "Mean"
+tail_risk_median_label = "Median"
+tail_risk_xaxis_title = "Daily Return"
+tail_risk_yaxis_title = "Frequency Density"
+
+tail_risk_best_worst_days = "📊 Best and worst days"
+tail_risk_period = "Period"
+tail_risk_worst_days_title = "Worst days"
+tail_risk_best_days_title = "Best days"
+tail_risk_return = "Return"
+tail_risk_date = "Date"
+tail_risk_var_highlight = "Return beyond the 95% VaR threshold"

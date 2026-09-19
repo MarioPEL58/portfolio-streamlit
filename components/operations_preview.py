@@ -44,7 +44,8 @@ def render_operations_preview(ops_enriched):
                 .apply(highlight_sell_col, axis=0)
             )
 
-            st.dataframe(styled, use_container_width=True)
+            # st.dataframe(styled, use_container_width=True)
+            st.dataframe(styled, width="stretch")  
 
         else:
             cols = [
@@ -75,4 +76,5 @@ def render_operations_preview(ops_enriched):
                 .apply(highlight_sell_col, axis=0)
             )
 
-            st.dataframe(styled, use_container_width=True)
+            # st.dataframe(styled, use_container_width=True)
+            st.dataframe(styled, width="stretch")
