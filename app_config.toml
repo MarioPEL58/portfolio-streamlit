@@ -268,6 +268,14 @@ tail_risk_median_label = "Mediana"
 tail_risk_xaxis_title = "Rendimento Giornaliero"
 tail_risk_yaxis_title = "Densità di Frequenza"
 
+tail_risk_best_worst_days = "📊 Migliori e peggiori giornate"
+tail_risk_period = "Periodo"
+tail_risk_worst_days_title = "Peggiori giornate"
+tail_risk_best_days_title = "Migliori giornate"
+tail_risk_return = "Rendimento"
+tail_risk_date = "Data"
+tail_risk_var_highlight = "Rendimento oltre la soglia VaR 95%"
+
 [lang.en]
 
 # HEADER
@@ -520,3 +528,11 @@ tail_risk_mean_label = "Mean"
 tail_risk_median_label = "Median"
 tail_risk_xaxis_title = "Daily Return"
 tail_risk_yaxis_title = "Frequency Density"
+
+tail_risk_best_worst_days = "📊 Best and worst days"
+tail_risk_period = "Period"
+tail_risk_worst_days_title = "Worst days"
+tail_risk_best_days_title = "Best days"
+tail_risk_return = "Return"
+tail_risk_date = "Date"
+tail_risk_var_highlight = "Return beyond the 95% VaR threshold"
