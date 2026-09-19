@@ -1120,7 +1120,9 @@ def create_tail_risk_figure(flow_adjusted_returns):
     
     var_giornaliero = compute_var_historical(flow_adjusted_returns, 0.95)
     cvar_giornaliero = compute_conditional_var(flow_adjusted_returns, 0.95)
-    
+
+    media= flow_adjusted_returns.mean()
+    mediana= flow_adjusted_returns.median()
     # -----------------------------------------
     # Range grafico: escludiamo solo visivamente
     # gli estremi strutturali
@@ -1165,7 +1167,26 @@ def create_tail_risk_figure(flow_adjusted_returns):
         annotation_text=f"{t('tail_risk_cvar_label')}: {-cvar_giornaliero:.2%}",
         annotation_position="bottom left",
     )
-
+    
+    # Linea Media
+    fig_rend.add_vline(
+        x=media,
+        line_dash="dash",
+        line_color="#3498db",
+        line_width=2,
+        annotation_text=f"{t('tail_risk_mean_label')}: {media:.2%}",
+        annotation_position="top right",
+    )
+    
+    # Linea Mediana
+    fig_rend.add_vline(
+        x=mediana,
+        line_dash="dot",
+        line_color="#2ecc71",
+        line_width=2,
+        annotation_text=f"{t('tail_risk_median_label')}: {mediana:.2%}",
+        annotation_position="bottom right",
+    )
     fig_rend.update_layout(
         template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
