@@ -28,6 +28,7 @@ from utils.demo import create_demo_file
 from utils.display import get_display_columns
 from utils.series_utils import ensure_datetime_series
 from components.tables import render_positions_table, render_performance_table, render_operations_table
+from components.tables import render_best_worst_days
 from components.downloads import render_download_tab
 from components.market_status import render_market_data_status
 
@@ -787,6 +788,9 @@ with tab_analysis:
         width="stretch",
         key="rend_chart"
     )
+    
+    render_best_worst_days(flow_adjusted_returns)
+    
 # Tabs
 tab_pos, tab_perfo, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
     [t("tab_positions"),t("tab_performance"), t("tab_exposure"), t("tab_flows"), t("tab_operations"), t("tab_download")]
