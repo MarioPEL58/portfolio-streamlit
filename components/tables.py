@@ -213,16 +213,22 @@ def render_best_worst_days(flow_adjusted_returns, n_days=10):
         # --------------------------
         period = st.segmented_control(
             t("tail_risk_period"),
-            options=["1Y", "3Y", "5Y", "ALL"],
+            options=["3M", "6M", "1Y", "3Y", "5Y", "ALL"],
             default="1Y",
             key="tail_risk_period_selector"
         )
 
         end_date = returns.index.max()
 
-        if period == "1Y":
+        if period == "3M":
+            start_date = end_date - pd.DateOffset(months=3)
+            
+        elif period == "6M":
+            start_date = end_date - pd.DateOffset(months=6)
+            
+        elif period == "1Y":
             start_date = end_date - pd.DateOffset(years=1)
-
+            
         elif period == "3Y":
             start_date = end_date - pd.DateOffset(years=3)
 
