@@ -1115,6 +1115,9 @@ def pl_treemap(
 
 def create_tail_risk_figure(flow_adjusted_returns):
 
+    # Serie completa per VaR/CVaR
+    returns = flow_adjusted_returns.dropna()
+    
     var_giornaliero = compute_var_historical(flow_adjusted_returns, 0.95)
     cvar_giornaliero = compute_conditional_var(flow_adjusted_returns, 0.95)
     
