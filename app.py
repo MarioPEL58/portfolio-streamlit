@@ -225,7 +225,7 @@ if missing:
     
 start= time.time()
 # Portfolio
-series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
+series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered, price_quality=price_quality)
 
 #debug
 # st.write(series.tail(5))
