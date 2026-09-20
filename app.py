@@ -324,6 +324,12 @@ quality_mask = (
 
 returns_quality = flow_adjusted_returns[quality_mask]
 
+st.write("Osservazioni totali:", len(flow_adjusted_returns))
+st.write("Osservazioni valide:", len(returns_quality))
+
+st.write("Osservazioni escluse:",len(flow_adjusted_returns) - len(returns_quality))
+st.write("Copertura dati reali:",f"{len(returns_quality) / len(flow_adjusted_returns):.1%}")
+
 # sharpe = compute_sharpe_from_returns(flow_adjusted_returns, risk_free_rate=rf_daily)
 # sortino = compute_sortino_ratio(flow_adjusted_returns, risk_free_rate=rf_daily)
 
