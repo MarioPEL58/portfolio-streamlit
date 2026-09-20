@@ -315,6 +315,15 @@ flow_adjusted_returns = compute_flow_adjusted_returns(
     flows_df=xirr_flows,
     flow_col="Operazioni"
 )
+
+quality_mask = (
+    series["Prezzi reali"]
+    .reindex(flow_adjusted_returns.index)
+    .fillna(False)
+)
+
+returns_quality = flow_adjusted_returns[quality_mask]
+
 sharpe = compute_sharpe_from_returns(flow_adjusted_returns, risk_free_rate=rf_daily)
 sortino = compute_sortino_ratio(flow_adjusted_returns, risk_free_rate=rf_daily)
 
