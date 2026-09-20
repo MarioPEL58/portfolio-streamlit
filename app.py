@@ -324,8 +324,11 @@ quality_mask = (
 
 returns_quality = flow_adjusted_returns[quality_mask]
 
-sharpe = compute_sharpe_from_returns(flow_adjusted_returns, risk_free_rate=rf_daily)
-sortino = compute_sortino_ratio(flow_adjusted_returns, risk_free_rate=rf_daily)
+# sharpe = compute_sharpe_from_returns(flow_adjusted_returns, risk_free_rate=rf_daily)
+# sortino = compute_sortino_ratio(flow_adjusted_returns, risk_free_rate=rf_daily)
+
+sharpe = compute_sharpe_from_returns(returns_quality, risk_free_rate=rf_daily)
+sortino = compute_sortino_ratio(returns_quality, risk_free_rate=rf_daily)
 
 # =========================
 # Benchmark
