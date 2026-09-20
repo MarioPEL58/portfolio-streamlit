@@ -467,6 +467,14 @@ def fill_late_tickers_with_purchase_price(
 ):
     closes = closes.copy()
 
+    # True = prezzo reale
+    # False = prezzo mancante/sintetico
+    price_quality = (
+        closes
+        .replace(0, np.nan)
+        .notna()
+    )
+    
     for ticker in closes.columns:
 
         ops_ticker = (
@@ -499,7 +507,11 @@ def fill_late_tickers_with_purchase_price(
             (closes.index >= purchase_date)
             & (closes.index < first_yahoo)
         )
-
+        
+        # Prezzo sintetico
         closes.loc[mask, ticker] = purchase_price
+        
+        # Segnaliamo che NON è un prezzo reale
+        price_quality.loc[mask, ticker] = False
 
-    return closes
+    return closes, price_quality
