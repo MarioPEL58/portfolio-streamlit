@@ -272,7 +272,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
 
     return ops
 
-def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
+def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None, price_quality: pd.DataFrame | None = None):
 
     # t = time.perf_counter()
     # ✅ normalizzazione date
