@@ -572,6 +572,41 @@ with tab_perf:
     fig.data[0].visible = True
     
     st.plotly_chart(fig, width="stretch", theme=None, key=chart_key)
+    fig_test = go.Figure()
+
+    # test    per debug   
+    
+    fig_test.add_trace(
+        go.Scatter(
+            x=filtered_series.index,
+            y=filtered_series["Valore portafoglio"],
+            mode="lines+markers",
+            name="TEST PORTFOLIO",
+            line=dict(
+                color="lime",
+                width=5
+            ),
+            marker=dict(
+                color="lime",
+                size=8
+            ),
+            visible=True
+        )
+    )
+    
+    fig_test.update_layout(
+        height=400,
+        yaxis=dict(autorange=True),
+        showlegend=True
+    )
+    
+    st.plotly_chart(
+        fig_test,
+        width="stretch",
+        theme=None,
+        key=f"test_portfolio_{benchmark}_{show_benchmark}"
+    )
+    # end test debug 
 
 with tab_daily:
     st.subheader(t("daily_title"))
