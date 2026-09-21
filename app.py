@@ -545,6 +545,9 @@ with tab_perf:
         filtered_series["Valore portafoglio"].min(),
         filtered_series["Valore portafoglio"].max()
     )
+    if filtered_bench is not None:
+        st.write("Benchmark count:", filtered_bench.count())
+        st.write("Benchmark min/max:", filtered_bench.min(), filtered_bench.max())
     
     st.write(
         filtered_series[
