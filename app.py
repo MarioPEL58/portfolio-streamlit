@@ -569,6 +569,8 @@ with tab_perf:
     # st.plotly_chart(fig, use_container_width=True)
     chart_key = (f"portfolio_chart_"f"{benchmark.strip()}_"f"{show_benchmark}")
     
+    fig.data[0].visible = True
+    
     st.plotly_chart(fig, width="stretch", theme=None, key=chart_key)
 
 with tab_daily:
