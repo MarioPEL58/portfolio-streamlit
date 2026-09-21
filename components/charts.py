@@ -11,7 +11,9 @@ from services.portfolio_metrics import compute_var_historical, compute_condition
 def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
 
     columns_map = get_display_columns()
-
+    
+    pl_range = calculate_pl_range(series["P/L trading"])
+    
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(
@@ -80,6 +82,12 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
             tickfont=dict(color=COLORE_ASSE_DESTRO),  # Numeri dell'asse destro
             overlaying="y",
             side="right",
+            
+            range=pl_range,
+            zeroline=True,
+            zerolinecolor="rgba(29,112,184,0.5)",
+            zerolinewidth=1,
+            
             showgrid=False,
             automargin=True
         ),
@@ -1200,3 +1208,114 @@ def create_tail_risk_figure(flow_adjusted_returns):
     )
 
     return fig_rend
+
+def calculate_pl_range(
+    series: pd.Series,
+    margin: float = 0.10
+) -> listvalues = pd.to_numeric(
+        series,
+        errors="coerce"
+    ).dropna()
+
+    if values.empty:
+        return [-1.0, 1.0]
+
+    pl_min = float(values.min())
+    pl_max = float(values.max())
+
+    # Caso tutto zero
+    if pl_min == 0 and pl_max == 0:
+        return [-1.0, 1.0]
+
+    # -------------------------
+    # Solo P/L positivo
+    # Zero in basso
+    # -------------------------
+    if pl_min >= 0:
+
+        top = pl_max * (1 + margin)
+
+        return [
+            0,
+            max(top, 1.0)
+        ]
+
+    # -------------------------
+    # Solo P/L negativo
+    # Zero in alto
+    # -------------------------
+    if pl_max <= 0:
+
+        bottom = pl_min * (1 + margin)
+
+        return [
+            min(bottom, -1.0),
+            0
+        ]
+
+    # -------------------------
+    # Abbiamo positivo e negativo
+    # -------------------------
+
+    negative = abs(pl_min)
+    positive = pl_max
+
+    ratio = positive / negative
+
+    # Bilanciato
+    if 0.75 <= ratio <= 1.33:
+
+        extent = max(positive, negative) * (1 + margin)
+
+        return [
+            -extent,
+            extent
+        ]
+
+    # Negativo circa >= 2 volte positivo
+    # Zero al 75% dell'altezza
+    if ratio <= 0.5:
+
+        negative_range = negative * (1 + margin)
+
+        # 75% sotto zero, 25% sopra
+        positive_range = negative_range / 3
+
+        positive_range = max(
+            positive * (1 + margin),
+            positive_range
+        )
+
+        return [
+            -negative_range,
+            positive_range
+        ]
+
+    # Positivo circa >= 2 volte negativo
+    # Zero al 25% dell'altezza
+    if ratio >= 2.0:
+
+        positive_range = positive * (1 + margin)
+
+        # 25% sotto zero, 75% sopra
+        negative_range = positive_range / 3
+
+        negative_range = max(
+            negative * (1 + margin),
+            negative_range
+        )
+
+        return [
+            -negative_range,
+            positive_range
+        ]
+
+    # -------------------------
+    # Situazioni intermedie
+    # Range proporzionale naturale
+    # -------------------------
+
+    return [
+        pl_min * (1 + margin),
+        pl_max * (1 + margin)
+    ]
