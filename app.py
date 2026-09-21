@@ -531,7 +531,32 @@ with tab_perf:
     if first_valid_price_date is not None:
         prefix = CONFIG["lang"][LANG]["market_data_available_from"]
         note_text = f"{prefix} {first_valid_price_date.strftime('%d/%m/%Y')}"
-
+        
+    st.write("=== DEBUG PORTFOLIO ===")
+    st.write("filtered_series shape:", filtered_series.shape)
+    
+    st.write(
+        "Valore portafoglio count:",
+        filtered_series["Valore portafoglio"].count()
+    )
+    
+    st.write(
+        "Valore portafoglio min/max:",
+        filtered_series["Valore portafoglio"].min(),
+        filtered_series["Valore portafoglio"].max()
+    )
+    
+    st.write(
+        filtered_series[
+            ["Valore portafoglio", "Capitale investito", "P/L trading"]
+        ].tail()
+    )
+    
+    st.write("=== DEBUG BENCHMARK ===")
+    st.write("show_benchmark:", show_benchmark)
+    st.write("benchmark:", benchmark)
+    st.write("bench_series is None:", bench_series is None)
+    
     fig = portfolio_chart(
         filtered_series,
         bench_norm=filtered_bench,   # nome parametro puoi cambiarlo dopo
