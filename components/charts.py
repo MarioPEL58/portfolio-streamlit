@@ -1213,7 +1213,7 @@ def calculate_pl_range(
     series: pd.Series,
     margin: float = 0.10
 ) -> list:
-        values = pd.to_numeric(
+    values = pd.to_numeric(
         series,
         errors="coerce"
     ).dropna()
