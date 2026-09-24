@@ -1212,7 +1212,7 @@ def create_tail_risk_figure(flow_adjusted_returns):
 def calculate_pl_range(
     series: pd.Series,
     margin: float = 0.10
-    ) -> listvalues : pd.to_numeric(
+    ) -> listvalues = pd.to_numeric(
         series,
         errors="coerce"
     ).dropna()
