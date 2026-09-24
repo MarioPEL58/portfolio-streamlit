@@ -272,7 +272,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
 
     return ops
 
-def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None, price_quality: pd.DataFrame | None = None):
+def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
 
     # t = time.perf_counter()
     # ✅ normalizzazione date
@@ -398,61 +398,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
                 position_closes_eur[pos_key] = closes_eur_ticker[ticker]
 
         position_closes_eur = position_closes_eur.reindex(columns=holdings.columns)
-        
-        # ==================================================
-        # Qualità prezzi per PositionKey
-        # True  = prezzo reale
-        # False = prezzo sintetico / fallback
-        # ==================================================
-        
-        if price_quality is not None and not price_quality.empty:
-        
-            quality_ticker = (
-                price_quality
-                .reindex(idx)
-                .fillna(False)
-                .astype(bool)
-            )
-        
-            position_price_quality = pd.DataFrame(
-                True,
-                index=idx,
-                columns=holdings.columns
-            )
-        
-            for pos_key in holdings.columns:
-        
-                ticker = position_to_ticker.loc[pos_key]
-        
-                if ticker in quality_ticker.columns:
-                    position_price_quality[pos_key] = quality_ticker[ticker]
-        
-        else:
-        
-            # Se non abbiamo informazioni sulla qualità,
-            # assumiamo i prezzi disponibili come validi.
-            position_price_quality = pd.DataFrame(
-                True,
-                index=idx,
-                columns=holdings.columns
-            )
-        # ==================================================
-        # Considera SOLO le posizioni effettivamente aperte
-        # ==================================================
-        
-        open_positions = holdings.abs() > 1e-12
-        
-        # Posizioni aperte che utilizzano un prezzo sintetico
-        synthetic_open_positions = (
-            open_positions
-            & ~position_price_quality
-        )
-        
-        # True  = tutte le posizioni aperte hanno prezzi reali
-        # False = almeno una posizione aperta usa un prezzo sintetico
-        portfolio_price_quality = (
-            ~synthetic_open_positions.any(axis=1)
-        ).rename("Prezzi reali")
 
         # =========================
         # 8. Valore storico portafoglio
@@ -790,8 +735,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             perf_ytd_pct,
             perf_1y_pct,
             daily_dividends,
-            pl_realizzato,
-            portfolio_price_quality
+            pl_realizzato
         ],
         axis=1
     )
