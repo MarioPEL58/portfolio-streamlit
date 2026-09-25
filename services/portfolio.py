@@ -636,7 +636,16 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_total_pl_pct = (
             daily_total_pl / total_value.shift(1)
         ).rename("P/L Totale Giornaliero %")
-        
+        # DEBUG primo giorno ticker filtrato
+        st.write(
+            pd.DataFrame({
+                "Valore": total_value,
+                "Cashflow": daily_cf_total,
+                "P/L": daily_total_pl,
+                "Return": daily_total_pl_pct,
+            }).loc["2026-07-07"]
+        )
+         # DEBUG primo giorno ticker filtrato
         weekly_total_pl = (
             daily_total_pl
             .rolling("7D")
