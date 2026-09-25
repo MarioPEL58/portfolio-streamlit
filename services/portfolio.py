@@ -632,7 +632,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # ==================================================
         
         daily_total_pl = (
-            daily_pl + realized_daily
+            #  daily_pl + realized_daily #  eleminto perche sommava due volte il profitto realizzato dalle vendite 
+            daily_pl + daily_dividends
         ).rename("P/L Totale Giornaliero")
         
         daily_total_pl_pct = (
