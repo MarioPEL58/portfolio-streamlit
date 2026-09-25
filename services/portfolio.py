@@ -416,6 +416,28 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     ops_cf = ops_all.copy()
     ops_cf["Cashflow"] = ops_cf["CashflowCalc"]
 
+    # DEBUG vendite 08/04 e 16/04
+    st.write("DEBUG OPERAZIONI VENDITA")
+    
+    st.dataframe(
+        ops_cf.loc[
+            ops_cf["DateOnly"].isin([
+                pd.Timestamp("2026-04-08"),
+                pd.Timestamp("2026-04-16")
+            ]),
+            [
+                "DateOnly",
+                "Ticker",
+                "Quantita",
+                "Cashflow",
+                "RealizedTradePL",
+                "QtyOpenAfter",
+                "CostOpenAfter"
+            ]
+        ]
+    )
+    # DEBUG vendite 08/04 e 16/04 end
+
     if dividends is None or dividends.empty:
         daily_dividends = pd.Series(0.0, index=idx, name="Dividendi netti")
     else:
