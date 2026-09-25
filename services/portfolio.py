@@ -616,6 +616,25 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_total_pl_pct = (
             daily_total_pl / total_value.shift(1)
         ).rename("P/L Totale Giornaliero %")
+
+        # DEbug perf
+        debug_perf = pd.DataFrame({
+            "Valore precedente": total_value.shift(1),
+            "Valore portafoglio": total_value,
+            "Cash Flow": daily_cf_total,
+            "P/L giornaliero": daily_pl,
+            "Realizzato + dividendi": realized_daily,
+            "P/L totale": daily_total_pl,
+            "Return giornaliero": daily_total_pl_pct,
+        })
+        
+        st.write("DEBUG PERFORMANCE")
+        st.dataframe(
+            debug_perf.loc[
+                debug_perf["Cash Flow"].abs() > 0.01
+            ]
+        )
+        ###### end debug perf 
         
         weekly_total_pl = (
             daily_total_pl
