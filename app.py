@@ -85,7 +85,7 @@ min_filter_date = sidebar_cfg["min_filter_date"]
 if st.session_state.get("use_demo", False):
     file_source = create_demo_file(LANG)
     file_label = "Demo file"
-    st.session_state.use_demo = False
+    # st.session_state.use_demo = False
 else:
     file_source, file_label = resolve_file_source(uploaded_file)
 
