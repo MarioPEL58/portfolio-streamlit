@@ -48,48 +48,6 @@ from services.market_data import convert_closes_to_eur
 
 #  funzione ottimizzate per ridurre i tempi di calcolo della precednte 
 
-# def build_period_performance(
-#     daily_total_pl: pd.Series,
-#     total_value: pd.Series,
-#     months: int | None = None,
-#     years: int | None = None,
-#     name: str = ""
-# ) -> pd.Series:
-
-#     perf = pd.Series(index=total_value.index, dtype=float)
-
-#     cum_pl = daily_total_pl.cumsum()
-#     cum_pl_prev = cum_pl.shift(1).fillna(0)
-
-#     valid_values = total_value.dropna()
-#     valid_index = valid_values.index
-
-#     for dt in total_value.index:
-
-#         if months is not None:
-#             ref_date = dt - pd.DateOffset(months=months)
-#         elif years is not None:
-#             ref_date = dt - pd.DateOffset(years=years)
-#         else:
-#             continue
-
-#         pos = valid_index.searchsorted(ref_date, side="right") - 1
-
-#         if pos < 0:
-#             continue
-
-#         start_dt = valid_index[pos]
-#         start_value = valid_values.iloc[pos]
-
-#         period_pl = (
-#             cum_pl.loc[dt]
-#             - cum_pl_prev.loc[start_dt]
-#         )
-
-#         if start_value != 0:
-#             perf.loc[dt] = period_pl / start_value
-
-#     return perf.rename(name)
 def build_period_performance(
     daily_total_pl_pct: pd.Series,
     months: int | None = None,
@@ -478,28 +436,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     ops_cf = ops_all.copy()
     ops_cf["Cashflow"] = ops_cf["CashflowCalc"]
 
-    # DEBUG vendite 08/04 e 16/04
-    st.write("DEBUG OPERAZIONI VENDITA")
-    
-    st.dataframe(
-        ops_cf.loc[
-            ops_cf["DateOnly"].isin([
-                pd.Timestamp("2026-04-08"),
-                pd.Timestamp("2026-04-16")
-            ]),
-            [
-                "DateOnly",
-                "Ticker",
-                "Quantita",
-                "Cashflow",
-                "RealizedTradePL",
-                "QtyOpenAfter",
-                "CostOpenAfter"
-            ]
-        ]
-    )
-    # DEBUG vendite 08/04 e 16/04 end
-
     if dividends is None or dividends.empty:
         daily_dividends = pd.Series(0.0, index=idx, name="Dividendi netti")
     else:
@@ -694,32 +630,12 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # ==================================================
         
         daily_total_pl = (
-            #  daily_pl + realized_daily #  eleminto perche sommava due volte il profitto realizzato dalle vendite 
-            daily_pl + daily_dividends
+            daily_pl + daily_dividends    #  daily_pl + realized_daily eliminto perche sommava due volte il profitto realizzato dalle vendite 
         ).rename("P/L Totale Giornaliero")
         
         daily_total_pl_pct = (
             daily_total_pl / total_value.shift(1)
         ).rename("P/L Totale Giornaliero %")
-
-        # DEbug perf
-        debug_perf = pd.DataFrame({
-            "Valore precedente": total_value.shift(1),
-            "Valore portafoglio": total_value,
-            "Cash Flow": daily_cf_total,
-            "P/L giornaliero": daily_pl,
-            "Realizzato + dividendi": realized_daily,
-            "P/L totale": daily_total_pl,
-            "Return giornaliero": daily_total_pl_pct,
-        })
-        
-        st.write("DEBUG PERFORMANCE")
-        st.dataframe(
-            debug_perf.loc[
-                debug_perf["Cash Flow"].abs() > 0.01
-            ]
-        )
-        ###### end debug perf 
         
         weekly_total_pl = (
             daily_total_pl
@@ -748,8 +664,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # t0 = time.perf_counter()
         
         perf_3m_pct = build_period_performance(
-            # daily_total_pl,
-            # total_value,
             daily_total_pl_pct,
             months=3,
             name="Performance 3M %"
@@ -759,8 +673,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # t0 = time.perf_counter()
         
         perf_6m_pct = build_period_performance(
-            # daily_total_pl,
-            # total_value,
             daily_total_pl_pct,
             months=6,
             name="Performance 6M %"
@@ -770,8 +682,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # t0 = time.perf_counter()
         
         perf_1y_pct = build_period_performance(
-            # daily_total_pl,
-            # total_value,
             daily_total_pl_pct,
             years=1,
             name="Performance 1Y %"
