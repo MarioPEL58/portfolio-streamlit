@@ -2,6 +2,15 @@ import pandas as pd
 import streamlit as st
 from utils.i18n import t
 
+def reset_portfolio_filters():
+    for key in [
+        "only_active",
+        "selected_brokers",
+        "selected_types",
+        "selected_operations",
+    ]:
+        st.session_state.pop(key, None)
+    
 def render_filters(ops, dividends):
     st.markdown(t("filters_title"))
     
