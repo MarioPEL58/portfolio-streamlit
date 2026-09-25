@@ -7,7 +7,7 @@ import pandas as pd
 import streamlit as st
 import pytz
 from utils.state import init_state, get_state, set_state
-from componets.filters import reset_portfolio_filters
+from components.filters import reset_portfolio_filters
 
 from utils.i18n import t
 
