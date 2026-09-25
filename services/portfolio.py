@@ -636,6 +636,18 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_total_pl_pct = (
             daily_total_pl / total_value.shift(1)
         ).rename("P/L Totale Giornaliero %")
+        
+        first_investment_day = (
+            total_value.notna()
+            & total_value.shift(1).isna()
+            & (daily_cf_total < 0)
+        )
+        
+        daily_total_pl_pct.loc[first_investment_day] = (
+            daily_total_pl.loc[first_investment_day]
+            / (-daily_cf_total.loc[first_investment_day])
+        )
+
         # DEBUG primo giorno ticker filtrato
         st.write(
             pd.DataFrame({
