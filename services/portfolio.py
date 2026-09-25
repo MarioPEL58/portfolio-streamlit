@@ -748,8 +748,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # t0 = time.perf_counter()
         
         perf_3m_pct = build_period_performance(
-            daily_total_pl,
-            total_value,
+            # daily_total_pl,
+            # total_value,
+            daily_total_pl_pct,
             months=3,
             name="Performance 3M %"
         )
@@ -758,8 +759,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # t0 = time.perf_counter()
         
         perf_6m_pct = build_period_performance(
-            daily_total_pl,
-            total_value,
+            # daily_total_pl,
+            # total_value,
+            daily_total_pl_pct,
             months=6,
             name="Performance 6M %"
         )
@@ -768,8 +770,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # t0 = time.perf_counter()
         
         perf_1y_pct = build_period_performance(
-            daily_total_pl,
-            total_value,
+            # daily_total_pl,
+            # total_value,
+            daily_total_pl_pct,
             years=1,
             name="Performance 1Y %"
         )
