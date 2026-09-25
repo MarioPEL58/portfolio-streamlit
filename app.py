@@ -82,12 +82,27 @@ use_risk_free = sidebar_cfg["use_risk_free"]
 min_filter_date = sidebar_cfg["min_filter_date"]
 
 # Input source
-if st.session_state.get("use_demo", False):
+# if st.session_state.get("use_demo", False):
+#     file_source = create_demo_file(LANG)
+#     file_label = "Demo file"
+#     # st.session_state.use_demo = False
+# else:
+#     file_source, file_label = resolve_file_source(uploaded_file)
+
+# Input source
+if uploaded_file is not None:
+    # Un file caricato manualmente ha priorità sul demo
+    st.session_state.use_demo = False
+    file_source, file_label = resolve_file_source(uploaded_file)
+ 
+elif st.session_state.get("use_demo", False):
+    # Mantiene il demo attivo anche dopo i rerun
     file_source = create_demo_file(LANG)
     file_label = "Demo file"
-    # st.session_state.use_demo = False
+ 
 else:
-    file_source, file_label = resolve_file_source(uploaded_file)
+    file_source = None
+    file_label = None
 
 if file_source is None:
     st.info(t("upload_prompt"))
