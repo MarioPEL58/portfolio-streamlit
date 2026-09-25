@@ -672,34 +672,26 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         # st.write(f"1Y: {time.perf_counter()-t0:.2f} sec")
         # t0 = time.perf_counter()
-        
+                
         perf_ytd_pct = pd.Series(
+            np.nan,
             index=total_value.index,
             dtype=float,
             name="Performance YTD %"
         )
-
-        # t0 = time.perf_counter()
-        for year in total_value.index.year.unique():
         
+        for year in total_value.index.year.unique():
             mask = total_value.index.year == year
         
-            values = total_value.loc[mask].dropna()
-        
-            if values.empty:
-                continue
-        
-            start_value = values.iloc[0]
-        
-            ytd_pl = (
-                daily_total_pl.loc[mask]
-                .cumsum()
+            r = (
+                daily_total_pl_pct.loc[mask]
+                .replace([np.inf, -np.inf], np.nan)
+                .fillna(0.0)
             )
         
-            if start_value != 0:
-                perf_ytd_pct.loc[mask] = (
-                    ytd_pl / start_value
-                )
+            perf_ytd_pct.loc[mask] = (
+                (1.0 + r).cumprod() - 1.0
+            )
                 
     # st.write(f"YTD: {time.perf_counter()-t0:.2f} sec")
     # =========================
