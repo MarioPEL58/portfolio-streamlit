@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 import pytz
 from utils.state import init_state, get_state, set_state
+from componets.filters import reset_portfolio_filters
 
 from utils.i18n import t
 
@@ -36,7 +37,9 @@ def render_sidebar():
         uploaded_file = st.file_uploader(
             t("sidebar_upload_label"),
             type=["xlsx"],
-            help=t("sidebar_upload_help")
+            help=t("sidebar_upload_help"),
+            key="portfolio_file",
+            on_change=reset_portfolio_filters
         )
 
         st.markdown("---")
