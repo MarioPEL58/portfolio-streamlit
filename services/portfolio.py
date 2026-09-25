@@ -48,48 +48,110 @@ from services.market_data import convert_closes_to_eur
 
 #  funzione ottimizzate per ridurre i tempi di calcolo della precednte 
 
+# def build_period_performance(
+#     daily_total_pl: pd.Series,
+#     total_value: pd.Series,
+#     months: int | None = None,
+#     years: int | None = None,
+#     name: str = ""
+# ) -> pd.Series:
+
+#     perf = pd.Series(index=total_value.index, dtype=float)
+
+#     cum_pl = daily_total_pl.cumsum()
+#     cum_pl_prev = cum_pl.shift(1).fillna(0)
+
+#     valid_values = total_value.dropna()
+#     valid_index = valid_values.index
+
+#     for dt in total_value.index:
+
+#         if months is not None:
+#             ref_date = dt - pd.DateOffset(months=months)
+#         elif years is not None:
+#             ref_date = dt - pd.DateOffset(years=years)
+#         else:
+#             continue
+
+#         pos = valid_index.searchsorted(ref_date, side="right") - 1
+
+#         if pos < 0:
+#             continue
+
+#         start_dt = valid_index[pos]
+#         start_value = valid_values.iloc[pos]
+
+#         period_pl = (
+#             cum_pl.loc[dt]
+#             - cum_pl_prev.loc[start_dt]
+#         )
+
+#         if start_value != 0:
+#             perf.loc[dt] = period_pl / start_value
+
+#     return perf.rename(name)
 def build_period_performance(
-    daily_total_pl: pd.Series,
-    total_value: pd.Series,
+    daily_total_pl_pct: pd.Series,
     months: int | None = None,
     years: int | None = None,
     name: str = ""
 ) -> pd.Series:
 
-    perf = pd.Series(index=total_value.index, dtype=float)
+    # Rendimenti giornalieri puliti
+    r = (
+        daily_total_pl_pct
+        .replace([np.inf, -np.inf], np.nan)
+        .fillna(0.0)
+    )
 
-    cum_pl = daily_total_pl.cumsum()
-    cum_pl_prev = cum_pl.shift(1).fillna(0)
+    # Growth index TWR
+    growth = (1.0 + r).cumprod()
 
-    valid_values = total_value.dropna()
-    valid_index = valid_values.index
-
-    for dt in total_value.index:
-
-        if months is not None:
-            ref_date = dt - pd.DateOffset(months=months)
-        elif years is not None:
-            ref_date = dt - pd.DateOffset(years=years)
-        else:
-            continue
-
-        pos = valid_index.searchsorted(ref_date, side="right") - 1
-
-        if pos < 0:
-            continue
-
-        start_dt = valid_index[pos]
-        start_value = valid_values.iloc[pos]
-
-        period_pl = (
-            cum_pl.loc[dt]
-            - cum_pl_prev.loc[start_dt]
+    # Data di riferimento per ogni giorno
+    if months is not None:
+        ref_dates = growth.index - pd.DateOffset(months=months)
+    elif years is not None:
+        ref_dates = growth.index - pd.DateOffset(years=years)
+    else:
+        return pd.Series(
+            np.nan,
+            index=growth.index,
+            dtype=float,
+            name=name
         )
 
-        if start_value != 0:
-            perf.loc[dt] = period_pl / start_value
+    # Indice giornaliero continuo:
+    # trova direttamente la posizione della data <= ref_date
+    positions = growth.index.searchsorted(
+        ref_dates,
+        side="right"
+    ) - 1
 
-    return perf.rename(name)
+    # Periodi non ancora disponibili
+    valid = positions >= 0
+
+    # Array risultato
+    result = np.full(
+        len(growth),
+        np.nan,
+        dtype=float
+    )
+
+    growth_values = growth.to_numpy()
+
+    # TWR periodo:
+    # growth finale / growth iniziale - 1
+    result[valid] = (
+        growth_values[valid]
+        / growth_values[positions[valid]]
+        - 1.0
+    )
+
+    return pd.Series(
+        result,
+        index=growth.index,
+        name=name
+    )
 
 def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
     keys = sorted(ops["PositionKey"].unique().tolist())
