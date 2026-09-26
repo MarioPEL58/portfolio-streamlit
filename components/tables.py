@@ -4,6 +4,7 @@ import pandas as pd
 from utils.display import get_display_columns, get_format_dict_positions
 from utils.formatting import style_pl_column
 from utils.i18n import t
+from services.portfolio_metrics import compute_var_historical
 
 def render_positions_table(current):
 
@@ -73,7 +74,8 @@ def render_positions_table(current):
         .apply(style_pl_column, axis=0)
     )
 
-    st.dataframe(styled, use_container_width=True)
+    # st.dataframe(styled, use_container_width=True)    
+    st.dataframe(styled, width="stretch")
     
 def render_performance_table(current):
 
@@ -117,7 +119,8 @@ def render_performance_table(current):
 
     st.dataframe(
         styled,
-        use_container_width=True
+        # use_container_width=True
+        width="stretch"
     )
     
 def render_operations_table(ops_enriched):
@@ -191,4 +194,138 @@ def render_operations_table(ops_enriched):
         .apply(style_pl_column, axis=0)
     )
 
-    st.dataframe(styled, use_container_width=True)
+    st.dataframe(styled, width="stretch")
+    
+def render_best_worst_days(flow_adjusted_returns, n_days=10):
+
+    returns = flow_adjusted_returns.dropna().sort_index()
+
+    if returns.empty:
+        return
+
+    # VaR 95% sulla serie completa
+    var_giornaliero = compute_var_historical(returns, 0.95)
+
+    with st.expander(t("tail_risk_best_worst_days")):
+
+        # --------------------------
+        # Selezione periodo
+        # --------------------------
+        period = st.segmented_control(
+            t("tail_risk_period"),
+            options=["3M", "6M", "1Y", "3Y", "5Y", "ALL"],
+            default="1Y",
+            key="tail_risk_period_selector"
+        )
+
+        end_date = returns.index.max()
+
+        if period == "3M":
+            start_date = end_date - pd.DateOffset(months=3)
+            
+        elif period == "6M":
+            start_date = end_date - pd.DateOffset(months=6)
+            
+        elif period == "1Y":
+            start_date = end_date - pd.DateOffset(years=1)
+            
+        elif period == "3Y":
+            start_date = end_date - pd.DateOffset(years=3)
+
+        elif period == "5Y":
+            start_date = end_date - pd.DateOffset(years=5)
+
+        else:
+            start_date = returns.index.min()
+
+        returns_period = returns.loc[start_date:end_date]
+
+        # --------------------------
+        # Migliori / peggiori giorni
+        # --------------------------
+        worst_days = returns_period.nsmallest(n_days)
+        best_days = returns_period.nlargest(n_days)
+
+        col_worst, col_best = st.columns(2)
+
+        # ==========================
+        # PEGGIORI
+        # ==========================
+        with col_worst:
+
+            st.markdown(
+                f"#### 📉 {t('tail_risk_worst_days_title')}"
+            )
+
+            worst_df = (
+                worst_days
+                .rename(t("tail_risk_return"))
+                .to_frame()
+            )
+
+            worst_df.index.name = t("tail_risk_date")
+
+            return_col = t("tail_risk_return")
+
+            # Evidenzia i giorni oltre il VaR
+            def highlight_var(value):
+                if value <= -var_giornaliero:
+                    return (
+                        "background-color: rgba(231, 76, 60, 0.25); "
+                        "color: #ff6b6b; "
+                        "font-weight: bold;"
+                    )
+                return ""
+
+            styled_worst = (
+                worst_df.style
+                .format({
+                    return_col: "{:.2%}"
+                })
+                .map(
+                    highlight_var,
+                    subset=[return_col]
+                )
+            )
+
+            st.dataframe(
+                styled_worst,
+                width="stretch"
+            )
+
+        # ==========================
+        # MIGLIORI
+        # ==========================
+        with col_best:
+
+            st.markdown(
+                f"#### 📈 {t('tail_risk_best_days_title')}"
+            )
+
+            best_df = (
+                best_days
+                .rename(t("tail_risk_return"))
+                .to_frame()
+            )
+
+            best_df.index.name = t("tail_risk_date")
+
+            styled_best = (
+                best_df.style
+                .format({
+                    return_col: "{:.2%}"
+                })
+            )
+
+            st.dataframe(
+                styled_best,
+                width="stretch"
+            )
+
+        # --------------------------
+        # Legenda
+        # --------------------------
+        st.caption(
+            f"🔴 {t('tail_risk_var_highlight')} "
+            f"({-var_giornaliero:.2%})"
+        )

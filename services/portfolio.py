@@ -49,47 +49,67 @@ from services.market_data import convert_closes_to_eur
 #  funzione ottimizzate per ridurre i tempi di calcolo della precednte 
 
 def build_period_performance(
-    daily_total_pl: pd.Series,
-    total_value: pd.Series,
+    daily_total_pl_pct: pd.Series,
     months: int | None = None,
     years: int | None = None,
     name: str = ""
 ) -> pd.Series:
 
-    perf = pd.Series(index=total_value.index, dtype=float)
+    # Rendimenti giornalieri puliti
+    r = (
+        daily_total_pl_pct
+        .replace([np.inf, -np.inf], np.nan)
+        .fillna(0.0)
+    )
 
-    cum_pl = daily_total_pl.cumsum()
-    cum_pl_prev = cum_pl.shift(1).fillna(0)
+    # Growth index TWR
+    growth = (1.0 + r).cumprod()
 
-    valid_values = total_value.dropna()
-    valid_index = valid_values.index
-
-    for dt in total_value.index:
-
-        if months is not None:
-            ref_date = dt - pd.DateOffset(months=months)
-        elif years is not None:
-            ref_date = dt - pd.DateOffset(years=years)
-        else:
-            continue
-
-        pos = valid_index.searchsorted(ref_date, side="right") - 1
-
-        if pos < 0:
-            continue
-
-        start_dt = valid_index[pos]
-        start_value = valid_values.iloc[pos]
-
-        period_pl = (
-            cum_pl.loc[dt]
-            - cum_pl_prev.loc[start_dt]
+    # Data di riferimento per ogni giorno
+    if months is not None:
+        ref_dates = growth.index - pd.DateOffset(months=months)
+    elif years is not None:
+        ref_dates = growth.index - pd.DateOffset(years=years)
+    else:
+        return pd.Series(
+            np.nan,
+            index=growth.index,
+            dtype=float,
+            name=name
         )
 
-        if start_value != 0:
-            perf.loc[dt] = period_pl / start_value
+    # Indice giornaliero continuo:
+    # trova direttamente la posizione della data <= ref_date
+    positions = growth.index.searchsorted(
+        ref_dates,
+        side="right"
+    ) - 1
 
-    return perf.rename(name)
+    # Periodi non ancora disponibili
+    valid = positions >= 0
+
+    # Array risultato
+    result = np.full(
+        len(growth),
+        np.nan,
+        dtype=float
+    )
+
+    growth_values = growth.to_numpy()
+
+    # TWR periodo:
+    # growth finale / growth iniziale - 1
+    result[valid] = (
+        growth_values[valid]
+        / growth_values[positions[valid]]
+        - 1.0
+    )
+
+    return pd.Series(
+        result,
+        index=growth.index,
+        name=name
+    )
 
 def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
     keys = sorted(ops["PositionKey"].unique().tolist())
@@ -610,13 +630,24 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # ==================================================
         
         daily_total_pl = (
-            daily_pl + realized_daily
+            daily_pl + daily_dividends    #  daily_pl + realized_daily eliminto perche sommava due volte il profitto realizzato dalle vendite 
         ).rename("P/L Totale Giornaliero")
         
         daily_total_pl_pct = (
             daily_total_pl / total_value.shift(1)
         ).rename("P/L Totale Giornaliero %")
         
+        first_investment_day = (
+            total_value.notna()
+            & total_value.shift(1).isna()
+            & (daily_cf_total < 0)
+        )
+        
+        daily_total_pl_pct.loc[first_investment_day] = (
+            daily_total_pl.loc[first_investment_day]
+            / (-daily_cf_total.loc[first_investment_day])
+        )
+
         weekly_total_pl = (
             daily_total_pl
             .rolling("7D")
@@ -644,8 +675,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # t0 = time.perf_counter()
         
         perf_3m_pct = build_period_performance(
-            daily_total_pl,
-            total_value,
+            daily_total_pl_pct,
             months=3,
             name="Performance 3M %"
         )
@@ -654,8 +684,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # t0 = time.perf_counter()
         
         perf_6m_pct = build_period_performance(
-            daily_total_pl,
-            total_value,
+            daily_total_pl_pct,
             months=6,
             name="Performance 6M %"
         )
@@ -664,42 +693,33 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # t0 = time.perf_counter()
         
         perf_1y_pct = build_period_performance(
-            daily_total_pl,
-            total_value,
+            daily_total_pl_pct,
             years=1,
             name="Performance 1Y %"
         )
         
         # st.write(f"1Y: {time.perf_counter()-t0:.2f} sec")
         # t0 = time.perf_counter()
-        
+                
         perf_ytd_pct = pd.Series(
+            np.nan,
             index=total_value.index,
             dtype=float,
             name="Performance YTD %"
         )
-
-        # t0 = time.perf_counter()
-        for year in total_value.index.year.unique():
         
+        for year in total_value.index.year.unique():
             mask = total_value.index.year == year
         
-            values = total_value.loc[mask].dropna()
-        
-            if values.empty:
-                continue
-        
-            start_value = values.iloc[0]
-        
-            ytd_pl = (
-                daily_total_pl.loc[mask]
-                .cumsum()
+            r = (
+                daily_total_pl_pct.loc[mask]
+                .replace([np.inf, -np.inf], np.nan)
+                .fillna(0.0)
             )
         
-            if start_value != 0:
-                perf_ytd_pct.loc[mask] = (
-                    ytd_pl / start_value
-                )
+            perf_ytd_pct.loc[mask] = (
+                (1.0 + r).cumprod() - 1.0
+            )
                 
     # st.write(f"YTD: {time.perf_counter()-t0:.2f} sec")
     # =========================

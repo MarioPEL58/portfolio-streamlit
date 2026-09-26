@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 import pytz
 from utils.state import init_state, get_state, set_state
+from components.filters import reset_portfolio_filters
 
 from utils.i18n import t
 
@@ -25,6 +26,10 @@ def render_sidebar():
         t("sidebar_label_name"): "Nome"
     }
     with st.sidebar:
+        
+        _, center, _ = st.columns([1, 3, 1])
+        with center:
+            st.image("assets/Pem_Image_github.png",width=100)
 
         st.markdown("---")
         st.header(t("sidebar_data_source"))
@@ -32,7 +37,9 @@ def render_sidebar():
         uploaded_file = st.file_uploader(
             t("sidebar_upload_label"),
             type=["xlsx"],
-            help=t("sidebar_upload_help")
+            help=t("sidebar_upload_help"),
+            key="portfolio_file",
+            on_change=reset_portfolio_filters
         )
 
         st.markdown("---")
@@ -86,7 +93,18 @@ def render_sidebar():
             t("sidebar_min_date"),
             value=None
         )
-
+        
+        # 🔹 AGGIUNTA SEZIONE STAMPA con fondo bianco🔹
+        # st.markdown("---")     
+        # st.header(t("sidebar_print_header"))
+        
+        # stampa_attiva = st.toggle(
+        #     t("sidebar_print_toggle"),
+        #     value=get_state("stampa_attiva"),
+        #     key="stampa_attiva_toggle"
+        # )
+        # set_state("stampa_attiva", stampa_attiva)
+        
     return {
         "uploaded_file": uploaded_file,
         "benchmark": get_state("benchmark"),
@@ -94,6 +112,7 @@ def render_sidebar():
         "use_risk_free": get_state("use_risk_free"),
         "min_filter_date": min_filter_date,
         "label_choice": get_state("label_choice")
+        # ,"stampa_attiva": get_state("stampa_attiva")
     }
 
 def resolve_file_source(uploaded_file):
