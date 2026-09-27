@@ -179,7 +179,7 @@ def _show_historical_parameters(params: dict):
 
     st.markdown("#### Dati storici")
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
 
     col1.metric(
         "Rendimento annualizzato",
@@ -196,15 +196,12 @@ def _show_historical_parameters(params: dict):
         f'{params["observations"]:,}'.replace(",", "."),
     )
 
-    col4.metric(
-        "Periodo",
-        (
-            f'{_format_date(params["start_date"])}'
-            f' - '
-            f'{_format_date(params["end_date"])}'
-        ),
+    st.caption(
+        f'Periodo storico: '
+        f'{_format_date(params["start_date"])}'
+        f' - '
+        f'{_format_date(params["end_date"])}'
     )
-
 
 # ============================================================
 # Risultati simulazione
