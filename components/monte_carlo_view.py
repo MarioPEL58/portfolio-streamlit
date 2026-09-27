@@ -37,7 +37,38 @@ def _format_date(value) -> str:
         return "-"
 
     return pd.Timestamp(value).strftime("%d/%m/%Y")
+    
+def _historical_quality(observations: int) -> tuple[str, str]:
 
+    if observations < 252:
+        return (
+            "Insufficiente",
+            "Storico inferiore a circa 1 anno. "
+            "I parametri stimati possono essere poco rappresentativi."
+        )
+
+    elif observations < 756:
+        return (
+            "Limitato",
+            "Storico inferiore a circa 3 anni. "
+            "Usare con cautela soprattutto il rendimento atteso."
+        )
+
+    elif observations < 1260:
+        return (
+            "Discreto",
+            "Storico compreso tra circa 3 e 5 anni. "
+            "I parametri sono utilizzabili, ma restano sensibili "
+            "al periodo osservato."
+        )
+
+    else:
+        return (
+            "Ampio",
+            "Storico di almeno circa 5 anni. "
+            "Il campione è più rappresentativo, ma i rendimenti "
+            "futuri possono comunque differire da quelli storici."
+        )
 
 # ============================================================
 # Fan chart
@@ -179,7 +210,13 @@ def _show_historical_parameters(params: dict):
 
     st.markdown("#### Dati storici")
 
-    col1, col2, col3 = st.columns(3)
+    observations = params["observations"]
+
+    quality, quality_message = _historical_quality(
+        observations
+    )
+
+    col1, col2, col3, col4 = st.columns(4)
 
     col1.metric(
         "Rendimento annualizzato",
@@ -193,7 +230,12 @@ def _show_historical_parameters(params: dict):
 
     col3.metric(
         "Osservazioni",
-        f'{params["observations"]:,}'.replace(",", "."),
+        f'{observations:,}'.replace(",", "."),
+    )
+
+    col4.metric(
+        "Qualità storico",
+        quality,
     )
 
     st.caption(
@@ -203,6 +245,17 @@ def _show_historical_parameters(params: dict):
         f'{_format_date(params["end_date"])}'
     )
 
+    if quality == "Insufficiente":
+        st.error(quality_message)
+
+    elif quality == "Limitato":
+        st.warning(quality_message)
+
+    elif quality == "Discreto":
+        st.info(quality_message)
+
+    else:
+        st.caption(quality_message)
 # ============================================================
 # Risultati simulazione
 # ============================================================
