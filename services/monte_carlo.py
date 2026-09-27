@@ -110,10 +110,13 @@ def estimate_mc_parameters(
 ) -> dict:
     """
     Stima rendimento annualizzato e volatilità annualizzata
-    dai rendimenti giornalieri.
+    dai rendimenti storici.
 
-    Il rendimento storico annualizzato viene calcolato
-    geometricamente.
+    Il rendimento annualizzato viene calcolato geometricamente
+    utilizzando la durata temporale effettiva dello storico.
+
+    La volatilità continua a essere annualizzata su 252
+    sedute di mercato.
     """
 
     r = clean_returns(returns)
@@ -124,32 +127,75 @@ def estimate_mc_parameters(
             "per stimare i parametri Monte Carlo."
         )
 
+    # ========================================================
+    # Rendimento cumulato
+    # ========================================================
+
     growth = (1.0 + r).prod()
 
-    years = len(r) / trading_days
+    # ========================================================
+    # Durata reale dello storico
+    # ========================================================
+
+    if isinstance(r.index, pd.DatetimeIndex):
+
+        start_date = r.index.min()
+        end_date = r.index.max()
+
+        days = (end_date - start_date).days
+
+        if days <= 0:
+            raise ValueError(
+                "Periodo storico insufficiente "
+                "per annualizzare il rendimento."
+            )
+
+        years = days / 365.25
+
+    else:
+
+        # Fallback per eventuali serie senza indice temporale
+        start_date = None
+        end_date = None
+
+        years = len(r) / trading_days
+
+    # ========================================================
+    # Rendimento annualizzato geometrico
+    # ========================================================
 
     if growth > 0 and years > 0:
-        annual_return = growth ** (1.0 / years) - 1.0
+
+        annual_return = (
+            growth ** (1.0 / years)
+            - 1.0
+        )
+
     else:
+
         annual_return = np.nan
 
+    # ========================================================
+    # Volatilità annualizzata
+    # ========================================================
+
     annual_volatility = (
-        r.std(ddof=1) * np.sqrt(trading_days)
+        r.std(ddof=1)
+        * np.sqrt(trading_days)
     )
+
+    # ========================================================
+    # Output
+    # ========================================================
 
     return {
         "mu": float(annual_return),
         "sigma": float(annual_volatility),
         "observations": int(len(r)),
-        "start_date": r.index.min()
-        if isinstance(r.index, pd.DatetimeIndex)
-        else None,
-        "end_date": r.index.max()
-        if isinstance(r.index, pd.DatetimeIndex)
-        else None,
+        "start_date": start_date,
+        "end_date": end_date,
+        "years": float(years),
     }
-
-
 # ============================================================
 # 5. Motore Monte Carlo
 # ============================================================
