@@ -40,6 +40,7 @@ from utils.kpi_cards import (
 )
 
 from utils.performance_card import render_performance_cards_tot, render_performance_cards
+from components.monte_carlo_view import render_monte_carlo
 from utils.style import applica_stile_stampa
 
 from config.config import load_config
@@ -510,12 +511,13 @@ st.caption(t("performance_total_desc"))
 
 st.subheader(t("charts_title"))
 
-tab_perf, tab_daily, tab_unrealized, tab_heatmap, tab_analysis = st.tabs([
+tab_perf, tab_daily, tab_unrealized, tab_heatmap, tab_analysis, tab_monte_carlo = st.tabs([
     t("tab_perf"),
     t("tab_daily"),
     t("tab_unrealized"),
     t("tab_heatmap"),
-    t("tab_analysis")
+    t("tab_analysis"),
+    t("tab_monte_carlo")
 ])
 
 # tab not working with date tutte uguali
@@ -826,6 +828,13 @@ with tab_analysis:
     
     render_best_worst_days(flow_adjusted_returns)
     
+with tab_monte_carlo:
+    render_monte_carlo(
+    series=series,
+    current=current,
+    closes=closes,
+    )
+
 # Tabs
 tab_pos, tab_perfo, tab_exp, tab_flu, tab_ops, tab_dl = st.tabs(
     [t("tab_positions"),t("tab_performance"), t("tab_exposure"), t("tab_flows"), t("tab_operations"), t("tab_download")]
