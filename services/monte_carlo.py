@@ -154,6 +154,173 @@ def estimate_mc_parameters(
 # 5. Motore Monte Carlo
 # ============================================================
 
+# ============================================================
+# Motore Monte Carlo (old) non ottimizzato 
+# ============================================================
+
+# def run_monte_carlo(
+#     initial_value: float,
+#     mu: float,
+#     sigma: float,
+#     years: int = 10,
+#     n_simulations: int = 10_000,
+#     trading_days: int = TRADING_DAYS,
+#     seed: int | None = None,
+# ) -> dict:
+#     """
+#     Simulazione Monte Carlo vettorializzata tramite
+#     moto browniano geometrico.
+
+#     Restituisce i percentili temporali e le statistiche finali.
+#     """
+
+#     if initial_value <= 0:
+#         raise ValueError(
+#             "Il capitale iniziale deve essere maggiore di zero."
+#         )
+
+#     if years <= 0:
+#         raise ValueError(
+#             "L'orizzonte temporale deve essere maggiore di zero."
+#         )
+
+#     if n_simulations <= 0:
+#         raise ValueError(
+#             "Il numero di simulazioni deve essere maggiore di zero."
+#         )
+
+#     if sigma < 0:
+#         raise ValueError(
+#             "La volatilità non può essere negativa."
+#         )
+
+#     if not np.isfinite(mu):
+#         raise ValueError("Rendimento atteso non valido.")
+
+#     if not np.isfinite(sigma):
+#         raise ValueError("Volatilità non valida.")
+
+#     n_days = int(years * trading_days)
+
+#     rng = np.random.default_rng(seed)
+
+#     # Incrementi casuali giornalieri
+#     z = rng.standard_normal(
+#         size=(n_days, n_simulations)
+#     )
+
+#     dt = 1.0 / trading_days
+
+#     drift = (mu - 0.5 * sigma ** 2) * dt
+#     diffusion = sigma * np.sqrt(dt) * z
+
+#     log_returns = drift + diffusion
+
+#     cumulative_log_returns = np.cumsum(
+#         log_returns,
+#         axis=0,
+#     )
+
+#     paths = initial_value * np.exp(
+#         cumulative_log_returns
+#     )
+
+#     # Aggiunge il valore iniziale al giorno zero
+#     initial_row = np.full(
+#         (1, n_simulations),
+#         initial_value,
+#         dtype=float,
+#     )
+
+#     paths = np.vstack([
+#         initial_row,
+#         paths,
+#     ])
+
+#     # ========================================================
+#     # Percentili lungo tutto l'orizzonte
+#     # ========================================================
+
+#     percentile_levels = [10, 25, 50, 75, 90]
+
+#     percentiles = np.percentile(
+#         paths,
+#         percentile_levels,
+#         axis=1,
+#     )
+
+#     timeline_years = (
+#         np.arange(n_days + 1) / trading_days
+#     )
+
+#     percentile_paths = pd.DataFrame(
+#         percentiles.T,
+#         index=timeline_years,
+#         columns=[
+#             "P10",
+#             "P25",
+#             "P50",
+#             "P75",
+#             "P90",
+#         ],
+#     )
+
+#     percentile_paths.index.name = "Years"
+
+#     # ========================================================
+#     # Valori finali
+#     # ========================================================
+
+#     final_values = paths[-1]
+
+#     final_percentiles = {
+#         "P10": float(np.percentile(final_values, 10)),
+#         "P25": float(np.percentile(final_values, 25)),
+#         "P50": float(np.percentile(final_values, 50)),
+#         "P75": float(np.percentile(final_values, 75)),
+#         "P90": float(np.percentile(final_values, 90)),
+#     }
+
+#     probability_loss = float(
+#         np.mean(final_values < initial_value)
+#     )
+
+#     probability_gain = float(
+#         np.mean(final_values > initial_value)
+#     )
+
+#     median_final_value = final_percentiles["P50"]
+
+#     median_cagr = (
+#         (median_final_value / initial_value)
+#         ** (1.0 / years)
+#         - 1.0
+#     )
+
+#     mean_final_value = float(
+#         np.mean(final_values)
+#     )
+
+#     return {
+#         "percentile_paths": percentile_paths,
+#         "final_values": final_values,
+#         "final_percentiles": final_percentiles,
+#         "initial_value": float(initial_value),
+#         "mean_final_value": mean_final_value,
+#         "median_final_value": median_final_value,
+#         "probability_loss": probability_loss,
+#         "probability_gain": probability_gain,
+#         "median_cagr": float(median_cagr),
+#         "mu": float(mu),
+#         "sigma": float(sigma),
+#         "years": int(years),
+#         "n_simulations": int(n_simulations),
+#     }
+
+# ============================================================
+# Motore Monte Carlo  ottimizzato fa simulazioni ridotte e tiene i valori mensili
+# ============================================================
+
 def run_monte_carlo(
     initial_value: float,
     mu: float,
@@ -162,13 +329,26 @@ def run_monte_carlo(
     n_simulations: int = 10_000,
     trading_days: int = TRADING_DAYS,
     seed: int | None = None,
+    batch_size: int = 2_000,
+    points_per_year: int = 12,
 ) -> dict:
     """
-    Simulazione Monte Carlo vettorializzata tramite
+    Simulazione Monte Carlo memory-efficient tramite
     moto browniano geometrico.
 
-    Restituisce i percentili temporali e le statistiche finali.
+    Le simulazioni vengono elaborate a blocchi per ridurre
+    drasticamente l'utilizzo di memoria.
+
+    Per il fan chart vengono conservati solo alcuni punti
+    temporali, per default uno al mese.
+
+    L'interfaccia di output rimane compatibile con
+    monte_carlo_view.py.
     """
+
+    # ========================================================
+    # Validazione
+    # ========================================================
 
     if initial_value <= 0:
         raise ValueError(
@@ -191,62 +371,185 @@ def run_monte_carlo(
         )
 
     if not np.isfinite(mu):
-        raise ValueError("Rendimento atteso non valido.")
+        raise ValueError(
+            "Rendimento atteso non valido."
+        )
 
     if not np.isfinite(sigma):
-        raise ValueError("Volatilità non valida.")
+        raise ValueError(
+            "Volatilità non valida."
+        )
+
+    # ========================================================
+    # Parametri temporali
+    # ========================================================
 
     n_days = int(years * trading_days)
 
-    rng = np.random.default_rng(seed)
-
-    # Incrementi casuali giornalieri
-    z = rng.standard_normal(
-        size=(n_days, n_simulations)
-    )
-
     dt = 1.0 / trading_days
 
-    drift = (mu - 0.5 * sigma ** 2) * dt
-    diffusion = sigma * np.sqrt(dt) * z
+    drift = (
+        mu - 0.5 * sigma ** 2
+    ) * dt
 
-    log_returns = drift + diffusion
-
-    cumulative_log_returns = np.cumsum(
-        log_returns,
-        axis=0,
+    daily_sigma = (
+        sigma * np.sqrt(dt)
     )
 
-    paths = initial_value * np.exp(
-        cumulative_log_returns
+    # Circa un punto al mese
+    n_points = int(
+        years * points_per_year
     )
 
-    # Aggiunge il valore iniziale al giorno zero
-    initial_row = np.full(
-        (1, n_simulations),
-        initial_value,
-        dtype=float,
+    sample_days = np.linspace(
+        0,
+        n_days,
+        n_points + 1,
+        dtype=int,
     )
 
-    paths = np.vstack([
-        initial_row,
-        paths,
-    ])
-
-    # ========================================================
-    # Percentili lungo tutto l'orizzonte
-    # ========================================================
-
-    percentile_levels = [10, 25, 50, 75, 90]
-
-    percentiles = np.percentile(
-        paths,
-        percentile_levels,
-        axis=1,
-    )
+    # Evita eventuali duplicati
+    sample_days = np.unique(sample_days)
 
     timeline_years = (
-        np.arange(n_days + 1) / trading_days
+        sample_days / trading_days
+    )
+
+    # ========================================================
+    # Memoria risultati
+    # ========================================================
+
+    #
+    # Questa matrice è molto più piccola:
+    #
+    # 10 anni:
+    # circa 121 x 50.000
+    #
+    # invece di:
+    # 2521 x 50.000
+    #
+
+    sampled_values = np.empty(
+        (
+            len(sample_days),
+            n_simulations,
+        ),
+        dtype=np.float32,
+    )
+
+    final_values = np.empty(
+        n_simulations,
+        dtype=np.float64,
+    )
+
+    # Capitale iniziale
+    sampled_values[0, :] = initial_value
+
+    # ========================================================
+    # Random generator
+    # ========================================================
+
+    rng = np.random.default_rng(seed)
+
+    # ========================================================
+    # Simulazione a blocchi
+    # ========================================================
+
+    for start in range(
+        0,
+        n_simulations,
+        batch_size,
+    ):
+
+        end = min(
+            start + batch_size,
+            n_simulations,
+        )
+
+        current_batch_size = (
+            end - start
+        )
+
+        # ----------------------------------------------------
+        # Generiamo solo un batch
+        # ----------------------------------------------------
+
+        z = rng.standard_normal(
+            size=(
+                n_days,
+                current_batch_size,
+            )
+        )
+
+        # Log-rendimenti giornalieri
+        log_returns = (
+            drift
+            + daily_sigma * z
+        )
+
+        # Rendimenti cumulati
+        cumulative_log_returns = (
+            np.cumsum(
+                log_returns,
+                axis=0,
+            )
+        )
+
+        # ----------------------------------------------------
+        # Campionamento mensile
+        # ----------------------------------------------------
+
+        for i in range(
+            1,
+            len(sample_days),
+        ):
+
+            day = sample_days[i]
+
+            sampled_values[
+                i,
+                start:end
+            ] = (
+                initial_value
+                * np.exp(
+                    cumulative_log_returns[
+                        day - 1
+                    ]
+                )
+            )
+
+        # ----------------------------------------------------
+        # Valore finale
+        # ----------------------------------------------------
+
+        final_values[start:end] = (
+            initial_value
+            * np.exp(
+                cumulative_log_returns[-1]
+            )
+        )
+
+        # Il batch precedente può essere liberato
+        del z
+        del log_returns
+        del cumulative_log_returns
+
+    # ========================================================
+    # Percentili fan chart
+    # ========================================================
+
+    percentile_levels = [
+        10,
+        25,
+        50,
+        75,
+        90,
+    ]
+
+    percentiles = np.percentile(
+        sampled_values,
+        percentile_levels,
+        axis=1,
     )
 
     percentile_paths = pd.DataFrame(
@@ -264,31 +567,71 @@ def run_monte_carlo(
     percentile_paths.index.name = "Years"
 
     # ========================================================
-    # Valori finali
+    # Percentili finali
     # ========================================================
 
-    final_values = paths[-1]
-
     final_percentiles = {
-        "P10": float(np.percentile(final_values, 10)),
-        "P25": float(np.percentile(final_values, 25)),
-        "P50": float(np.percentile(final_values, 50)),
-        "P75": float(np.percentile(final_values, 75)),
-        "P90": float(np.percentile(final_values, 90)),
+        "P10": float(
+            np.percentile(
+                final_values,
+                10,
+            )
+        ),
+        "P25": float(
+            np.percentile(
+                final_values,
+                25,
+            )
+        ),
+        "P50": float(
+            np.percentile(
+                final_values,
+                50,
+            )
+        ),
+        "P75": float(
+            np.percentile(
+                final_values,
+                75,
+            )
+        ),
+        "P90": float(
+            np.percentile(
+                final_values,
+                90,
+            )
+        ),
     }
 
+    # ========================================================
+    # Probabilità
+    # ========================================================
+
     probability_loss = float(
-        np.mean(final_values < initial_value)
+        np.mean(
+            final_values < initial_value
+        )
     )
 
     probability_gain = float(
-        np.mean(final_values > initial_value)
+        np.mean(
+            final_values > initial_value
+        )
     )
 
-    median_final_value = final_percentiles["P50"]
+    # ========================================================
+    # Mediana
+    # ========================================================
+
+    median_final_value = (
+        final_percentiles["P50"]
+    )
 
     median_cagr = (
-        (median_final_value / initial_value)
+        (
+            median_final_value
+            / initial_value
+        )
         ** (1.0 / years)
         - 1.0
     )
@@ -297,22 +640,48 @@ def run_monte_carlo(
         np.mean(final_values)
     )
 
+    # ========================================================
+    # Output
+    # ========================================================
+
     return {
         "percentile_paths": percentile_paths,
         "final_values": final_values,
         "final_percentiles": final_percentiles,
-        "initial_value": float(initial_value),
-        "mean_final_value": mean_final_value,
-        "median_final_value": median_final_value,
-        "probability_loss": probability_loss,
-        "probability_gain": probability_gain,
-        "median_cagr": float(median_cagr),
+
+        "initial_value": float(
+            initial_value
+        ),
+
+        "mean_final_value": (
+            mean_final_value
+        ),
+
+        "median_final_value": (
+            median_final_value
+        ),
+
+        "probability_loss": (
+            probability_loss
+        ),
+
+        "probability_gain": (
+            probability_gain
+        ),
+
+        "median_cagr": float(
+            median_cagr
+        ),
+
         "mu": float(mu),
         "sigma": float(sigma),
-        "years": int(years),
-        "n_simulations": int(n_simulations),
-    }
 
+        "years": int(years),
+
+        "n_simulations": int(
+            n_simulations
+        ),
+    }
 
 # ============================================================
 # 6. Preparazione intero portafoglio
