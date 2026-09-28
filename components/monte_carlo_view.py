@@ -569,11 +569,13 @@ def render_monte_carlo(
             # ----------------------------------------------------
     
             try:
-    
+            
                 with st.spinner(
-                    f"Scaricamento storico {external_ticker}..."
+                    t("mc_downloading_history").format(
+                        ticker=external_ticker
+                    )
                 ):
-    
+            
                     initial_value, returns, _ = (
                         prepare_external_ticker_mc(
                             ticker=external_ticker,
@@ -581,14 +583,16 @@ def render_monte_carlo(
                             period="max",
                         )
                     )
-    
+            
             except Exception as exc:
-    
+            
                 st.error(
-                    f"Impossibile recuperare "
-                    f"{external_ticker}: {exc}"
+                    t("mc_unable_to_retrieve").format(
+                        ticker=external_ticker,
+                        error=exc,
+                    )
                 )
-    
+            
                 return
     
         # ========================================================
