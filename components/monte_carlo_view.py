@@ -782,28 +782,29 @@ def render_monte_carlo(
         # ========================================================
         # Avvio Monte Carlo
         # ========================================================
-    
+        
         run = st.button(
-            "Avvia simulazione",
+            t("mc_run_simulation"),
             type="primary",
             width="stretch",
             key="mc_run",
         )
-    
+        
         if not run:
             return
-    
+        
         # ========================================================
         # Simulazione
         # ========================================================
-    
+        
         try:
-    
+        
             with st.spinner(
-                f"Esecuzione di "
-                f"{n_simulations:,} simulazioni..."
+                t("mc_running_simulations").format(
+                    count=f"{n_simulations:,}".replace(",", ".")
+                )
             ):
-    
+        
                 result = run_monte_carlo(
                     initial_value=initial_value,
                     mu=mu,
@@ -811,15 +812,16 @@ def render_monte_carlo(
                     years=years,
                     n_simulations=n_simulations,
                 )
-    
+        
         except Exception as exc:
-    
+        
             st.error(
-                f"Errore durante la simulazione: {exc}"
+                t("mc_simulation_error").format(
+                    error=exc
+                )
             )
-    
+        
             return
-    
         # ========================================================
         # Risultati
         # ========================================================
@@ -830,9 +832,4 @@ def render_monte_carlo(
         # Disclaimer
         # ========================================================
     
-        st.caption(
-            "La simulazione Monte Carlo rappresenta scenari "
-            "probabilistici basati sui parametri selezionati. "
-            "I risultati non costituiscono una previsione dei "
-            "rendimenti futuri."
-        )
+        st.caption(t("mc_disclaimer"))
