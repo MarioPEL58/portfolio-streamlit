@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+from utils.i18n import t
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -42,34 +43,27 @@ def _historical_quality(observations: int) -> tuple[str, str]:
 
     if observations < 252:
         return (
-            "Insufficiente",
-            "Storico inferiore a circa 1 anno. "
-            "I parametri stimati possono essere poco rappresentativi."
+            t("mc_quality_insufficient"),
+            t("mc_quality_insufficient_message"),
         )
 
     elif observations < 756:
         return (
-            "Limitato",
-            "Storico inferiore a circa 3 anni. "
-            "Usare con cautela soprattutto il rendimento atteso."
+            t("mc_quality_limited"),
+            t("mc_quality_limited_message"),
         )
 
     elif observations < 1260:
         return (
-            "Discreto",
-            "Storico compreso tra circa 3 e 5 anni. "
-            "I parametri sono utilizzabili, ma restano sensibili "
-            "al periodo osservato."
+            t("mc_quality_fair"),
+            t("mc_quality_fair_message"),
         )
 
     else:
         return (
-            "Ampio",
-            "Storico di almeno circa 5 anni. "
-            "Il campione è più rappresentativo, ma i rendimenti "
-            "futuri possono comunque differire da quelli storici."
+            t("mc_quality_broad"),
+            t("mc_quality_broad_message"),
         )
-
 # ============================================================
 # Fan chart
 # ============================================================
