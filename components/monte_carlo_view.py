@@ -396,7 +396,6 @@ def render_monte_carlo(
     2. Ticker del portafoglio
     3. Ticker esterno
     """
-   
     # # ========================================================
     # # CSS LOCALE MONTE CARLO
     # # ========================================================  
@@ -411,14 +410,6 @@ def render_monte_carlo(
     # }
     # </style>
     # """)
-    
-    # st.header("🎲 Monte Carlo")
-
-    # st.caption(
-    #     "Simulazione probabilistica basata sul rendimento "
-    #     "atteso e sulla volatilità del sottostante."
-    # )
-    
     # # ========================================================
     # # CONTAINER PRINCIPALE
     # #
@@ -427,6 +418,14 @@ def render_monte_carlo(
     # # ========================================================
      
     # with st.container(key="monte_carlo_module"):
+    st.header("🎲 Monte Carlo")
+
+    st.caption(
+        "Simulazione probabilistica basata sul rendimento "
+        "atteso e sulla volatilità del sottostante."
+    )
+    
+
     
     # ========================================================
     # Modalità
