@@ -352,10 +352,10 @@ def render_monte_carlo(
     series: pd.DataFrame,
     current: pd.DataFrame,
     closes: pd.DataFrame,
-    holdings=holdings,
-    price_quality=price_quality,
-    ops_enriched=ops_enriched,
-    ):
+    holdings: pd.DataFrame,
+    price_quality: pd.DataFrame,
+    ops_enriched: pd.DataFrame,
+):
     """
     Visualizza il modulo Monte Carlo.
 
