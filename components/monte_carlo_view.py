@@ -618,67 +618,67 @@ def render_monte_carlo(
         # ========================================================
         # Parametri simulazione
         # ========================================================
-    
+        
         st.markdown("---")
-        st.subheader("Parametri simulazione")
-    
+        st.subheader(t("mc_simulation_parameters"))
+        
         parameter_mode = st.radio(
-            "Rendimento e volatilità",
+            t("mc_return_and_volatility"),
             [
-                "Storici",
-                "Personalizzati",
+                t("mc_historical"),
+                t("mc_custom"),
             ],
             horizontal=True,
             key="mc_parameter_mode",
         )
-    
+        
         # --------------------------------------------------------
         # Parametri storici
         # --------------------------------------------------------
-    
-        if parameter_mode == "Storici":
-    
+        
+        if parameter_mode == t("mc_historical"):
+        
             mu = historical_params["mu"]
             sigma = historical_params["sigma"]
-    
+        
             col1, col2 = st.columns(2)
-    
+        
             col1.metric(
-                "Rendimento atteso utilizzato",
+                t("mc_expected_return_used"),
                 _format_pct(mu),
             )
-    
+        
             col2.metric(
-                "Volatilità utilizzata",
+                t("mc_volatility_used"),
                 _format_pct(sigma),
             )
-    
+        
         # --------------------------------------------------------
         # Parametri personalizzati
         # --------------------------------------------------------
-    
+        
         else:
-    
+        
             historical_mu_pct = (
                 historical_params["mu"] * 100
             )
-    
+        
             historical_sigma_pct = (
                 historical_params["sigma"] * 100
             )
-    
+        
             if not np.isfinite(historical_mu_pct):
                 historical_mu_pct = 7.0
-    
+        
             if not np.isfinite(historical_sigma_pct):
                 historical_sigma_pct = 15.0
-    
+        
             col1, col2 = st.columns(2)
-    
+        
             with col1:
-    
+        
                 mu_pct = st.number_input(
-                    "Rendimento atteso annuo (%)",
+                    t("mc_expected_annual_return"),
                     min_value=-50.0,
                     max_value=100.0,
                     value=float(
@@ -687,11 +687,11 @@ def render_monte_carlo(
                     step=0.25,
                     key="mc_custom_mu",
                 )
-    
+        
             with col2:
-    
+        
                 sigma_pct = st.number_input(
-                    "Volatilità annua (%)",
+                    t("mc_annual_volatility"),
                     min_value=0.0,
                     max_value=100.0,
                     value=float(
@@ -700,7 +700,7 @@ def render_monte_carlo(
                     step=0.25,
                     key="mc_custom_sigma",
                 )
-    
+        
             mu = mu_pct / 100.0
             sigma = sigma_pct / 100.0
     
