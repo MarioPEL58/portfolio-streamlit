@@ -378,7 +378,6 @@ def _show_results(result: dict):
 # ============================================================
 # UI principale
 # ============================================================
-
 def render_monte_carlo(
     series: pd.DataFrame,
     current: pd.DataFrame,
@@ -416,7 +415,7 @@ def render_monte_carlo(
     # # Tutte le st.metric contenute qui dentro ricevono
     # # lo stile compatto definito sopra.
     # # ========================================================
-     
+    
     # with st.container(key="monte_carlo_module"):
     st.header("🎲 Monte Carlo")
 
@@ -424,8 +423,6 @@ def render_monte_carlo(
         "Simulazione probabilistica basata sul rendimento "
         "atteso e sulla volatilità del sottostante."
     )
-    
-
     
     # ========================================================
     # Modalità
