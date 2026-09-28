@@ -754,28 +754,28 @@ def render_monte_carlo(
         # ========================================================
         # Riepilogo
         # ========================================================
-    
-        st.markdown("#### Riepilogo")
-    
+        
+        st.markdown(f"#### {t('mc_summary')}")
+        
         col1, col2, col3, col4 = st.columns(4)
-    
+        
         col1.metric(
-            "Analisi",
+            t("mc_analysis"),
             source_name,
         )
-    
+        
         col2.metric(
-            "Capitale",
+            t("mc_capital"),
             _format_currency(initial_value),
         )
-    
+        
         col3.metric(
-            "Rendimento atteso",
+            t("mc_expected_return"),
             _format_pct(mu),
         )
-    
+        
         col4.metric(
-            "Volatilità",
+            t("mc_volatility"),
             _format_pct(sigma),
         )
     
