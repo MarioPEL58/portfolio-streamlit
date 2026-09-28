@@ -185,7 +185,7 @@ def _build_fan_chart(
         title="Evoluzione simulata del capitale",
         xaxis_title="Anni",
         yaxis_title="Valore",
-        hovermode="x unified",
+        hovermode="closest",
         legend=dict(
             orientation="h",
             yanchor="bottom",
