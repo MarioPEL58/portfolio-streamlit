@@ -707,13 +707,13 @@ def render_monte_carlo(
         # ========================================================
         # Orizzonte / simulazioni
         # ========================================================
-    
+        
         col1, col2 = st.columns(2)
-    
+        
         with col1:
-    
+        
             years = st.select_slider(
-                "Orizzonte temporale",
+                t("mc_time_horizon"),
                 options=[
                     1,
                     3,
@@ -725,14 +725,18 @@ def render_monte_carlo(
                     30,
                 ],
                 value=10,
-                format_func=lambda x: f"{x} anni",
+                format_func=lambda x: (
+                    f"{x} {t('mc_year')}"
+                    if x == 1
+                    else f"{x} {t('mc_years')}"
+                ),
                 key="mc_years",
             )
-    
+        
         with col2:
-    
+        
             n_simulations = st.selectbox(
-                "Numero simulazioni",
+                t("mc_number_of_simulations"),
                 [
                     1_000,
                     5_000,
