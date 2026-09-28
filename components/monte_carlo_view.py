@@ -486,9 +486,9 @@ def render_monte_carlo(
             if "Ticker" not in current.columns:
     
                st.warning(t("mc_ticker_column_unavailable"))
-    
+                
                 return
-    
+                
             portfolio_tickers = sorted(
                 current["Ticker"]
                 .dropna()
