@@ -98,7 +98,116 @@ def download_ticker_history(
     prices.name = ticker
 
     return prices
+    
+def build_portfolio_quality_mask(
+    holdings: pd.DataFrame,
+    price_quality: pd.DataFrame,
+    ops_enriched: pd.DataFrame,
+) -> pd.Series:
+    """
+    Costruisce una maschera giornaliera che indica se il portafoglio
+    dispone di almeno un prezzo reale per una posizione effettivamente
+    detenuta in quella data.
 
+    True:
+        almeno una posizione detenuta ha un prezzo reale.
+
+    False:
+        nessuna posizione detenuta dispone di un prezzo reale
+        oppure non ci sono posizioni aperte.
+    """
+
+    if holdings is None or holdings.empty:
+        return pd.Series(
+            False,
+            index=price_quality.index,
+            name="PortfolioPriceQuality",
+        )
+
+    if price_quality is None or price_quality.empty:
+        return pd.Series(
+            False,
+            index=holdings.index,
+            name="PortfolioPriceQuality",
+        )
+
+    if ops_enriched is None or ops_enriched.empty:
+        raise ValueError(
+            "ops_enriched necessario per associare PositionKey e Ticker."
+        )
+
+    if "PositionKey" not in ops_enriched.columns:
+        raise ValueError(
+            "Colonna PositionKey non disponibile in ops_enriched."
+        )
+
+    if "Ticker" not in ops_enriched.columns:
+        raise ValueError(
+            "Colonna Ticker non disponibile in ops_enriched."
+        )
+
+    # ========================================================
+    # PositionKey -> Ticker
+    # ========================================================
+
+    position_to_ticker = (
+        ops_enriched
+        .sort_values("Data")
+        .groupby("PositionKey")["Ticker"]
+        .last()
+    )
+
+    # ========================================================
+    # Indice comune
+    # ========================================================
+
+    idx = holdings.index.intersection(
+        price_quality.index
+    )
+
+    portfolio_quality = pd.Series(
+        False,
+        index=idx,
+        dtype=bool,
+        name="PortfolioPriceQuality",
+    )
+
+    # ========================================================
+    # Controllo posizione per posizione
+    # ========================================================
+
+    for position_key in holdings.columns:
+
+        if position_key not in position_to_ticker.index:
+            continue
+
+        ticker = position_to_ticker.loc[position_key]
+
+        if ticker not in price_quality.columns:
+            continue
+
+        # Posizione realmente detenuta
+        held = (
+            holdings.loc[idx, position_key]
+            .fillna(0.0)
+            .abs()
+            > 1e-12
+        )
+
+        # Prezzo reale Yahoo / mercato
+        real_price = (
+            price_quality.loc[idx, ticker]
+            .fillna(False)
+            .astype(bool)
+        )
+
+        # Questa posizione contribuisce alla qualità del
+        # portafoglio solo quando è detenuta E ha prezzo reale
+        valid_position = held & real_price
+
+        portfolio_quality |= valid_position
+
+    return portfolio_quality
 
 # ============================================================
 # 4. Stima parametri Monte Carlo
@@ -106,18 +215,9 @@ def download_ticker_history(
 
 def estimate_mc_parameters(
     returns: pd.Series,
+    volatility_returns: pd.Series | None = None,
     trading_days: int = TRADING_DAYS,
 ) -> dict:
-    """
-    Stima rendimento annualizzato e volatilità annualizzata
-    dai rendimenti storici.
-
-    Il rendimento annualizzato viene calcolato geometricamente
-    utilizzando la durata temporale effettiva dello storico.
-
-    La volatilità continua a essere annualizzata su 252
-    sedute di mercato.
-    """
 
     r = clean_returns(returns)
 
@@ -128,41 +228,36 @@ def estimate_mc_parameters(
         )
 
     # ========================================================
-    # Rendimento cumulato
+    # MU
+    # Durata temporale reale
     # ========================================================
 
     growth = (1.0 + r).prod()
-
-    # ========================================================
-    # Durata reale dello storico
-    # ========================================================
 
     if isinstance(r.index, pd.DatetimeIndex):
 
         start_date = r.index.min()
         end_date = r.index.max()
 
-        days = (end_date - start_date).days
+        days = (
+            end_date - start_date
+        ).days
 
         if days <= 0:
             raise ValueError(
-                "Periodo storico insufficiente "
-                "per annualizzare il rendimento."
+                "Periodo storico insufficiente."
             )
 
         years = days / 365.25
 
     else:
 
-        # Fallback per eventuali serie senza indice temporale
         start_date = None
         end_date = None
 
-        years = len(r) / trading_days
-
-    # ========================================================
-    # Rendimento annualizzato geometrico
-    # ========================================================
+        years = (
+            len(r) / trading_days
+        )
 
     if growth > 0 and years > 0:
 
@@ -176,11 +271,24 @@ def estimate_mc_parameters(
         annual_return = np.nan
 
     # ========================================================
-    # Volatilità annualizzata
+    # SIGMA
     # ========================================================
 
+    if volatility_returns is None:
+        r_vol = r
+    else:
+        r_vol = clean_returns(
+            volatility_returns
+        )
+
+    if len(r_vol) < 2:
+        raise ValueError(
+            "Osservazioni insufficienti "
+            "per stimare la volatilità."
+        )
+
     annual_volatility = (
-        r.std(ddof=1)
+        r_vol.std(ddof=1)
         * np.sqrt(trading_days)
     )
 
@@ -191,9 +299,15 @@ def estimate_mc_parameters(
     return {
         "mu": float(annual_return),
         "sigma": float(annual_volatility),
+
         "observations": int(len(r)),
+        "volatility_observations": int(
+            len(r_vol)
+        ),
+
         "start_date": start_date,
         "end_date": end_date,
+
         "years": float(years),
     }
 # ============================================================
@@ -735,11 +849,10 @@ def run_monte_carlo(
 
 def prepare_portfolio_mc(
     series: pd.DataFrame,
-) -> tuple[float, pd.Series]:
-    """
-    Prepara capitale iniziale e rendimenti storici
-    dell'intero portafoglio.
-    """
+    holdings: pd.DataFrame,
+    price_quality: pd.DataFrame,
+    ops_enriched: pd.DataFrame,
+) -> tuple[float, pd.Series, pd.Series]:
 
     required_columns = {
         "Valore portafoglio",
@@ -755,6 +868,10 @@ def prepare_portfolio_mc(
             f"Colonne mancanti in series: {sorted(missing)}"
         )
 
+    # ========================================================
+    # Capitale corrente
+    # ========================================================
+
     values = (
         series["Valore portafoglio"]
         .replace([np.inf, -np.inf], np.nan)
@@ -766,19 +883,64 @@ def prepare_portfolio_mc(
             "Valore del portafoglio non disponibile."
         )
 
-    initial_value = float(values.iloc[-1])
+    initial_value = float(
+        values.iloc[-1]
+    )
 
-    returns = clean_returns(
+    # ========================================================
+    # Rendimenti completi
+    #
+    # Servono per il rendimento storico annualizzato.
+    # Non eliminiamo i periodi sintetici.
+    # ========================================================
+
+    returns_all = clean_returns(
         series["P/L Totale Giornaliero %"]
     )
 
-    if returns.empty:
+    if returns_all.empty:
         raise ValueError(
             "Rendimenti storici del portafoglio non disponibili."
         )
 
-    return initial_value, returns
+    # ========================================================
+    # Qualità prezzi holdings-aware
+    # ========================================================
 
+    quality_mask = build_portfolio_quality_mask(
+        holdings=holdings,
+        price_quality=price_quality,
+        ops_enriched=ops_enriched,
+    )
+
+    # Allineamento
+    quality_mask = quality_mask.reindex(
+        returns_all.index,
+        fill_value=False,
+    )
+
+    # ========================================================
+    # Rendimenti per stima volatilità
+    #
+    # Conserviamo solo le giornate in cui almeno una posizione
+    # realmente detenuta dispone di un prezzo reale.
+    # ========================================================
+
+    returns_for_volatility = returns_all.loc[
+        quality_mask
+    ]
+
+    if returns_for_volatility.empty:
+        raise ValueError(
+            "Nessun rendimento con prezzi reali disponibile "
+            "per stimare la volatilità."
+        )
+
+    return (
+        initial_value,
+        returns_all,
+        returns_for_volatility,
+    )
 
 # ============================================================
 # 7. Preparazione ticker presente nel portafoglio
