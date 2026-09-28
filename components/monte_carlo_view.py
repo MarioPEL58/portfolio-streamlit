@@ -352,7 +352,10 @@ def render_monte_carlo(
     series: pd.DataFrame,
     current: pd.DataFrame,
     closes: pd.DataFrame,
-):
+    holdings=holdings,
+    price_quality=price_quality,
+    ops_enriched=ops_enriched,
+    ):
     """
     Visualizza il modulo Monte Carlo.
 
@@ -399,8 +402,13 @@ def render_monte_carlo(
 
         try:
 
-            initial_value, returns = prepare_portfolio_mc(
-                series
+            initial_value, returns, volatility_returns = (
+                prepare_portfolio_mc(
+                    series=series,
+                    holdings=holdings,
+                    price_quality=price_quality,
+                    ops_enriched=ops_enriched,
+                )
             )
 
             st.info(
@@ -548,7 +556,8 @@ def render_monte_carlo(
     try:
 
         historical_params = estimate_mc_parameters(
-            returns
+            returns=returns,
+            volatility_returns=volatility_returns,
         )
 
     except ValueError as exc:
