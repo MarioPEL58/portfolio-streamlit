@@ -163,9 +163,9 @@ def _build_fan_chart(
             customdata=customdata,
             hovertemplate=(
                 "<b>Anno %{x:.1f}</b><br><br>"
-                "P75 € %{customdata,.0f}<br>"
+                "P75 € %{customdata[1],.0f}<br>"
                 "<b>P50 € %{y:,.0f}</b><br>"
-                "P25 € %{customdata,.0f}"
+                "P25 € %{customdata[0],.0f}"
                 "<extra></extra>"
             ),
         )
