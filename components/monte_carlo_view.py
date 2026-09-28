@@ -102,7 +102,7 @@ def _build_fan_chart(
             fill="tonexty",
             fillcolor="rgba(31, 119, 180, 0.12)",
             line=dict(width=0),
-            name="P10 - P90",
+            name=t("mc_chart_p10_p90"),
             hoverinfo="skip",
         )
     )
@@ -130,7 +130,7 @@ def _build_fan_chart(
             fill="tonexty",
             fillcolor="rgba(31, 119, 180, 0.25)",
             line=dict(width=0),
-            name="P25 - P75",
+            name=t("mc_chart_p25_p75"),
             hoverinfo="skip",
         )
     )
@@ -149,14 +149,14 @@ def _build_fan_chart(
             x=x,
             y=df["P50"],
             mode="lines",
-            name="Mediana",
+            name=t("mc_chart_median"),
             line=dict(
                 color="#1f77b4",
                 width=3,
             ),
             customdata=customdata,
             hovertemplate=(
-                "<b>Anno %{x:.1f}</b><br><br>"
+                "<b> {t('mc_chart_year')} %{x:.1f}</b><br><br>"
                 "P75 € %{customdata[1]:,.0f}<br>"
                 "<b>P50 € %{y:,.0f}</b><br>"
                 "P25 € %{customdata[0]:,.0f}"
@@ -172,13 +172,13 @@ def _build_fan_chart(
         y=initial_value,
         line_dash="dot",
         line_color="gray",
-        annotation_text="Capitale iniziale",
+        annotation_text=t("mc_chart_initial_capital"),
     )
 
     fig.update_layout(
-        title="Evoluzione simulata del capitale",
-        xaxis_title="Anni",
-        yaxis_title="Valore",
+        title=t("mc_chart_title"),
+        xaxis_title=t("mc_chart_years_axis"),
+        yaxis_title=t("mc_chart_value_axis"),
         hovermode="closest",
         legend=dict(
             orientation="h",
@@ -209,7 +209,7 @@ def _build_fan_chart(
 
 def _show_historical_parameters(params: dict):
 
-    st.markdown("#### Dati storici")
+    st.markdown(f"#### {t('mc_historical_data')}")
 
     observations = params["observations"]
 
@@ -229,17 +229,17 @@ def _show_historical_parameters(params: dict):
     col1, col2, col3 = st.columns(3)
 
     col1.metric(
-        "Rendimento annualizzato",
+        t("mc_annualized_return"),
         _format_pct(params["mu"]),
     )
-
+    
     col2.metric(
-        "Volatilità annualizzata",
+        t("mc_annualized_volatility"),
         _format_pct(params["sigma"]),
     )
-
+    
     col3.metric(
-        "Qualità storico",
+        t("mc_historical_quality"),
         quality,
     )
 
@@ -251,12 +251,12 @@ def _show_historical_parameters(params: dict):
     col1, col2, col3  = st.columns(3)
 
     col1.metric(
-        "Osservazioni storico",
+        t("mc_historical_observations"),
         f'{observations:,}'.replace(",", "."),
     )
-
+    
     col2.metric(
-        "Osservazioni volatilità",
+        t("mc_volatility_observations"),
         f'{volatility_observations:,}'.replace(",", "."),
     )
     # col3 volutamente vuota
@@ -266,7 +266,7 @@ def _show_historical_parameters(params: dict):
     # ========================================================
 
     st.caption(
-        f'Periodo storico: '
+        f'{t("mc_historical_period")}: '
         f'{_format_date(params["start_date"])}'
         f' - '
         f'{_format_date(params["end_date"])}'
@@ -295,7 +295,7 @@ def _show_historical_parameters(params: dict):
 def _show_results(result: dict):
 
     st.markdown("---")
-    st.subheader("Risultati")
+    st.subheader(t("mc_results"))
 
     final = result["final_percentiles"]
 
@@ -303,7 +303,7 @@ def _show_results(result: dict):
     # Percentili
     # --------------------------------------------------------
 
-    st.markdown("#### Capitale finale")
+    st.markdown(f"#### {t('mc_final_capital')}")
 
     cols = st.columns(5)
 
@@ -336,27 +336,27 @@ def _show_results(result: dict):
     # Indicatori
     # --------------------------------------------------------
 
-    st.markdown("#### Indicatori")
+    st.markdown(f"#### {t('mc_indicators')}")
 
     col1, col2, col3, col4 = st.columns(4)
 
     col1.metric(
-        "Capitale iniziale",
+        t("mc_initial_capital"),
         _format_currency(result["initial_value"]),
     )
-
+    
     col2.metric(
-        "Valore mediano",
+        t("mc_median_value"),
         _format_currency(result["median_final_value"]),
     )
-
+    
     col3.metric(
-        "CAGR mediano",
+        t("mc_median_cagr"),
         _format_pct(result["median_cagr"]),
     )
-
+    
     col4.metric(
-        "Probabilità di perdita",
+        t("mc_loss_probability"),
         _format_pct(result["probability_loss"]),
     )
 
@@ -418,23 +418,20 @@ def render_monte_carlo(
     # ========================================================
     
     with st.container(key="monte_carlo_module"):
-        st.header("🎲 Monte Carlo")
-    
-        st.caption(
-            "Simulazione probabilistica basata sul rendimento "
-            "atteso e sulla volatilità del sottostante."
-        )
+        st.header(t("mc_title"))
+        
+        st.caption(t("mc_description"))
         
         # ========================================================
         # Modalità
         # ========================================================
     
         mode = st.radio(
-            "Simula",
+            t("mc_simulate"),
             [
-                "Intero portafoglio",
-                "Ticker del portafoglio",
-                "Ticker esterno",
+                t("mc_whole_portfolio"),
+                t("mc_portfolio_ticker"),
+                t("mc_external_ticker"),
             ],
             horizontal=True,
             key="mc_mode",
@@ -449,9 +446,9 @@ def render_monte_carlo(
         # 1. INTERO PORTAFOGLIO
         # ========================================================
     
-        if mode == "Intero portafoglio":
+        if mode == t("mc_whole_portfolio"):
     
-            source_name = "Intero portafoglio"
+            source_name = t("mc_whole_portfolio")
     
             try:
     
@@ -465,8 +462,8 @@ def render_monte_carlo(
                 )
     
                 st.info(
-                    f"Capitale attuale: "
-                    f"{_format_currency(initial_value)}"
+                    f'{t("mc_current_capital")}: '
+                    f'{_format_currency(initial_value)}'
                 )
     
             except ValueError as exc:
@@ -478,22 +475,17 @@ def render_monte_carlo(
         # 2. TICKER DEL PORTAFOGLIO
         # ========================================================
     
-        elif mode == "Ticker del portafoglio":
+        elif mode == t("mc_portfolio_ticker"):
     
             if current is None or current.empty:
     
-                st.warning(
-                    "Non sono presenti posizioni aperte "
-                    "nel portafoglio."
-                )
+                st.warning(t("mc_no_open_positions"))
     
                 return
     
             if "Ticker" not in current.columns:
     
-                st.warning(
-                    "La colonna Ticker non è disponibile."
-                )
+               st.warning(t("mc_ticker_column_unavailable"))
     
                 return
     
@@ -506,10 +498,7 @@ def render_monte_carlo(
     
             if not portfolio_tickers:
     
-                st.warning(
-                    "Nessun ticker disponibile "
-                    "nel portafoglio."
-                )
+                st.warning(t("mc_no_portfolio_tickers"))
     
                 return
     
@@ -532,7 +521,7 @@ def render_monte_carlo(
                 )
     
                 st.info(
-                    f"Valore attuale posizione: "
+                    t("mc_enter_ticker")
                     f"{_format_currency(initial_value)}"
                 )
     
@@ -552,7 +541,7 @@ def render_monte_carlo(
             with col1:
     
                 external_ticker = st.text_input(
-                    "Ticker Yahoo Finance",
+                    t("mc_yahoo_ticker"),
                     value="VWCE.DE",
                     key="mc_external_ticker",
                 )
@@ -560,7 +549,7 @@ def render_monte_carlo(
             with col2:
     
                 external_capital = st.number_input(
-                    "Capitale da simulare (€)",
+                    t("mc_capital_to_simulate"),
                     min_value=100.0,
                     value=10_000.0,
                     step=1_000.0,
@@ -570,7 +559,7 @@ def render_monte_carlo(
             external_ticker = external_ticker.strip().upper()
     
             if not external_ticker:
-                st.info("Inserisci un ticker.")
+                st.info(t("mc_enter_ticker"))
                 return
     
             source_name = external_ticker
