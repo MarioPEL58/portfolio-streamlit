@@ -390,6 +390,7 @@ def render_monte_carlo(
 
     initial_value = None
     returns = None
+    volatility_returns = None
     source_name = None
 
     # ========================================================
