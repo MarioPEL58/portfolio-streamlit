@@ -156,7 +156,7 @@ def _build_fan_chart(
             ),
             customdata=customdata,
             hovertemplate=(
-                "<b> {t('mc_chart_year')} %{x:.1f}</b><br><br>"
+                f"<b>{t('mc_chart_year')} %{{x:.1f}}</b><br><br>"
                 "P75 € %{customdata[1]:,.0f}<br>"
                 "<b>P50 € %{y:,.0f}</b><br>"
                 "P25 € %{customdata[0]:,.0f}"
@@ -521,8 +521,8 @@ def render_monte_carlo(
                 )
     
                 st.info(
-                    t("mc_enter_ticker")
-                    f"{_format_currency(initial_value)}"
+                    f'{t("mc_current_position_value")}: '
+                    f'{_format_currency(initial_value)}'
                 )
     
             except ValueError as exc:
