@@ -833,6 +833,9 @@ with tab_monte_carlo:
     series=series,
     current=current,
     closes=closes,
+    holdings=holdings,
+    price_quality=price_quality,
+    ops_enriched=ops_enriched,
     )
 
 # Tabs
