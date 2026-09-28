@@ -244,9 +244,10 @@ def _show_historical_parameters(params: dict):
 
     # ========================================================
     # Seconda riga: numero osservazioni
+    # Manteniamo la stessa griglia a 3 colonne
     # ========================================================
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3  = st.columns(3)
 
     col1.metric(
         "Osservazioni storico",
@@ -257,7 +258,8 @@ def _show_historical_parameters(params: dict):
         "Osservazioni volatilità",
         f'{volatility_observations:,}'.replace(",", "."),
     )
-
+    # col3 volutamente vuota
+    
     # ========================================================
     # Periodo storico
     # ========================================================
