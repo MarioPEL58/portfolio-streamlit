@@ -212,11 +212,20 @@ def _show_historical_parameters(params: dict):
 
     observations = params["observations"]
 
+    volatility_observations = params.get(
+        "volatility_observations",
+        observations,
+    )
+
     quality, quality_message = _historical_quality(
         observations
     )
 
-    col1, col2, col3, col4 = st.columns(4)
+    # ========================================================
+    # Prima riga: parametri principali
+    # ========================================================
+
+    col1, col2, col3 = st.columns(3)
 
     col1.metric(
         "Rendimento annualizzato",
@@ -229,14 +238,29 @@ def _show_historical_parameters(params: dict):
     )
 
     col3.metric(
-        "Osservazioni",
-        f'{observations:,}'.replace(",", "."),
-    )
-
-    col4.metric(
         "Qualità storico",
         quality,
     )
+
+    # ========================================================
+    # Seconda riga: numero osservazioni
+    # ========================================================
+
+    col1, col2 = st.columns(2)
+
+    col1.metric(
+        "Osservazioni storico",
+        f'{observations:,}'.replace(",", "."),
+    )
+
+    col2.metric(
+        "Osservazioni volatilità",
+        f'{volatility_observations:,}'.replace(",", "."),
+    )
+
+    # ========================================================
+    # Periodo storico
+    # ========================================================
 
     st.caption(
         f'Periodo storico: '
@@ -244,6 +268,10 @@ def _show_historical_parameters(params: dict):
         f' - '
         f'{_format_date(params["end_date"])}'
     )
+
+    # ========================================================
+    # Indicazione qualità storico
+    # ========================================================
 
     if quality == "Insufficiente":
         st.error(quality_message)
@@ -256,6 +284,7 @@ def _show_historical_parameters(params: dict):
 
     else:
         st.caption(quality_message)
+        
 # ============================================================
 # Risultati simulazione
 # ============================================================
