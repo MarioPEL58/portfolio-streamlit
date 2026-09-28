@@ -140,11 +140,16 @@ def _build_fan_chart(
             hoverinfo="skip",
         )
     )
-
+    
     # --------------------------------------------------------
-    # Mediana
+    # Mediana + tooltip P25 / P50 / P75
     # --------------------------------------------------------
-
+    
+    customdata = np.column_stack([
+        df["P25"],
+        df["P75"],
+    ])
+    
     fig.add_trace(
         go.Scatter(
             x=x,
@@ -155,14 +160,16 @@ def _build_fan_chart(
                 color="#1f77b4",
                 width=3,
             ),
+            customdata=customdata,
             hovertemplate=(
-                "Anno %{x:.1f}<br>"
-                "Mediana € %{y:,.0f}"
+                "<b>Anno %{x:.1f}</b><br><br>"
+                "P75 € %{customdata,.0f}<br>"
+                "<b>P50 € %{y:,.0f}</b><br>"
+                "P25 € %{customdata,.0f}"
                 "<extra></extra>"
             ),
         )
     )
-
     # --------------------------------------------------------
     # Capitale iniziale
     # --------------------------------------------------------
