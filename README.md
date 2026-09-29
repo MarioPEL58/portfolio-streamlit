@@ -5,6 +5,7 @@ Applicazione Streamlit per ricostruire il valore del portafoglio nel tempo a par
 ## Funzionalità
 - Upload di file Excel
 - Lettura del foglio `Operazioni` (oppure foglio compatibile)
+- Opzionale lettura file  `DividendiCedole` (oppure foglio compatibile)
 - Parsing delle colonne:
   - `Ticker`
   - `Data`
