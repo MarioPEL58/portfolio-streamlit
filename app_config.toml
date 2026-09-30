@@ -1,5 +1,5 @@
 [app]
-version = "1.3.01"
+version = "1.0.0"
 
 [ui]
 # puoi tenerlo vuoto o usarlo per defaults comuni in futuro
@@ -45,6 +45,7 @@ tab_daily = "📅 Giornaliero"
 tab_unrealized = "💼 P/L non realizzato"
 tab_heatmap = "🧊 Heatmap"
 tab_analysis = "📐 Analisi"
+tab_monte_carlo = "🎲 Monte Carlo"
 
 daily_title = "📅 Performance giornaliera del portafoglio"
 unrealized_title = "💼 Profitto/perdita sulle posizioni attualmente aperte"
@@ -276,6 +277,106 @@ tail_risk_return = "Rendimento"
 tail_risk_date = "Data"
 tail_risk_var_highlight = "Rendimento oltre la soglia VaR 95%"
 
+# ============================================================
+# MONTE CARLO
+# ============================================================
+
+mc_title = "🎲 Monte Carlo"
+mc_description = "Simulazione probabilistica basata sul rendimento atteso e sulla volatilità del sottostante."
+
+# Modalità
+mc_simulate = "Simula"
+mc_whole_portfolio = "Intero portafoglio"
+mc_portfolio_ticker = "Ticker del portafoglio"
+mc_external_ticker = "Ticker esterno"
+mc_ticker = "Ticker"
+mc_yahoo_ticker = "Ticker Yahoo Finance"
+mc_capital_to_simulate = "Capitale da simulare (€)"
+
+# Capitale
+mc_current_capital = "Capitale attuale"
+mc_current_position_value = "Valore attuale posizione"
+
+# Messaggi
+mc_no_open_positions = "Non sono presenti posizioni aperte nel portafoglio."
+mc_ticker_column_unavailable = "La colonna Ticker non è disponibile."
+mc_no_portfolio_tickers = "Nessun ticker disponibile nel portafoglio."
+mc_enter_ticker = "Inserisci un ticker."
+mc_downloading_history = "Scaricamento storico {ticker}..."
+mc_unable_to_retrieve = "Impossibile recuperare {ticker}: {error}"
+mc_simulation_error = "Errore durante la simulazione: {error}"
+
+# Dati storici
+mc_historical_data = "Dati storici"
+mc_annualized_return = "Rendimento annualizzato"
+mc_annualized_volatility = "Volatilità annualizzata"
+mc_historical_quality = "Qualità storico"
+mc_historical_observations = "Osservazioni storico"
+mc_volatility_observations = "Osservazioni volatilità"
+mc_historical_period = "Periodo storico"
+
+# Qualità dello storico
+mc_quality_insufficient = "Insufficiente"
+mc_quality_limited = "Limitato"
+mc_quality_fair = "Discreto"
+mc_quality_broad = "Ampio"
+
+mc_quality_insufficient_message = "Storico inferiore a circa 1 anno. I parametri stimati possono essere poco rappresentativi."
+mc_quality_limited_message = "Storico inferiore a circa 3 anni. Usare con cautela soprattutto il rendimento atteso."
+mc_quality_fair_message = "Storico compreso tra circa 3 e 5 anni. I parametri sono utilizzabili, ma restano sensibili al periodo osservato."
+mc_quality_broad_message = "Storico di almeno circa 5 anni. Il campione è più rappresentativo, ma i rendimenti futuri possono comunque differire da quelli storici."
+
+# Parametri simulazione
+mc_simulation_parameters = "Parametri simulazione"
+mc_return_and_volatility = "Rendimento e volatilità"
+mc_historical = "Storici"
+mc_custom = "Personalizzati"
+mc_expected_return_used = "Rendimento atteso utilizzato"
+mc_volatility_used = "Volatilità utilizzata"
+mc_expected_annual_return = "Rendimento atteso annuo (%)"
+mc_annual_volatility = "Volatilità annua (%)"
+
+# Orizzonte temporale e simulazioni
+mc_time_horizon = "Orizzonte temporale"
+mc_year = "anno"
+mc_years = "anni"
+mc_number_of_simulations = "Numero simulazioni"
+mc_running_simulations = "Esecuzione di {count} simulazioni..."
+
+# Riepilogo
+mc_summary = "Riepilogo"
+mc_analysis = "Analisi"
+mc_capital = "Capitale"
+mc_expected_return = "Rendimento atteso"
+mc_volatility = "Volatilità"
+
+# Avvio
+mc_run_simulation = "Avvia simulazione"
+
+# Risultati
+mc_results = "Risultati"
+mc_final_capital = "Capitale finale"
+mc_median = "Mediana"
+
+# Indicatori
+mc_indicators = "Indicatori"
+mc_initial_capital = "Capitale iniziale"
+mc_median_value = "Valore mediano"
+mc_median_cagr = "CAGR mediano"
+mc_loss_probability = "Probabilità di perdita"
+
+# Grafico
+mc_chart_title = "Evoluzione simulata del capitale"
+mc_chart_years_axis = "Anni"
+mc_chart_value_axis = "Valore"
+mc_chart_initial_capital = "Capitale iniziale"
+mc_chart_year = "Anno"
+mc_chart_median = "Mediana"
+mc_chart_p10_p90 = "P10 - P90"
+mc_chart_p25_p75 = "P25 - P75"
+
+# Disclaimer
+mc_disclaimer = "La simulazione Monte Carlo rappresenta scenari probabilistici basati sui parametri selezionati. I risultati non costituiscono una previsione dei rendimenti futuri."
 [lang.en]
 
 # HEADER
@@ -305,6 +406,7 @@ tab_daily = "📅 Daily"
 tab_unrealized = "💼 Open P/L"
 tab_heatmap = "🧊 Heatmap"
 tab_analysis = "📐 Analysis"
+tab_monte_carlo = "🎲 Monte Carlo"
 
 daily_title = "📅 Daily portfolio performance"
 unrealized_title = "💼 Unrealized profit and loss"
@@ -536,3 +638,104 @@ tail_risk_best_days_title = "Best days"
 tail_risk_return = "Return"
 tail_risk_date = "Date"
 tail_risk_var_highlight = "Return beyond the 95% VaR threshold"
+
+# ============================================================
+# MONTE CARLO
+# ============================================================
+
+mc_title = "🎲 Monte Carlo"
+mc_description = "Probabilistic simulation based on the expected return and volatility of the underlying asset."
+
+# Modes
+mc_simulate = "Simulate"
+mc_whole_portfolio = "Entire portfolio"
+mc_portfolio_ticker = "Portfolio ticker"
+mc_external_ticker = "External ticker"
+mc_ticker = "Ticker"
+mc_yahoo_ticker = "Yahoo Finance ticker"
+mc_capital_to_simulate = "Capital to simulate (€)"
+
+# Capital
+mc_current_capital = "Current capital"
+mc_current_position_value = "Current position value"
+
+# Messages
+mc_no_open_positions = "There are no open positions in the portfolio."
+mc_ticker_column_unavailable = "The Ticker column is not available."
+mc_no_portfolio_tickers = "No tickers are available in the portfolio."
+mc_enter_ticker = "Enter a ticker."
+mc_downloading_history = "Downloading historical data for {ticker}..."
+mc_unable_to_retrieve = "Unable to retrieve {ticker}: {error}"
+mc_simulation_error = "Error during simulation: {error}"
+
+# Historical data
+mc_historical_data = "Historical data"
+mc_annualized_return = "Annualized return"
+mc_annualized_volatility = "Annualized volatility"
+mc_historical_quality = "Historical data quality"
+mc_historical_observations = "Historical observations"
+mc_volatility_observations = "Volatility observations"
+mc_historical_period = "Historical period"
+
+# Historical data quality
+mc_quality_insufficient = "Insufficient"
+mc_quality_limited = "Limited"
+mc_quality_fair = "Fair"
+mc_quality_broad = "Extensive"
+
+mc_quality_insufficient_message = "Less than approximately 1 year of historical data. The estimated parameters may not be representative."
+mc_quality_limited_message = "Less than approximately 3 years of historical data. Use with caution, especially the expected return."
+mc_quality_fair_message = "Between approximately 3 and 5 years of historical data. The parameters can be used, but remain sensitive to the selected period."
+mc_quality_broad_message = "At least approximately 5 years of historical data. The sample is more representative, but future returns may still differ from historical returns."
+
+# Simulation parameters
+mc_simulation_parameters = "Simulation parameters"
+mc_return_and_volatility = "Return and volatility"
+mc_historical = "Historical"
+mc_custom = "Custom"
+mc_expected_return_used = "Expected return used"
+mc_volatility_used = "Volatility used"
+mc_expected_annual_return = "Expected annual return (%)"
+mc_annual_volatility = "Annual volatility (%)"
+
+# Time horizon and simulations
+mc_time_horizon = "Time horizon"
+mc_year = "year"
+mc_years = "years"
+mc_number_of_simulations = "Number of simulations"
+mc_running_simulations = "Running {count} simulations..."
+
+# Summary
+mc_summary = "Summary"
+mc_analysis = "Analysis"
+mc_capital = "Capital"
+mc_expected_return = "Expected return"
+mc_volatility = "Volatility"
+
+# Run
+mc_run_simulation = "Run simulation"
+
+# Results
+mc_results = "Results"
+mc_final_capital = "Final capital"
+mc_median = "Median"
+
+# Indicators
+mc_indicators = "Indicators"
+mc_initial_capital = "Initial capital"
+mc_median_value = "Median value"
+mc_median_cagr = "Median CAGR"
+mc_loss_probability = "Probability of loss"
+
+# Chart
+mc_chart_title = "Simulated capital evolution"
+mc_chart_years_axis = "Years"
+mc_chart_value_axis = "Value"
+mc_chart_initial_capital = "Initial capital"
+mc_chart_year = "Year"
+mc_chart_median = "Median"
+mc_chart_p10_p90 = "P10 - P90"
+mc_chart_p25_p75 = "P25 - P75"
+
+# Disclaimer
+mc_disclaimer = "The Monte Carlo simulation represents probabilistic scenarios based on the selected parameters. The results do not constitute a forecast of future returns."
