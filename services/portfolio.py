@@ -649,7 +649,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
         
         # debug demo
-        debug_date = pd.Timestamp("2022-03-24")
+        debug_date = pd.Timestamp("2023-03-24")
         
         st.write("DEBUG BMPS 24/03/2022")
         st.write("total_value:", total_value.loc[debug_date])
