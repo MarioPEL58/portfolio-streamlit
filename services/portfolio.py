@@ -647,7 +647,18 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             daily_total_pl.loc[first_investment_day]
             / (-daily_cf_total.loc[first_investment_day])
         )
-
+        
+        # debug demo
+        debug_date = pd.Timestamp("2022-03-24")
+        
+        st.write("DEBUG BMPS 24/03/2022")
+        st.write("total_value:", total_value.loc[debug_date])
+        st.write("daily_cf_total:", daily_cf_total.loc[debug_date])
+        st.write("daily_total_pl:", daily_total_pl.loc[debug_date])
+        st.write("daily_total_pl_pct:", daily_total_pl_pct.loc[debug_date])
+        st.write("first_investment_day:", first_investment_day.loc[debug_date])
+        # end debug 
+        
         weekly_total_pl = (
             daily_total_pl
             .rolling("7D")
