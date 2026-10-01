@@ -133,7 +133,7 @@ def _build_demo_operations_df() -> pd.DataFrame:
             "ISIN": "IT0005218752",
             "Ticker": "BMPS.MI",
             "Tassa": 0.26,
-            "Data": "2022-03-24",
+            "Data": "2023-03-24",
             "Mercato": "MTA",
             "Intermediario": "CreditAgricole",
             "Quantità": 400,
