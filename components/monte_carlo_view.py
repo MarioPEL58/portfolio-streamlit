@@ -461,23 +461,6 @@ def render_monte_carlo(
                     )
                 )
                 
-                st.write("### VOL DEBUG")
-
-                st.write("Statistiche:")
-                st.write(volatility_returns.describe())
-                
-                st.write("Min:", volatility_returns.min())
-                st.write("Max:", volatility_returns.max())
-                
-                st.write("Top 10 movimenti assoluti:")
-                st.write(
-                    volatility_returns
-                    .abs()
-                    .sort_values(ascending=False)
-                    .head(10)
-                )
-                # end debug
-                
                 st.info(
                     f'{t("mc_current_capital")}: '
                     f'{_format_currency(initial_value)}'
