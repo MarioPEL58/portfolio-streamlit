@@ -58,11 +58,11 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
                 session=session  
             )
             
-            st.write("DEBUG YFINANCE BMPS")
+            # st.write("DEBUG YFINANCE BMPS")
              
-            st.write(
-            raw["BMPS.MI"].loc["2022-03-24"]
-            )
+            # st.write(
+            # raw["BMPS.MI"].loc["2022-03-24"]
+            # )
 
         except Exception as e:
             st.error(f"Errore critico durante il download da Yahoo: {e}")
