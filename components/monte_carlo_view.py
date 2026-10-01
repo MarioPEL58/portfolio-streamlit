@@ -460,7 +460,7 @@ def render_monte_carlo(
                         ops_enriched=ops_enriched,
                     )
                 )
-    
+                
                 st.info(
                     f'{t("mc_current_capital")}: '
                     f'{_format_currency(initial_value)}'

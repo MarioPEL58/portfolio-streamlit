@@ -647,7 +647,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             daily_total_pl.loc[first_investment_day]
             / (-daily_cf_total.loc[first_investment_day])
         )
-
+        
         weekly_total_pl = (
             daily_total_pl
             .rolling("7D")
