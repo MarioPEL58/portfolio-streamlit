@@ -59,12 +59,9 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
             )
             
             st.write("DEBUG YFINANCE BMPS")
- 
+             
             st.write(
-            raw.loc[
-            "2022-03-24",
-            "BMPS.MI"
-            ]
+            raw["BMPS.MI"].loc["2022-03-24"]
             )
 
         except Exception as e:
