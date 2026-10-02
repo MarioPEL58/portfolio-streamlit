@@ -559,7 +559,15 @@ with tab_perf:
     chart_key = (f"portfolio_chart_"f"{benchmark.strip()}_"f"{show_benchmark}")
     
     st.plotly_chart(fig, width="stretch", theme=None, key=chart_key)
-
+    
+    # ========================================================
+    # Metriche confronto portafoglio / benchmark
+    # ========================================================
+    comparison_metrics = compute_chart_comparison_metrics(
+        portfolio_returns=flow_adjusted_returns,
+        benchmark_returns=bench_returns if show_benchmark else None,
+        start_date=min_date,
+    )
 with tab_daily:
     st.subheader(t("daily_title"))
     view_mode = st.radio(
