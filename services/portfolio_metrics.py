@@ -293,3 +293,185 @@ def compute_conditional_var(returns: pd.Series, confidence_level: float = 0.95):
     if beyond_var_returns.empty:
         return None
     return -beyond_var_returns.mean()
+    
+def compute_chart_comparison_metrics(
+    portfolio_returns: pd.Series,
+    benchmark_returns: pd.Series | None = None,
+    start_date=None,
+    annualization_days: int = 252,
+) -> dict:
+    """
+    Calcola le metriche di confronto mostrate sotto
+    il grafico principale del portafoglio.
+
+    Metriche:
+    - rendimento cumulato portafoglio
+    - rendimento cumulato benchmark
+    - sovraperformance
+    - volatilità annualizzata
+    - max drawdown
+
+    I rendimenti devono essere giornalieri e flow-adjusted.
+    """
+
+    # ========================================================
+    # Pulizia rendimenti portafoglio
+    # ========================================================
+
+    p_returns = (
+        pd.to_numeric(portfolio_returns, errors="coerce")
+        .replace([np.inf, -np.inf], np.nan)
+        .dropna()
+        .sort_index()
+    )
+
+    if start_date is not None:
+        start_date = pd.Timestamp(start_date)
+        p_returns = p_returns.loc[
+            p_returns.index >= start_date
+        ]
+
+    # ========================================================
+    # Helper interno
+    # ========================================================
+
+    def _calculate_metrics(returns: pd.Series) -> dict:
+
+        if returns is None or returns.empty:
+            return {
+                "return": None,
+                "volatility": None,
+                "max_drawdown": None,
+            }
+
+        returns = (
+            pd.to_numeric(returns, errors="coerce")
+            .replace([np.inf, -np.inf], np.nan)
+            .dropna()
+            .sort_index()
+        )
+
+        if returns.empty:
+            return {
+                "return": None,
+                "volatility": None,
+                "max_drawdown": None,
+            }
+
+        # Rendimento cumulato
+        cumulative = (1.0 + returns).cumprod()
+
+        total_return = (
+            float(cumulative.iloc[-1] - 1.0)
+        )
+
+        # Volatilità annualizzata
+        if len(returns) > 1:
+            volatility = float(
+                returns.std(ddof=1)
+                * np.sqrt(annualization_days)
+            )
+        else:
+            volatility = None
+
+        # Max Drawdown
+        running_max = cumulative.cummax()
+
+        drawdown = (
+            cumulative / running_max
+        ) - 1.0
+
+        max_drawdown = float(
+            drawdown.min()
+        )
+
+        return {
+            "return": total_return,
+            "volatility": volatility,
+            "max_drawdown": max_drawdown,
+        }
+
+    # ========================================================
+    # Portafoglio
+    # ========================================================
+
+    portfolio = _calculate_metrics(
+        p_returns
+    )
+
+    # ========================================================
+    # Benchmark
+    # ========================================================
+
+    benchmark = {
+        "return": None,
+        "volatility": None,
+        "max_drawdown": None,
+    }
+
+    if benchmark_returns is not None:
+
+        b_returns = (
+            pd.to_numeric(
+                benchmark_returns,
+                errors="coerce",
+            )
+            .replace([np.inf, -np.inf], np.nan)
+            .dropna()
+            .sort_index()
+        )
+
+        if start_date is not None:
+            b_returns = b_returns.loc[
+                b_returns.index >= start_date
+            ]
+
+        benchmark = _calculate_metrics(
+            b_returns
+        )
+
+    # ========================================================
+    # Sovraperformance
+    # ========================================================
+
+    outperformance = None
+
+    if (
+        portfolio["return"] is not None
+        and benchmark["return"] is not None
+    ):
+        outperformance = (
+            portfolio["return"]
+            - benchmark["return"]
+        )
+
+    # ========================================================
+    # Periodo effettivamente utilizzato
+    # ========================================================
+
+    period_start = (
+        p_returns.index.min()
+        if not p_returns.empty
+        else None
+    )
+
+    period_end = (
+        p_returns.index.max()
+        if not p_returns.empty
+        else None
+    )
+
+    return {
+        "period_start": period_start,
+        "period_end": period_end,
+
+        "portfolio_return": portfolio["return"],
+        "benchmark_return": benchmark["return"],
+        "outperformance": outperformance,
+
+        "portfolio_volatility": portfolio["volatility"],
+        "benchmark_volatility": benchmark["volatility"],
+
+        "portfolio_max_drawdown": portfolio["max_drawdown"],
+        "benchmark_max_drawdown": benchmark["max_drawdown"],
+    }
