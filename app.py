@@ -12,13 +12,14 @@ from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
 from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, pl_treemap, sharpe_gauge
 from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare, create_tail_risk_figure
+from components.chart_comparison_metrics import (render_chart_comparison_metrics,)
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
 from services.market_data import download_close_prices, download_last_intraday_timestamp, report_late_tickers, fill_late_tickers_with_purchase_price
 from services.portfolio import build_portfolio
 from services.portfolio_metrics import compute_portfolio_xirr, compute_sharpe_ratio
-from services.portfolio_metrics import compute_flow_adjusted_returns, compute_sharpe_from_returns, compute_sortino_ratio, compute_beta, compute_chart_comparison_metrics
+from services.portfolio_metrics import compute_flow_adjusted_returns, compute_sharpe_from_returns, compute_sortino_ratio, compute_beta
 from services.market_status import compute_market_update_label
 from services.benchmark import build_flow_adjusted_benchmark
 from services.risk_free import get_euro_risk_free_rate
@@ -563,11 +564,17 @@ with tab_perf:
     # ========================================================
     # Metriche confronto portafoglio / benchmark
     # ========================================================
-    comparison_metrics = compute_chart_comparison_metrics(
+    render_chart_comparison_metrics(
         portfolio_returns=flow_adjusted_returns,
-        benchmark_returns=bench_returns if show_benchmark else None,
+        benchmark_returns=(
+            bench_returns
+            if show_benchmark
+            else None
+        ),
+        benchmark_name=benchmark,
         start_date=min_date,
     )
+
 with tab_daily:
     st.subheader(t("daily_title"))
     view_mode = st.radio(
