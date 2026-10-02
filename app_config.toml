@@ -67,6 +67,17 @@ radio_select_pl_mode = "Seleziona metrica"
 radio_pl_daily = "P/L Giornaliero"
 radio_pl_total = "P/L Totale"
 
+# Metriche grafico portafoglio
+chart_metrics_show = "Mostra metriche"
+chart_metrics_period = "Periodo"
+chart_metrics_portfolio = "Portafoglio"
+chart_metrics_benchmark = "Benchmark"
+chart_metrics_outperformance = "Sovraperformance"
+
+chart_metrics_portfolio_volatility = "Volatilità portafoglio"
+chart_metrics_benchmark_volatility = "Volatilità benchmark"
+chart_metrics_portfolio_drawdown = "Max Drawdown portafoglio"
+chart_metrics_benchmark_drawdown = "Max Drawdown benchmark"
 
 # TABS
 compact_view = "Vista compatta"
@@ -430,6 +441,17 @@ radio_select_pl_mode = "Select metric"
 radio_pl_daily = "Daily P/L"
 radio_pl_total = "Total P/L"
 
+# Portfolio chart metrics
+chart_metrics_show = "Show metrics"
+chart_metrics_period = "Period"
+chart_metrics_portfolio = "Portfolio"
+chart_metrics_benchmark = "Benchmark"
+chart_metrics_outperformance = "Outperformance"
+
+chart_metrics_portfolio_volatility = "Portfolio volatility"
+chart_metrics_benchmark_volatility = "Benchmark volatility"
+chart_metrics_portfolio_drawdown = "Portfolio max drawdown"
+chart_metrics_benchmark_drawdown = "Benchmark max drawdown"
 
 # TABS
 current_view = "Compact view"
