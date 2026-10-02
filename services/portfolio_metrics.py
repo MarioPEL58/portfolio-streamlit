@@ -296,7 +296,7 @@ def compute_conditional_var(returns: pd.Series, confidence_level: float = 0.95):
     
 def compute_chart_comparison_metrics(
     portfolio_returns: pd.Series,
-    benchmark_returns: pd.Series | None = None,
+    benchmark_returns= None,
     start_date=None,
     annualization_days: int = 252,
 ) -> dict:
