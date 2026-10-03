@@ -78,6 +78,8 @@ chart_metrics_portfolio_volatility = "Volatilità portafoglio"
 chart_metrics_benchmark_volatility = "Volatilità benchmark"
 chart_metrics_portfolio_drawdown = "Max Drawdown portafoglio"
 chart_metrics_benchmark_drawdown = "Max Drawdown benchmark"
+chart_metrics_tracking_error = "Tracking Error"
+chart_metrics_information_ratio = "Information Ratio"
 
 # TABS
 compact_view = "Vista compatta"
@@ -452,6 +454,8 @@ chart_metrics_portfolio_volatility = "Portfolio volatility"
 chart_metrics_benchmark_volatility = "Benchmark volatility"
 chart_metrics_portfolio_drawdown = "Portfolio max drawdown"
 chart_metrics_benchmark_drawdown = "Benchmark max drawdown"
+chart_metrics_tracking_error = "Tracking Error"
+chart_metrics_information_ratio = "Information Ratio"
 
 # TABS
 current_view = "Compact view"
