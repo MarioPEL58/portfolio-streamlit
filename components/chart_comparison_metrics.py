@@ -129,3 +129,30 @@ def render_chart_comparison_metrics(
                 else "-"
             ),
         )
+        
+        # ====================================================
+        # Confronto relativo
+        # ====================================================
+
+        tracking_error = metrics["tracking_error"]
+        information_ratio = metrics["information_ratio"]
+
+        col1, col2 = st.columns(2)
+
+        col1.metric(
+            t("chart_metrics_tracking_error"),
+            (
+                f"{tracking_error:.2%}"
+                if tracking_error is not None
+                else "-"
+            ),
+        )
+
+        col2.metric(
+            t("chart_metrics_information_ratio"),
+            (
+                f"{information_ratio:.2f}"
+                if information_ratio is not None
+                else "-"
+            ),
+        )
