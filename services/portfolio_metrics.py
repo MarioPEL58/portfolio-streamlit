@@ -446,6 +446,52 @@ def compute_chart_comparison_metrics(
         )
 
     # ========================================================
+    # Tracking Error / Information Ratio
+    # ========================================================
+
+    tracking_error = None
+    information_ratio = None
+
+    if benchmark_returns is not None:
+
+        # Allineiamo portafoglio e benchmark sulle stesse date
+        aligned = pd.concat(
+            [
+                p_returns.rename("portfolio"),
+                b_returns.rename("benchmark"),
+            ],
+            axis=1,
+            join="inner",
+        ).dropna()
+
+        if len(aligned) > 1:
+
+            active_returns = (
+                aligned["portfolio"]
+                - aligned["benchmark"]
+            )
+
+            # Tracking Error annualizzato
+            active_std = active_returns.std(ddof=1)
+
+            if np.isfinite(active_std):
+
+                tracking_error = float(
+                    active_std
+                    * np.sqrt(annualization_days)
+                )
+
+                # Information Ratio annualizzato
+                if active_std > 0:
+
+                    information_ratio = float(
+                        (
+                            active_returns.mean()
+                            / active_std
+                        )
+                        * np.sqrt(annualization_days)
+                    )
+    # ========================================================
     # Periodo effettivamente utilizzato
     # ========================================================
 
@@ -474,4 +520,7 @@ def compute_chart_comparison_metrics(
 
         "portfolio_max_drawdown": portfolio["max_drawdown"],
         "benchmark_max_drawdown": benchmark["max_drawdown"],
+
+        "tracking_error": tracking_error,
+        "information_ratio": information_ratio,
     }
