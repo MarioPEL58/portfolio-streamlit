@@ -254,7 +254,7 @@ series = series.loc[:market_last_date]
 #debug per vedere struttua di holdings
 st.write("=== DEBUG HOLDINGS ===")
 st.write("Shape:", holdings.shape)
-st.write("Index type:", type(holdings.index))
+# st.write("Index type:", type(holdings.index))
 st.write("Columns:", holdings.columns.tolist())
 
 st.dataframe(
@@ -264,6 +264,16 @@ st.dataframe(
 st.write("Index iniziale:", holdings.index.min())
 st.write("Index finale:", holdings.index.max())
 
+st.write("=== POSITION KEY -> TICKER ===")
+
+st.dataframe(
+    ops_enriched[
+        ["PositionKey", "Ticker"]
+    ]
+    .drop_duplicates()
+    .sort_values("PositionKey"),
+    width="stretch"
+)
 #debug
 # st.write(series.tail(5))
 
