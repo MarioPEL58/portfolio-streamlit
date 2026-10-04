@@ -13,6 +13,7 @@ from components.charts import allocation_pie_chart, allocation_bar_chart
 from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, pl_treemap, sharpe_gauge
 from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare, create_tail_risk_figure
 from components.chart_comparison_metrics import (render_chart_comparison_metrics,)
+from components.backtest_view import render_backtest
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
@@ -512,12 +513,13 @@ st.caption(t("performance_total_desc"))
 
 st.subheader(t("charts_title"))
 
-tab_perf, tab_daily, tab_unrealized, tab_heatmap, tab_analysis, tab_monte_carlo = st.tabs([
+tab_perf, tab_daily, tab_unrealized, tab_heatmap, tab_analysis, tab_backtest, tab_monte_carlo = st.tabs([
     t("tab_perf"),
     t("tab_daily"),
     t("tab_unrealized"),
     t("tab_heatmap"),
     t("tab_analysis"),
+    t("tab_backtest"),
     t("tab_monte_carlo")
 ])
 
@@ -842,6 +844,13 @@ with tab_analysis:
     )
     
     render_best_worst_days(flow_adjusted_returns)
+    
+with tab_backtest:
+    render_backtest(
+    holdings=holdings,
+    ops_enriched=ops_enriched,
+    closes=closes,
+    )
     
 with tab_monte_carlo:
     render_monte_carlo(
