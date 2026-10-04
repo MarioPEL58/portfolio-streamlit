@@ -13,8 +13,7 @@ def render_backtest(
     ops_enriched,
     closes,
     bench_series=None,
-    benchmark_name="",
-):
+    benchmark_name="",):
     # ========================================================
     # Frequenza ribilanciamento
     # ========================================================
