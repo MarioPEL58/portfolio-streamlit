@@ -309,4 +309,26 @@ def backtest_initial_portfolio(
         ticker = position["ticker"]
         column = position["holdings_column"]
 
-        quantity
+        quantity = pd.to_numeric(
+            holdings.at[
+                initial_date,
+                column,
+            ],
+            errors="coerce",
+        )
+
+        if pd.isna(quantity):
+            quantity = 0.0
+
+        initial_quantities[ticker] = (
+            initial_quantities.get(
+                ticker,
+                0.0,
+            )
+            + float(quantity)
+        )
+
+    initial_quantities = pd.Series(
+        initial_quantities,
+        dtype=float,
+    )
