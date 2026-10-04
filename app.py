@@ -252,9 +252,17 @@ st.write(f"time to build Portfolio: {time.time() - start:.2f} sec")
 series = series.loc[:market_last_date]
 
 #debug per vedere struttua di holdings
-st.write("DEBUG HOLDINGS")
-st.write(type(holdings))
-st.write(holdings)
+st.write("=== DEBUG HOLDINGS ===")
+st.write("Shape:", holdings.shape)
+st.write("Index type:", type(holdings.index))
+st.write("Columns:", holdings.columns.tolist())
+
+st.dataframe(
+    holdings.head(10),
+    width="stretch"
+)
+st.write("Index iniziale:", holdings.index.min())
+st.write("Index finale:", holdings.index.max())
 
 #debug
 # st.write(series.tail(5))
