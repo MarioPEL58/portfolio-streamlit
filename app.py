@@ -846,10 +846,13 @@ with tab_analysis:
     render_best_worst_days(flow_adjusted_returns)
     
 with tab_backtest:
+
     render_backtest(
-    holdings=holdings,
-    ops_enriched=ops_enriched,
-    closes=closes,
+        holdings=holdings,
+        ops_enriched=ops_enriched,
+        closes=closes,
+        bench_series=bench_series,
+        benchmark_name=benchmark,
     )
     
 with tab_monte_carlo:
