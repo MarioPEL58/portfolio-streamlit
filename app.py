@@ -251,6 +251,11 @@ st.write(f"time to build Portfolio: {time.time() - start:.2f} sec")
 # ✅ taglia serie alla data reale
 series = series.loc[:market_last_date]
 
+#debug per vedere struttua di holdings
+st.write("DEBUG HOLDINGS")
+st.write(type(holdings))
+st.write(holdings)
+
 #debug
 # st.write(series.tail(5))
 
