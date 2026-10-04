@@ -310,6 +310,7 @@ backtest_period = "Periodo"
 backtest_initial_allocation = "Allocazione iniziale"
 backtest_rebalancing = "Ribilanciamenti"
 backtest_portfolio = "Portafoglio backtest"
+backtest_index_value = "Valore indice (base 100)"
 
 # ============================================================
 # MONTE CARLO
@@ -706,6 +707,7 @@ backtest_period = "Period"
 backtest_initial_allocation = "Initial allocation"
 backtest_rebalancing = "Rebalancing"
 backtest_portfolio = "Backtest portfolio"
+backtest_index_value = "Index value (base 100)"
 
 # ============================================================
 # MONTE CARLO
