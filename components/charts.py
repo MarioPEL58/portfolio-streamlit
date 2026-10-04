@@ -103,6 +103,228 @@ def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
     )
 
     return fig
+def backtest_chart(
+    backtest: pd.DataFrame,
+    benchmark=None,
+    benchmark_name: str = "",
+    note_text: Optional[str] = None,
+):
+    """
+    Grafico normalizzato del backtest rispetto al benchmark.
+
+    Entrambe le serie partono da 100, così il confronto
+    rappresenta direttamente la performance relativa.
+
+    Parameters
+    ----------
+    backtest : pd.DataFrame
+        Output di backtest_initial_portfolio().
+
+    benchmark : pd.Series | None
+        Serie storica dei prezzi del benchmark.
+
+    benchmark_name : str
+        Nome/ticker del benchmark.
+
+    note_text : str | None
+        Eventuale nota visualizzata sotto il grafico.
+    """
+
+    if backtest is None or backtest.empty:
+        return None
+
+    if "Valore portafoglio" not in backtest.columns:
+        return None
+
+    # ========================================================
+    # Portafoglio normalizzato a 100
+    # ========================================================
+
+    portfolio = pd.to_numeric(
+        backtest["Valore portafoglio"],
+        errors="coerce",
+    ).dropna()
+
+    if portfolio.empty:
+        return None
+
+    portfolio_norm = (
+        portfolio
+        / portfolio.iloc[0]
+        * 100.0
+    )
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Scatter(
+            x=portfolio_norm.index,
+            y=portfolio_norm.values,
+            mode="lines",
+            name=t("backtest_portfolio"),
+            line=dict(
+                width=2.5
+            ),
+        )
+    )
+
+    # ========================================================
+    # Benchmark
+    # ========================================================
+
+    if benchmark is not None:
+
+        benchmark = pd.to_numeric(
+            benchmark,
+            errors="coerce",
+        ).dropna()
+
+        # Solo periodo del backtest
+        benchmark = benchmark.loc[
+            benchmark.index >= portfolio_norm.index.min()
+        ]
+
+        # ====================================================
+        # Date comuni portfolio / benchmark
+        # ====================================================
+
+        common_index = (
+            portfolio_norm.index
+            .intersection(benchmark.index)
+        )
+
+        if len(common_index) > 0:
+
+            portfolio_common = portfolio_norm.loc[
+                common_index
+            ]
+
+            benchmark_common = benchmark.loc[
+                common_index
+            ]
+
+            # Rinormalizzazione sulla prima data comune
+            portfolio_common = (
+                portfolio_common
+                / portfolio_common.iloc[0]
+                * 100.0
+            )
+
+            benchmark_norm = (
+                benchmark_common
+                / benchmark_common.iloc[0]
+                * 100.0
+            )
+
+            # Sostituiamo anche il portfolio con la serie
+            # perfettamente allineata al benchmark
+            fig.data = []
+
+            fig.add_trace(
+                go.Scatter(
+                    x=portfolio_common.index,
+                    y=portfolio_common.values,
+                    mode="lines",
+                    name=t("backtest_portfolio"),
+                    line=dict(
+                        width=2.5
+                    ),
+                )
+            )
+
+            fig.add_trace(
+                go.Scatter(
+                    x=benchmark_norm.index,
+                    y=benchmark_norm.values,
+                    mode="lines",
+                    name=(
+                        f"{t('benchmark_label')}: "
+                        f"{benchmark_name}"
+                    ),
+                    line=dict(
+                        width=2,
+                    ),
+                )
+            )
+
+    # ========================================================
+    # Linea base 100
+    # ========================================================
+
+    fig.add_hline(
+        y=100,
+        line_width=1,
+        line_dash="dot",
+        line_color="rgba(255,255,255,0.30)",
+    )
+
+    # ========================================================
+    # Nota
+    # ========================================================
+
+    if note_text:
+
+        fig.add_annotation(
+            xref="paper",
+            yref="paper",
+            x=0.01,
+            y=-0.10,
+            text=f"<i>{note_text}</i>",
+            showarrow=False,
+            font=dict(
+                size=11,
+                color="gray",
+            ),
+            align="left",
+            yanchor="top",
+        )
+
+    # ========================================================
+    # Layout
+    # ========================================================
+
+    fig.update_layout(
+        height=540,
+
+        xaxis_title=t("col_date"),
+
+        yaxis_title=t("backtest_index_value"),
+
+        xaxis=dict(
+            title=dict(
+                standoff=15,
+            ),
+            automargin=True,
+        ),
+
+        yaxis=dict(
+            title=dict(
+                standoff=15,
+            ),
+            automargin=True,
+            showgrid=True,
+            gridcolor="rgba(255, 255, 255, 0.15)",
+        ),
+
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+        ),
+
+        plot_bgcolor="rgba(255, 255, 255, 0.01)",
+
+        margin=dict(
+            l=80,
+            r=40,
+            t=20,
+            b=60,
+        ),
+    )
+
+    return fig
     
 def allocation_pie_chart(exposure, column="Ticker", title=None):
     
