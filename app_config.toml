@@ -45,6 +45,7 @@ tab_daily = "📅 Giornaliero"
 tab_unrealized = "💼 P/L non realizzato"
 tab_heatmap = "🧊 Heatmap"
 tab_analysis = "📐 Analisi"
+tab_backtest = "🧪 Backtest"
 tab_monte_carlo = "🎲 Monte Carlo"
 
 daily_title = "📅 Performance giornaliera del portafoglio"
@@ -291,6 +292,26 @@ tail_risk_date = "Data"
 tail_risk_var_highlight = "Rendimento oltre la soglia VaR 95%"
 
 # ============================================================
+# Backtest
+# ============================================================
+
+backtest_rebalance_frequency = "Frequenza di ribilanciamento"
+backtest_initial_date = "Data iniziale"
+backtest_initial_value = "Valore iniziale"
+backtest_weight = "Peso"
+
+backtest_frequency_monthly = "Mensile"
+backtest_frequency_quarterly = "Trimestrale"
+backtest_frequency_semiannual = "Semestrale"
+backtest_frequency_yearly = "Annuale"
+backtest_frequency_none = "Nessun ribilanciamento"
+
+backtest_period = "Periodo"
+backtest_initial_allocation = "Allocazione iniziale"
+backtest_rebalancing = "Ribilanciamenti"
+backtest_portfolio = "Portafoglio backtest"
+
+# ============================================================
 # MONTE CARLO
 # ============================================================
 
@@ -419,6 +440,7 @@ tab_daily = "📅 Daily"
 tab_unrealized = "💼 Open P/L"
 tab_heatmap = "🧊 Heatmap"
 tab_analysis = "📐 Analysis"
+tab_backtest = "🧪 Backtest"
 tab_monte_carlo = "🎲 Monte Carlo"
 
 daily_title = "📅 Daily portfolio performance"
@@ -664,6 +686,26 @@ tail_risk_best_days_title = "Best days"
 tail_risk_return = "Return"
 tail_risk_date = "Date"
 tail_risk_var_highlight = "Return beyond the 95% VaR threshold"
+
+# ============================================================
+# Backtest
+# ============================================================
+
+backtest_rebalance_frequency = "Rebalancing frequency"
+backtest_initial_date = "Initial date"
+backtest_initial_value = "Initial value"
+backtest_weight = "Weight"
+
+backtest_frequency_monthly = "Monthly"
+backtest_frequency_quarterly = "Quarterly"
+backtest_frequency_semiannual = "Semiannual"
+backtest_frequency_yearly = "Annual"
+backtest_frequency_none = "No rebalancing"
+
+backtest_period = "Period"
+backtest_initial_allocation = "Initial allocation"
+backtest_rebalancing = "Rebalancing"
+backtest_portfolio = "Backtest portfolio"
 
 # ============================================================
 # MONTE CARLO
