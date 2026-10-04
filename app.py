@@ -251,29 +251,6 @@ st.write(f"time to build Portfolio: {time.time() - start:.2f} sec")
 # ✅ taglia serie alla data reale
 series = series.loc[:market_last_date]
 
-#debug per vedere struttua di holdings
-st.write("=== DEBUG HOLDINGS ===")
-st.write("Shape:", holdings.shape)
-# st.write("Index type:", type(holdings.index))
-st.write("Columns:", holdings.columns.tolist())
-
-st.dataframe(
-    holdings.head(10),
-    width="stretch"
-)
-st.write("Index iniziale:", holdings.index.min())
-st.write("Index finale:", holdings.index.max())
-
-st.write("=== POSITION KEY -> TICKER ===")
-
-st.dataframe(
-    ops_enriched[
-        ["PositionKey", "Ticker"]
-    ]
-    .drop_duplicates()
-    .sort_values("PositionKey"),
-    width="stretch"
-)
 #debug
 # st.write(series.tail(5))
 
