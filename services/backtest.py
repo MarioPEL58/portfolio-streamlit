@@ -332,3 +332,292 @@ def backtest_initial_portfolio(
         initial_quantities,
         dtype=float,
     )
+    # ========================================================
+    # Prezzi iniziali
+    # ========================================================
+
+    initial_prices = pd.to_numeric(
+        closes.loc[
+            initial_date,
+            initial_quantities.index,
+        ],
+        errors="coerce",
+    )
+
+    # ========================================================
+    # Valore iniziale di ogni ticker
+    # ========================================================
+
+    initial_position_values = (
+        initial_quantities
+        * initial_prices
+    )
+
+    # ========================================================
+    # Valore iniziale totale del portafoglio
+    # ========================================================
+
+    initial_value = float(
+        initial_position_values.sum()
+    )
+
+    if (
+        not np.isfinite(initial_value)
+        or initial_value <= 0
+    ):
+        raise ValueError(
+            "Valore iniziale del portafoglio non valido."
+        )
+
+    # ========================================================
+    # Pesi target iniziali
+    # ========================================================
+
+    target_weights = (
+        initial_position_values
+        / initial_value
+    )
+
+    target_weights = (
+        target_weights
+        / target_weights.sum()
+    )
+
+    # ========================================================
+    # Prezzi utilizzati dal backtest
+    # ========================================================
+
+    prices = closes[
+        target_weights.index
+    ].copy()
+
+    prices = prices.loc[
+        prices.index >= initial_date
+    ]
+
+    prices = prices.apply(
+        pd.to_numeric,
+        errors="coerce",
+    )
+
+    prices = prices.replace(
+        [np.inf, -np.inf],
+        np.nan,
+    )
+
+    # Il backtest procede soltanto sulle date
+    # in cui tutti i ticker hanno un prezzo valido
+    prices = prices.dropna(
+        how="any"
+    )
+
+    if len(prices) < 2:
+        raise ValueError(
+            "Storico prezzi insufficiente "
+            "per eseguire il backtest."
+        )
+
+    # ========================================================
+    # Rendimenti giornalieri dei ticker
+    # ========================================================
+
+    asset_returns = (
+        prices
+        .pct_change()
+        .fillna(0.0)
+    )
+
+    # ========================================================
+    # Valore iniziale delle singole posizioni
+    # ========================================================
+
+    position_values = (
+        target_weights
+        * initial_value
+    ).astype(float)
+
+    # ========================================================
+    # Prima data teorica di ribilanciamento
+    # ========================================================
+
+    if rebalance_frequency == "none":
+        next_rebalance_date = None
+    else:
+        next_rebalance_date = (
+            initial_date
+            + frequency_map[
+                rebalance_frequency
+            ]
+        )
+
+    # ========================================================
+    # Simulazione
+    # ========================================================
+
+    records = []
+
+    for i, date in enumerate(prices.index):
+
+        rebalanced = False
+        scheduled_rebalance_date = pd.NaT
+
+        # ====================================================
+        # Dal secondo giorno applichiamo i rendimenti
+        # ====================================================
+
+        if i > 0:
+
+            position_values = (
+                position_values
+                * (
+                    1.0
+                    + asset_returns.loc[date]
+                )
+            )
+
+            # =================================================
+            # Ribilanciamento
+            #
+            # Il calendario parte da initial_date.
+            #
+            # Se la data teorica cade in un giorno senza
+            # quotazioni, il ribilanciamento avviene alla
+            # prima data disponibile successiva.
+            # =================================================
+
+            while (
+                next_rebalance_date is not None
+                and date >= next_rebalance_date
+            ):
+
+                scheduled_rebalance_date = (
+                    next_rebalance_date
+                )
+
+                total_value = float(
+                    position_values.sum()
+                )
+
+                position_values = (
+                    target_weights
+                    * total_value
+                )
+
+                rebalanced = True
+
+                next_rebalance_date = (
+                    next_rebalance_date
+                    + frequency_map[
+                        rebalance_frequency
+                    ]
+                )
+
+        # ====================================================
+        # Valore totale portafoglio
+        # ====================================================
+
+        total_value = float(
+            position_values.sum()
+        )
+
+        # ====================================================
+        # Pesi effettivi della giornata
+        # ====================================================
+
+        if total_value > 0:
+
+            actual_weights = (
+                position_values
+                / total_value
+            )
+
+        else:
+
+            actual_weights = pd.Series(
+                np.nan,
+                index=position_values.index,
+            )
+
+        # ====================================================
+        # Record giornaliero
+        # ====================================================
+
+        row = {
+            "Data": date,
+            "Valore portafoglio": total_value,
+            "Ribilanciamento": rebalanced,
+            "Data teorica ribilanciamento":
+                scheduled_rebalance_date,
+        }
+
+        for ticker in target_weights.index:
+
+            row[
+                f"Valore {ticker}"
+            ] = float(
+                position_values[ticker]
+            )
+
+            row[
+                f"Peso {ticker}"
+            ] = float(
+                actual_weights[ticker]
+            )
+
+        records.append(row)
+
+    # ========================================================
+    # DataFrame finale
+    # ========================================================
+
+    result = (
+        pd.DataFrame(records)
+        .set_index("Data")
+    )
+
+    # ========================================================
+    # Rendimento giornaliero portafoglio
+    # ========================================================
+
+    result["Rendimento giornaliero"] = (
+        result["Valore portafoglio"]
+        .pct_change()
+        .fillna(0.0)
+    )
+
+    # ========================================================
+    # Rendimento cumulato
+    # ========================================================
+
+    result["Rendimento cumulato"] = (
+        result["Valore portafoglio"]
+        / initial_value
+        - 1.0
+    )
+
+    # ========================================================
+    # Metadata
+    # ========================================================
+
+    result.attrs["initial_date"] = (
+        initial_date
+    )
+
+    result.attrs["initial_value"] = (
+        initial_value
+    )
+
+    result.attrs["rebalance_frequency"] = (
+        rebalance_frequency
+    )
+
+    # ========================================================
+    # Return
+    # ========================================================
+
+    return (
+        result,
+        target_weights,
+        initial_value,
+        initial_date,
+    )
