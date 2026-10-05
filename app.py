@@ -852,11 +852,9 @@ with tab_analysis:
 with tab_backtest:
 
     render_backtest(
-        # holdings=holdings,
-        # ops_enriched=ops_enriched,
         current=current,
         closes=closes,
-        bench_series=bench_series,
+        benchmark_prices=benchmark_prices,
         benchmark_name=benchmark,
     )
     
