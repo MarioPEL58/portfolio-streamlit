@@ -358,6 +358,7 @@ sortino = compute_sortino_ratio(flow_adjusted_returns, risk_free_rate=rf_daily)
 # Benchmark
 # =========================
 bench_norm = None
+benchmark_prices = None
 
 # =========================
 # ✅ Benchmark flow-adjusted
@@ -373,6 +374,9 @@ if show_benchmark and benchmark.strip():
 
     if not bench_df.empty and benchmark.strip() in bench_df.columns:
         b = bench_df[benchmark.strip()].dropna()
+        
+        # Prezzi grezzi benchmark utilizzati dal Backtest
+        benchmark_prices = b.copy()
         
         #OLD investing all capital on the first day
         # if not b.empty and b.iloc[0] != 0:
