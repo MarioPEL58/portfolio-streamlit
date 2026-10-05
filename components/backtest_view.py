@@ -226,6 +226,29 @@ def render_backtest(
             filtered_bench,
             errors="coerce",
         )
+        st.write(
+            "DEBUG BACKTEST:",
+            backtest.index.min(),
+            "→",
+            backtest.index.max(),
+        )
+        
+        st.write(
+            "DEBUG BENCH DOPO REINDEX:",
+            "righe =", len(filtered_bench),
+            "| validi =", filtered_bench.notna().sum(),
+            "| prima data valida =", filtered_bench.first_valid_index(),
+            "| primo valore =", (
+                filtered_bench.dropna().iloc[0]
+                if not filtered_bench.dropna().empty
+                else None
+            ),
+            "| ultimo valore =", (
+                filtered_bench.dropna().iloc[-1]
+                if not filtered_bench.dropna().empty
+                else None
+            ),
+        )
     # ========================================================
     # Grafico Backtest vs Benchmark
     # ========================================================
