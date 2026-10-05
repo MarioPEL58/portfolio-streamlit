@@ -164,17 +164,17 @@ def render_backtest(
     # ========================================================
     # Preparazione benchmark
     # ========================================================
-
+    
     filtered_bench = None
-
+    
     if bench_series is not None:
-
+    
         filtered_bench = bench_series.copy()
-
-        # -----------------------------------------------
-        # Index Datetime
-        # -----------------------------------------------
-
+    
+        # ----------------------------------------------------
+        # Normalizzazione indice
+        # ----------------------------------------------------
+    
         if not isinstance(
             filtered_bench.index,
             pd.DatetimeIndex,
@@ -183,38 +183,49 @@ def render_backtest(
                 filtered_bench.index,
                 errors="coerce",
             )
-
-        # Elimina eventuali date non valide
+    
+        # elimina date non valide
         filtered_bench = filtered_bench.loc[
             ~filtered_bench.index.isna()
         ]
-
+    
+        # index ordinato obbligatorio per method="ffill"
         filtered_bench = (
             filtered_bench
             .sort_index()
         )
-
-        # -----------------------------------------------
-        # Solo periodo del backtest
-        # -----------------------------------------------
-
+    
+        # ----------------------------------------------------
+        # Limiti temporali del backtest
+        # ----------------------------------------------------
+    
+        backtest_start = backtest.index.min()
+        backtest_end = backtest.index.max()
+    
+        # Manteniamo anche i dati precedenti alla partenza
+        # del backtest, perché reindex(method="ffill")
+        # possa recuperare l'ultimo prezzo disponibile.
         filtered_bench = filtered_bench.loc[
-            filtered_bench.index >= initial_date
+            filtered_bench.index <= backtest_end
         ]
-
-        # -----------------------------------------------
-        # Allineamento benchmark alle date del backtest
-        # -----------------------------------------------
-
+    
+        # ----------------------------------------------------
+        # Allineamento alle date del backtest
+        # ----------------------------------------------------
+    
         filtered_bench = filtered_bench.reindex(
-            backtest.index
+            backtest.index,
+            method="ffill",
         )
-
-        filtered_bench = (
-            filtered_bench
-            .ffill()
+    
+        # ----------------------------------------------------
+        # Pulizia finale
+        # ----------------------------------------------------
+    
+        filtered_bench = pd.to_numeric(
+            filtered_bench,
+            errors="coerce",
         )
-
     # ========================================================
     # Grafico Backtest vs Benchmark
     # ========================================================
