@@ -192,7 +192,133 @@ def render_backtest(
             theme=None,
             key=chart_key,
         )
-
+        
+    # ========================================================
+    # Metriche Backtest vs Benchmark
+    # ========================================================
+    
+    if metrics is not None:
+    
+        st.subheader(
+            t("backtest_metrics_title")
+        )
+    
+        # ----------------------------------------------------
+        # Portafoglio
+        # ----------------------------------------------------
+    
+        st.caption(
+            t("backtest_portfolio")
+        )
+    
+        p1, p2, p3, p4 = st.columns(4)
+    
+        p1.metric(
+            t("backtest_total_return"),
+            f"{metrics['portfolio_total_return']:.2%}",
+            delta=(
+                f"{metrics['portfolio_total_return'] - metrics['benchmark_total_return']:+.2%}"
+                if pd.notna(metrics["benchmark_total_return"])
+                else None
+            ),
+        )
+    
+        p2.metric(
+            t("backtest_cagr"),
+            f"{metrics['portfolio_cagr']:.2%}",
+            delta=(
+                f"{metrics['portfolio_cagr'] - metrics['benchmark_cagr']:+.2%}"
+                if pd.notna(metrics["benchmark_cagr"])
+                else None
+            ),
+        )
+    
+        p3.metric(
+            t("backtest_volatility"),
+            f"{metrics['portfolio_volatility']:.2%}",
+        )
+    
+        p4.metric(
+            t("backtest_max_drawdown"),
+            f"{metrics['portfolio_max_drawdown']:.2%}",
+        )
+    
+        # ----------------------------------------------------
+        # Benchmark
+        # ----------------------------------------------------
+    
+        if (
+            backtest_benchmark is not None
+            and pd.notna(
+                metrics["benchmark_total_return"]
+            )
+        ):
+    
+            st.caption(
+                f"{t('backtest_benchmark')}: "
+                f"{benchmark_name}"
+            )
+    
+            b1, b2, b3, b4 = st.columns(4)
+    
+            b1.metric(
+                t("backtest_benchmark_total_return"),
+                f"{metrics['benchmark_total_return']:.2%}",
+            )
+    
+            b2.metric(
+                t("backtest_benchmark_cagr"),
+                f"{metrics['benchmark_cagr']:.2%}",
+            )
+    
+            b3.metric(
+                t("backtest_benchmark_volatility"),
+                f"{metrics['benchmark_volatility']:.2%}",
+            )
+    
+            b4.metric(
+                t("backtest_benchmark_max_drawdown"),
+                f"{metrics['benchmark_max_drawdown']:.2%}",
+            )
+    
+            # ------------------------------------------------
+            # Metriche relative
+            # ------------------------------------------------
+    
+            r1, r2, r3 = st.columns(3)
+    
+            r1.metric(
+                t("backtest_active_return"),
+                (
+                    f"{metrics['active_return']:.2%}"
+                    if pd.notna(
+                        metrics["active_return"]
+                    )
+                    else "—"
+                ),
+            )
+    
+            r2.metric(
+                t("backtest_tracking_error"),
+                (
+                    f"{metrics['tracking_error']:.2%}"
+                    if pd.notna(
+                        metrics["tracking_error"]
+                    )
+                    else "—"
+                ),
+            )
+    
+            r3.metric(
+                t("backtest_information_ratio"),
+                (
+                    f"{metrics['information_ratio']:.2f}"
+                    if pd.notna(
+                        metrics["information_ratio"]
+                    )
+                    else "—"
+                ),
+            )
     # ========================================================
     # Return
     # Lo teniamo utile per eventuali sviluppi successivi.
