@@ -724,3 +724,181 @@ def build_backtest_benchmark(
     benchmark_value.name = "Valore benchmark"
 
     return benchmark_value
+
+def calculate_backtest_metrics(backtest, benchmark=None):
+
+    if backtest is None or backtest.empty:
+        return None
+
+    portfolio = pd.to_numeric(
+        backtest["Valore portafoglio"],
+        errors="coerce",
+    ).replace([np.inf, -np.inf], np.nan).dropna()
+
+    portfolio = portfolio[portfolio > 0]
+
+    if len(portfolio) < 2:
+        return None
+
+    bench = None
+
+    if benchmark is not None:
+        bench = pd.to_numeric(
+            benchmark,
+            errors="coerce",
+        ).replace([np.inf, -np.inf], np.nan).dropna()
+
+        bench = bench[bench > 0]
+
+        if len(bench) < 2:
+            bench = None
+
+    if bench is not None:
+        data = pd.concat(
+            [
+                portfolio.rename("portfolio"),
+                bench.rename("benchmark"),
+            ],
+            axis=1,
+            join="inner",
+        ).dropna()
+
+        if len(data) < 2:
+            bench = None
+        else:
+            portfolio = data["portfolio"]
+            bench = data["benchmark"]
+
+    days = (
+        portfolio.index[-1]
+        - portfolio.index[0]
+    ).days
+
+    years = days / 365.25
+
+    portfolio_total = (
+        portfolio.iloc[-1]
+        / portfolio.iloc[0]
+        - 1
+    )
+
+    portfolio_cagr = (
+        (portfolio.iloc[-1] / portfolio.iloc[0])
+        ** (1 / years)
+        - 1
+        if years > 0
+        else np.nan
+    )
+
+    portfolio_returns = (
+        portfolio.pct_change().dropna()
+    )
+
+    portfolio_vol = (
+        portfolio_returns.std(ddof=1)
+        * np.sqrt(252)
+        if len(portfolio_returns) >= 2
+        else np.nan
+    )
+
+    portfolio_dd = (
+        portfolio
+        / portfolio.cummax()
+        - 1
+    ).min()
+
+    metrics = {
+        "portfolio_total_return": portfolio_total,
+        "portfolio_cagr": portfolio_cagr,
+        "portfolio_volatility": portfolio_vol,
+        "portfolio_max_drawdown": portfolio_dd,
+        "benchmark_total_return": np.nan,
+        "benchmark_cagr": np.nan,
+        "benchmark_volatility": np.nan,
+        "benchmark_max_drawdown": np.nan,
+        "active_return": np.nan,
+        "tracking_error": np.nan,
+        "information_ratio": np.nan,
+    }
+
+    if bench is None:
+        return metrics
+
+    bench_total = (
+        bench.iloc[-1]
+        / bench.iloc[0]
+        - 1
+    )
+
+    bench_cagr = (
+        (bench.iloc[-1] / bench.iloc[0])
+        ** (1 / years)
+        - 1
+        if years > 0
+        else np.nan
+    )
+
+    bench_returns = (
+        bench.pct_change().dropna()
+    )
+
+    bench_vol = (
+        bench_returns.std(ddof=1)
+        * np.sqrt(252)
+        if len(bench_returns) >= 2
+        else np.nan
+    )
+
+    bench_dd = (
+        bench
+        / bench.cummax()
+        - 1
+    ).min()
+    
+    metrics["benchmark_total_return"] = bench_total
+    metrics["benchmark_cagr"] = bench_cagr
+    metrics["benchmark_volatility"] = bench_vol
+    metrics["benchmark_max_drawdown"] = bench_dd
+    
+    returns = pd.concat(
+        [
+            portfolio.pct_change().rename("portfolio"),
+            bench.pct_change().rename("benchmark"),
+        ],
+        axis=1,
+    ).dropna()
+
+    active = (
+        returns["portfolio"]
+        - returns["benchmark"]
+    ).dropna()
+
+    if len(active) < 2:
+        return metrics
+
+    active_return = (
+        active.mean() * 252
+    )
+
+    tracking_error = (
+        active.std(ddof=1)
+        * np.sqrt(252)
+    )
+
+    information_ratio = np.nan
+
+    if (
+        pd.notna(tracking_error)
+        and tracking_error > 0
+    ):
+        information_ratio = (
+            active_return
+            / tracking_error
+        )
+
+
+    metrics["active_return"] = active_return
+    metrics["tracking_error"] = tracking_error
+    metrics["information_ratio"] = information_ratio
+
+    return metrics
