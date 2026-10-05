@@ -280,7 +280,78 @@ def backtest_chart(
                 ),
             )
         )
+    # ========================================================
+    # Ribilanciamenti
+    # ========================================================
 
+    if "Ribilanciamento" in backtest.columns:
+
+        rebalance_dates = backtest.index[
+            backtest["Ribilanciamento"].fillna(False)
+        ]
+
+        first_rebalance = True
+
+        for rebalance_date in rebalance_dates:
+
+            # ------------------------------------------------
+            # Linea verticale sulla data effettiva
+            # ------------------------------------------------
+
+            fig.add_vline(
+                x=rebalance_date,
+                line_width=1,
+                line_dash="dot",
+                line_color="rgba(46, 204, 113, 0.55)",
+            )
+
+            # ------------------------------------------------
+            # Rombo sulla curva del portafoglio
+            # ------------------------------------------------
+
+            if rebalance_date in portfolio_norm.index:
+
+                rebalance_value = float(
+                    portfolio_norm.loc[
+                        rebalance_date
+                    ]
+                )
+
+                fig.add_trace(
+                    go.Scatter(
+                        x=[rebalance_date],
+                        y=[rebalance_value],
+                        mode="markers",
+
+                        marker=dict(
+                            size=10,
+                            color="#2ECC71",
+                            symbol="diamond",
+                            line=dict(
+                                color="white",
+                                width=1,
+                            ),
+                        ),
+
+                        name=t("backtest_rebalancing"),
+                        legendgroup="rebalance",
+
+                        # Una sola voce nella legenda
+                        showlegend=first_rebalance,
+
+                        hovertemplate=(
+                            f"<b>{t('backtest_rebalancing')}</b>"
+                            "<br>"
+                            "%{x|%d/%m/%Y}"
+                            "<br>"
+                            f"{t('backtest_index_value')}: "
+                            "%{y:.2f}"
+                            "<extra></extra>"
+                        ),
+                    )
+                )
+
+                first_rebalance = False
     # ========================================================
     # Linea base 100
     # ========================================================
