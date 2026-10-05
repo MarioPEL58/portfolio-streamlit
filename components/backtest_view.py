@@ -190,4 +190,20 @@ def render_backtest(
     # Lo teniamo utile per eventuali sviluppi successivi.
     # ========================================================
 
+    # debug
+    st.write("Pesi target:")
+    st.dataframe(
+        target_weights.rename("Peso")
+    )
+    
+    st.write("Ribilanciamenti:")
+    st.dataframe(
+        backtest.loc[
+            backtest["Ribilanciamento"],
+            [
+                "Valore portafoglio",
+                "Data teorica ribilanciamento",
+            ],
+        ]
+    )
     return backtest
