@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-from services.backtest import backtest_portfolio
+from services.backtest import (backtest_portfolio, build_backtest_benchmark,)
 from utils.i18n import t
 
 # Adatta questo import al modulo in cui hai inserito backtest_chart()
@@ -9,11 +9,9 @@ from components.charts import backtest_chart
 
 
 def render_backtest(
-    # holdings,
-    # ops_enriched,
     current,
     closes,
-    bench_series=None,
+    benchmark_prices=None,
     benchmark_name="",):
     # ========================================================
     # Frequenza ribilanciamento
@@ -141,121 +139,30 @@ def render_backtest(
                     ),
             },
         )
-        
+
+    if backtest is None or backtest.empty:
+        return None
     # ========================================================
-    # DEBUG benchmark
-    # ========================================================
-    
-    if bench_series is not None:
-        st.write(
-            "DEBUG benchmark:",
-            benchmark_name,
-            "| Prima data:",
-            bench_series.first_valid_index(),
-            "| Ultima data:",
-            bench_series.last_valid_index(),
-            "| Osservazioni:",
-            bench_series.notna().sum(),
-        )
-    else:
-        st.write(
-            "DEBUG benchmark: bench_series è None"
-        ) 
-    # ========================================================
-    # Preparazione benchmark
+    # Benchmark dedicato al backtest
     # ========================================================
     
-    filtered_bench = None
+    backtest_benchmark = None
     
-    if bench_series is not None:
+    if benchmark_prices is not None:
     
-        filtered_bench = bench_series.copy()
-    
-        # ----------------------------------------------------
-        # Normalizzazione indice
-        # ----------------------------------------------------
-    
-        if not isinstance(
-            filtered_bench.index,
-            pd.DatetimeIndex,
-        ):
-            filtered_bench.index = pd.to_datetime(
-                filtered_bench.index,
-                errors="coerce",
-            )
-    
-        # elimina date non valide
-        filtered_bench = filtered_bench.loc[
-            ~filtered_bench.index.isna()
-        ]
-    
-        # index ordinato obbligatorio per method="ffill"
-        filtered_bench = (
-            filtered_bench
-            .sort_index()
+        backtest_benchmark = build_backtest_benchmark(
+            benchmark_prices=benchmark_prices,
+            backtest_index=backtest.index,
+            initial_value=initial_value,
         )
     
-        # ----------------------------------------------------
-        # Limiti temporali del backtest
-        # ----------------------------------------------------
-    
-        backtest_start = backtest.index.min()
-        backtest_end = backtest.index.max()
-    
-        # Manteniamo anche i dati precedenti alla partenza
-        # del backtest, perché reindex(method="ffill")
-        # possa recuperare l'ultimo prezzo disponibile.
-        filtered_bench = filtered_bench.loc[
-            filtered_bench.index <= backtest_end
-        ]
-    
-        # ----------------------------------------------------
-        # Allineamento alle date del backtest
-        # ----------------------------------------------------
-    
-        filtered_bench = filtered_bench.reindex(
-            backtest.index,
-            method="ffill",
-        )
-    
-        # ----------------------------------------------------
-        # Pulizia finale
-        # ----------------------------------------------------
-    
-        filtered_bench = pd.to_numeric(
-            filtered_bench,
-            errors="coerce",
-        )
-        st.write(
-            "DEBUG BACKTEST:",
-            backtest.index.min(),
-            "→",
-            backtest.index.max(),
-        )
-        
-        st.write(
-            "DEBUG BENCH DOPO REINDEX:",
-            "righe =", len(filtered_bench),
-            "| validi =", filtered_bench.notna().sum(),
-            "| prima data valida =", filtered_bench.first_valid_index(),
-            "| primo valore =", (
-                filtered_bench.dropna().iloc[0]
-                if not filtered_bench.dropna().empty
-                else None
-            ),
-            "| ultimo valore =", (
-                filtered_bench.dropna().iloc[-1]
-                if not filtered_bench.dropna().empty
-                else None
-            ),
-        )
     # ========================================================
     # Grafico Backtest vs Benchmark
     # ========================================================
 
     fig = backtest_chart(
         backtest=backtest,
-        benchmark=filtered_bench,
+        benchmark=backtest_benchmark,
         benchmark_name=benchmark_name,
     )
 
