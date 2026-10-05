@@ -312,6 +312,22 @@ backtest_rebalancing = "Ribilanciamenti"
 backtest_portfolio = "Portafoglio backtest"
 backtest_index_value = "Valore indice (base 100)"
 
+backtest_metrics_title = "Metriche Backtest vs Benchmark"
+
+backtest_total_return = "Rendimento totale"
+backtest_cagr = "CAGR"
+backtest_volatility = "Volatilità"
+backtest_max_drawdown = "Max Drawdown"
+
+backtest_benchmark = "Benchmark"
+backtest_benchmark_total_return = "Rendimento benchmark"
+backtest_benchmark_cagr = "CAGR benchmark"
+backtest_benchmark_volatility = "Volatilità benchmark"
+backtest_benchmark_max_drawdown = "Max Drawdown benchmark"
+
+backtest_active_return = "Active Return"
+backtest_tracking_error = "Tracking Error"
+backtest_information_ratio = "Information Ratio"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -708,6 +724,23 @@ backtest_initial_allocation = "Initial allocation"
 backtest_rebalancing = "Rebalancing"
 backtest_portfolio = "Backtest portfolio"
 backtest_index_value = "Index value (base 100)"
+
+backtest_metrics_title = "Backtest vs Benchmark Metrics"
+
+backtest_total_return = "Total Return"
+backtest_cagr = "CAGR"
+backtest_volatility = "Volatility"
+backtest_max_drawdown = "Max Drawdown"
+
+backtest_benchmark = "Benchmark"
+backtest_benchmark_total_return = "Benchmark Return"
+backtest_benchmark_cagr = "Benchmark CAGR"
+backtest_benchmark_volatility = "Benchmark Volatility"
+backtest_benchmark_max_drawdown = "Benchmark Max Drawdown"
+
+backtest_active_return = "Active Return"
+backtest_tracking_error = "Tracking Error"
+backtest_information_ratio = "Information Ratio"
 
 # ============================================================
 # MONTE CARLO
