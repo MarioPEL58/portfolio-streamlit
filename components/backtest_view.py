@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-from services.backtest import backtest_initial_portfolio
+from services.backtest import backtest_portfolio
 from utils.i18n import t
 
 # Adatta questo import al modulo in cui hai inserito backtest_chart()
@@ -9,8 +9,9 @@ from components.charts import backtest_chart
 
 
 def render_backtest(
-    holdings,
-    ops_enriched,
+    # holdings,
+    # ops_enriched,
+    current,
     closes,
     bench_series=None,
     benchmark_name="",):
@@ -43,9 +44,8 @@ def render_backtest(
         target_weights,
         initial_value,
         initial_date,
-    ) = backtest_initial_portfolio(
-        holdings=holdings,
-        ops_enriched=ops_enriched,
+    ) =backtest_portfolio(
+        current=current,
         closes=closes,
         rebalance_frequency=rebalance_frequency,
     )
