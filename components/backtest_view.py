@@ -217,22 +217,24 @@ def render_backtest(
             t("backtest_total_return"),
             f"{metrics['portfolio_total_return']:.2%}",
             delta=(
+                f"{t('backtest_delta_vs_benchmark')} "
                 f"{metrics['portfolio_total_return'] - metrics['benchmark_total_return']:+.2%}"
                 if pd.notna(metrics["benchmark_total_return"])
                 else None
             ),
         )
-    
+        
         p2.metric(
             t("backtest_cagr"),
             f"{metrics['portfolio_cagr']:.2%}",
             delta=(
+                f"{t('backtest_delta_vs_benchmark')} "
                 f"{metrics['portfolio_cagr'] - metrics['benchmark_cagr']:+.2%}"
                 if pd.notna(metrics["benchmark_cagr"])
                 else None
             ),
         )
-    
+            
         p3.metric(
             t("backtest_volatility"),
             f"{metrics['portfolio_volatility']:.2%}",
