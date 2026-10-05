@@ -328,6 +328,7 @@ backtest_benchmark_max_drawdown = "Max Drawdown benchmark"
 backtest_active_return = "Active Return"
 backtest_tracking_error = "Tracking Error"
 backtest_information_ratio = "Information Ratio"
+backtest_delta_vs_benchmark = "Δ vs benchmark"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -741,6 +742,7 @@ backtest_benchmark_max_drawdown = "Benchmark Max Drawdown"
 backtest_active_return = "Active Return"
 backtest_tracking_error = "Tracking Error"
 backtest_information_ratio = "Information Ratio"
+backtest_delta_vs_benchmark = "Δ vs benchmark"
 
 # ============================================================
 # MONTE CARLO
