@@ -143,6 +143,25 @@ def render_backtest(
         )
         
     # ========================================================
+    # DEBUG benchmark
+    # ========================================================
+    
+    if bench_series is not None:
+        st.write(
+            "DEBUG benchmark:",
+            benchmark_name,
+            "| Prima data:",
+            bench_series.first_valid_index(),
+            "| Ultima data:",
+            bench_series.last_valid_index(),
+            "| Osservazioni:",
+            bench_series.notna().sum(),
+        )
+    else:
+        st.write(
+            "DEBUG benchmark: bench_series è None"
+        ) 
+    # ========================================================
     # Preparazione benchmark
     # ========================================================
 
@@ -233,20 +252,4 @@ def render_backtest(
     # Lo teniamo utile per eventuali sviluppi successivi.
     # ========================================================
 
-    # debug
-    st.write("Pesi target:")
-    st.dataframe(
-        target_weights.rename("Peso")
-    )
-    
-    st.write("Ribilanciamenti:")
-    st.dataframe(
-        backtest.loc[
-            backtest["Ribilanciamento"],
-            [
-                "Valore portafoglio",
-                "Data teorica ribilanciamento",
-            ],
-        ]
-    )
     return backtest
