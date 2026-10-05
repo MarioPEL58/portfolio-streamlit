@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-from services.backtest import (backtest_portfolio, build_backtest_benchmark,)
+from services.backtest import (backtest_portfolio, build_backtest_benchmark, calculate_backtest_metrics,)
 from utils.i18n import t
 
 # Adatta questo import al modulo in cui hai inserito backtest_chart()
@@ -155,7 +155,12 @@ def render_backtest(
             backtest_index=backtest.index,
             initial_value=initial_value,
         )
-    
+        
+    metrics = calculate_backtest_metrics(
+        backtest=backtest,
+        benchmark=backtest_benchmark,
+    )
+
     # ========================================================
     # Grafico Backtest vs Benchmark
     # ========================================================
