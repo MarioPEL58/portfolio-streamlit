@@ -12,6 +12,8 @@ from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
 from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, pl_treemap, sharpe_gauge
 from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare, create_tail_risk_figure
+from components.chart_comparison_metrics import (render_chart_comparison_metrics,)
+from components.backtest_view import render_backtest
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
@@ -356,6 +358,7 @@ sortino = compute_sortino_ratio(flow_adjusted_returns, risk_free_rate=rf_daily)
 # Benchmark
 # =========================
 bench_norm = None
+benchmark_prices = None
 
 # =========================
 # ✅ Benchmark flow-adjusted
@@ -371,6 +374,9 @@ if show_benchmark and benchmark.strip():
 
     if not bench_df.empty and benchmark.strip() in bench_df.columns:
         b = bench_df[benchmark.strip()].dropna()
+        
+        # Prezzi grezzi benchmark utilizzati dal Backtest
+        benchmark_prices = b.copy()
         
         #OLD investing all capital on the first day
         # if not b.empty and b.iloc[0] != 0:
@@ -511,12 +517,13 @@ st.caption(t("performance_total_desc"))
 
 st.subheader(t("charts_title"))
 
-tab_perf, tab_daily, tab_unrealized, tab_heatmap, tab_analysis, tab_monte_carlo = st.tabs([
+tab_perf, tab_daily, tab_unrealized, tab_heatmap, tab_analysis, tab_backtest, tab_monte_carlo = st.tabs([
     t("tab_perf"),
     t("tab_daily"),
     t("tab_unrealized"),
     t("tab_heatmap"),
     t("tab_analysis"),
+    t("tab_backtest"),
     t("tab_monte_carlo")
 ])
 
@@ -559,6 +566,20 @@ with tab_perf:
     chart_key = (f"portfolio_chart_"f"{benchmark.strip()}_"f"{show_benchmark}")
     
     st.plotly_chart(fig, width="stretch", theme=None, key=chart_key)
+    
+    # ========================================================
+    # Metriche confronto portafoglio / benchmark
+    # ========================================================
+    render_chart_comparison_metrics(
+        portfolio_returns=flow_adjusted_returns,
+        benchmark_returns=(
+            bench_returns
+            if show_benchmark
+            else None
+        ),
+        benchmark_name=benchmark,
+        start_date=min_date,
+    )
 
 with tab_daily:
     st.subheader(t("daily_title"))
@@ -827,6 +848,15 @@ with tab_analysis:
     )
     
     render_best_worst_days(flow_adjusted_returns)
+    
+with tab_backtest:
+
+    render_backtest(
+        current=current,
+        closes=closes,
+        benchmark_prices=benchmark_prices,
+        benchmark_name=benchmark,
+    )
     
 with tab_monte_carlo:
     render_monte_carlo(
