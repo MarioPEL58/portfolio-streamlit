@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 
 from services.backtest import (backtest_portfolio, build_backtest_benchmark, calculate_backtest_metrics,)
+import numpy as np
 from utils.i18n import t
 
 # Adatta questo import al modulo in cui hai inserito backtest_chart()
@@ -34,6 +35,103 @@ def render_backtest(
     )
 
     # ========================================================
+    # Allocazione personalizzata
+    # ========================================================
+    
+    target_weights_override = None
+    
+    current_positive = current[
+        current["Valore"] > 0
+    ].copy()
+    
+    current_values = (
+        current_positive
+        .groupby("Ticker")["Valore"]
+        .sum()
+    )
+    
+    current_total = float(
+        current_values.sum()
+    )
+    
+    current_weights = (
+        current_values
+        / current_total
+    )
+    
+    # Personalizzazione disponibile solo con pochi ticker
+    if 1 < len(current_weights) <= 5:
+    
+        st.subheader(
+            t("backtest_custom_allocation")
+        )
+    
+        st.caption(
+            t("backtest_custom_allocation_help")
+        )
+    
+        weight_columns = st.columns(
+            len(current_weights)
+        )
+    
+        custom_weights = {}
+    
+        for column, (ticker, weight) in zip(
+            weight_columns,
+            current_weights.items(),
+        ):
+    
+            with column:
+    
+                weight_pct = st.number_input(
+                    ticker,
+                    min_value=0.0,
+                    max_value=100.0,
+                    value=float(weight * 100.0),
+                    step=1.0,
+                    format="%.2f",
+                    key=f"backtest_weight_{ticker}",
+                )
+    
+                custom_weights[ticker] = (
+                    weight_pct / 100.0
+                )
+    
+        total_weight = sum(
+            custom_weights.values()
+        )
+    
+        total_pct = total_weight * 100.0
+    
+        st.metric(
+            t("backtest_weight_total"),
+            f"{total_pct:.2f}%",
+        )
+    
+        weights_valid = np.isclose(
+            total_weight,
+            1.0,
+            atol=1e-6,
+        )
+    
+        if weights_valid:
+    
+            st.success(
+                t("backtest_weight_valid")
+            )
+    
+            target_weights_override = (
+                custom_weights
+            )
+    
+        else:
+    
+            st.error(
+                t("backtest_weight_invalid")
+            )
+    
+            return None
+    # ========================================================
     # Calcolo backtest
     # ========================================================
 
@@ -46,6 +144,7 @@ def render_backtest(
         current=current,
         closes=closes,
         rebalance_frequency=rebalance_frequency,
+        target_weights_override=target_weights_override,
     )
 
     if backtest is None or backtest.empty:
