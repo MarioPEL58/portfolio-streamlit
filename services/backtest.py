@@ -8,6 +8,7 @@ def backtest_portfolio(
     ticker_col: str = "Ticker",
     value_col: str = "Valore",
     initial_value=None,
+    target_weights_override=None,
 ):
     """
     Backtest della composizione ATTUALE del portafoglio.
@@ -237,17 +238,97 @@ def backtest_portfolio(
             "Valore totale corrente non valido."
         )
 
-    target_weights = (
-        current_values
-        / total_current_value
-    )
+    # target_weights = (
+    #     current_values
+    #     / total_current_value
+    # )
 
-    # Normalizzazione di sicurezza
+    # # Normalizzazione di sicurezza
+    # target_weights = (
+    #     target_weights
+    #     / target_weights.sum()
+    # )
+
+    # ========================================================
+    # Pesi target
+    # ========================================================
+    
+    if target_weights_override is None:
+    
+        # Pesi correnti del portafoglio
+        target_weights = (
+            current_values
+            / total_current_value
+        )
+    
+    else:
+    
+        # Pesi personalizzati ricevuti dalla UI
+        target_weights = pd.Series(
+            target_weights_override,
+            dtype=float,
+        )
+    
+        # Devono essere presenti esattamente gli stessi ticker
+        missing_weights = [
+            ticker
+            for ticker in tickers
+            if ticker not in target_weights.index
+        ]
+    
+        extra_weights = [
+            ticker
+            for ticker in target_weights.index
+            if ticker not in tickers
+        ]
+    
+        if missing_weights:
+            raise ValueError(
+                "Pesi mancanti per: "
+                + ", ".join(missing_weights)
+            )
+    
+        if extra_weights:
+            raise ValueError(
+                "Pesi presenti per ticker non inclusi: "
+                + ", ".join(extra_weights)
+            )
+    
+        # Stesso ordine dei ticker del portafoglio
+        target_weights = target_weights.reindex(
+            tickers
+        )
+    
+        if target_weights.isna().any():
+            raise ValueError(
+                "I pesi personalizzati contengono valori non validi."
+            )
+    
+        if (target_weights < 0).any():
+            raise ValueError(
+                "I pesi personalizzati non possono essere negativi."
+            )
+    
+        total_weight = float(
+            target_weights.sum()
+        )
+    
+        # La UI passerà pesi decimali:
+        # 40% -> 0.40
+        if not np.isclose(
+            total_weight,
+            1.0,
+            atol=1e-6,
+        ):
+            raise ValueError(
+                "La somma dei pesi deve essere pari al 100%."
+            )
+    
+    # Normalizzazione finale di sicurezza
     target_weights = (
         target_weights
         / target_weights.sum()
     )
-
     # ========================================================
     # Capitale nozionale iniziale
     #
