@@ -329,6 +329,13 @@ backtest_active_return = "Active Return"
 backtest_tracking_error = "Tracking Error"
 backtest_information_ratio = "Information Ratio"
 backtest_delta_vs_benchmark = "Δ vs benchmark"
+
+backtest_custom_allocation = "Allocazione personalizzata"
+backtest_custom_allocation_help = "Modifica i pesi del backtest. La somma deve essere pari al 100%."
+backtest_weight_total = "Totale pesi"
+backtest_weight_valid = "Allocazione valida"
+backtest_weight_invalid = "La somma dei pesi deve essere pari al 100%."
+backtest_current_allocation = "Usa allocazione attuale"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -744,6 +751,12 @@ backtest_tracking_error = "Tracking Error"
 backtest_information_ratio = "Information Ratio"
 backtest_delta_vs_benchmark = "Δ vs benchmark"
 
+backtest_custom_allocation = "Custom allocation"
+backtest_custom_allocation_help = "Change the backtest weights. The weights must add up to 100%."
+backtest_weight_total = "Total weights"
+backtest_weight_valid = "Valid allocation"
+backtest_weight_invalid = "The weights must add up to 100%."
+backtest_current_allocation = "Use current allocation"
 # ============================================================
 # MONTE CARLO
 # ============================================================
