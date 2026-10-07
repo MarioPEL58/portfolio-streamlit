@@ -255,8 +255,8 @@ def render_filters(ops, dividends):
     if not st.session_state.selected_operations:
         
         st.warning(t("filter_at_least_one_operation"))
-         
         st.stop()
+        
     # =========================
     # FILTER OPS
     # =========================
