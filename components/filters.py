@@ -138,17 +138,9 @@ def render_filters(ops, dividends):
     
     with col3:
     
-        selected_count = len(
-            st.session_state.selected_operations
-        )
-    
-        expander_label = (
-            f"{t('filter_operations')} "
-            f"({selected_count}/{len(all_operations)})"
-        )
     
         with st.expander(
-            expander_label,
+            t("filter_operations"),
             expanded=False,
         ):
     
