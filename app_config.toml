@@ -345,6 +345,9 @@ backtest_price_available_from = "Prezzi disponibili da"
 backtest_available_from = "Backtest disponibile da"
 backtest_limiting_ticker = "Ticker limitante"
 backtest_limiting_tickers = "Ticker limitanti"
+
+backtest_reset_weights = "Ripristina pesi attuali"
+backtest_custom_weights_active = "Allocazione personalizzata attiva"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -775,6 +778,9 @@ backtest_price_available_from = "Prices available from"
 backtest_available_from = "Backtest available from"
 backtest_limiting_ticker = "Limiting ticker"
 backtest_limiting_tickers = "Limiting tickers"
+
+backtest_reset_weights = "Reset current weights"
+backtest_custom_weights_active = "Custom allocation active"
 # ============================================================
 # MONTE CARLO
 # ============================================================
