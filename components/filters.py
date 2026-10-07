@@ -140,7 +140,8 @@ def render_filters(ops, dividends):
     
         st.markdown(f"**{t('filter_operations')}**")
          
-        with st.expander(" ",expanded=False,):
+        with st.expander(" ",expanded=False,
+        ):
     
             # -------------------------------------------------
             # Seleziona / Deseleziona tutto
