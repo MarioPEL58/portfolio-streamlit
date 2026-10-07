@@ -137,6 +137,8 @@ def render_backtest(
         if st.button(
             t("backtest_reset_weights"),
             key="backtest_reset_weights",
+            type="secondary",
+            icon=":material/restart_alt:",
         ):
         
             for ticker, weight in current_weights.items():
