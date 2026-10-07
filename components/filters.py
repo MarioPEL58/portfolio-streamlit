@@ -127,7 +127,9 @@ def render_filters(ops, dividends):
             t("filter_operations"),
             options=all_operations,
             #  default=st.session_state.selected_operations,
-            key="selected_operations"
+            key="selected_operations",
+            select_all=True,
+            width="stretch",
         )
         
     # =========================
