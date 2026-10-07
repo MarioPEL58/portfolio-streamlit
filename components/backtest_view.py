@@ -286,73 +286,7 @@ def render_backtest(
             f"€ {initial_value:,.2f}",
         )
 
-    # ========================================================
-    # Allocazione iniziale
-    # ========================================================
-    
-    st.subheader(
-        t("backtest_initial_allocation")
-    )
-    
-    # --------------------------------------------------------
-    # Portafoglio semplice
-    # --------------------------------------------------------
-    
-    if len(target_weights) <= 5:
-    
-        weight_columns = st.columns(
-            len(target_weights)
-        )
-    
-        for column, (ticker, weight) in zip(
-            weight_columns,
-            target_weights.items(),
-        ):
-            with column:
-                st.metric(
-                    ticker,
-                    f"{weight:.2%}",
-                )
-    # --------------------------------------------------------
-    # Portafoglio complesso
-    # --------------------------------------------------------
-    
-    else:
-    
-        weights_df = (
-            target_weights
-            .rename("Peso")
-            .sort_values(ascending=False)
-            .reset_index()
-        )
-    
-        weights_df.columns = [
-            t("ticker_label"),
-            t("backtest_weight"),
-        ]
-    
-        st.dataframe(
-            weights_df,
-            hide_index=True,
-            width="stretch",
-            column_config={
-                t("ticker_label"):
-                    st.column_config.TextColumn(
-                        t("ticker_label"),
-                        width="medium",
-                    ),
-    
-                t("backtest_weight"):
-                    st.column_config.NumberColumn(
-                        t("backtest_weight"),
-                        format="percent",
-                        width="small",
-                    ),
-            },
-        )
 
-    if backtest is None or backtest.empty:
-        return None
     # ========================================================
     # Benchmark dedicato al backtest
     # ========================================================
