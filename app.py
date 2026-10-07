@@ -17,7 +17,7 @@ from components.backtest_view import render_backtest
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
-from services.market_data import download_close_prices, download_last_intraday_timestamp, report_late_tickers, fill_late_tickers_with_purchase_price
+from services.market_data import download_close_prices, download_last_intraday_timestamp, report_late_tickers, fill_late_tickers_with_purchase_price, prepare_backtest_closes_eur
 from services.portfolio import build_portfolio
 from services.portfolio_metrics import compute_portfolio_xirr, compute_sharpe_ratio
 from services.portfolio_metrics import compute_flow_adjusted_returns, compute_sharpe_from_returns, compute_sortino_ratio, compute_beta
@@ -850,10 +850,15 @@ with tab_analysis:
     render_best_worst_days(flow_adjusted_returns)
     
 with tab_backtest:
-
+    
+    closes_backtest_eur = prepare_backtest_closes_eur(
+        closes=closes,
+        ops=ops_filtered,
+    )
+    
     render_backtest(
         current=current,
-        closes=closes,
+        closes=closes_backtest_eur,
         benchmark_prices=benchmark_prices,
         benchmark_name=benchmark,
     )
