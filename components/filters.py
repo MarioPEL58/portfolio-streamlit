@@ -107,11 +107,29 @@ def render_filters(ops, dividends):
     col1, col2, col3 = st.columns(3)
 
     with col1:
+        st.markdown(
+            f"**{t('filter_brokers')}**"
+        )
+    
+    with col2:
+        st.markdown(
+            f"**{t('filter_types')}**"
+        )
+    
+    with col3:
+        st.markdown(
+            f"**{t('filter_operations')}**"
+        )
+        
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
         st.multiselect(
             t("filter_brokers"),
             options=all_brokers,
             # default=st.session_state.selected_brokers,
-            key="selected_brokers"
+            key="selected_brokers",
+            label_visibility="collapsed",
         )
 
     with col2:
@@ -119,7 +137,8 @@ def render_filters(ops, dividends):
             t("filter_types"),
             options=all_types,
             # default=st.session_state.selected_types,
-            key="selected_types"
+            key="selected_types",
+            label_visibility="collapsed",
         )
 
     # with col3:
@@ -137,8 +156,6 @@ def render_filters(ops, dividends):
     # =========================================================
     
     with col3:
-    
-        st.markdown(f"**{t('filter_operations')}**")
         
         with st.expander(" ",expanded=False,
         ):
