@@ -139,7 +139,7 @@ def render_filters(ops, dividends):
     with col3:
     
         st.markdown(f"**{t('filter_operations')}**")
-         
+        
         with st.expander(" ",expanded=False,
         ):
     
