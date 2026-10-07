@@ -134,7 +134,18 @@ def render_backtest(
         st.caption(
             t("backtest_custom_allocation_help")
         )
-    
+        if st.button(
+            t("backtest_reset_weights"),
+            key="backtest_reset_weights",
+        ):
+        
+            for ticker, weight in current_weights.items():
+        
+                st.session_state[
+                    f"backtest_weight_{ticker}"
+                ] = float(weight * 100.0)
+        
+            st.rerun()
         weight_columns = st.columns(
             len(current_weights)
         )
