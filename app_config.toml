@@ -339,6 +339,8 @@ backtest_current_allocation = "Usa allocazione attuale"
 
 backtest_price_available_from = "Prezzi disponibili da"
 backtest_available_from = "Backtest disponibile da"
+backtest_limiting_ticker = "Ticker limitante"
+backtest_limiting_tickers = "Ticker limitanti"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -763,6 +765,8 @@ backtest_current_allocation = "Use current allocation"
 
 backtest_price_available_from = "Prices available from"
 backtest_available_from = "Backtest available from"
+backtest_limiting_ticker = "Limiting ticker"
+backtest_limiting_tickers = "Limiting tickers"
 # ============================================================
 # MONTE CARLO
 # ============================================================
