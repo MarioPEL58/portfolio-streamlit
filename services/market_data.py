@@ -222,6 +222,46 @@ def convert_closes_to_eur(closes: pd.DataFrame, ops: pd.DataFrame, start_date: p
 
     return closes_eur, fx_rates
     
+def prepare_backtest_closes_eur(
+    closes: pd.DataFrame,
+    ops: pd.DataFrame,
+) -> pd.DataFrame:
+
+    # ========================================================
+    # Controlli
+    # ========================================================
+
+    if closes is None or closes.empty:
+        return pd.DataFrame()
+
+    if ops is None or ops.empty:
+        return closes.copy()
+
+    # ========================================================
+    # Periodo disponibile nei prezzi
+    # ========================================================
+
+    start_date = pd.to_datetime(
+        closes.index.min()
+    )
+
+    end_date = pd.to_datetime(
+        closes.index.max()
+    )
+
+    # ========================================================
+    # Conversione prezzi storici in EUR
+    # ========================================================
+
+    closes_eur, _ = convert_closes_to_eur(
+        closes=closes,
+        ops=ops,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+    return closes_eur
+    
 @st.cache_data(show_spinner=False, ttl=120)
 def download_last_intraday_timestamp(tickers: list[str]):
     tickers = [t for t in tickers if isinstance(t, str) and t.strip()]
