@@ -142,6 +142,7 @@ filter_active_only = "Solo posizioni attive"
 filter_select_all = "Seleziona tutto"
 filter_deselect_all = "Deseleziona tutto"
 filter_selected_count = "Selezionate"
+filter_at_least_one_operation = "Seleziona almeno un'operazione per continuare."
 # FEEDBACK FILTRI
 active_filters = "Filtri attivi"
 
@@ -571,6 +572,7 @@ filter_active_only = "Active positions only"
 filter_select_all = "Select all"
 filter_deselect_all = "Deselect all"
 filter_selected_count = "Selected"
+filter_at_least_one_operation = "Select at least one operation to continue."
 # FEEDBACK FILTRI
 active_filters = "Active filters"
 
