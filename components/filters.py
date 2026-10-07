@@ -122,16 +122,124 @@ def render_filters(ops, dividends):
             key="selected_types"
         )
 
+    # with col3:
+    #     st.multiselect(
+    #         t("filter_operations"),
+    #         options=all_operations,
+    #         #  default=st.session_state.selected_operations,
+    #         key="selected_operations",
+    #         select_all=True,
+    #         width="stretch",
+    #     )
+
+    # =========================================================
+    # Filtro operazioni con checkbox
+    # =========================================================
+    
     with col3:
-        st.multiselect(
-            t("filter_operations"),
-            options=all_operations,
-            #  default=st.session_state.selected_operations,
-            key="selected_operations",
-            select_all=True,
-            width="stretch",
+    
+        selected_count = len(
+            st.session_state.selected_operations
         )
-        
+    
+        expander_label = (
+            f"{t('filter_operations')} "
+            f"({selected_count}/{len(all_operations)})"
+        )
+    
+        with st.expander(
+            expander_label,
+            expanded=False,
+        ):
+    
+            # -------------------------------------------------
+            # Seleziona / Deseleziona tutto
+            # -------------------------------------------------
+    
+            button_col1, button_col2 = st.columns(2)
+    
+            select_all_clicked = button_col1.button(
+                t("filter_select_all"),
+                key="filter_operations_select_all",
+                width="stretch",
+            )
+    
+            deselect_all_clicked = button_col2.button(
+                t("filter_deselect_all"),
+                key="filter_operations_deselect_all",
+                width="stretch",
+            )
+    
+            if select_all_clicked:
+    
+                st.session_state.selected_operations = (
+                    all_operations.copy()
+                )
+    
+                for i, operation in enumerate(
+                    all_operations
+                ):
+                    st.session_state[
+                        f"operation_checkbox_{i}"
+                    ] = True
+    
+                st.rerun()
+    
+            if deselect_all_clicked:
+    
+                st.session_state.selected_operations = []
+    
+                for i, operation in enumerate(
+                    all_operations
+                ):
+                    st.session_state[
+                        f"operation_checkbox_{i}"
+                    ] = False
+    
+                st.rerun()
+    
+            # -------------------------------------------------
+            # Checkbox operazioni
+            # -------------------------------------------------
+    
+            selected_operations = []
+    
+            current_selection = set(
+                st.session_state.selected_operations
+            )
+    
+            for i, operation in enumerate(
+                all_operations
+            ):
+    
+                checkbox_key = (
+                    f"operation_checkbox_{i}"
+                )
+    
+                is_selected = (
+                    operation in current_selection
+                )
+    
+                # Inizializzazione solo se la checkbox
+                # non esiste ancora
+                if checkbox_key not in st.session_state:
+                    st.session_state[
+                        checkbox_key
+                    ] = is_selected
+    
+                checked = st.checkbox(
+                    operation,
+                    key=checkbox_key,
+                )
+    
+                if checked:
+                    selected_operations.append(
+                        operation
+                    )
+    
+            st.session_state.selected_operations = (
+                selected_operations
+            )    
     # =========================
     # FILTER OPS
     # =========================
@@ -151,12 +259,12 @@ def render_filters(ops, dividends):
             )
         ]
 
-    if st.session_state.selected_operations:
-        ops_filtered = ops_filtered[
-            ops_filtered["OperationLabel"].isin(
-                st.session_state.selected_operations
-            )
-        ]
+    # if st.session_state.selected_operations:
+    ops_filtered = ops_filtered[
+        ops_filtered["OperationLabel"].isin(
+            st.session_state.selected_operations
+        )
+    ]
     if st.session_state.only_active:
         
         active_ids = (
