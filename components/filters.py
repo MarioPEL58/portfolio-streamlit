@@ -151,12 +151,12 @@ def render_filters(ops, dividends):
             )
         ]
 
-    if st.session_state.selected_operations:
-        ops_filtered = ops_filtered[
-            ops_filtered["OperationLabel"].isin(
-                st.session_state.selected_operations
-            )
-        ]
+    # if st.session_state.selected_operations:
+    ops_filtered = ops_filtered[
+        ops_filtered["OperationLabel"].isin(
+            st.session_state.selected_operations
+        )
+    ]
     if st.session_state.only_active:
         
         active_ids = (
