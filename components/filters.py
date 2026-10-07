@@ -247,7 +247,18 @@ def render_filters(ops, dividends):
     
             st.session_state.selected_operations = (
                 selected_operations
-            )    
+            )  
+    # =========================================================
+    # Protezione: almeno una operazione selezionata
+    # =========================================================
+     
+    if not st.session_state.selected_operations:
+     
+    st.warning(
+    t("filter_at_least_one_operation")
+    )
+     
+    st.stop()
     # =========================
     # FILTER OPS
     # =========================
