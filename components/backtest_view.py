@@ -58,6 +58,39 @@ def render_backtest(
         current_values
         / current_total
     )
+        
+    # ========================================================
+    # Prima data prezzi disponibile per ticker
+    # ========================================================
+    
+    first_price_dates = {}
+    
+    for ticker in current_weights.index:
+    
+        first_date = None
+    
+        if ticker in closes.columns:
+    
+            ticker_prices = pd.to_numeric(
+                closes[ticker],
+                errors="coerce",
+            )
+    
+            ticker_prices = ticker_prices.replace(
+                [np.inf, -np.inf],
+                np.nan,
+            )
+    
+            ticker_prices = ticker_prices[
+                ticker_prices > 0
+            ]
+    
+            if not ticker_prices.empty:
+                first_date = (
+                    ticker_prices.first_valid_index()
+                )
+    
+        first_price_dates[ticker] = first_date
     
     # Personalizzazione disponibile solo con pochi ticker
     if 1 < len(current_weights) <= 5:
