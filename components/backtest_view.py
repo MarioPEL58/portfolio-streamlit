@@ -110,12 +110,12 @@ def render_backtest(
         custom_weights = {}
     
         for column, (ticker, weight) in zip(
-            weight_columns,
+            columns,
             current_weights.items(),
         ):
-    
+        
             with column:
-    
+        
                 weight_pct = st.number_input(
                     ticker,
                     min_value=0.0,
@@ -125,10 +125,31 @@ def render_backtest(
                     format="%.2f",
                     key=f"backtest_weight_{ticker}",
                 )
-    
+        
                 custom_weights[ticker] = (
                     weight_pct / 100.0
                 )
+        
+                first_date = first_price_dates.get(
+                    ticker
+                )
+        
+                if first_date is not None:
+        
+                    first_date = pd.to_datetime(
+                        first_date
+                    )
+        
+                    st.caption(
+                        f"{t('backtest_price_available_from')}: "
+                        f"{first_date:%d/%m/%Y}"
+                    )
+        
+                else:
+        
+                    st.caption(
+                        f"{t('backtest_price_available_from')}: —"
+                    )
     
         total_weight = sum(
             custom_weights.values()
