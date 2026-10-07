@@ -35,6 +35,8 @@ def render_filters(ops, dividends):
         ops["ID"].astype(str).str.replace(".0", "", regex=False)
         + " - "
         + ops["Nome"].fillna("").astype(str).str.strip()
+        + " - "
+        + ops["Ticker"].fillna("").astype(str).str.strip()
     )
     
     ops_for_operations = ops.copy()
