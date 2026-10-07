@@ -110,7 +110,7 @@ def render_backtest(
         custom_weights = {}
     
         for column, (ticker, weight) in zip(
-            columns,
+            weight_columns,
             current_weights.items(),
         ):
         
@@ -185,6 +185,64 @@ def render_backtest(
             )
     
             return None
+    else:
+
+        # ====================================================
+        # Più di 5 ticker:
+        # allocazione non modificabile, ma mostriamo
+        # peso e prima data disponibile
+        # ====================================================
+
+        allocation_rows = []
+
+        for ticker, weight in current_weights.items():
+
+            first_date = first_price_dates.get(
+                ticker
+            )
+
+            allocation_rows.append(
+                {
+                    "Ticker": ticker,
+                    t("backtest_weight"): weight,
+                    t("backtest_price_available_from"): (
+                        pd.to_datetime(first_date)
+                        if first_date is not None
+                        else pd.NaT
+                    ),
+                }
+            )
+
+        allocation_df = pd.DataFrame(
+            allocation_rows
+        )
+
+        st.dataframe(
+            allocation_df,
+            hide_index=True,
+            width="stretch",
+            column_config={
+                "Ticker":
+                    st.column_config.TextColumn(
+                        "Ticker",
+                        width="medium",
+                    ),
+
+                t("backtest_weight"):
+                    st.column_config.NumberColumn(
+                        t("backtest_weight"),
+                        format="percent",
+                        width="small",
+                    ),
+
+                t("backtest_price_available_from"):
+                    st.column_config.DateColumn(
+                        t("backtest_price_available_from"),
+                        format="DD/MM/YYYY",
+                        width="medium",
+                    ),
+            },
+        )
     # ========================================================
     # Calcolo backtest
     # ========================================================
