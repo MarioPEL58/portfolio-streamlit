@@ -98,7 +98,32 @@ def render_backtest(
                 )
     
         first_price_dates[ticker] = first_date
+        
+    # ========================================================
+    # Data minima comune e ticker limitanti
+    # ========================================================
     
+    valid_price_dates = {
+        ticker: pd.to_datetime(date)
+        for ticker, date in first_price_dates.items()
+        if date is not None
+    }
+    
+    backtest_available_from = None
+    limiting_tickers = []
+    
+    if valid_price_dates:
+    
+        backtest_available_from = max(
+            valid_price_dates.values()
+        )
+    
+        limiting_tickers = [
+            ticker
+            for ticker, date in valid_price_dates.items()
+            if date == backtest_available_from
+        ]
+        
     # Personalizzazione disponibile solo con pochi ticker
     if 1 < len(current_weights) <= 5:
     
@@ -250,6 +275,30 @@ def render_backtest(
                     ),
             },
         )
+    # ========================================================
+    # Disponibilità storica del backtest
+    # ========================================================
+    
+    if backtest_available_from is not None:
+    
+        st.info(
+            f"**{t('backtest_available_from')}:** "
+            f"{backtest_available_from:%d/%m/%Y}"
+        )
+    
+        if len(limiting_tickers) == 1:
+    
+            st.warning(
+                f"**{t('backtest_limiting_ticker')}:** "
+                f"{limiting_tickers[0]}"
+            )
+    
+        elif len(limiting_tickers) > 1:
+    
+            st.warning(
+                f"**{t('backtest_limiting_tickers')}:** "
+                f"{', '.join(limiting_tickers)}"
+            )
     # ========================================================
     # Calcolo backtest
     # ========================================================
