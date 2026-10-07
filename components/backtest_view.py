@@ -197,7 +197,14 @@ def render_backtest(
         total_weight = sum(
             custom_weights.values()
         )
-    
+        weights_modified = any(
+            not np.isclose(
+                custom_weights[ticker],
+                current_weights[ticker],
+                atol=1e-6,
+            )
+            for ticker in current_weights.index
+        )
         total_pct = total_weight * 100.0
     
         st.metric(
@@ -212,11 +219,19 @@ def render_backtest(
         )
     
         if weights_valid:
-    
-            st.success(
-                t("backtest_weight_valid")
-            )
-    
+        
+            if weights_modified:
+        
+                st.info(
+                    t("backtest_custom_weights_active")
+                )
+        
+            else:
+        
+                st.success(
+                    t("backtest_weight_valid")
+                )
+        
             target_weights_override = (
                 custom_weights
             )
