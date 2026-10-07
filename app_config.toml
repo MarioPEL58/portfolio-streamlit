@@ -336,6 +336,9 @@ backtest_weight_total = "Totale pesi"
 backtest_weight_valid = "Allocazione valida"
 backtest_weight_invalid = "La somma dei pesi deve essere pari al 100%."
 backtest_current_allocation = "Usa allocazione attuale"
+
+backtest_price_available_from = "Prezzi disponibili da"
+backtest_available_from = "Backtest disponibile da"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -757,6 +760,9 @@ backtest_weight_total = "Total weights"
 backtest_weight_valid = "Valid allocation"
 backtest_weight_invalid = "The weights must add up to 100%."
 backtest_current_allocation = "Use current allocation"
+
+backtest_price_available_from = "Prices available from"
+backtest_available_from = "Backtest available from"
 # ============================================================
 # MONTE CARLO
 # ============================================================
