@@ -28,6 +28,9 @@ def render_efficient_frontier(
     if closes is None or closes.empty:
         return None
         
+    if "efficient_frontier_result" not in st.session_state:
+        st.session_state["efficient_frontier_result"] = None
+    
     # ========================================================
     # Ticker Name
     # ========================================================
@@ -99,17 +102,44 @@ def render_efficient_frontier(
     # ========================================================
     # Calcolo Frontiera Efficiente
     # ========================================================
-    if not run_simulation:
-        return None
+    # if not run_simulation:
+    #     return None
     
-    result = calculate_efficient_frontier(
-        closes=closes,
-        current_weights=current_weights,
-        num_portfolios=num_portfolios,
-        use_risk_free=use_risk_free,
-        risk_free_rate=risk_free_rate,
-    )
+    # result = calculate_efficient_frontier(
+    #     closes=closes,
+    #     current_weights=current_weights,
+    #     num_portfolios=num_portfolios,
+    #     use_risk_free=use_risk_free,
+    #     risk_free_rate=risk_free_rate,
+    # )
 
+    # ========================================================
+    # Calcolo simulazione
+    # ========================================================
+    
+    if run_simulation:
+    
+        result = calculate_efficient_frontier(
+            closes=closes,
+            current_weights=current_weights,
+            num_portfolios=num_portfolios,
+            use_risk_free=use_risk_free,
+            risk_free_rate=risk_free_rate,
+        )
+    
+        st.session_state[
+            "efficient_frontier_result"
+        ] = result
+    
+    
+    # ========================================================
+    # Recupero ultima simulazione
+    # ========================================================
+    
+    result = st.session_state.get(
+        "efficient_frontier_result"
+    )
+    
     if result is None:
         st.warning(
             t("efficient_frontier_no_data")
