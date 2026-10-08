@@ -169,7 +169,7 @@ def render_efficient_frontier(
                 "%{y:.2f}%"
                 "<br>"
                 f"{t('efficient_frontier_sharpe')}: "
-                "%{customdata.2f}"
+                "%{customdata[0]:.2f}"
                 "<extra></extra>"
             ),
         )
@@ -213,7 +213,7 @@ def render_efficient_frontier(
                 "%{y:.2f}%"
                 "<br>"
                 f"{t('efficient_frontier_sharpe')}: "
-                "%{customdata.2f}"
+                "%{customdata[0]:.2f}"
                 "<extra></extra>"
             ),
         )
@@ -257,7 +257,7 @@ def render_efficient_frontier(
                 "%{y:.2f}%"
                 "<br>"
                 f"{t('efficient_frontier_sharpe')}: "
-                "%{customdata.2f}"
+                "%{customdata[0]:.2f}"
                 "<extra></extra>"
             ),
         )
@@ -301,7 +301,7 @@ def render_efficient_frontier(
                 "%{y:.2f}%"
                 "<br>"
                 f"{t('efficient_frontier_sharpe')}: "
-                "%{customdata.2f}"
+                "%{customdata[0]:.2f}"
                 "<extra></extra>"
             ),
         )
