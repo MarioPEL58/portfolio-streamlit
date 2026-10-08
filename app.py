@@ -514,17 +514,22 @@ st.subheader(t("performance_total"))
 render_performance_cards_tot(series) #  contiene anche dividendie e profitto delle posizioni vendute nel frattempo
 st.caption(t("performance_total_desc"))
 
+closes_backtest_eur = prepare_backtest_closes_eur(
+    closes=closes,
+    ops=ops_filtered,
+)
 # Main chart
 
 st.subheader(t("charts_title"))
 
-tab_perf, tab_daily, tab_unrealized, tab_heatmap, tab_analysis, tab_backtest, tab_monte_carlo = st.tabs([
+tab_perf, tab_daily, tab_unrealized, tab_heatmap, tab_analysis, tab_backtest, tab_frontier, tab_monte_carlo = st.tabs([
     t("tab_perf"),
     t("tab_daily"),
     t("tab_unrealized"),
     t("tab_heatmap"),
     t("tab_analysis"),
     t("tab_backtest"),
+    t("tab_efficient_frontier"),
     t("tab_monte_carlo")
 ])
 
@@ -852,10 +857,10 @@ with tab_analysis:
     
 with tab_backtest:
     
-    closes_backtest_eur = prepare_backtest_closes_eur(
-        closes=closes,
-        ops=ops_filtered,
-    )
+    # closes_backtest_eur = prepare_backtest_closes_eur(
+    #     closes=closes,
+    #     ops=ops_filtered,
+    # )
     
     render_backtest(
         current=current,
@@ -863,6 +868,8 @@ with tab_backtest:
         benchmark_prices=benchmark_prices,
         benchmark_name=benchmark,
     )
+
+with tab_frontier:
     
     render_efficient_frontier(
         current=current,
@@ -870,6 +877,7 @@ with tab_backtest:
         use_risk_free=use_risk_free,
         risk_free_rate=rf_annual,
     )
+    
 with tab_monte_carlo:
     render_monte_carlo(
     series=series,
