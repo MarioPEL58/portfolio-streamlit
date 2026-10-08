@@ -58,27 +58,29 @@ def render_efficient_frontier(
     # ========================================================
     # Parametri simulazione
     # ========================================================
-    
-    num_portfolios = st.select_slider(
-        t("efficient_frontier_num_portfolios"),
-        options=[
-            10_000,
-            25_000,
-            50_000,
-            75_000,
-            100_000,
-        ],
-        value=50_000,
-        format_func=lambda x: f"{x:,}",
-        key="efficient_frontier_num_portfolios",
-    )
-    
-    run_simulation = st.form_submit_button(
-        t("efficient_frontier_run"),
-        type="primary",
-        icon=":material/play_arrow:",
-        width="stretch",
-    )
+    with st.form(
+        key="efficient_frontier_form",
+    ):
+        num_portfolios = st.select_slider(
+            t("efficient_frontier_num_portfolios"),
+            options=[
+                10_000,
+                25_000,
+                50_000,
+                75_000,
+                100_000,
+            ],
+            value=50_000,
+            format_func=lambda x: f"{x:,}",
+            key="efficient_frontier_num_portfolios",
+        )
+        
+        run_simulation = st.form_submit_button(
+            t("efficient_frontier_run"),
+            type="primary",
+            icon=":material/play_arrow:",
+            width="stretch",
+        )
     # ========================================================
     # Calcolo Frontiera Efficiente
     # ========================================================
