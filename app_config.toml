@@ -348,6 +348,24 @@ backtest_limiting_tickers = "Ticker limitanti"
 
 backtest_reset_weights = "Ripristina pesi attuali"
 backtest_custom_weights_active = "Allocazione personalizzata attiva"
+
+# ============================================================
+# Efficent Frontier
+# ============================================================
+efficient_frontier_no_data = "Dati insufficienti per calcolare la frontiera efficiente."
+efficient_frontier_period = "Periodo utilizzato"
+efficient_frontier_assets = "Asset"
+efficient_frontier_simulations = "Simulazioni"
+efficient_frontier_risk_free = "Risk free"
+efficient_frontier_risk_free_disabled = "Non utilizzato"
+
+efficient_frontier_current_portfolio = "Portafoglio attuale"
+efficient_frontier_min_volatility = "Minima volatilità"
+efficient_frontier_max_sharpe = "Massimo Sharpe"
+
+efficient_frontier_return = "Rendimento annualizzato"
+efficient_frontier_volatility = "Volatilità annualizzata"
+efficient_frontier_sharpe = "Sharpe Ratio"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -781,6 +799,24 @@ backtest_limiting_tickers = "Limiting tickers"
 
 backtest_reset_weights = "Reset current weights"
 backtest_custom_weights_active = "Custom allocation active"
+
+# ============================================================
+# Efficent Frontier
+# ============================================================
+efficient_frontier_no_data = "Insufficient data to calculate the efficient frontier."
+efficient_frontier_period = "Period used"
+efficient_frontier_assets = "Assets"
+efficient_frontier_simulations = "Simulations"
+efficient_frontier_risk_free = "Risk free"
+efficient_frontier_risk_free_disabled = "Not used"
+
+efficient_frontier_current_portfolio = "Current portfolio"
+efficient_frontier_min_volatility = "Minimum volatility"
+efficient_frontier_max_sharpe = "Maximum Sharpe"
+
+efficient_frontier_return = "Annualized return"
+efficient_frontier_volatility = "Annualized volatility"
+efficient_frontier_sharpe = "Sharpe Ratio"
 # ============================================================
 # MONTE CARLO
 # ============================================================
