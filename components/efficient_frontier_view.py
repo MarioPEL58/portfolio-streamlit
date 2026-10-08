@@ -72,10 +72,19 @@ def render_efficient_frontier(
         format_func=lambda x: f"{x:,}",
         key="efficient_frontier_num_portfolios",
     )
+    
+    run_simulation = st.form_submit_button(
+        t("efficient_frontier_run"),
+        type="primary",
+        icon=":material/play_arrow:",
+        width="stretch",
+    )
     # ========================================================
     # Calcolo Frontiera Efficiente
     # ========================================================
-
+    if not run_simulation:
+        return None
+    
     result = calculate_efficient_frontier(
         closes=closes,
         current_weights=current_weights,
