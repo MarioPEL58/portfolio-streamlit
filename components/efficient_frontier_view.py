@@ -13,6 +13,7 @@ from utils.i18n import t
 def render_efficient_frontier(
     current: pd.DataFrame,
     closes: pd.DataFrame,
+    ops: pd.DataFrame,
     use_risk_free: bool = False,
     risk_free_rate: float = 0.0,
 ):
@@ -25,6 +26,19 @@ def render_efficient_frontier(
 
     if closes is None or closes.empty:
         return None
+        
+    # ========================================================
+    # Ticker Name
+    # ========================================================
+    ticker_names = (
+        ops
+        .dropna(subset=["Ticker"])
+        .sort_values("Data")
+        .groupby("Ticker")["Nome"]
+        .last()
+        .fillna("")
+        .to_dict()
+    )
 
     # ========================================================
     # Portafoglio corrente
@@ -516,7 +530,12 @@ def render_efficient_frontier(
     allocation_df = pd.DataFrame(
         {
             "Ticker": result["assets"],
-    
+            
+            t("efficient_frontier_name"): [
+                ticker_names.get(ticker, "")
+                for ticker in result["assets"]
+            ],
+            
             t("efficient_frontier_current"):
                 current_weights.reindex(
                     result["assets"]
