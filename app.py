@@ -874,6 +874,7 @@ with tab_frontier:
     render_efficient_frontier(
         current=current,
         closes=closes_backtest_eur,
+        ops=ops_filtered,
         use_risk_free=use_risk_free,
         risk_free_rate=rf_annual,
     )
