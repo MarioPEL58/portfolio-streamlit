@@ -116,32 +116,6 @@ def render_efficient_frontier(
         )
         return None
         
-    st.write("### DEBUG FRONTIER")
-    
-    st.write(
-        "Assets:",
-        result["assets"],
-    )
-    
-    st.write(
-        "Current weights:",
-        result["current_portfolio"]["weights"],
-    )
-    
-    st.write(
-        "Current volatility:",
-        result["current_portfolio"]["volatility"],
-    )
-    
-    st.write(
-        "Monte Carlo min volatility:",
-        result["min_volatility"]["volatility"],
-    )
-    
-    st.write(
-        "Min volatility weights:",
-        result["min_volatility"]["weights"],
-    )
     # ========================================================
     # Grafico Frontiera Efficiente
     # ========================================================
