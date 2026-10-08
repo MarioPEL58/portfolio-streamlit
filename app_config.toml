@@ -367,6 +367,10 @@ efficient_frontier_max_sharpe = "Massimo Sharpe"
 efficient_frontier_return = "Rendimento annualizzato"
 efficient_frontier_volatility = "Volatilità annualizzata"
 efficient_frontier_sharpe = "Sharpe Ratio"
+efficient_frontier_short_history = (
+    "Storico molto breve: i risultati della simulazione "
+    "possono essere poco rappresentativi."
+)
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -819,6 +823,10 @@ efficient_frontier_max_sharpe = "Maximum Sharpe"
 efficient_frontier_return = "Annualized return"
 efficient_frontier_volatility = "Annualized volatility"
 efficient_frontier_sharpe = "Sharpe Ratio"
+efficient_frontier_short_history = (
+    "Very short history: simulation results "
+    "may not be representative."
+)
 # ============================================================
 # MONTE CARLO
 # ============================================================
