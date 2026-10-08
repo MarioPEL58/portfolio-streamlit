@@ -373,7 +373,14 @@ efficient_frontier_run = "Avvia simulazione"
 
 efficient_frontier_chart_title = "Simulazione rischio / rendimento"
 efficient_frontier_random_portfolios = "Portafogli simulati"
+
 efficient_frontier_random_portfolio = "Portafoglio simulato"
+efficient_frontier_allocations = "Confronto allocazioni"
+efficient_frontier_current = "Attuale"
+efficient_frontier_min_vol_short = "Min. volatilità"
+efficient_frontier_max_sharpe_short = "Max Sharpe"
+efficient_frontier_delta_min_vol = "Δ Min. volatilità"
+efficient_frontier_delta_max_sharpe = "Δ Max Sharpe"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -833,6 +840,13 @@ efficient_frontier_run = "Run simulation"
 efficient_frontier_chart_title = "Risk / return simulation"
 efficient_frontier_random_portfolios = "Simulated portfolios"
 efficient_frontier_random_portfolio = "Simulated portfolio"
+
+efficient_frontier_allocations = "Allocation comparison"
+efficient_frontier_current = "Current"
+efficient_frontier_min_vol_short = "Min. volatility"
+efficient_frontier_max_sharpe_short = "Max Sharpe"
+efficient_frontier_delta_min_vol = "Δ Min. volatility"
+efficient_frontier_delta_max_sharpe = "Δ Max Sharpe"
 # ============================================================
 # MONTE CARLO
 # ============================================================
