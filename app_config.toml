@@ -381,6 +381,7 @@ efficient_frontier_min_vol_short = "Min. volatilità"
 efficient_frontier_max_sharpe_short = "Max Sharpe"
 efficient_frontier_delta_min_vol = "Δ Min. volatilità"
 efficient_frontier_delta_max_sharpe = "Δ Max Sharpe"
+efficient_frontier_name = "Nome"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -847,6 +848,7 @@ efficient_frontier_min_vol_short = "Min. volatility"
 efficient_frontier_max_sharpe_short = "Max Sharpe"
 efficient_frontier_delta_min_vol = "Δ Min. volatility"
 efficient_frontier_delta_max_sharpe = "Δ Max Sharpe"
+efficient_frontier_name = "Name"
 # ============================================================
 # MONTE CARLO
 # ============================================================
