@@ -65,6 +65,7 @@ def render_efficient_frontier(
             10_000,
             25_000,
             50_000,
+            75_000,
             100_000,
         ],
         value=50_000,
