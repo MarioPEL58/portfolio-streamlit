@@ -54,7 +54,23 @@ def render_efficient_frontier(
         current_values
         / current_total
     )
-
+    
+    # ========================================================
+    # Parametri simulazione
+    # ========================================================
+    
+    num_portfolios = st.select_slider(
+        t("efficient_frontier_num_portfolios"),
+        options=[
+            10_000,
+            25_000,
+            50_000,
+            100_000,
+        ],
+        value=50_000,
+        format_func=lambda x: f"{x:,}",
+        key="efficient_frontier_num_portfolios",
+    )
     # ========================================================
     # Calcolo Frontiera Efficiente
     # ========================================================
@@ -62,7 +78,7 @@ def render_efficient_frontier(
     result = calculate_efficient_frontier(
         closes=closes,
         current_weights=current_weights,
-        num_portfolios=50_000,
+        num_portfolios=num_portfolios,
         use_risk_free=use_risk_free,
         risk_free_rate=risk_free_rate,
     )
