@@ -530,12 +530,12 @@ def render_efficient_frontier(
     allocation_df = pd.DataFrame(
         {
             "Ticker": result["assets"],
-            
+    
             t("efficient_frontier_name"): [
                 ticker_names.get(ticker, "")
                 for ticker in result["assets"]
             ],
-            
+    
             t("efficient_frontier_current"):
                 current_weights.reindex(
                     result["assets"]
@@ -553,6 +553,7 @@ def render_efficient_frontier(
         }
     )
     
+    # Delta
     allocation_df[
         t("efficient_frontier_delta_min_vol")
     ] = (
@@ -574,6 +575,19 @@ def render_efficient_frontier(
             t("efficient_frontier_current")
         ]
     )
+    
+    # Ordine finale colonne
+    allocation_df = allocation_df[
+        [
+            "Ticker",
+            t("efficient_frontier_name"),
+            t("efficient_frontier_current"),
+            t("efficient_frontier_min_vol_short"),
+            t("efficient_frontier_delta_min_vol"),
+            t("efficient_frontier_max_sharpe_short"),
+            t("efficient_frontier_delta_max_sharpe"),
+        ]
+    ]
     
     percentage_columns = [
         t("efficient_frontier_current"),
