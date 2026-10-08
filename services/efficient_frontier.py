@@ -354,7 +354,10 @@ def calculate_efficient_frontier(
 
         "simulations":
             simulations,
-
+        
+        "weights_matrix":
+            weights_matrix,
+        
         "min_volatility":
             build_portfolio_result(
                 min_vol_idx
