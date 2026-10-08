@@ -90,7 +90,12 @@ def render_efficient_frontier(
         f"{start_date:%d/%m/%Y} → "
         f"{end_date:%d/%m/%Y}"
     )
-
+    history_days = (end_date - start_date).days
+    
+    if history_days < 365:
+    
+        st.warning(t("efficient_frontier_short_history"))
+        
     # ========================================================
     # Informazioni simulazione
     # ========================================================
