@@ -346,12 +346,47 @@ def render_efficient_frontier(
     end_date = pd.to_datetime(
         result["end_date"]
     )
-
+    
+    # ========================================================
+    # Ticker che limita lo storico comune
+    # ========================================================
+    
+    first_valid_dates = (
+        closes[assets]
+        .apply(lambda s: s.first_valid_index())
+        .dropna()
+    )
+    
+    limiting_tickers = (
+        first_valid_dates[
+            first_valid_dates == first_valid_dates.max()
+        ]
+        .index
+        .tolist()
+    )
+    
+    limiting_labels = [
+        f"{ticker} - {ticker_names.get(ticker, '')}".rstrip(" -")
+        for ticker in limiting_tickers
+    ]
+    
+    limiting_text = ", ".join(
+        limiting_labels
+    )
+    
     st.caption(
         f"{t('efficient_frontier_period')}: "
         f"{start_date:%d/%m/%Y} → "
         f"{end_date:%d/%m/%Y}"
     )
+    
+    if limiting_tickers:
+    
+        st.caption(
+            f"{t('efficient_frontier_limiting_ticker')}: "
+            f"{limiting_text}"
+        )
+        
     history_days = (end_date - start_date).days
     
     if history_days < 365:
@@ -361,6 +396,7 @@ def render_efficient_frontier(
     elif history_days < 365 * 3:
 
         st.warning(t("efficient_frontier_history_short"))
+    
     # ========================================================
     # Informazioni simulazione
     # ========================================================
