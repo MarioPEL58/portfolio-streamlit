@@ -116,6 +116,7 @@ def render_efficient_frontier(
         )
         return None
         
+    assets = result["assets"] 
     # ========================================================
     # Grafico Frontiera Efficiente
     # ========================================================
