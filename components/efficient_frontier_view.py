@@ -358,6 +358,9 @@ def render_efficient_frontier(
     
         st.warning(t("efficient_frontier_short_history"))
         
+    elif history_days < 365 * 3:
+
+        st.warning(t("efficient_frontier_history_short"))
     # ========================================================
     # Informazioni simulazione
     # ========================================================
