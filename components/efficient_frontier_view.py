@@ -140,6 +140,14 @@ def render_efficient_frontier(
         "efficient_frontier_result"
     )
     
+    # Prima simulazione non ancora eseguita
+    if result is None and not run_simulation:
+        st.info(
+            t("efficient_frontier_ready")
+        )
+        return None
+        
+    # Simulazione eseguita, ma dati realmente insufficienti
     if result is None:
         st.warning(
             t("efficient_frontier_no_data")
