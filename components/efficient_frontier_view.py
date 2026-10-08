@@ -491,7 +491,132 @@ def render_efficient_frontier(
         t("efficient_frontier_sharpe"),
         f"{max_sharpe['sharpe']:.2f}",
     )
-
+    
+    # ========================================================
+    # Tabella allocazioni
+    # ========================================================
+    
+    st.subheader(
+        t("efficient_frontier_allocations")
+    )
+    
+    current_weights = result[
+        "current_portfolio"
+    ]["weights"]
+    
+    min_vol_weights = result[
+        "min_volatility"
+    ]["weights"]
+    
+    max_sharpe_weights = result[
+        "max_sharpe"
+    ]["weights"]
+    
+    
+    allocation_df = pd.DataFrame(
+        {
+            "Ticker": result["assets"],
+    
+            t("efficient_frontier_current"):
+                current_weights.reindex(
+                    result["assets"]
+                ).values,
+    
+            t("efficient_frontier_min_vol_short"):
+                min_vol_weights.reindex(
+                    result["assets"]
+                ).values,
+    
+            t("efficient_frontier_max_sharpe_short"):
+                max_sharpe_weights.reindex(
+                    result["assets"]
+                ).values,
+        }
+    )
+    
+    allocation_df[
+        t("efficient_frontier_delta_min_vol")
+    ] = (
+        allocation_df[
+            t("efficient_frontier_min_vol_short")
+        ]
+        - allocation_df[
+            t("efficient_frontier_current")
+        ]
+    )
+    
+    allocation_df[
+        t("efficient_frontier_delta_max_sharpe")
+    ] = (
+        allocation_df[
+            t("efficient_frontier_max_sharpe_short")
+        ]
+        - allocation_df[
+            t("efficient_frontier_current")
+        ]
+    )
+    
+    percentage_columns = [
+        t("efficient_frontier_current"),
+        t("efficient_frontier_min_vol_short"),
+        t("efficient_frontier_delta_min_vol"),
+        t("efficient_frontier_max_sharpe_short"),
+        t("efficient_frontier_delta_max_sharpe"),
+    ]
+    
+    allocation_df[
+        percentage_columns
+    ] *= 100.0
+    
+    allocation_df = (
+        allocation_df
+        .sort_values(
+            t("efficient_frontier_current"),
+            ascending=False,
+        )
+        .reset_index(drop=True)
+    )
+    
+    st.dataframe(
+        allocation_df,
+        width="stretch",
+        hide_index=True,
+        column_config={
+            "Ticker": st.column_config.TextColumn(
+                "Ticker"
+            ),
+    
+            t("efficient_frontier_current"):
+                st.column_config.NumberColumn(
+                    t("efficient_frontier_current"),
+                    format="%.2f%%",
+                ),
+    
+            t("efficient_frontier_min_vol_short"):
+                st.column_config.NumberColumn(
+                    t("efficient_frontier_min_vol_short"),
+                    format="%.2f%%",
+                ),
+    
+            t("efficient_frontier_delta_min_vol"):
+                st.column_config.NumberColumn(
+                    t("efficient_frontier_delta_min_vol"),
+                    format="%+.2f%%",
+                ),
+    
+            t("efficient_frontier_max_sharpe_short"):
+                st.column_config.NumberColumn(
+                    t("efficient_frontier_max_sharpe_short"),
+                    format="%.2f%%",
+                ),
+    
+            t("efficient_frontier_delta_max_sharpe"):
+                st.column_config.NumberColumn(
+                    t("efficient_frontier_delta_max_sharpe"),
+                    format="%+.2f%%",
+                ),
+        },
+    )
     # ========================================================
     # Return
     # ========================================================
