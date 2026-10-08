@@ -14,6 +14,7 @@ from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, pl_t
 from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare, create_tail_risk_figure
 from components.chart_comparison_metrics import (render_chart_comparison_metrics,)
 from components.backtest_view import render_backtest
+from components.efficient_frontier_view import render_efficient_frontier
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
@@ -863,6 +864,12 @@ with tab_backtest:
         benchmark_name=benchmark,
     )
     
+    render_efficient_frontier(
+        current=current,
+        closes=closes_backtest_eur,
+        use_risk_free=use_risk_free,
+        risk_free_rate=rf_annual,
+    )
 with tab_monte_carlo:
     render_monte_carlo(
     series=series,
