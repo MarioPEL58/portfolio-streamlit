@@ -384,6 +384,7 @@ efficient_frontier_delta_min_vol = "Δ Min. volatilità"
 efficient_frontier_delta_max_sharpe = "Δ Max Sharpe"
 efficient_frontier_name = "Nome"
 efficient_frontier_limiting_ticker = "Ticker che limita lo storico"
+efficient_frontier_ready = "Imposta il numero di portafogli e avvia la simulazione."
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -853,6 +854,7 @@ efficient_frontier_delta_min_vol = "Δ Min. volatility"
 efficient_frontier_delta_max_sharpe = "Δ Max Sharpe"
 efficient_frontier_name = "Name"
 efficient_frontier_limiting_ticker = "Ticker limiting the historical period"
+efficient_frontier_ready = "Set the number of portfolios and start the simulation."
 # ============================================================
 # MONTE CARLO
 # ============================================================
