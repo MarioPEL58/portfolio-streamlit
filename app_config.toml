@@ -370,6 +370,10 @@ efficient_frontier_sharpe = "Sharpe Ratio"
 efficient_frontier_short_history = "Storico molto breve: i risultati della simulazione possono essere poco rappresentativi."
 efficient_frontier_num_portfolios = "Numero di simulazioni"
 efficient_frontier_run = "Avvia simulazione"
+
+efficient_frontier_chart_title = "Simulazione rischio / rendimento"
+efficient_frontier_random_portfolios = "Portafogli simulati"
+efficient_frontier_random_portfolio = "Portafoglio simulato"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -825,6 +829,10 @@ efficient_frontier_sharpe = "Sharpe Ratio"
 efficient_frontier_short_history = "Very short history: simulation results may not be representative."
 efficient_frontier_num_portfolios = "Number of simulations"
 efficient_frontier_run = "Run simulation"
+
+efficient_frontier_chart_title = "Risk / return simulation"
+efficient_frontier_random_portfolios = "Simulated portfolios"
+efficient_frontier_random_portfolio = "Simulated portfolio"
 # ============================================================
 # MONTE CARLO
 # ============================================================
