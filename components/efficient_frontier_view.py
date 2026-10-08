@@ -7,6 +7,7 @@ from services.efficient_frontier import (
     calculate_efficient_frontier,
 )
 import plotly.graph_objects as go
+from utils.formatting import color_pl
 from utils.i18n import t
 
 
@@ -610,14 +611,39 @@ def render_efficient_frontier(
         .reset_index(drop=True)
     )
     
+    delta_min_col = t(
+        "efficient_frontier_delta_min_vol"
+    )
+    
+    delta_sharpe_col = t(
+        "efficient_frontier_delta_max_sharpe"
+    )
+    
+    styled_allocation_df = (
+        allocation_df.style
+        .map(
+            color_pl,
+            subset=[
+                delta_min_col,
+                delta_sharpe_col,
+            ],
+        )
+    )
+    
     st.dataframe(
-        allocation_df,
+        styled_allocation_df,
         width="stretch",
         hide_index=True,
         column_config={
-            "Ticker": st.column_config.TextColumn(
-                "Ticker"
-            ),
+            "Ticker":
+                st.column_config.TextColumn(
+                    "Ticker"
+                ),
+    
+            t("efficient_frontier_name"):
+                st.column_config.TextColumn(
+                    t("efficient_frontier_name")
+                ),
     
             t("efficient_frontier_current"):
                 st.column_config.NumberColumn(
@@ -631,9 +657,9 @@ def render_efficient_frontier(
                     format="%.2f%%",
                 ),
     
-            t("efficient_frontier_delta_min_vol"):
+            delta_min_col:
                 st.column_config.NumberColumn(
-                    t("efficient_frontier_delta_min_vol"),
+                    delta_min_col,
                     format="%+.2f%%",
                 ),
     
@@ -643,9 +669,9 @@ def render_efficient_frontier(
                     format="%.2f%%",
                 ),
     
-            t("efficient_frontier_delta_max_sharpe"):
+            delta_sharpe_col:
                 st.column_config.NumberColumn(
-                    t("efficient_frontier_delta_max_sharpe"),
+                    delta_sharpe_col,
                     format="%+.2f%%",
                 ),
         },
