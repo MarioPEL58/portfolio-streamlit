@@ -383,6 +383,7 @@ efficient_frontier_max_sharpe_short = "Max Sharpe"
 efficient_frontier_delta_min_vol = "Δ Min. volatilità"
 efficient_frontier_delta_max_sharpe = "Δ Max Sharpe"
 efficient_frontier_name = "Nome"
+efficient_frontier_limiting_ticker = "Ticker che limita lo storico"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -851,6 +852,7 @@ efficient_frontier_max_sharpe_short = "Max Sharpe"
 efficient_frontier_delta_min_vol = "Δ Min. volatility"
 efficient_frontier_delta_max_sharpe = "Δ Max Sharpe"
 efficient_frontier_name = "Name"
+efficient_frontier_limiting_ticker = "Ticker limiting the historical period"
 # ============================================================
 # MONTE CARLO
 # ============================================================
