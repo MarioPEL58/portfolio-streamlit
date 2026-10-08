@@ -369,6 +369,7 @@ efficient_frontier_volatility = "Volatilità annualizzata"
 efficient_frontier_sharpe = "Sharpe Ratio"
 efficient_frontier_short_history = "Storico molto breve: i risultati della simulazione possono essere poco rappresentativi."
 efficient_frontier_num_portfolios = "Numero di simulazioni"
+efficient_frontier_run = "Avvia simulazione"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -823,6 +824,7 @@ efficient_frontier_volatility = "Annualized volatility"
 efficient_frontier_sharpe = "Sharpe Ratio"
 efficient_frontier_short_history = "Very short history: simulation results may not be representative."
 efficient_frontier_num_portfolios = "Number of simulations"
+efficient_frontier_run = "Run simulation"
 # ============================================================
 # MONTE CARLO
 # ============================================================
