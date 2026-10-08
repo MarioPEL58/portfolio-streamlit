@@ -178,7 +178,7 @@ def render_efficient_frontier(
     min_vol = result["min_volatility"]
 
     fig.add_trace(
-        go.Scatter(
+        go.Scattergl(
             x=[
                 min_vol["volatility"]
                 * 100.0
@@ -222,7 +222,7 @@ def render_efficient_frontier(
     max_sharpe = result["max_sharpe"]
 
     fig.add_trace(
-        go.Scatter(
+        go.Scattergl(
             x=[
                 max_sharpe["volatility"]
                 * 100.0
@@ -267,7 +267,7 @@ def render_efficient_frontier(
     ]
     
     fig.add_trace(
-        go.Scatter(
+        go.Scattergl(
             x=[
                 current_result["volatility"]
                 * 100.0
