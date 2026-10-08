@@ -6,7 +6,7 @@ import streamlit as st
 from services.efficient_frontier import (
     calculate_efficient_frontier,
 )
-
+import plotly.graph_objects as go
 from utils.i18n import t
 
 
@@ -100,7 +100,226 @@ def render_efficient_frontier(
             t("efficient_frontier_no_data")
         )
         return None
+    
+    # ========================================================
+    # Grafico Frontiera Efficiente
+    # ========================================================
+    
+    simulations = result["simulations"]
+    
+    fig = go.Figure()
+    
+    # --------------------------------------------------------
+    # Portafogli simulati
+    # --------------------------------------------------------
+    
+    fig.add_trace(
+        go.Scattergl(
+            x=simulations["Volatility"] * 100.0,
+            y=simulations["Return"] * 100.0,
+            mode="markers",
+            name=t("efficient_frontier_random_portfolios"),
+            marker=dict(
+                size=5,
+                color=simulations["Sharpe"],
+                colorscale="Viridis",
+                opacity=0.45,
+                colorbar=dict(
+                    title=t(
+                        "efficient_frontier_sharpe"
+                    )
+                ),
+            ),
+            customdata=simulations[
+                ["Sharpe"]
+            ].to_numpy(),
+            hovertemplate=(
+                f"<b>{t('efficient_frontier_random_portfolio')}</b>"
+                "<br>"
+                f"{t('efficient_frontier_volatility')}: "
+                "%{x:.2f}%"
+                "<br>"
+                f"{t('efficient_frontier_return')}: "
+                "%{y:.2f}%"
+                "<br>"
+                f"{t('efficient_frontier_sharpe')}: "
+                "%{customdata.2f}"
+                "<extra></extra>"
+            ),
+        )
+    )
+    
+    min_vol = result["min_volatility"]
 
+    fig.add_trace(
+        go.Scatter(
+            x=[
+                min_vol["volatility"]
+                * 100.0
+            ],
+            y=[
+                min_vol["return"]
+                * 100.0
+            ],
+            mode="markers",
+            name=t(
+                "efficient_frontier_min_volatility"
+            ),
+            marker=dict(
+                size=15,
+                color="#E53935",
+                symbol="square",
+                line=dict(
+                    color="black",
+                    width=1,
+                ),
+            ),
+            customdata=[
+                [min_vol["sharpe"]]
+            ],
+            hovertemplate=(
+                f"<b>{t('efficient_frontier_min_volatility')}</b>"
+                "<br>"
+                f"{t('efficient_frontier_volatility')}: "
+                "%{x:.2f}%"
+                "<br>"
+                f"{t('efficient_frontier_return')}: "
+                "%{y:.2f}%"
+                "<br>"
+                f"{t('efficient_frontier_sharpe')}: "
+                "%{customdata.2f}"
+                "<extra></extra>"
+            ),
+        )
+    )
+    
+    max_sharpe = result["max_sharpe"]
+
+    fig.add_trace(
+        go.Scatter(
+            x=[
+                max_sharpe["volatility"]
+                * 100.0
+            ],
+            y=[
+                max_sharpe["return"]
+                * 100.0
+            ],
+            mode="markers",
+            name=t(
+                "efficient_frontier_max_sharpe"
+            ),
+            marker=dict(
+                size=16,
+                color="#00C853",
+                symbol="diamond",
+                line=dict(
+                    color="black",
+                    width=1,
+                ),
+            ),
+            customdata=[
+                [max_sharpe["sharpe"]]
+            ],
+            hovertemplate=(
+                f"<b>{t('efficient_frontier_max_sharpe')}</b>"
+                "<br>"
+                f"{t('efficient_frontier_volatility')}: "
+                "%{x:.2f}%"
+                "<br>"
+                f"{t('efficient_frontier_return')}: "
+                "%{y:.2f}%"
+                "<br>"
+                f"{t('efficient_frontier_sharpe')}: "
+                "%{customdata.2f}"
+                "<extra></extra>"
+            ),
+        )
+    )
+    current_result = result[
+        "current_portfolio"
+    ]
+    
+    fig.add_trace(
+        go.Scatter(
+            x=[
+                current_result["volatility"]
+                * 100.0
+            ],
+            y=[
+                current_result["return"]
+                * 100.0
+            ],
+            mode="markers",
+            name=t(
+                "efficient_frontier_current_portfolio"
+            ),
+            marker=dict(
+                size=18,
+                color="#D500F9",
+                symbol="x",
+                line=dict(
+                    width=2,
+                ),
+            ),
+            customdata=[
+                [current_result["sharpe"]]
+            ],
+            hovertemplate=(
+                f"<b>{t('efficient_frontier_current_portfolio')}</b>"
+                "<br>"
+                f"{t('efficient_frontier_volatility')}: "
+                "%{x:.2f}%"
+                "<br>"
+                f"{t('efficient_frontier_return')}: "
+                "%{y:.2f}%"
+                "<br>"
+                f"{t('efficient_frontier_sharpe')}: "
+                "%{customdata.2f}"
+                "<extra></extra>"
+            ),
+        )
+    )
+    
+    fig.update_layout(
+        title=t(
+            "efficient_frontier_chart_title"
+        ),
+        xaxis_title=t(
+            "efficient_frontier_volatility"
+        ),
+        yaxis_title=t(
+            "efficient_frontier_return"
+        ),
+        hovermode="closest",
+        height=650,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="left",
+            x=0,
+        ),
+        margin=dict(
+            l=20,
+            r=20,
+            t=100,
+            b=20,
+        ),
+    )
+    
+    fig.update_xaxes(
+        ticksuffix="%"
+    )
+    
+    fig.update_yaxes(
+        ticksuffix="%"
+    )
+    
+    st.plotly_chart(
+        fig,
+        width="stretch",
+    )
     # ========================================================
     # Periodo utilizzato
     # ========================================================
