@@ -411,10 +411,18 @@ def render_efficient_frontier(
         ticksuffix="%"
     )
     
-    st.plotly_chart(
+    # st.plotly_chart(
+    #     fig,
+    #     width="stretch",
+    # )
+    chart_event = st.plotly_chart(
         fig,
         width="stretch",
+        key="efficient_frontier_chart",
+        on_select="rerun",
+        selection_mode="points",
     )
+    st.write(chart_event)
     # ========================================================
     # Periodo utilizzato
     # ========================================================
