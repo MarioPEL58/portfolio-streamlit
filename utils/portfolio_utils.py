@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-def build_ticker_names(ops):
+def build_ticker_names(ops: pd.DataFrame,) -> dict[str, str]:
     return (
         ops
         .dropna(subset=["Ticker"])
