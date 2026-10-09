@@ -267,6 +267,7 @@ def render_backtest(
             allocation_rows.append(
                 {
                     "Ticker": ticker,
+                    "Nome": ticker_names.get(ticker,"",),
                     t("backtest_weight"): weight,
                     t("backtest_price_available_from"): (
                         pd.to_datetime(first_date)
@@ -290,7 +291,11 @@ def render_backtest(
                         "Ticker",
                         width="medium",
                     ),
-
+                "Nome":
+                    st.column_config.TextColumn(
+                        "Nome",
+                        width="large",
+                    ),
                 t("backtest_weight"):
                     st.column_config.NumberColumn(
                         t("backtest_weight"),
@@ -306,6 +311,7 @@ def render_backtest(
                     ),
             },
         )
+    
     # ========================================================
     # Disponibilità storica del backtest
     # ========================================================
