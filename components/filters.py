@@ -3,6 +3,7 @@ import streamlit as st
 from utils.i18n import t
 
 def reset_portfolio_filters():
+
     for key in [
         "only_active",
         "selected_brokers",
@@ -10,6 +11,13 @@ def reset_portfolio_filters():
         "selected_operations",
     ]:
         st.session_state.pop(key, None)
+
+    for key in list(st.session_state.keys()):
+
+        if key.startswith(
+            "operation_checkbox_"
+        ):
+            del st.session_state[key]
     
 def render_filters(ops, dividends):
     st.markdown(t("filters_title"))
@@ -101,6 +109,14 @@ def render_filters(ops, dividends):
     st.session_state.selected_operations = [
         op for op in st.session_state.selected_operations if op in all_operations
     ]
+    # Se il portfolio è cambiato e non resta nulla
+    # seleziona automaticamente tutte le operazioni
+    
+    if (
+        not st.session_state.selected_operations
+        and all_operations
+    ):
+        st.session_state.selected_operations = (all_operations.copy())
     # -------------------------
     # widgets
     # -------------------------
