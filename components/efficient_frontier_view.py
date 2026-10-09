@@ -8,6 +8,7 @@ from services.efficient_frontier import (
 )
 import plotly.graph_objects as go
 from utils.formatting import color_pl
+from utils.portfolio_utils import build_ticker_names
 from utils.i18n import t
 
 
@@ -34,16 +35,17 @@ def render_efficient_frontier(
     # ========================================================
     # Ticker Name
     # ========================================================
-    ticker_names = (
-        ops
-        .dropna(subset=["Ticker"])
-        .sort_values("Data")
-        .groupby("Ticker")["Nome"]
-        .last()
-        .fillna("")
-        .to_dict()
-    )
+    # ticker_names = (
+    #     ops
+    #     .dropna(subset=["Ticker"])
+    #     .sort_values("Data")
+    #     .groupby("Ticker")["Nome"]
+    #     .last()
+    #     .fillna("")
+    #     .to_dict()
+    # )
 
+    ticker_names = build_ticker_names(ops)
     # ========================================================
     # Portafoglio corrente
     # ========================================================
