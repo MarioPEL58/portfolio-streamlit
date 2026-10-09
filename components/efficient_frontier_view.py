@@ -740,7 +740,6 @@ def render_efficient_frontier(
             t("efficient_frontier_delta_min_vol"),
             t("efficient_frontier_max_sharpe_short"),
             t("efficient_frontier_delta_max_sharpe"),
-            t("efficient_frontier_selected"),
     ]
     if selected_weights is not None:
     
