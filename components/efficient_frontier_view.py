@@ -785,7 +785,11 @@ def render_efficient_frontier(
     delta_sharpe_col = t(
         "efficient_frontier_delta_max_sharpe"
     )
-    
+    # degug 
+    st.write(
+        allocation_df.columns.tolist()
+    )
+    # end debug 
     styled_allocation_df = (
         allocation_df.style
         .map(
