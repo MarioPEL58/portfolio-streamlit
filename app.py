@@ -865,6 +865,7 @@ with tab_backtest:
     render_backtest(
         current=current,
         closes=closes_backtest_eur,
+        ops=ops_filtered,
         benchmark_prices=benchmark_prices,
         benchmark_name=benchmark,
     )
