@@ -723,9 +723,17 @@ def render_efficient_frontier(
         ]
     )
     
+    if selected_weights is not None:
+
+        allocation_df[
+            t("efficient_frontier_selected")
+        ] = (
+            selected_weights
+            .reindex(result["assets"])
+            .values
+        )
     # Ordine finale colonne
-    allocation_df = allocation_df[
-        [
+    ordered_cols = [
             "Ticker",
             t("efficient_frontier_name"),
             t("efficient_frontier_current"),
@@ -733,7 +741,16 @@ def render_efficient_frontier(
             t("efficient_frontier_delta_min_vol"),
             t("efficient_frontier_max_sharpe_short"),
             t("efficient_frontier_delta_max_sharpe"),
-        ]
+            t("efficient_frontier_selected"),
+    ]
+    if selected_weights is not None:
+    
+        ordered_cols.append(
+            t("efficient_frontier_selected")
+        )
+        
+    allocation_df = allocation_df[
+        ordered_cols
     ]
     
     percentage_columns = [
@@ -744,6 +761,11 @@ def render_efficient_frontier(
         t("efficient_frontier_delta_max_sharpe"),
     ]
     
+    if selected_weights is not None:
+        percentage_columns.append(
+            t("efficient_frontier_selected")
+        )
+        
     allocation_df[
         percentage_columns
     ] *= 100.0
@@ -819,6 +841,12 @@ def render_efficient_frontier(
                 st.column_config.NumberColumn(
                     delta_sharpe_col,
                     format="%+.2f%%",
+                ),
+            
+            t("efficient_frontier_selected"):
+                st.column_config.NumberColumn(
+                    t("efficient_frontier_selected"),
+                    format="%.2f%%",
                 ),
         },
     )
