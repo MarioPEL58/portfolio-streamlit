@@ -209,7 +209,7 @@ def render_efficient_frontier(
     # --------------------------------------------------------
     
     fig.add_trace(
-        go.Scattergl(
+        go.Scatter(
             x=simulations["Volatility"] * 100.0,
             y=simulations["Return"] * 100.0,
             mode="markers",
