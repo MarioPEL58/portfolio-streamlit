@@ -209,7 +209,7 @@ def render_efficient_frontier(
     # --------------------------------------------------------
     
     fig.add_trace(
-        go.Scatter(
+        go.Scattergl(
             x=simulations["Volatility"] * 100.0,
             y=simulations["Return"] * 100.0,
             mode="markers",
@@ -422,7 +422,57 @@ def render_efficient_frontier(
         on_select="rerun",
         selection_mode="points",
     )
-    st.write(chart_event)
+    
+    # ========================================================
+    # conrollo selezione ID
+    # ========================================================
+    selected_points = (
+        chart_event["selection"]["points"]
+    )
+    
+    if selected_points:
+    
+        point_index = (
+            selected_points[0]["point_index"]
+        )
+    
+        st.session_state[
+            "efficient_frontier_selected_id"
+        ] = point_index
+    
+        st.write(
+            f"Selected portfolio ID: {point_index}"
+        )
+    
+    # ========================================================
+    # conrollo pesi selected 
+    # ========================================================
+    selected_id = st.session_state.get(
+        "efficient_frontier_selected_id"
+    )
+    
+    if selected_id is not None:
+    
+        selected_weights = pd.Series(
+            result["weights_matrix"][
+                selected_id
+            ],
+            index=result["assets"],
+        )
+    
+        st.write(
+            f"Somma pesi: "
+            f"{selected_weights.sum():.6f}"
+        )
+    
+        st.dataframe(
+            selected_weights
+            .sort_values(
+                ascending=False
+            )
+            .rename("Weight")
+            .reset_index()
+        )
     # ========================================================
     # Periodo utilizzato
     # ========================================================
