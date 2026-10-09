@@ -3,6 +3,7 @@ import streamlit as st
 
 from services.backtest import (backtest_portfolio, build_backtest_benchmark, calculate_backtest_metrics,)
 import numpy as np
+from utils.portfolio_utils import (build_ticker_names,)
 from utils.i18n import t
 
 # Adatta questo import al modulo in cui hai inserito backtest_chart()
@@ -12,6 +13,7 @@ from components.charts import backtest_chart
 def render_backtest(
     current,
     closes,
+    ops,
     benchmark_prices=None,
     benchmark_name="",):
     # ========================================================
@@ -33,7 +35,8 @@ def render_backtest(
         index=3,  # yearly
         key="backtest_rebalance_frequency",
     )
-
+    
+    ticker_names = build_ticker_names(ops)
     # ========================================================
     # Allocazione personalizzata
     # ========================================================
