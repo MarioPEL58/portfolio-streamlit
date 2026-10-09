@@ -456,14 +456,13 @@ def render_efficient_frontier(
             index=result["assets"],
         )
 
-        
-    st.write(
-        f"Selected portfolio ID: {point_index}"
-    )
-    st.write(
-        f"Somma pesi: "
-        f"{selected_weights.sum():.6f}"
-    )
+        # st.write(
+        #     f"Selected portfolio ID: {point_index}"
+        # )
+        # st.write(
+        #     f"Somma pesi: "
+        #     f"{selected_weights.sum():.6f}"
+        # )
     
     # ========================================================
     # Periodo utilizzato
