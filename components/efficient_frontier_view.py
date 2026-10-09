@@ -74,6 +74,45 @@ def render_efficient_frontier(
     )
     
     # ========================================================
+    # Session state
+    # ========================================================
+    
+    if "efficient_frontier_result" not in st.session_state:
+        st.session_state["efficient_frontier_result"] = None
+    
+    if ("efficient_frontier_portfolio_signature"not in st.session_state):
+        st.session_state["efficient_frontier_portfolio_signature"] = None
+    
+    if ("efficient_frontier_selected_id" not in st.session_state):
+        st.session_state["efficient_frontier_selected_id"] = None
+    # ========================================================
+    # Firma portafoglio corrente
+    # ========================================================
+    
+    portfolio_signature = tuple(
+        sorted(
+            (
+                str(ticker),
+                round(float(weight), 10),
+            )
+            for ticker, weight
+            in current_weights.items()
+        )
+    )
+    
+    previous_signature = st.session_state[
+        "efficient_frontier_portfolio_signature"
+    ]
+    
+    if previous_signature != portfolio_signature:
+    
+        st.session_state["efficient_frontier_result"] = None
+        
+        st.session_state["efficient_frontier_selected_id"] = None
+        
+        st.session_state["efficient_frontier_portfolio_signature"] = portfolio_signature
+        
+    # ========================================================
     # Parametri simulazione
     # ========================================================
     with st.form(
