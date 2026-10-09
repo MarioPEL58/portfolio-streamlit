@@ -440,10 +440,6 @@ def render_efficient_frontier(
             "efficient_frontier_selected_id"
         ] = point_index
     
-        st.write(
-            f"Selected portfolio ID: {point_index}"
-        )
-    
     # ========================================================
     # conrollo pesi selected 
     # ========================================================
@@ -459,20 +455,16 @@ def render_efficient_frontier(
             ],
             index=result["assets"],
         )
+
+        
+    st.write(
+        f"Selected portfolio ID: {point_index}"
+    )
+    st.write(
+        f"Somma pesi: "
+        f"{selected_weights.sum():.6f}"
+    )
     
-        st.write(
-            f"Somma pesi: "
-            f"{selected_weights.sum():.6f}"
-        )
-    
-        st.dataframe(
-            selected_weights
-            .sort_values(
-                ascending=False
-            )
-            .rename("Weight")
-            .reset_index()
-        )
     # ========================================================
     # Periodo utilizzato
     # ========================================================
