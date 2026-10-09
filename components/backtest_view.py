@@ -424,13 +424,23 @@ def render_backtest(
             f"{rebalance_frequency}"
         )
 
-        st.plotly_chart(
+        # st.plotly_chart(
+        #     fig,
+        #     width="stretch",
+        #     theme=None,
+        #     key=chart_key,
+        # )
+        
+        chart_event = st.plotly_chart(
             fig,
             width="stretch",
             theme=None,
             key=chart_key,
+            on_select="rerun",
+            selection_mode="points",
         )
-        
+        st.write(chart_event)
+
     # ========================================================
     # Metriche Backtest vs Benchmark
     # ========================================================
