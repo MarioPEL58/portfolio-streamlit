@@ -443,9 +443,13 @@ def render_efficient_frontier(
     # ========================================================
     # conrollo pesi selected 
     # ========================================================
+    
+    
     selected_id = st.session_state.get(
         "efficient_frontier_selected_id"
     )
+    
+    selected_weights = None
     
     if selected_id is not None:
     
