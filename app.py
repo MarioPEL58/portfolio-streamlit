@@ -872,6 +872,8 @@ with tab_backtest:
 
 with tab_frontier:
     
+    print("rf_annual:",rf_annual)
+    
     render_efficient_frontier(
         current=current,
         closes=closes_backtest_eur,
