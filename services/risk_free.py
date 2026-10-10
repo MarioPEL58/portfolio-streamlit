@@ -17,7 +17,14 @@ def get_euro_risk_free_rate():
 
     prezzo_inizio = df["Close"].iloc[0]
     prezzo_fine = df["Close"].iloc[-1]
-
+    
+    print(df.tail())
+    print(prezzo_inizio)
+    print(prezzo_fine)
+    
+    if (pd.isna(prezzo_inizio) or pd.isna(prezzo_fine)):
+        return None
+    
     giorni = (df.index[-1] - df.index[0]).days
 
     if giorni == 0:
