@@ -320,6 +320,8 @@ xirr_value, xirr_flows = compute_portfolio_xirr(
 rf_daily = 0.0
 rf_annual = None
 
+print("use_risk_free =", use_risk_free)
+
 if use_risk_free:
     rf_annual = get_euro_risk_free_rate()
     if rf_annual is not None:
