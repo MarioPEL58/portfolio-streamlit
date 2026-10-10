@@ -213,6 +213,36 @@ def calculate_efficient_frontier(
         )
     )
 
+    #=========================================================
+    # ***** DEBUG 
+    #=========================================================
+    print(
+        "RF:",
+        risk_free_rate
+    )
+    
+    print(
+        "Return min/max:",
+        np.nanmin(portfolio_returns),
+        np.nanmax(portfolio_returns),
+    )
+    
+    print(
+        "Volatility min/max:",
+        np.nanmin(portfolio_volatility),
+        np.nanmax(portfolio_volatility),
+    )
+    
+    print(
+        "NaN sharpe:",
+        np.isnan(sharpe_ratios).sum()
+    )
+    
+    print(
+        "Total sharpe:",
+        len(sharpe_ratios)
+    )
+    #=========================================================
     max_sharpe_idx = int(
         np.nanargmax(
             sharpe_ratios
