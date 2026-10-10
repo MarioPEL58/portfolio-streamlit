@@ -196,7 +196,27 @@ def calculate_efficient_frontier(
         ),
         where=portfolio_volatility > 0,
     )
-
+    
+    print(
+        "Positive volatility:",
+        np.sum(
+            portfolio_volatility > 0
+        )
+    )
+    
+    print(
+        "Zero volatility:",
+        np.sum(
+            portfolio_volatility == 0
+        )
+    )
+    
+    print(
+        "NaN volatility:",
+        np.isnan(
+            portfolio_volatility
+        ).sum()
+    )
     # ========================================================
     # Portafogli speciali
     # ========================================================
