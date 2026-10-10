@@ -12,28 +12,26 @@ def get_euro_risk_free_rate():
 
     data = yf.Ticker(ticker)
     df = data.history(period="1mo")
-
-    if df.empty or len(df) < 2:
-        return None
-
-    prezzo_inizio = df["Close"].iloc[0]
-    prezzo_fine = df["Close"].iloc[-1]
     
-    print(df.tail())
-    print(prezzo_inizio)
-    print(prezzo_fine)
+    close = (
+        df["Close"]
+        .dropna()
+    )
     
-    if (pd.isna(prezzo_inizio) or pd.isna(prezzo_fine)):
+    if len(close) < 2:
         return None
     
-    giorni = (df.index[-1] - df.index[0]).days
-
-    if giorni == 0:
+    prezzo_inizio = close.iloc[0]
+    prezzo_fine = close.iloc[-1]
+    
+    giorni = (close.index[-1] - close.index[0]).days
+    
+    if giorni <= 0:
         return None
-
+    
     rendimento_periodo = (prezzo_fine / prezzo_inizio) - 1
-
+    
     # ✅ annualizzazione corretta
-    rf_annual = (1 + rendimento_periodo) ** (365 / giorni) - 1
-
-    return rf_annual
+    rf_annual = ((1 + rendimento_periodo)** (365 / giorni) - 1)
+    
+    return float(rf_annual)
