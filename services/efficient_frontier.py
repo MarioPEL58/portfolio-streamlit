@@ -177,7 +177,7 @@ def calculate_efficient_frontier(
     # Sharpe Ratio
     # ========================================================
 
-    if use_risk_free:
+    if (use_risk_free and pd.notna(risk_free_rate)):
         excess_returns = (
             portfolio_returns
             - risk_free_rate
