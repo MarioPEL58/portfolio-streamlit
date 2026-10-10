@@ -874,7 +874,7 @@ with tab_backtest:
 
 with tab_frontier:
     
-    rf_annual = get_euro_risk_free_rate()
+    # rf_annual = get_euro_risk_free_rate()
     
     st.write(
         f"RF annual: {rf_annual}"
