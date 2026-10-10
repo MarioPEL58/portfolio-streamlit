@@ -8,8 +8,6 @@ def get_euro_risk_free_rate():
     Ritorna valore ANNUALIZZATO (decimale, es. 0.021 = 2.1%)
     """
     
-    print("RF DEBUG VERSION 2")
-    
     ticker = "XEON.DE"
 
     data = yf.Ticker(ticker)
