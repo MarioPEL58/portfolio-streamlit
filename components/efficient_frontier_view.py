@@ -735,6 +735,12 @@ def render_efficient_frontier(
             .reindex(result["assets"])
             .values
         )
+        allocation_df[
+            t("efficient_frontier_delta_selected")
+        ] = (allocation_df[t("efficient_frontier_selected")]
+            -
+            allocation_df[t("efficient_frontier_current")]
+        )
     # Ordine finale colonne
     ordered_cols = [
             "Ticker",
@@ -747,8 +753,11 @@ def render_efficient_frontier(
     ]
     if selected_weights is not None:
     
-        ordered_cols.append(
-            t("efficient_frontier_selected")
+        ordered_cols.extend(
+            [
+                t("efficient_frontier_selected"),
+                t("efficient_frontier_delta_selected"),
+            ]
         )
         
     allocation_df = allocation_df[
@@ -764,8 +773,11 @@ def render_efficient_frontier(
     ]
     
     if selected_weights is not None:
-        percentage_columns.append(
-            t("efficient_frontier_selected")
+        percentage_columns.extend(
+            [
+                t("efficient_frontier_selected"),
+                t("efficient_frontier_delta_selected"),
+            ]
         )
         
     allocation_df[
@@ -788,19 +800,27 @@ def render_efficient_frontier(
     delta_sharpe_col = t(
         "efficient_frontier_delta_max_sharpe"
     )
-    # degug 
-    st.write(
-        allocation_df.columns.tolist()
+    
+    delta_selected_col = t(
+        "efficient_frontier_delta_selected"
     )
-    # end debug 
+
+    delta_columns = [
+        delta_min_col,
+        delta_sharpe_col,
+    ]
+    
+    if selected_weights is not None:
+    
+        delta_columns.append(
+            delta_selected_col
+        )
+    
     styled_allocation_df = (
         allocation_df.style
         .map(
             color_pl,
-            subset=[
-                delta_min_col,
-                delta_sharpe_col,
-            ],
+            subset=delta_columns,
         )
     )
     
@@ -853,6 +873,12 @@ def render_efficient_frontier(
                 st.column_config.NumberColumn(
                     t("efficient_frontier_selected"),
                     format="%.2f%%",
+                ),
+            
+            t("efficient_frontier_delta_selected"):
+                st.column_config.NumberColumn(
+                    t("efficient_frontier_delta_selected"),
+                    format="%+.2f%%",
                 ),
         },
     )
