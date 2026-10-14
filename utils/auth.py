@@ -1,39 +1,45 @@
 import streamlit as st
 
-from supabase import create_client
+from supabase import Client, create_client
 
 
-# ==================================
-# CLIENT SUPABASE
-# ==================================
+# =====================================================
+# SUPABASE CLIENT
+# =====================================================
 
 @st.cache_resource
-def get_supabase():
+def get_supabase() -> Client:
 
     return create_client(
         st.secrets["SUPABASE_URL"],
-        st.secrets["SUPABASE_KEY"]
+        st.secrets["SUPABASE_KEY"],
     )
 
 
-# ==================================
-# SESSIONE
-# ==================================
+# =====================================================
+# SESSION STATE
+# =====================================================
 
 def init_session():
 
-    if "logged_in" not in st.session_state:
-        st.session_state.logged_in = False
+    defaults = {
+        "logged_in": False,
+        "user": None,
+        "user_id": None,
+        "user_email": None,
+    }
 
-    if "user" not in st.session_state:
-        st.session_state.user = None
+    for key, value in defaults.items():
+
+        if key not in st.session_state:
+            st.session_state[key] = value
 
 
-# ==================================
+# =====================================================
 # LOGIN
-# ==================================
+# =====================================================
 
-def login(email, password):
+def login(email: str, password: str) -> bool:
 
     supabase = get_supabase()
 
@@ -48,21 +54,25 @@ def login(email, password):
 
         st.session_state.logged_in = True
         st.session_state.user = result.user
+        st.session_state.user_id = result.user.id
+        st.session_state.user_email = result.user.email
 
         return True
 
     except Exception as e:
 
-        st.error(f"Login fallito: {e}")
+        st.error(
+            f"Login fallito: {e}"
+        )
 
         return False
 
 
-# ==================================
+# =====================================================
 # REGISTRAZIONE
-# ==================================
+# =====================================================
 
-def signup(email, password):
+def signup(email: str, password: str) -> bool:
 
     supabase = get_supabase()
 
@@ -90,30 +100,30 @@ def signup(email, password):
         return False
 
 
-# ==================================
+# =====================================================
 # LOGOUT
-# ==================================
+# =====================================================
 
 def logout():
 
     try:
 
-        supabase = get_supabase()
+        get_supabase().auth.sign_out()
 
-        supabase.auth.sign_out()
-
-    except:
+    except Exception:
         pass
 
     st.session_state.logged_in = False
     st.session_state.user = None
+    st.session_state.user_id = None
+    st.session_state.user_email = None
 
 
-# ==================================
-# UTENTE LOGGATO ?
-# ==================================
+# =====================================================
+# INFO UTENTE
+# =====================================================
 
-def is_logged():
+def is_logged() -> bool:
 
     return st.session_state.get(
         "logged_in",
@@ -121,16 +131,61 @@ def is_logged():
     )
 
 
-# ==================================
-# PROTEZIONE PAGINA
-# ==================================
+def get_user_email():
+
+    return st.session_state.get(
+        "user_email"
+    )
+
+
+def get_user_id():
+
+    return st.session_state.get(
+        "user_id"
+    )
+
+
+# =====================================================
+# PROTEZIONE PAGINE
+# =====================================================
 
 def require_login():
 
     if not is_logged():
 
         st.warning(
-            "Effettua il login per accedere a questa pagina."
+            "🔒 Area riservata agli utenti registrati."
+        )
+
+        st.info(
+            "Effettua il login per accedere alla Frontiera Efficiente."
         )
 
         st.stop()
+
+
+# =====================================================
+# SIDEBAR UTENTE
+# =====================================================
+
+def render_user_sidebar():
+
+    if is_logged():
+
+        st.sidebar.success(
+            f"👤 {get_user_email()}"
+        )
+
+        if st.sidebar.button(
+            "🚪 Logout",
+            width="stretch"
+        ):
+
+            logout()
+            st.rerun()
+
+    else:
+
+        st.sidebar.info(
+            "👤 Ospite"
+        )
