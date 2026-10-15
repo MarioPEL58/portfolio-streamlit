@@ -182,8 +182,6 @@ def render_efficient_frontier(
     )
     asset_stats = (result.get("asset_stats") if result is not None else None)
     
-    show_assets = st.toggle(t("efficient_frontier_show_assets"),value=False,)
-    
     # Prima simulazione non ancora eseguita
     if result is None and not run_simulation:
         st.info(
@@ -199,6 +197,9 @@ def render_efficient_frontier(
         return None
         
     assets = result["assets"] 
+
+    show_assets = st.toggle(t("efficient_frontier_show_assets"),value=False,key="efficient_frontier_show_assets",)
+    
     # ========================================================
     # Grafico Frontiera Efficiente
     # ========================================================
