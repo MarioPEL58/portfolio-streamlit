@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import streamlit as st
+# import streamlit as st
 
 
 TRADING_DAYS = 252
@@ -95,13 +95,6 @@ def calculate_efficient_frontier(
     prices = prices.dropna(
         how="any"
     )
-    
-    st.subheader("DEBUG - Periodo comune")
-    
-    st.write("Asset:", assets)
-    st.write("Data inizio:", prices.index.min())
-    st.write("Data fine:", prices.index.max())
-    st.write("Numero righe:", len(prices))
 
     
     if prices.empty or len(prices) < 2:
@@ -116,17 +109,6 @@ def calculate_efficient_frontier(
         .pct_change(fill_method=None)
         .dropna(how="any")
     )
-
-    #  debug ###############
-    corr = returns.corr()
-    
-    st.subheader("DEBUG - Correlazione")
-    
-    st.dataframe(
-        corr.round(2),
-        width="stretch"
-    )
-    #  end debug ###############
     
     if returns.empty:
         return None
@@ -145,28 +127,6 @@ def calculate_efficient_frontier(
         * TRADING_DAYS
     )
 
-    #  debug ###############
-    asset_stats = pd.DataFrame(
-        {
-            "Return": mean_returns,
-            "Volatility": np.sqrt(
-                np.diag(cov_matrix)
-            ),
-        }
-    )
-    
-    st.subheader("DEBUG - Return e Volatilità")
-    
-    st.dataframe(
-        asset_stats
-        .sort_values(
-            "Volatility",
-            ascending=False
-        )
-        .round(4),
-        width="stretch"
-    )
-    #  end debug ###############
     # ========================================================
     # Monte Carlo
     # ========================================================
