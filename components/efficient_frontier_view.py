@@ -380,38 +380,35 @@ def render_efficient_frontier(
         )
     )
     
-    if (
-        show_assets
-        and asset_stats is not None
-    ):
-        fig.add_trace(
-            go.Scatter(
-                x=asset_stats["Volatility"] * 100.0,
-                y=asset_stats["Return"] * 100.0,
-                mode="markers",
-                name=t(
-                    "efficient_frontier_assets_trace"
+    fig.add_trace(
+        go.Scatter(
+            x=asset_stats["Volatility"] * 100.0,
+            y=asset_stats["Return"] * 100.0,
+            mode="markers",
+            visible=show_assets,   # <-- QUI
+            name=t(
+                "efficient_frontier_assets_trace"
+            ),
+            customdata=asset_stats.index,
+            marker=dict(
+                size=12,
+                color="orange",
+                symbol="circle",
+                line=dict(
+                    color="white",
+                    width=2,
                 ),
-                customdata=asset_stats.index,
-                marker=dict(
-                    size=12,
-                    color="orange",
-                    symbol="circle",
-                    line=dict(
-                        color="white",
-                        width=2,
-                    ),
-                ),
-                hovertemplate=(
-                    "<b>%{customdata}</b><br>"
-                    f"{t('efficient_frontier_volatility')}: "
-                    "%{x:.2f}%<br>"
-                    f"{t('efficient_frontier_return')}: "
-                    "%{y:.2f}%"
-                    "<extra></extra>"
-                ),
-            )
+            ),
+            hovertemplate=(
+                "<b>%{customdata}</b><br>"
+                f"{t('efficient_frontier_volatility')}: "
+                "%{x:.2f}%<br>"
+                f"{t('efficient_frontier_return')}: "
+                "%{y:.2f}%"
+                "<extra></extra>"
+            ),
         )
+    )
         
     fig.update_layout(
         title=t(
