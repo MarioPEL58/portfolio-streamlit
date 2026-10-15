@@ -456,8 +456,6 @@ def render_efficient_frontier(
         on_select="rerun",
         selection_mode="points",
     )
-    # debug
-    st.write(chart_event)
     
     # ========================================================
     # conrollo selezione ID
