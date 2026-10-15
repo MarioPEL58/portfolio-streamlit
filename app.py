@@ -172,15 +172,46 @@ ops_filtered = filter_ctx["ops"]
 dividends_filtered = filter_ctx["dividends"]
 filtered_tickers = filter_ctx["tickers"]
 
-# Price download
-start_date = ops["Data"].min().normalize()
+# # Price download old
+# start_date = ops["Data"].min().normalize()
+# end_date = pd.Timestamp.today().normalize()
+
+# closes, missing = download_close_prices(
+#     filtered_tickers,
+#     start_date,
+#     end_date
+# )
+
+# Price download new 
+
+portfolio_start_date = (
+    ops["Data"].min().normalize()
+)
+
+five_years_ago = (
+    pd.Timestamp.today().normalize()
+    - pd.DateOffset(years=5)
+)
+
+download_start_date = min(
+    portfolio_start_date,
+    five_years_ago
+)
+
 end_date = pd.Timestamp.today().normalize()
 
 closes, missing = download_close_prices(
     filtered_tickers,
-    start_date,
+    download_start_date,
     end_date
 )
+st.write(
+    "DOWNLOAD:",
+    closes.index.min(),
+    closes.index.max()
+)
+# Price download new  end 
+
 market_last_date = closes.index.max()
 
 # st.write("=== FILTERED TICKERS ===")
