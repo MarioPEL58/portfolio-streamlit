@@ -206,11 +206,6 @@ closes, missing = download_close_prices(
     download_start_date,
     end_date
 )
-st.write(
-    "DOWNLOAD:",
-    closes.index.min(),
-    closes.index.max()
-)
 # Price download new  end 
 
 market_last_date = closes.index.max()
@@ -241,11 +236,7 @@ full_index = pd.date_range(
 )
 
 closes = closes.reindex(full_index)
-st.write(
-    "REINDEX:",
-    closes.index.min(),
-    closes.index.max()
-)
+
 # st.write(closes.index.min())
 # st.write(closes.index.max())
 
@@ -559,15 +550,6 @@ closes_backtest_eur = prepare_backtest_closes_eur(
 closes_frontier_eur = prepare_backtest_closes_eur(
     closes=closes_frontier,
     ops=ops_filtered,
-)
-
-st.write("Debug prepare",
-    closes_backtest_eur.index.min(),
-    closes_backtest_eur.index.max()
-)
-st.write("Debug prepare frontier",
-    closes_frontier_eur.index.min(),
-    closes_frontier_eur.index.max()
 )
 
 # Main chart
