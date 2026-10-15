@@ -556,11 +556,20 @@ closes_backtest_eur = prepare_backtest_closes_eur(
     closes=closes,
     ops=ops_filtered,
 )
+closes_frontier_eur = prepare_backtest_closes_eur(
+    closes=closes_frontier,
+    ops=ops_filtered,
+)
 
 st.write("Debug prepare",
     closes_backtest_eur.index.min(),
     closes_backtest_eur.index.max()
 )
+st.write("Debug prepare frontier",
+    closes_frontier_eur.index.min(),
+    closes_frontier_eur.index.max()
+)
+
 # Main chart
 
 st.subheader(t("charts_title"))
@@ -917,7 +926,7 @@ with tab_frontier:
     
     render_efficient_frontier(
         current=current,
-        closes=closes_backtest_eur,
+        closes=closes_frontier_eur,
         ops=ops_filtered,
         use_risk_free=use_risk_free,
         risk_free_rate=rf_annual,
