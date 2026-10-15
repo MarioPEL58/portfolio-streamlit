@@ -180,6 +180,7 @@ def render_efficient_frontier(
     result = st.session_state.get(
         "efficient_frontier_result"
     )
+    asset_stats = result.get("asset_stats") if result else None
     
     # Prima simulazione non ancora eseguita
     if result is None and not run_simulation:
