@@ -197,6 +197,7 @@ download_start_date = min(
     portfolio_start_date,
     five_years_ago
 )
+start_date = download_start_date
 
 end_date = pd.Timestamp.today().normalize()
 
