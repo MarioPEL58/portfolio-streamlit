@@ -387,6 +387,8 @@ efficient_frontier_limiting_ticker = "Ticker che limita lo storico"
 efficient_frontier_ready = "Imposta il numero di portafogli e avvia la simulazione."
 efficient_frontier_selected = "Selezionato"
 efficient_frontier_delta_selected = "Δ Selezionato"
+efficient_frontier_show_assets = "📍 Mostra singoli asset"
+efficient_frontier_assets_trace = "Asset"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -859,6 +861,8 @@ efficient_frontier_limiting_ticker = "Ticker limiting the historical period"
 efficient_frontier_ready = "Set the number of portfolios and start the simulation."
 efficient_frontier_selected = "Selected"
 efficient_frontier_delta_selected = "Δ Selected"
+efficient_frontier_show_assets = "📍 Show individual assets"
+efficient_frontier_assets_trace = "Assets"
 # ============================================================
 # MONTE CARLO
 # ============================================================
