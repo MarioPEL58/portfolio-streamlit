@@ -232,6 +232,8 @@ market_last_date = closes.index.max()
 # st.write("closes max:", closes.index.max())
 # st.write("closes max type:", type(closes.index.max()))
 
+closes_frontier = closes.copy()
+
 full_index = pd.date_range(
     start=ops["Data"].min(),
     end=closes.index.max(),
@@ -553,6 +555,11 @@ st.caption(t("performance_total_desc"))
 closes_backtest_eur = prepare_backtest_closes_eur(
     closes=closes,
     ops=ops_filtered,
+)
+
+st.write("Debug prepare",
+    closes_backtest_eur.index.min(),
+    closes_backtest_eur.index.max()
 )
 # Main chart
 
