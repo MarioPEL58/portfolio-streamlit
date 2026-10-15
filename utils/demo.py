@@ -472,6 +472,28 @@ def _build_demo_operations_df() -> pd.DataFrame:
             "Cambio": 1.0,
             "Spese euro": 5.00,
         },
+        {
+            "ID": 31,
+            "Statistiche": "1",
+            "Nome": "Invesco EQQQ Nasdaq-100 UCITS ETF",
+            "Tipo": "ETF",
+            "Classe": "ETF Growth",
+            "Area": "USA",
+            "Settore": "Tecnologia",
+            "Emittente": "Invesco",
+            "Valuta": "EUR",
+            "ISIN": "IE0032077012",
+            "Ticker": "EQQQ.MI",
+            "Tassa": 0.26,
+            "Data": "2022-01-20",
+            "Mercato": "Milano",
+            "Intermediario": "IBK",
+            "Quantità": 90,
+            "Prezzo": 120.00,
+            "Spese valuta": 0.00,
+            "Cambio": 1.0,
+            "Spese euro": 5.00,
+        },
     ])
 
 
