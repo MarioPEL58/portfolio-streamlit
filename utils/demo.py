@@ -362,6 +362,28 @@ def _build_demo_operations_df() -> pd.DataFrame:
             "Cambio": 1.0,
             "Spese euro": 9.95,
         },
+                {
+            "ID": 26,
+            "Statistiche": "1",
+            "Nome": "SUSTAINABLE MULTIASSET R EUR ACC",
+            "Tipo": "FONDO",
+            "Classe": "Bilanciato",
+            "Area": "Italia",
+            "Settore": "Tutti",
+            "Emittente": "Eurizon",
+            "Valuta": "EUR",
+            "ISIN": "LU2215042750",
+            "Ticker": "0P0001M2JZ.F",
+            "Tassa": 0.26,
+            "Data": "2022-04-04",
+            "Mercato": "Milano",
+            "Intermediario": "IntesaSanPaolo",
+            "Quantità": 45.349,
+            "Prezzo": 98.10,
+            "Spese valuta": 0.00,
+            "Cambio": 1.0,
+            "Spese euro": 88.5,
+        },
     ])
 
 
