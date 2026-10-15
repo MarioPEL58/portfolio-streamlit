@@ -126,7 +126,23 @@ def calculate_efficient_frontier(
         returns.cov()
         * TRADING_DAYS
     )
-
+    
+    # ========================================================
+    # Single asset stats
+    # ========================================================
+    asset_stats = pd.DataFrame(
+        {
+            "Return": mean_returns,
+            "Volatility": np.sqrt(
+                np.diag(cov_matrix)
+            ),
+        }
+    )
+    
+    asset_stats["Sharpe"] = (
+        asset_stats["Return"]
+        / asset_stats["Volatility"]
+    )
     # ========================================================
     # Monte Carlo
     # ========================================================
@@ -341,7 +357,9 @@ def calculate_efficient_frontier(
     return {
         "assets":
             assets,
-
+        
+        "asset_stats": asset_stats,
+        
         "start_date":
             prices.index.min(),
 
