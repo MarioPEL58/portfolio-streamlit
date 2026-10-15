@@ -239,7 +239,11 @@ full_index = pd.date_range(
 )
 
 closes = closes.reindex(full_index)
-
+st.write(
+    "REINDEX:",
+    closes.index.min(),
+    closes.index.max()
+)
 # st.write(closes.index.min())
 # st.write(closes.index.max())
 
