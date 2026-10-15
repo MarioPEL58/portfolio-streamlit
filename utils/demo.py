@@ -472,6 +472,28 @@ def _build_demo_operations_df() -> pd.DataFrame:
             "Cambio": 1.0,
             "Spese euro": 5.00,
         },
+        {
+            "ID": 31,
+            "Statistiche": "1",
+            "Nome": "Bitcoin",
+            "Tipo": "CRYPTO",
+            "Classe": "Crypto",
+            "Area": "Globale",
+            "Settore": "Digital Asset",
+            "Emittente": "Bitcoin",
+            "Valuta": "USD",
+            "ISIN": "",
+            "Ticker": "BTC-USD",
+            "Tassa": 0.26,
+            "Data": "2022-07-08",
+            "Mercato": "Crypto",
+            "Intermediario": "IBK",
+            "Quantità": 0.15,
+            "Prezzo": 21600.00,
+            "Spese valuta": 0.00,
+            "Cambio": 1.0,
+            "Spese euro": 10.00,
+        },
     ])
 
 
