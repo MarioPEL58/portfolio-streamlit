@@ -397,6 +397,14 @@ def render_efficient_frontier(
         )
     )
     
+    asset_labels = [
+        asset_labels_map.get(
+            ticker,
+            ticker
+        )
+        for ticker in asset_stats.index
+    ]
+    
     fig.add_trace(
         go.Scatter(
             x=asset_stats["Volatility"] * 100.0,
@@ -406,7 +414,7 @@ def render_efficient_frontier(
             name=t(
                 "efficient_frontier_assets_trace"
             ),
-            customdata=asset_stats.index,
+            customdata=asset_labels,
             marker=dict(
                 size=12,
                 color="orange",
