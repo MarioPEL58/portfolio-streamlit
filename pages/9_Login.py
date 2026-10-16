@@ -50,6 +50,18 @@ else:
             if success:
         
                 st.rerun()
+
+            else:
+
+                if (
+                    error
+                    and "Invalid login credentials" in error
+                ):
+            
+                    st.warning(
+                        f"{t('login_invalid_credentials')}\n\n"
+                        f"{t('login_register_hint')}"
+                    )
         
             else:
         
