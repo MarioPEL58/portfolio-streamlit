@@ -16,6 +16,7 @@ def render_efficient_frontier(
     current: pd.DataFrame,
     closes: pd.DataFrame,
     ops: pd.DataFrame,
+    label_choice: str,
     use_risk_free: bool = False,
     risk_free_rate: float = 0.0,
 ):
