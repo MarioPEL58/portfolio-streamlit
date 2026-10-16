@@ -1,5 +1,7 @@
 import streamlit as st
 
+from utils.i18n import t
+
 from utils.auth import (
     init_session,
     login,
