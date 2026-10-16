@@ -910,6 +910,7 @@ with tab_frontier:
         current=current,
         closes=closes_frontier_eur,
         ops=ops_filtered,
+        label_choice=label_choice,
         use_risk_free=use_risk_free,
         risk_free_rate=rf_annual,
     )
