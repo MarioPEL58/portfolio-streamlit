@@ -41,33 +41,41 @@ else:
     col1, col2 = st.columns(2)
 
     with col1:
-
+        
         if st.button("Login"):
         
-            success, error = login(
-                email,
-                password
-            )
+            if not email or not password:
         
-            if success:
+                st.warning(
+                    t("login_missing_credentials")
+                )
         
-                st.rerun()
-
             else:
-
-                if (
-                    error
-                    and "Invalid login credentials" in error
-                ):
-            
-                    st.warning(
-                        f"{t('login_invalid_credentials')}\n\n"
-                        f"{t('login_register_hint')}"
-                    )
+        
+                success, error = login(
+                    email,
+                    password
+                )
+        
+                if success:
+        
+                    st.rerun()
         
                 else:
-            
-                    st.error(error)
+        
+                    if (
+                        error
+                        and "Invalid login credentials" in error
+                    ):
+        
+                        st.warning(
+                            f"{t('login_invalid_credentials')}\n\n"
+                            f"{t('login_register_hint')}"
+                        )
+        
+                    else:
+        
+                        st.error(error)
 
     with col2:
 
