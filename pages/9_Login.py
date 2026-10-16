@@ -65,9 +65,9 @@ else:
                         f"{t('login_register_hint')}"
                     )
         
-            else:
-        
-                st.error(error)
+                else:
+            
+                    st.error(error)
 
     with col2:
 
