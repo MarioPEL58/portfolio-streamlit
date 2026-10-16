@@ -41,13 +41,19 @@ else:
     with col1:
 
         if st.button("Login"):
-
-            login(
+        
+            success, error = login(
                 email,
                 password
             )
-
-            st.rerun()
+        
+            if success:
+        
+                st.rerun()
+        
+            else:
+        
+                st.error(error)
 
     with col2:
 
