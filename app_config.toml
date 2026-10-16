@@ -32,6 +32,7 @@ missing_tickers = "Ticker senza prezzi scaricati:"
 portfolio_error = "Non è stato possibile costruire il portafoglio con i dati disponibili."
 
 # Login
+login_missing_credentials = "Inserisci email e password."
 login_invalid_credentials = "Account non trovato o password errata."
 login_register_hint = "Se è il tuo primo accesso, clicca su 'Registrati'."
 
@@ -509,6 +510,7 @@ missing_tickers = "Tickers without price data:"
 portfolio_error = "Unable to build the portfolio with available data."
 
 # Login
+login_missing_credentials = "Please enter both email and password."
 login_invalid_credentials = "Account not found or incorrect password."
 login_register_hint = "If this is your first access, click 'Sign Up'."
 
