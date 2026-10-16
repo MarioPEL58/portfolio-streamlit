@@ -31,6 +31,10 @@ no_prices = "Non sono riuscito a scaricare i prezzi da Yahoo Finance."
 missing_tickers = "Ticker senza prezzi scaricati:"
 portfolio_error = "Non è stato possibile costruire il portafoglio con i dati disponibili."
 
+# Login
+login_invalid_credentials = "Account non trovato o password errata."
+login_register_hint = "Se è il tuo primo accesso, clicca su 'Registrati'."
+
 # KPI
 kpi_title = "📊 KPI Portafoglio"
 
@@ -503,6 +507,10 @@ file_loaded = "File loaded:"
 no_prices = "Unable to download prices from Yahoo Finance."
 missing_tickers = "Tickers without price data:"
 portfolio_error = "Unable to build the portfolio with available data."
+
+# Login
+login_invalid_credentials = "Account not found or incorrect password."
+login_register_hint = "If this is your first access, click 'Sign Up'."
 
 # KPI
 kpi_title = "📊 Portfolio KPIs"
