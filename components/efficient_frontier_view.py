@@ -108,7 +108,12 @@ def render_efficient_frontier(
     ]
     
     if previous_signature != portfolio_signature:
-    
+        
+        st.write(
+            "previous_signature == portfolio_signature",
+            previous_signature == portfolio_signature
+        )
+        
         st.session_state["efficient_frontier_result"] = None
         
         st.session_state["efficient_frontier_selected_id"] = None
@@ -208,8 +213,6 @@ def render_efficient_frontier(
             if label_choice == "Nome"
             else ticker
         )
-        
-    st.write(asset_labels_map)   #debug
     
     show_assets = st.toggle(
         t("efficient_frontier_show_assets"),
