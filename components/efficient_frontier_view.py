@@ -109,21 +109,6 @@ def render_efficient_frontier(
     
     if previous_signature != portfolio_signature:
         
-        st.write("DIFF")
-    
-        prev = dict(previous_signature)
-        curr = dict(portfolio_signature)
-    
-        for k in sorted(set(prev) | set(curr)):
-    
-            if prev.get(k) != curr.get(k):
-    
-                st.write(
-                    k,
-                    prev.get(k),
-                    curr.get(k)
-                )
-        
         st.session_state["efficient_frontier_result"] = None
         
         st.session_state["efficient_frontier_selected_id"] = None
