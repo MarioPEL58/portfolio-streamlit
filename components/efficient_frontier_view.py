@@ -172,7 +172,6 @@ def render_efficient_frontier(
             "efficient_frontier_result"
         ] = result
     
-    
     # ========================================================
     # Recupero ultima simulazione
     # ========================================================
@@ -180,7 +179,6 @@ def render_efficient_frontier(
     result = st.session_state.get(
         "efficient_frontier_result"
     )
-    asset_stats = (result.get("asset_stats") if result is not None else None)
     
     # Prima simulazione non ancora eseguita
     if result is None and not run_simulation:
@@ -188,17 +186,35 @@ def render_efficient_frontier(
             t("efficient_frontier_ready")
         )
         return None
-        
+    
     # Simulazione eseguita, ma dati realmente insufficienti
     if result is None:
         st.warning(
             t("efficient_frontier_no_data")
         )
         return None
+    
+    assets = result["assets"]
+    
+    asset_stats = result.get("asset_stats")
+    
+    asset_labels_map = {}
+    
+    for ticker in assets:
+    
+        asset_labels_map[ticker] = (
+            ticker_names.get(ticker, ticker)
+            if label_choice == "Nome"
+            else ticker
+        )
         
-    assets = result["assets"] 
-
-    show_assets = st.toggle(t("efficient_frontier_show_assets"),value=False,key="efficient_frontier_show_assets",)
+    st.write(asset_labels_map)   #debug
+    
+    show_assets = st.toggle(
+        t("efficient_frontier_show_assets"),
+        value=False,
+        key="efficient_frontier_show_assets",
+    )
     
     # ========================================================
     # Grafico Frontiera Efficiente
