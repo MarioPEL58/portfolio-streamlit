@@ -39,7 +39,10 @@ def init_session():
 # LOGIN
 # =====================================================
 
-def login(email: str, password: str) -> bool:
+def login(
+    email: str,
+    password: str
+) -> tuple[bool, str | None]:
 
     supabase = get_supabase()
 
@@ -57,15 +60,11 @@ def login(email: str, password: str) -> bool:
         st.session_state.user_id = result.user.id
         st.session_state.user_email = result.user.email
 
-        return True
+        return True, None
 
     except Exception as e:
 
-        st.error(
-            f"Login fallito: {e}"
-        )
-
-        return False
+        return False, str(e)
 
 
 # =====================================================
