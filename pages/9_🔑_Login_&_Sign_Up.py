@@ -35,15 +35,18 @@ LANG = init_language(CONFIG)
 init_session()
 
 hash_value = st_javascript(
-    "await window.location.hash"
+    """
+    window.location.hash
+    """
 )
+st.write(repr(hash_value))
 
-recovery_mode = (
-    hash_value
-    and "type=recovery" in hash_value
-)
-st.write(hash_value)
-st.write(recovery_mode)
+# recovery_mode = (
+#     hash_value
+#     and "type=recovery" in hash_value
+# )
+# st.write(hash_value)
+# st.write(recovery_mode)
 
 
 st.title(t("login_page_title"))
