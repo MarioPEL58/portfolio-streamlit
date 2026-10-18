@@ -221,6 +221,10 @@ def reset_password(
 
         supabase.auth.reset_password_email(
             email
+            {
+                "redirect_to":
+                    "https://mariopel58.github.io/callback.html"
+            }
         )
 
         return True, None
