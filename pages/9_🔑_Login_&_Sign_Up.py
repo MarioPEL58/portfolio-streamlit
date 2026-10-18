@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 
+from streamlit_javascript import st_javascript
 from config.config import load_config
 from utils.i18n import init_language, t
 
@@ -32,6 +33,18 @@ LANG = init_language(CONFIG)
 
 # ==== UI ==========
 init_session()
+
+hash_value = st_javascript(
+    "await window.location.hash"
+)
+
+recovery_mode = (
+    hash_value
+    and "type=recovery" in hash_value
+)
+st.write(hash_value)
+st.write(recovery_mode)
+
 
 st.title(t("login_page_title"))
 
