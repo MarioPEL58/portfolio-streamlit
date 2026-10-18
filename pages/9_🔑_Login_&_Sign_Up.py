@@ -57,13 +57,67 @@ st.title(t("login_page_title"))
 
 if is_logged():
 
-    st.success(t("login_authenticated"))
+    st.success(
+        t("login_authenticated")
+    )
 
     st.write(
         st.session_state.user.email
     )
 
-    if st.button("Logout"):
+    st.markdown("---")
+
+    st.subheader(
+        t("change_password")
+    )
+
+    new_password = st.text_input(
+        t("new_password"),
+        type="password"
+    )
+
+    confirm_password = st.text_input(
+        t("confirm_password"),
+        type="password"
+    )
+
+    if st.button(
+        t("change_password")
+    ):
+
+        if not new_password:
+
+            st.warning(
+                t("password_required")
+            )
+
+        elif new_password != confirm_password:
+
+            st.warning(
+                t("password_mismatch")
+            )
+
+        else:
+
+            success, error = change_password(
+                new_password
+            )
+
+            if success:
+
+                st.success(
+                    t("password_changed")
+                )
+
+            else:
+
+                st.error(error)
+
+    st.markdown("---")
+
+    if st.button(
+        t("logout_button")
+    ):
 
         logout()
         st.rerun()
