@@ -220,7 +220,7 @@ def reset_password(
     try:
 
         supabase.auth.reset_password_email(
-            email
+            email,
             {
                 "redirect_to":
                     "https://mariopel58.github.io/callback.html"
