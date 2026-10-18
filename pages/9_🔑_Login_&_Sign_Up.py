@@ -9,7 +9,9 @@ from utils.auth import (
     login,
     signup,
     logout,
-    is_logged
+    is_logged,
+    reset_password,
+    change_password,
 )
 
 # ✅ CONFIG BASE
