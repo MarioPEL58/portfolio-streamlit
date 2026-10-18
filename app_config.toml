@@ -44,6 +44,10 @@ login_missing_credentials = "Inserisci email e password."
 login_invalid_credentials = "Account non trovato o password errata."
 login_register_hint = "Se è il tuo primo accesso, clicca su 'Registrati'."
 login_timeout = "Il servizio di autenticazione sta impiegando più tempo del previsto. Riprova tra qualche secondo."
+
+signup_success = "Registrazione completata. Controlla la tua email per confermare l'account."
+signup_check_spam = "Se non trovi il messaggio, verifica anche la cartella Spam."
+
 # KPI
 kpi_title = "📊 KPI Portafoglio"
 
@@ -530,6 +534,9 @@ login_missing_credentials = "Please enter both email and password."
 login_invalid_credentials = "Account not found or incorrect password."
 login_register_hint = "If this is your first access, click 'Sign Up'."
 login_timeout = "The authentication service is taking longer than expected. Please try again in a few seconds."
+
+signup_success = "Registration completed. Check your email to confirm your account."
+signup_check_spam = "If you cannot find the message, please check your Spam folder."
 # KPI
 kpi_title = "📊 Portfolio KPIs"
 
