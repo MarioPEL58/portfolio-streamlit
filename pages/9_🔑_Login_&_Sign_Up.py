@@ -84,6 +84,14 @@ else:
         
                     if (
                         error
+                        and "timed out" in error.lower()
+                    ):
+                
+                        st.warning(
+                            t("login_timeout")
+                        )
+                    elif (
+                        error
                         and "Invalid login credentials" in error
                     ):
         
