@@ -51,6 +51,14 @@ signup_check_spam = "Se non trovi il messaggio, verifica anche la cartella Spam.
 reset_password = "Password dimenticata?"
 reset_password_sent = "Controlla la tua email per reimpostare la password."
 login_email_required = "Inserisci l'indirizzo email."
+reset_password_title = "🔑 Reimposta Password"
+
+new_password = "Nuova password"
+confirm_password = "Conferma password"
+change_password = "Aggiorna password"
+password_required = "Inserisci una nuova password."
+password_mismatch = "Le password non coincidono."
+password_changed = "Password aggiornata correttamente."
 
 # KPI
 kpi_title = "📊 KPI Portafoglio"
@@ -545,6 +553,15 @@ signup_check_spam = "If you cannot find the message, please check your Spam fold
 reset_password = "Forgot password?"
 reset_password_sent = "Check your email to reset your password."
 login_email_required = "Please enter your email address."
+reset_password_title = "🔑 Reset Password"
+
+new_password = "New password"
+confirm_password = "Confirm password"
+change_password = "Update password"
+password_required = "Please enter a new password."
+password_mismatch = "Passwords do not match."
+password_changed = "Password updated successfully."
+
 # KPI
 kpi_title = "📊 Portfolio KPIs"
 
