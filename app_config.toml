@@ -32,7 +32,7 @@ missing_tickers = "Ticker senza prezzi scaricati:"
 portfolio_error = "Non è stato possibile costruire il portafoglio con i dati disponibili."
 
 # Login
-login_page_title = "🔑 Login & Sign Up"
+login_page_title = "🔑 Login & Registrazione"
 login_email = "Email"
 login_password = "Password"
 login_button = "Login"
