@@ -128,3 +128,32 @@ else:
             else:
             
                 st.error(message)
+                
+    st.markdown("---")
+    
+    if st.button(
+        t("reset_password")
+    ):
+        
+        if not email:
+            
+            st.warning(
+                t("login_email_required")
+            )
+        
+        else:
+            
+            success, error = reset_password(
+                email
+            )
+            
+            if success:
+                
+                st.success(
+                    t("reset_password_sent")
+                )
+            
+            else:
+                
+                st.error(error)
+
