@@ -77,13 +77,16 @@ def signup(email: str, password: str) -> bool:
 
     try:
 
-        supabase.auth.sign_up(
+        result= supabase.auth.sign_up(
             {
                 "email": email,
                 "password": password,
             }
         )
-
+        
+        st.write(result.user)
+        st.write(result.session)
+        
         st.success(
             "Utente registrato. Controlla la mail di conferma."
         )
