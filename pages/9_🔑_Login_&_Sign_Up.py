@@ -39,7 +39,8 @@ hash_value = st_javascript(
     window.location.hash
     """
 )
-st.write(repr(hash_value))
+st.write("TYPE:", type(hash_value))
+st.write("VALUE:", repr(hash_value))
 
 # recovery_mode = (
 #     hash_value
