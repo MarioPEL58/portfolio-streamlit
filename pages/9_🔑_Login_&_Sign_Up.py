@@ -35,12 +35,15 @@ LANG = init_language(CONFIG)
 init_session()
 
 hash_value = st_javascript(
-    """
-    window.location.hash
-    """
+    "window.location.hash"
 )
-st.write("TYPE:", type(hash_value))
-st.write("VALUE:", repr(hash_value))
+
+st.json(
+    {
+        "value": hash_value,
+        "python_type": str(type(hash_value))
+    }
+)
 
 # recovery_mode = (
 #     hash_value
