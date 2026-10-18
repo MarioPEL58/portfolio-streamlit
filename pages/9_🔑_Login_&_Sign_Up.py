@@ -108,7 +108,23 @@ else:
 
         if st.button(t("signup_button")):
 
-            signup(
+            success, message = signup(
                 email,
                 password
             )
+            
+            if success:
+            
+                if message == "confirm_email":
+            
+                    st.success(
+                        t("signup_success")
+                    )
+            
+                    st.caption(
+                        t("signup_check_spam")
+                    )
+            
+            else:
+            
+                st.error(message)
