@@ -84,14 +84,17 @@ def signup(email: str, password: str) -> bool:
             }
         )
         
-        st.write(result.user)
-        st.write(result.session)
+        # st.write(result.user)
+        # st.write(result.session)
         
-        st.success(
-            "Utente registrato. Controlla la mail di conferma."
-        )
+        # Utente creato ma non ancora confermato
+        if (
+            result.user
+            and result.user.email_confirmed_at is None
+        ):
+            return True, "confirm_email"
 
-        return True
+        return True, None
 
     except Exception as e:
 
