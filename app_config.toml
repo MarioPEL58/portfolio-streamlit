@@ -32,10 +32,18 @@ missing_tickers = "Ticker senza prezzi scaricati:"
 portfolio_error = "Non è stato possibile costruire il portafoglio con i dati disponibili."
 
 # Login
+login_page_title = "🔑 Login & Sign Up"
+login_email = "Email"
+login_password = "Password"
+login_button = "Login"
+signup_button = "Registrati"
+logout_button = "Logout"
+
+login_authenticated = "Utente autenticato"
 login_missing_credentials = "Inserisci email e password."
 login_invalid_credentials = "Account non trovato o password errata."
 login_register_hint = "Se è il tuo primo accesso, clicca su 'Registrati'."
-
+login_timeout = "Il servizio di autenticazione sta impiegando più tempo del previsto. Riprova tra qualche secondo."
 # KPI
 kpi_title = "📊 KPI Portafoglio"
 
@@ -510,10 +518,18 @@ missing_tickers = "Tickers without price data:"
 portfolio_error = "Unable to build the portfolio with available data."
 
 # Login
+login_page_title = "🔑 Login & Sign Up"
+login_email = "Email"
+login_password = "Password"
+login_button = "Login"
+signup_button = "Sign Up"
+logout_button = "Logout"
+
+login_authenticated = "Authenticated user"
 login_missing_credentials = "Please enter both email and password."
 login_invalid_credentials = "Account not found or incorrect password."
 login_register_hint = "If this is your first access, click 'Sign Up'."
-
+login_timeout = "The authentication service is taking longer than expected. Please try again in a few seconds."
 # KPI
 kpi_title = "📊 Portfolio KPIs"
 
