@@ -63,6 +63,9 @@ st.set_page_config(
     layout="wide"
 )
 
+st.write("QUERY PARAMS")
+st.write(st.query_params)
+
 #  🔹 Richiama la funzione subito dopo la page config per lo stile di stampa
 applica_stile_stampa()
 
