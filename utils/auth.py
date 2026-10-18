@@ -71,23 +71,22 @@ def login(
 # REGISTRAZIONE
 # =====================================================
 
-def signup(email: str, password: str) -> bool:
+def signup(
+    email: str,
+    password: str
+) -> tuple[bool, str | None]:
 
     supabase = get_supabase()
 
     try:
 
-        result= supabase.auth.sign_up(
+        result = supabase.auth.sign_up(
             {
                 "email": email,
                 "password": password,
             }
         )
-        
-        # st.write(result.user)
-        # st.write(result.session)
-        
-        # Utente creato ma non ancora confermato
+
         if (
             result.user
             and result.user.email_confirmed_at is None
@@ -98,11 +97,8 @@ def signup(email: str, password: str) -> bool:
 
     except Exception as e:
 
-        st.error(
-            f"Registrazione fallita: {e}"
-        )
+        return False, str(e)
 
-        return False
 
 
 # =====================================================
