@@ -34,23 +34,24 @@ LANG = init_language(CONFIG)
 # ==== UI ==========
 init_session()
 
-hash_value = st_javascript(
-    "window.location.hash"
-)
-
-st.json(
-    {
-        "value": hash_value,
-        "python_type": str(type(hash_value))
-    }
-)
-
-# recovery_mode = (
-#     hash_value
-#     and "type=recovery" in hash_value
+# hash_value = st_javascript(
+#     "window.location.hash"
 # )
-# st.write(hash_value)
-# st.write(recovery_mode)
+
+# st.json(
+#     {
+#         "value": hash_value,
+#         "python_type": str(type(hash_value))
+#     }
+# )
+params = st.query_params
+
+recovery_mode = (
+    params.get("type") == "recovery"
+)
+
+st.write(params)
+
 
 
 st.title(t("login_page_title"))
