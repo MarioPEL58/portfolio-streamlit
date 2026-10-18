@@ -190,3 +190,41 @@ def render_user_sidebar():
         st.sidebar.info(
             "👤 Ospite"
         )
+        
+def change_password(
+    new_password: str
+) -> tuple[bool, str | None]:
+
+    supabase = get_supabase()
+
+    try:
+
+        supabase.auth.update_user(
+            {
+                "password": new_password
+            }
+        )
+
+        return True, None
+
+    except Exception as e:
+
+        return False, str(e)
+
+def reset_password(
+    email: str
+) -> tuple[bool, str | None]:
+
+    supabase = get_supabase()
+
+    try:
+
+        supabase.auth.reset_password_email(
+            email
+        )
+
+        return True, None
+
+    except Exception as e:
+
+        return False, str(e)
