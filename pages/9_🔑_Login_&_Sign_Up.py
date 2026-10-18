@@ -1,6 +1,7 @@
 import streamlit as st
 
-from utils.i18n import t
+from config.config import load_config
+from utils.i18n import init_language, t
 
 from utils.auth import (
     init_session,
@@ -10,6 +11,23 @@ from utils.auth import (
     is_logged
 )
 
+# ✅ CONFIG BASE
+CONFIG = load_config()
+ENV = os.getenv("ENV", "DEV")
+
+env_cfg = CONFIG["env"][ENV]
+
+# ✅ ⚠️ SEMPRE PRIMA DI QUALSIASI st.sidebar
+st.set_page_config(
+    page_title=env_cfg["title"],
+    page_icon=env_cfg["icon"],
+    layout="wide"
+)
+
+# ✅ ORA puoi usare Streamlit
+LANG = init_language(CONFIG)
+
+# ==== UI ==========
 init_session()
 
 st.title("🔑 Login")
