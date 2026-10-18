@@ -31,11 +31,11 @@ LANG = init_language(CONFIG)
 # ==== UI ==========
 init_session()
 
-st.title("🔑 Login")
+st.title(t("login_page_title"))
 
 if is_logged():
 
-    st.success("Utente autenticato")
+    st.success(t("login_authenticated"))
 
     st.write(
         st.session_state.user.email
@@ -49,11 +49,11 @@ if is_logged():
 else:
 
     email = st.text_input(
-        "Email"
+        t("login_email")
     )
 
     password = st.text_input(
-        "Password",
+        t("login_password"),
         type="password"
     )
 
@@ -61,7 +61,7 @@ else:
 
     with col1:
         
-        if st.button("Login"):
+        if st.button(t("login_button")):
         
             if not email or not password:
         
@@ -98,7 +98,7 @@ else:
 
     with col2:
 
-        if st.button("Registrati"):
+        if st.button(t("signup_button")):
 
             signup(
                 email,
