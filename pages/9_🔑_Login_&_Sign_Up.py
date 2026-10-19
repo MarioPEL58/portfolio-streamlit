@@ -119,7 +119,13 @@ if is_logged():
     st.write(
         st.session_state.user.email
     )
+    if st.button(
+        t("logout_button")
+    ):
 
+        logout()
+        st.rerun()
+        
     st.markdown("---")
 
     st.subheader(
@@ -169,13 +175,6 @@ if is_logged():
                 st.error(error)
 
     st.markdown("---")
-
-    if st.button(
-        t("logout_button")
-    ):
-
-        logout()
-        st.rerun()
 
 else:
 
