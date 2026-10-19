@@ -45,6 +45,10 @@ init_session()
 #     }
 # )
 params = st.query_params
+st.json(params)
+
+access_token = params.get("access_token")
+refresh_token = params.get("refresh_token")
 
 recovery_mode = (
     params.get("type") == "recovery"
