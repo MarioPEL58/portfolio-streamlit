@@ -60,6 +60,8 @@ password_required = "Inserisci una nuova password."
 password_mismatch = "Le password non coincidono."
 password_changed = "Password aggiornata correttamente."
 
+login_with_new_password = "Ora puoi accedere con la nuova password."
+
 # KPI
 kpi_title = "📊 KPI Portafoglio"
 
@@ -561,6 +563,8 @@ change_password = "Update password"
 password_required = "Please enter a new password."
 password_mismatch = "Passwords do not match."
 password_changed = "Password updated successfully."
+
+login_with_new_password = "You can now sign in with your new password."
 
 # KPI
 kpi_title = "📊 Portfolio KPIs"
