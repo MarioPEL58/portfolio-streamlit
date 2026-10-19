@@ -35,9 +35,6 @@ LANG = init_language(CONFIG)
 # ==== UI ==========
 init_session()
 
-st.write("🇮🇹")
-st.write("🇬🇧")
-
 # hash_value = st_javascript(
 #     "window.location.hash"
 # )
@@ -49,15 +46,10 @@ st.write("🇬🇧")
 #     }
 # )
 params = st.query_params
-st.json(params)
 
 recovery_mode = (
     params.get("type") == "recovery"
 )
-
-st.write("Recovery:", params.get("type"))
-st.write("Access:", bool(params.get("access_token")))
-st.write("Refresh:", bool(params.get("refresh_token")))
 
 if recovery_mode:
     
@@ -69,10 +61,7 @@ if recovery_mode:
         refresh_token
     )
     
-    st.write(
-        "SESSION:",
-        success
-    )
+    # st.write("SESSION:",success)
     
     if error:
         st.error(error)
@@ -110,15 +99,13 @@ if recovery_mode:
                 st.success(
                     t("password_changed")
                 )
-    
+                st.info(
+                    t("login_with_new_password")
+                )
             else:
     
                 st.error(error)
             
-            st.write(
-                "RECOVERY MODE"
-            )
-
     st.stop()
 
 st.title(t("login_page_title"))
