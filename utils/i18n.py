@@ -67,7 +67,11 @@ def init_language(CONFIG):
     LANG = st.sidebar.selectbox(
         "Lingua / Language",
         languages,
-        index=languages.index(st.session_state.lang)
+        index=languages.index(st.session_state.lang),
+        format_func=lambda x: {
+            "it": "🇮🇹 Italiano",
+            "en": "🇬🇧 English",
+        }[x]
     )
 
     # aggiorna stato
