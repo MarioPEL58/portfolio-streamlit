@@ -54,9 +54,39 @@ recovery_mode = (
     params.get("type") == "recovery"
 )
 
-st.write(params)
+if recovery_mode:
 
+    st.title(
+        t("reset_password_title")
+    )
 
+    new_password = st.text_input(
+        t("new_password"),
+        type="password"
+    )
+
+    confirm_password = st.text_input(
+        t("confirm_password"),
+        type="password"
+    )
+
+    if st.button(
+        t("change_password")
+    ):
+
+        if new_password != confirm_password:
+
+            st.warning(
+                t("password_mismatch")
+            )
+
+        else:
+
+            st.write(
+                "RECOVERY MODE"
+            )
+
+    st.stop()
 
 st.title(t("login_page_title"))
 
