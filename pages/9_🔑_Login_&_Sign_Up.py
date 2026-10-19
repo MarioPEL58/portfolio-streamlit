@@ -1,7 +1,6 @@
 import streamlit as st
 import os
 
-from streamlit_javascript import st_javascript
 from config.config import load_config
 from utils.i18n import init_language, t
 
@@ -35,16 +34,6 @@ LANG = init_language(CONFIG)
 # ==== UI ==========
 init_session()
 
-# hash_value = st_javascript(
-#     "window.location.hash"
-# )
-
-# st.json(
-#     {
-#         "value": hash_value,
-#         "python_type": str(type(hash_value))
-#     }
-# )
 params = st.query_params
 
 recovery_mode = (
