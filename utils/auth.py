@@ -228,6 +228,26 @@ def reset_password(
         )
 
         return True, None
+        
+def set_recovery_session(
+    access_token: str,
+    refresh_token: str
+) -> tuple[bool, str | None]:
+
+    supabase = get_supabase()
+
+    try:
+
+        supabase.auth.set_session(
+            access_token,
+            refresh_token
+        )
+
+        return True, None
+
+    except Exception as e:
+
+        return False, str(e)
 
     except Exception as e:
 
