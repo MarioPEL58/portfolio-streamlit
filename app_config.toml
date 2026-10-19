@@ -61,6 +61,7 @@ password_mismatch = "Le password non coincidono."
 password_changed = "Password aggiornata correttamente."
 
 login_with_new_password = "Ora puoi accedere con la nuova password."
+login_email_not_verified = "La tua email non è ancora stata verificata. Controlla la casella di posta e clicca sul link di conferma ricevuto durante la registrazione."
 
 # KPI
 kpi_title = "📊 KPI Portafoglio"
@@ -565,6 +566,7 @@ password_mismatch = "Passwords do not match."
 password_changed = "Password updated successfully."
 
 login_with_new_password = "You can now sign in with your new password."
+login_email_not_verified = "Your email address has not been verified yet. Check your inbox and click the confirmation link received during registration."
 
 # KPI
 kpi_title = "📊 Portfolio KPIs"
