@@ -228,6 +228,10 @@ def reset_password(
         )
 
         return True, None
+    
+    except Exception as e:
+
+        return False, str(e)
         
 def set_recovery_session(
     access_token: str,
@@ -244,10 +248,6 @@ def set_recovery_session(
         )
 
         return True, None
-
-    except Exception as e:
-
-        return False, str(e)
 
     except Exception as e:
 
