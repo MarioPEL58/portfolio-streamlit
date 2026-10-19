@@ -102,7 +102,19 @@ if recovery_mode:
             )
 
         else:
-
+            success, error = change_password(
+                new_password
+            )
+            if success:
+    
+                st.success(
+                    t("password_changed")
+                )
+    
+            else:
+    
+                st.error(error)
+            
             st.write(
                 "RECOVERY MODE"
             )
