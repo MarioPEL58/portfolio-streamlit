@@ -229,7 +229,16 @@ else:
                             f"{t('login_invalid_credentials')}\n\n"
                             f"{t('login_register_hint')}"
                         )
-        
+                    elif (
+                        error
+                        and "Email not confirmed" in error
+                    ):
+                    
+                        st.warning(
+                            f"{t('login_email_not_verified')}\n\n"
+                            f"{t('login_check_spam')}"
+                        )
+                        
                     else:
         
                         st.error(error)
