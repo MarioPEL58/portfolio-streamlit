@@ -34,6 +34,9 @@ LANG = init_language(CONFIG)
 # ==== UI ==========
 init_session()
 
+st.write("🇮🇹")
+st.write("🇬🇧")
+
 # hash_value = st_javascript(
 #     "window.location.hash"
 # )
