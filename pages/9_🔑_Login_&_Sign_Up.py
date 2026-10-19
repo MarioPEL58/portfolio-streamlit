@@ -47,12 +47,13 @@ init_session()
 params = st.query_params
 st.json(params)
 
-access_token = params.get("access_token")
-refresh_token = params.get("refresh_token")
-
 recovery_mode = (
     params.get("type") == "recovery"
 )
+
+st.write("Recovery:", params.get("type"))
+st.write("Access:", bool(params.get("access_token")))
+st.write("Refresh:", bool(params.get("refresh_token")))
 
 if recovery_mode:
 
