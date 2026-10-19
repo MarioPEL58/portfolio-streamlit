@@ -13,6 +13,7 @@ from utils.auth import (
     is_logged,
     reset_password,
     change_password,
+    set_recovery_session,
 )
 
 # ✅ CONFIG BASE
@@ -59,7 +60,23 @@ st.write("Access:", bool(params.get("access_token")))
 st.write("Refresh:", bool(params.get("refresh_token")))
 
 if recovery_mode:
-
+    
+    access_token = params.get("access_token")
+    refresh_token = params.get("refresh_token")
+    
+    success, error = set_recovery_session(
+        access_token,
+        refresh_token
+    )
+    
+    st.write(
+        "SESSION:",
+        success
+    )
+    
+    if error:
+        st.error(error)
+        
     st.title(
         t("reset_password_title")
     )
