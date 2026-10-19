@@ -236,7 +236,7 @@ else:
                     
                         st.warning(
                             f"{t('login_email_not_verified')}\n\n"
-                            f"{t('login_check_spam')}"
+                            f"{t('signup_check_spam')}"
                         )
                         
                     else:
