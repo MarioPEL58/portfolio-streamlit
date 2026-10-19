@@ -502,7 +502,7 @@ def allocation_bar_chart(exposure, column="Area", title=None):
 
     fig.update_layout(
         height=420,
-        margin=dict(l=10, r=10, t=40, b=10)
+        margin=dict(l=40, r=10, t=40, b=40)
     )
 
     return fig

@@ -2,6 +2,8 @@ import pandas as pd
 import streamlit as st
 
 from services.backtest import (backtest_portfolio, build_backtest_benchmark, calculate_backtest_metrics,)
+import numpy as np
+from utils.portfolio_utils import (build_ticker_names,)
 from utils.i18n import t
 
 # Adatta questo import al modulo in cui hai inserito backtest_chart()
@@ -11,6 +13,7 @@ from components.charts import backtest_chart
 def render_backtest(
     current,
     closes,
+    ops,
     benchmark_prices=None,
     benchmark_name="",):
     # ========================================================
@@ -32,7 +35,307 @@ def render_backtest(
         index=3,  # yearly
         key="backtest_rebalance_frequency",
     )
+    
+    ticker_names = build_ticker_names(ops)
+    # ========================================================
+    # Allocazione personalizzata
+    # ========================================================
+    
+    target_weights_override = None
+    
+    current_positive = current[
+        current["Valore"] > 0
+    ].copy()
+    
+    current_values = (
+        current_positive
+        .groupby("Ticker")["Valore"]
+        .sum()
+    )
+    
+    current_total = float(
+        current_values.sum()
+    )
+    
+    current_weights = (
+        current_values
+        / current_total
+    )
+        
+    # ========================================================
+    # Allocazione iniziale
+    # ========================================================
+    
+    st.subheader(
+        t("backtest_initial_allocation")
+    )
+    # ========================================================
+    # Prima data prezzi disponibile per ticker
+    # ========================================================
+    
+    first_price_dates = {}
+    
+    for ticker in current_weights.index:
+    
+        first_date = None
+    
+        if ticker in closes.columns:
+    
+            ticker_prices = pd.to_numeric(
+                closes[ticker],
+                errors="coerce",
+            )
+    
+            ticker_prices = ticker_prices.replace(
+                [np.inf, -np.inf],
+                np.nan,
+            )
+    
+            ticker_prices = ticker_prices[
+                ticker_prices > 0
+            ]
+    
+            if not ticker_prices.empty:
+                first_date = (
+                    ticker_prices.first_valid_index()
+                )
+    
+        first_price_dates[ticker] = first_date
+        
+    # ========================================================
+    # Data minima comune e ticker limitanti
+    # ========================================================
+    
+    valid_price_dates = {
+        ticker: pd.to_datetime(date)
+        for ticker, date in first_price_dates.items()
+        if date is not None
+    }
+    
+    backtest_available_from = None
+    limiting_tickers = []
+    
+    if valid_price_dates:
+    
+        backtest_available_from = max(
+            valid_price_dates.values()
+        )
+    
+        limiting_tickers = [
+            ticker
+            for ticker, date in valid_price_dates.items()
+            if date == backtest_available_from
+        ]
+        
+    # Personalizzazione disponibile solo con pochi ticker
+    if 1 < len(current_weights) <= 5:
+    
+        st.subheader(
+            t("backtest_custom_allocation")
+        )
+    
+        st.caption(
+            t("backtest_custom_allocation_help")
+        )
+        if st.button(
+            t("backtest_reset_weights"),
+            key="backtest_reset_weights",
+            type="secondary",
+            icon=":material/restart_alt:",
+        ):
+        
+            for ticker, weight in current_weights.items():
+        
+                st.session_state[
+                    f"backtest_weight_{ticker}"
+                ] = float(weight * 100.0)
+        
+            st.rerun()
+        weight_columns = st.columns(
+            len(current_weights)
+        )
+    
+        custom_weights = {}
+    
+        for column, (ticker, weight) in zip(
+            weight_columns,
+            current_weights.items(),
+        ):
+        
+            with column:
+        
+                weight_pct = st.number_input(
+                    ticker,
+                    min_value=0.0,
+                    max_value=100.0,
+                    value=float(weight * 100.0),
+                    step=1.0,
+                    format="%.2f",
+                    key=f"backtest_weight_{ticker}",
+                )
+        
+                custom_weights[ticker] = (
+                    weight_pct / 100.0
+                )
+        
+                first_date = first_price_dates.get(
+                    ticker
+                )
+        
+                if first_date is not None:
+        
+                    first_date = pd.to_datetime(
+                        first_date
+                    )
+        
+                    st.caption(
+                        f"{t('backtest_price_available_from')}: "
+                        f"{first_date:%d/%m/%Y}"
+                    )
+        
+                else:
+        
+                    st.caption(
+                        f"{t('backtest_price_available_from')}: —"
+                    )
+    
+        total_weight = sum(
+            custom_weights.values()
+        )
+        weights_modified = any(
+            not np.isclose(
+                custom_weights[ticker],
+                current_weights[ticker],
+                atol=1e-6,
+            )
+            for ticker in current_weights.index
+        )
+        total_pct = total_weight * 100.0
+    
+        st.metric(
+            t("backtest_weight_total"),
+            f"{total_pct:.2f}%",
+        )
+    
+        weights_valid = np.isclose(
+            total_weight,
+            1.0,
+            atol=1e-6,
+        )
+    
+        if weights_valid:
+        
+            if weights_modified:
+        
+                st.info(
+                    t("backtest_custom_weights_active")
+                )
+        
+            else:
+        
+                st.success(
+                    t("backtest_weight_valid")
+                )
+        
+            target_weights_override = (
+                custom_weights
+            )
+    
+        else:
+    
+            st.error(
+                t("backtest_weight_invalid")
+            )
+    
+            return None
+    else:
 
+        # ====================================================
+        # Più di 5 ticker:
+        # allocazione non modificabile, ma mostriamo
+        # peso e prima data disponibile
+        # ====================================================
+
+        allocation_rows = []
+
+        for ticker, weight in current_weights.items():
+
+            first_date = first_price_dates.get(
+                ticker
+            )
+
+            allocation_rows.append(
+                {
+                    t("col_ticker"): ticker,
+                    t("col_name"): ticker_names.get(ticker,"",),
+                    t("backtest_weight"): weight,
+                    t("backtest_price_available_from"): (
+                        pd.to_datetime(first_date)
+                        if first_date is not None
+                        else pd.NaT
+                    ),
+                }
+            )
+
+        allocation_df = pd.DataFrame(
+            allocation_rows
+        )
+
+        st.dataframe(
+            allocation_df,
+            hide_index=True,
+            width="stretch",
+            column_config={
+                t("col_ticker"):
+                    st.column_config.TextColumn(
+                        t("col_ticker"),
+                        width="medium",
+                    ),
+                t("col_name"):
+                    st.column_config.TextColumn(
+                        t("col_name"),
+                        width="large",
+                    ),
+                t("backtest_weight"):
+                    st.column_config.NumberColumn(
+                        t("backtest_weight"),
+                        format="percent",
+                        width="small",
+                    ),
+
+                t("backtest_price_available_from"):
+                    st.column_config.DateColumn(
+                        t("backtest_price_available_from"),
+                        format="DD/MM/YYYY",
+                        width="medium",
+                    ),
+            },
+        )
+    
+    # ========================================================
+    # Disponibilità storica del backtest
+    # ========================================================
+    
+    if backtest_available_from is not None:
+    
+        st.info(
+            f"**{t('backtest_available_from')}:** "
+            f"{backtest_available_from:%d/%m/%Y}"
+        )
+    
+        if len(limiting_tickers) == 1:
+    
+            st.warning(
+                f"**{t('backtest_limiting_ticker')}:** "
+                f"{limiting_tickers[0]}"
+            )
+    
+        elif len(limiting_tickers) > 1:
+    
+            st.warning(
+                f"**{t('backtest_limiting_tickers')}:** "
+                f"{', '.join(limiting_tickers)}"
+            )
     # ========================================================
     # Calcolo backtest
     # ========================================================
@@ -46,6 +349,7 @@ def render_backtest(
         current=current,
         closes=closes,
         rebalance_frequency=rebalance_frequency,
+        target_weights_override=target_weights_override,
     )
 
     if backtest is None or backtest.empty:
@@ -75,73 +379,7 @@ def render_backtest(
             f"€ {initial_value:,.2f}",
         )
 
-    # ========================================================
-    # Allocazione iniziale
-    # ========================================================
-    
-    st.subheader(
-        t("backtest_initial_allocation")
-    )
-    
-    # --------------------------------------------------------
-    # Portafoglio semplice
-    # --------------------------------------------------------
-    
-    if len(target_weights) <= 5:
-    
-        weight_columns = st.columns(
-            len(target_weights)
-        )
-    
-        for column, (ticker, weight) in zip(
-            weight_columns,
-            target_weights.items(),
-        ):
-            with column:
-                st.metric(
-                    ticker,
-                    f"{weight:.2%}",
-                )
-    # --------------------------------------------------------
-    # Portafoglio complesso
-    # --------------------------------------------------------
-    
-    else:
-    
-        weights_df = (
-            target_weights
-            .rename("Peso")
-            .sort_values(ascending=False)
-            .reset_index()
-        )
-    
-        weights_df.columns = [
-            t("ticker_label"),
-            t("backtest_weight"),
-        ]
-    
-        st.dataframe(
-            weights_df,
-            hide_index=True,
-            width="stretch",
-            column_config={
-                t("ticker_label"):
-                    st.column_config.TextColumn(
-                        t("ticker_label"),
-                        width="medium",
-                    ),
-    
-                t("backtest_weight"):
-                    st.column_config.NumberColumn(
-                        t("backtest_weight"),
-                        format="percent",
-                        width="small",
-                    ),
-            },
-        )
 
-    if backtest is None or backtest.empty:
-        return None
     # ========================================================
     # Benchmark dedicato al backtest
     # ========================================================

@@ -1,5 +1,5 @@
 [app]
-version = "1.0.0"
+version = "1.1.0"
 
 [ui]
 # puoi tenerlo vuoto o usarlo per defaults comuni in futuro
@@ -31,6 +31,38 @@ no_prices = "Non sono riuscito a scaricare i prezzi da Yahoo Finance."
 missing_tickers = "Ticker senza prezzi scaricati:"
 portfolio_error = "Non è stato possibile costruire il portafoglio con i dati disponibili."
 
+# Login
+login_page_title = "🔑 Login & Registrazione"
+login_email = "Email"
+login_password = "Password"
+login_button = "Login"
+signup_button = "Registrati"
+logout_button = "Logout"
+
+login_authenticated = "Utente autenticato"
+login_missing_credentials = "Inserisci email e password."
+login_invalid_credentials = "Account non trovato o password errata."
+login_register_hint = "Se è il tuo primo accesso, clicca su 'Registrati'."
+login_timeout = "Il servizio di autenticazione sta impiegando più tempo del previsto. Riprova tra qualche secondo."
+
+signup_success = "Registrazione completata. Controlla la tua email per confermare l'account."
+signup_check_spam = "Se non trovi il messaggio, verifica anche la cartella Spam."
+
+reset_password = "Password dimenticata?"
+reset_password_sent = "Controlla la tua email per reimpostare la password."
+login_email_required = "Inserisci l'indirizzo email."
+reset_password_title = "🔑 Reimposta Password"
+
+new_password = "Nuova password"
+confirm_password = "Conferma password"
+change_password = "Aggiorna password"
+password_required = "Inserisci una nuova password."
+password_mismatch = "Le password non coincidono."
+password_changed = "Password aggiornata correttamente."
+
+login_with_new_password = "Ora puoi accedere con la nuova password."
+login_email_not_verified = "La tua email non è ancora stata verificata. Controlla la casella di posta e clicca sul link di conferma ricevuto durante la registrazione."
+
 # KPI
 kpi_title = "📊 KPI Portafoglio"
 
@@ -46,6 +78,7 @@ tab_unrealized = "💼 P/L non realizzato"
 tab_heatmap = "🧊 Heatmap"
 tab_analysis = "📐 Analisi"
 tab_backtest = "🧪 Backtest"
+tab_efficient_frontier = "🎯 Frontiera eff."
 tab_monte_carlo = "🎲 Monte Carlo"
 
 daily_title = "📅 Performance giornaliera del portafoglio"
@@ -139,6 +172,10 @@ filter_types = "Tipo"
 filter_operations = "Operazioni"
 filter_active_only = "Solo posizioni attive"
 
+filter_select_all = "Seleziona tutto"
+filter_deselect_all = "Deseleziona tutto"
+filter_selected_count = "Selezionate"
+filter_at_least_one_operation = "Seleziona almeno un'operazione per continuare."
 # FEEDBACK FILTRI
 active_filters = "Filtri attivi"
 
@@ -329,6 +366,61 @@ backtest_active_return = "Active Return"
 backtest_tracking_error = "Tracking Error"
 backtest_information_ratio = "Information Ratio"
 backtest_delta_vs_benchmark = "Δ vs benchmark"
+
+backtest_custom_allocation = "Allocazione personalizzata"
+backtest_custom_allocation_help = "Modifica i pesi del backtest. La somma deve essere pari al 100%."
+backtest_weight_total = "Totale pesi"
+backtest_weight_valid = "Allocazione valida"
+backtest_weight_invalid = "La somma dei pesi deve essere pari al 100%."
+backtest_current_allocation = "Usa allocazione attuale"
+
+backtest_price_available_from = "Prezzi disponibili da"
+backtest_available_from = "Backtest disponibile da"
+backtest_limiting_ticker = "Ticker limitante"
+backtest_limiting_tickers = "Ticker limitanti"
+
+backtest_reset_weights = "Ripristina pesi attuali"
+backtest_custom_weights_active = "Allocazione personalizzata attiva"
+
+# ============================================================
+# Efficent Frontier
+# ============================================================
+efficient_frontier_no_data = "Dati insufficienti per calcolare la frontiera efficiente."
+efficient_frontier_period = "Periodo utilizzato"
+efficient_frontier_assets = "Asset"
+efficient_frontier_simulations = "Simulazioni"
+efficient_frontier_risk_free = "Risk free"
+efficient_frontier_risk_free_disabled = "Non utilizzato"
+
+efficient_frontier_current_portfolio = "Portafoglio attuale"
+efficient_frontier_min_volatility = "Minima volatilità"
+efficient_frontier_max_sharpe = "Massimo Sharpe"
+
+efficient_frontier_return = "Rendimento medio storico annualizzato"
+efficient_frontier_volatility = "Volatilità annualizzata"
+efficient_frontier_sharpe = "Sharpe Ratio"
+efficient_frontier_short_history = "Storico molto breve: la simulazione utilizza meno di un anno di dati comuni. I risultati della simulazione possono essere poco rappresentativi."
+efficient_frontier_history_short = "Storico limitato: la simulazione utilizza meno di 3 anni di dati comuni. Rendimenti attesi, correlazioni e portafogli ottimali possono essere sensibili al periodo osservato."
+efficient_frontier_num_portfolios = "Numero di simulazioni"
+efficient_frontier_run = "Avvia simulazione"
+
+efficient_frontier_chart_title = "Simulazione rischio / rendimento"
+efficient_frontier_random_portfolios = "Portafogli simulati"
+
+efficient_frontier_random_portfolio = "Portafoglio simulato"
+efficient_frontier_allocations = "Confronto allocazioni"
+efficient_frontier_current = "Attuale"
+efficient_frontier_min_vol_short = "Min. volatilità"
+efficient_frontier_max_sharpe_short = "Max Sharpe"
+efficient_frontier_delta_min_vol = "Δ Min. volatilità"
+efficient_frontier_delta_max_sharpe = "Δ Max Sharpe"
+efficient_frontier_name = "Nome"
+efficient_frontier_limiting_ticker = "Ticker che limita lo storico"
+efficient_frontier_ready = "Imposta il numero di portafogli e avvia la simulazione."
+efficient_frontier_selected = "Selezionato"
+efficient_frontier_delta_selected = "Δ Selezionato"
+efficient_frontier_show_assets = "📍 Mostra singoli asset"
+efficient_frontier_assets_trace = "Asset"
 # ============================================================
 # MONTE CARLO
 # ============================================================
@@ -444,6 +536,38 @@ no_prices = "Unable to download prices from Yahoo Finance."
 missing_tickers = "Tickers without price data:"
 portfolio_error = "Unable to build the portfolio with available data."
 
+# Login
+login_page_title = "🔑 Login & Sign Up"
+login_email = "Email"
+login_password = "Password"
+login_button = "Login"
+signup_button = "Sign Up"
+logout_button = "Logout"
+
+login_authenticated = "Authenticated user"
+login_missing_credentials = "Please enter both email and password."
+login_invalid_credentials = "Account not found or incorrect password."
+login_register_hint = "If this is your first access, click 'Sign Up'."
+login_timeout = "The authentication service is taking longer than expected. Please try again in a few seconds."
+
+signup_success = "Registration completed. Check your email to confirm your account."
+signup_check_spam = "If you cannot find the message, please check your Spam folder."
+
+reset_password = "Forgot password?"
+reset_password_sent = "Check your email to reset your password."
+login_email_required = "Please enter your email address."
+reset_password_title = "🔑 Reset Password"
+
+new_password = "New password"
+confirm_password = "Confirm password"
+change_password = "Update password"
+password_required = "Please enter a new password."
+password_mismatch = "Passwords do not match."
+password_changed = "Password updated successfully."
+
+login_with_new_password = "You can now sign in with your new password."
+login_email_not_verified = "Your email address has not been verified yet. Check your inbox and click the confirmation link received during registration."
+
 # KPI
 kpi_title = "📊 Portfolio KPIs"
 
@@ -459,6 +583,7 @@ tab_unrealized = "💼 Open P/L"
 tab_heatmap = "🧊 Heatmap"
 tab_analysis = "📐 Analysis"
 tab_backtest = "🧪 Backtest"
+tab_efficient_frontier = "🎯 Efficient frontier"
 tab_monte_carlo = "🎲 Monte Carlo"
 
 daily_title = "📅 Daily portfolio performance"
@@ -553,6 +678,10 @@ filter_types = "Type"
 filter_operations = "Operations"
 filter_active_only = "Active positions only"
 
+filter_select_all = "Select all"
+filter_deselect_all = "Deselect all"
+filter_selected_count = "Selected"
+filter_at_least_one_operation = "Select at least one operation to continue."
 # FEEDBACK FILTRI
 active_filters = "Active filters"
 
@@ -744,6 +873,60 @@ backtest_tracking_error = "Tracking Error"
 backtest_information_ratio = "Information Ratio"
 backtest_delta_vs_benchmark = "Δ vs benchmark"
 
+backtest_custom_allocation = "Custom allocation"
+backtest_custom_allocation_help = "Change the backtest weights. The weights must add up to 100%."
+backtest_weight_total = "Total weights"
+backtest_weight_valid = "Valid allocation"
+backtest_weight_invalid = "The weights must add up to 100%."
+backtest_current_allocation = "Use current allocation"
+
+backtest_price_available_from = "Prices available from"
+backtest_available_from = "Backtest available from"
+backtest_limiting_ticker = "Limiting ticker"
+backtest_limiting_tickers = "Limiting tickers"
+
+backtest_reset_weights = "Reset current weights"
+backtest_custom_weights_active = "Custom allocation active"
+
+# ============================================================
+# Efficent Frontier
+# ============================================================
+efficient_frontier_no_data = "Insufficient data to calculate the efficient frontier."
+efficient_frontier_period = "Period used"
+efficient_frontier_assets = "Assets"
+efficient_frontier_simulations = "Simulations"
+efficient_frontier_risk_free = "Risk free"
+efficient_frontier_risk_free_disabled = "Not used"
+
+efficient_frontier_current_portfolio = "Current portfolio"
+efficient_frontier_min_volatility = "Minimum volatility"
+efficient_frontier_max_sharpe = "Maximum Sharpe"
+
+efficient_frontier_return = "Annualized historical mean return"
+efficient_frontier_volatility = "Annualized volatility"
+efficient_frontier_sharpe = "Sharpe Ratio"
+efficient_frontier_history_very_short = "Very short history: the simulation uses less than one year of common data. Results may not be representative."
+efficient_frontier_history_short = "Limited history: the simulation uses less than 3 years of common data. Expected returns, correlations, and optimal portfolios may be sensitive to the observed period."
+efficient_frontier_num_portfolios = "Number of simulations"
+efficient_frontier_run = "Run simulation"
+
+efficient_frontier_chart_title = "Risk / return simulation"
+efficient_frontier_random_portfolios = "Simulated portfolios"
+efficient_frontier_random_portfolio = "Simulated portfolio"
+
+efficient_frontier_allocations = "Allocation comparison"
+efficient_frontier_current = "Current"
+efficient_frontier_min_vol_short = "Min. volatility"
+efficient_frontier_max_sharpe_short = "Max Sharpe"
+efficient_frontier_delta_min_vol = "Δ Min. volatility"
+efficient_frontier_delta_max_sharpe = "Δ Max Sharpe"
+efficient_frontier_name = "Name"
+efficient_frontier_limiting_ticker = "Ticker limiting the historical period"
+efficient_frontier_ready = "Set the number of portfolios and start the simulation."
+efficient_frontier_selected = "Selected"
+efficient_frontier_delta_selected = "Δ Selected"
+efficient_frontier_show_assets = "📍 Show individual assets"
+efficient_frontier_assets_trace = "Assets"
 # ============================================================
 # MONTE CARLO
 # ============================================================

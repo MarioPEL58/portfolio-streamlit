@@ -14,10 +14,11 @@ from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, pl_t
 from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare, create_tail_risk_figure
 from components.chart_comparison_metrics import (render_chart_comparison_metrics,)
 from components.backtest_view import render_backtest
+from components.efficient_frontier_view import render_efficient_frontier
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
-from services.market_data import download_close_prices, download_last_intraday_timestamp, report_late_tickers, fill_late_tickers_with_purchase_price
+from services.market_data import download_close_prices, download_last_intraday_timestamp, report_late_tickers, fill_late_tickers_with_purchase_price, prepare_backtest_closes_eur
 from services.portfolio import build_portfolio
 from services.portfolio_metrics import compute_portfolio_xirr, compute_sharpe_ratio
 from services.portfolio_metrics import compute_flow_adjusted_returns, compute_sharpe_from_returns, compute_sortino_ratio, compute_beta
@@ -171,15 +172,42 @@ ops_filtered = filter_ctx["ops"]
 dividends_filtered = filter_ctx["dividends"]
 filtered_tickers = filter_ctx["tickers"]
 
-# Price download
-start_date = ops["Data"].min().normalize()
+# # Price download old
+# start_date = ops["Data"].min().normalize()
+# end_date = pd.Timestamp.today().normalize()
+
+# closes, missing = download_close_prices(
+#     filtered_tickers,
+#     start_date,
+#     end_date
+# )
+
+# Price download new 
+
+portfolio_start_date = (
+    ops["Data"].min().normalize()
+)
+
+five_years_ago = (
+    pd.Timestamp.today().normalize()
+    - pd.DateOffset(years=5)
+)
+
+download_start_date = min(
+    portfolio_start_date,
+    five_years_ago
+)
+start_date = download_start_date
+
 end_date = pd.Timestamp.today().normalize()
 
 closes, missing = download_close_prices(
     filtered_tickers,
-    start_date,
+    download_start_date,
     end_date
 )
+# Price download new  end 
+
 market_last_date = closes.index.max()
 
 # st.write("=== FILTERED TICKERS ===")
@@ -198,6 +226,8 @@ market_last_date = closes.index.max()
 
 # st.write("closes max:", closes.index.max())
 # st.write("closes max type:", type(closes.index.max()))
+
+closes_frontier = closes.copy()
 
 full_index = pd.date_range(
     start=ops["Data"].min(),
@@ -513,17 +543,27 @@ st.subheader(t("performance_total"))
 render_performance_cards_tot(series) #  contiene anche dividendie e profitto delle posizioni vendute nel frattempo
 st.caption(t("performance_total_desc"))
 
+closes_backtest_eur = prepare_backtest_closes_eur(
+    closes=closes,
+    ops=ops_filtered,
+)
+closes_frontier_eur = prepare_backtest_closes_eur(
+    closes=closes_frontier,
+    ops=ops_filtered,
+)
+
 # Main chart
 
 st.subheader(t("charts_title"))
 
-tab_perf, tab_daily, tab_unrealized, tab_heatmap, tab_analysis, tab_backtest, tab_monte_carlo = st.tabs([
+tab_perf, tab_daily, tab_unrealized, tab_heatmap, tab_analysis, tab_backtest, tab_frontier, tab_monte_carlo = st.tabs([
     t("tab_perf"),
     t("tab_daily"),
     t("tab_unrealized"),
     t("tab_heatmap"),
     t("tab_analysis"),
     t("tab_backtest"),
+    t("tab_efficient_frontier"),
     t("tab_monte_carlo")
 ])
 
@@ -850,12 +890,29 @@ with tab_analysis:
     render_best_worst_days(flow_adjusted_returns)
     
 with tab_backtest:
-
+    
+    # closes_backtest_eur = prepare_backtest_closes_eur(
+    #     closes=closes,
+    #     ops=ops_filtered,
+    # )
+    
     render_backtest(
         current=current,
-        closes=closes,
+        closes=closes_backtest_eur,
+        ops=ops_filtered,
         benchmark_prices=benchmark_prices,
         benchmark_name=benchmark,
+    )
+
+with tab_frontier:
+    
+    render_efficient_frontier(
+        current=current,
+        closes=closes_frontier_eur,
+        ops=ops_filtered,
+        label_choice=label_choice,
+        use_risk_free=use_risk_free,
+        risk_free_rate=rf_annual,
     )
     
 with tab_monte_carlo:

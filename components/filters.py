@@ -3,6 +3,7 @@ import streamlit as st
 from utils.i18n import t
 
 def reset_portfolio_filters():
+
     for key in [
         "only_active",
         "selected_brokers",
@@ -10,6 +11,13 @@ def reset_portfolio_filters():
         "selected_operations",
     ]:
         st.session_state.pop(key, None)
+
+    for key in list(st.session_state.keys()):
+
+        if key.startswith(
+            "operation_checkbox_"
+        ):
+            del st.session_state[key]
     
 def render_filters(ops, dividends):
     st.markdown(t("filters_title"))
@@ -35,6 +43,8 @@ def render_filters(ops, dividends):
         ops["ID"].astype(str).str.replace(".0", "", regex=False)
         + " - "
         + ops["Nome"].fillna("").astype(str).str.strip()
+        + " - "
+        + ops["Ticker"].fillna("").astype(str).str.strip()
     )
     
     ops_for_operations = ops.copy()
@@ -99,9 +109,34 @@ def render_filters(ops, dividends):
     st.session_state.selected_operations = [
         op for op in st.session_state.selected_operations if op in all_operations
     ]
+    # Se il portfolio è cambiato e non resta nulla
+    # seleziona automaticamente tutte le operazioni
+    
+    if (
+        not st.session_state.selected_operations
+        and all_operations
+    ):
+        st.session_state.selected_operations = (all_operations.copy())
     # -------------------------
     # widgets
     # -------------------------
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown(
+            f"**{t('filter_brokers')}**"
+        )
+    
+    with col2:
+        st.markdown(
+            f"**{t('filter_types')}**"
+        )
+    
+    with col3:
+        st.markdown(
+            f"**{t('filter_operations')}**"
+        )
+        
     col1, col2, col3 = st.columns(3)
 
     with col1:
@@ -109,7 +144,8 @@ def render_filters(ops, dividends):
             t("filter_brokers"),
             options=all_brokers,
             # default=st.session_state.selected_brokers,
-            key="selected_brokers"
+            key="selected_brokers",
+            label_visibility="collapsed",
         )
 
     with col2:
@@ -117,16 +153,125 @@ def render_filters(ops, dividends):
             t("filter_types"),
             options=all_types,
             # default=st.session_state.selected_types,
-            key="selected_types"
+            key="selected_types",
+            label_visibility="collapsed",
         )
 
+    # with col3:
+    #     st.multiselect(
+    #         t("filter_operations"),
+    #         options=all_operations,
+    #         #  default=st.session_state.selected_operations,
+    #         key="selected_operations",
+    #         select_all=True,
+    #         width="stretch",
+    #     )
+
+    # =========================================================
+    # Filtro operazioni con checkbox
+    # =========================================================
+    
     with col3:
-        st.multiselect(
-            t("filter_operations"),
-            options=all_operations,
-            #  default=st.session_state.selected_operations,
-            key="selected_operations"
-        )
+        
+        with st.expander(" ",expanded=False,
+        ):
+    
+            # -------------------------------------------------
+            # Seleziona / Deseleziona tutto
+            # -------------------------------------------------
+    
+            button_col1, button_col2 = st.columns(2)
+    
+            select_all_clicked = button_col1.button(
+                t("filter_select_all"),
+                key="filter_operations_select_all",
+                width="stretch",
+            )
+    
+            deselect_all_clicked = button_col2.button(
+                t("filter_deselect_all"),
+                key="filter_operations_deselect_all",
+                width="stretch",
+            )
+    
+            if select_all_clicked:
+    
+                st.session_state.selected_operations = (
+                    all_operations.copy()
+                )
+    
+                for i, operation in enumerate(
+                    all_operations
+                ):
+                    st.session_state[
+                        f"operation_checkbox_{i}"
+                    ] = True
+    
+                st.rerun()
+    
+            if deselect_all_clicked:
+    
+                st.session_state.selected_operations = []
+    
+                for i, operation in enumerate(
+                    all_operations
+                ):
+                    st.session_state[
+                        f"operation_checkbox_{i}"
+                    ] = False
+    
+                st.rerun()
+    
+            # -------------------------------------------------
+            # Checkbox operazioni
+            # -------------------------------------------------
+    
+            selected_operations = []
+    
+            current_selection = set(
+                st.session_state.selected_operations
+            )
+    
+            for i, operation in enumerate(
+                all_operations
+            ):
+    
+                checkbox_key = (
+                    f"operation_checkbox_{i}"
+                )
+    
+                is_selected = (
+                    operation in current_selection
+                )
+    
+                # Inizializzazione solo se la checkbox
+                # non esiste ancora
+                if checkbox_key not in st.session_state:
+                    st.session_state[
+                        checkbox_key
+                    ] = is_selected
+    
+                checked = st.checkbox(
+                    operation,
+                    key=checkbox_key,
+                )
+    
+                if checked:
+                    selected_operations.append(
+                        operation
+                    )
+    
+            st.session_state.selected_operations = (
+                selected_operations
+            )  
+    # =========================================================
+    # Protezione: almeno una operazione selezionata
+    # =========================================================
+    
+    if not st.session_state.selected_operations:
+        
+        st.warning(t("filter_at_least_one_operation"))
+        st.stop()
         
     # =========================
     # FILTER OPS
@@ -147,12 +292,12 @@ def render_filters(ops, dividends):
             )
         ]
 
-    if st.session_state.selected_operations:
-        ops_filtered = ops_filtered[
-            ops_filtered["OperationLabel"].isin(
-                st.session_state.selected_operations
-            )
-        ]
+    # if st.session_state.selected_operations:
+    ops_filtered = ops_filtered[
+        ops_filtered["OperationLabel"].isin(
+            st.session_state.selected_operations
+        )
+    ]
     if st.session_state.only_active:
         
         active_ids = (

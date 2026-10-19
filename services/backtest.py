@@ -8,6 +8,7 @@ def backtest_portfolio(
     ticker_col: str = "Ticker",
     value_col: str = "Valore",
     initial_value=None,
+    target_weights_override=None,
 ):
     """
     Backtest della composizione ATTUALE del portafoglio.
@@ -237,17 +238,114 @@ def backtest_portfolio(
             "Valore totale corrente non valido."
         )
 
-    target_weights = (
-        current_values
-        / total_current_value
-    )
+    # target_weights = (
+    #     current_values
+    #     / total_current_value
+    # )
 
-    # Normalizzazione di sicurezza
+    # # Normalizzazione di sicurezza
+    # target_weights = (
+    #     target_weights
+    #     / target_weights.sum()
+    # )
+
+    # ========================================================
+    # Pesi target
+    # ========================================================
+    
+    if target_weights_override is None:
+    
+        # Usa l'allocazione corrente del portafoglio
+        target_weights = (
+            current_values
+            / total_current_value
+        )
+    
+    else:
+    
+        # Pesi personalizzati ricevuti dalla UI
+        target_weights = pd.Series(
+            target_weights_override,
+            dtype=float,
+        )
+    
+        # ----------------------------------------------------
+        # Verifica ticker mancanti
+        # ----------------------------------------------------
+    
+        missing_weights = [
+            ticker
+            for ticker in tickers
+            if ticker not in target_weights.index
+        ]
+    
+        if missing_weights:
+            raise ValueError(
+                "backtest_weights_missing"
+            )
+    
+        # ----------------------------------------------------
+        # Verifica ticker aggiuntivi
+        # ----------------------------------------------------
+    
+        extra_weights = [
+            ticker
+            for ticker in target_weights.index
+            if ticker not in tickers
+        ]
+    
+        if extra_weights:
+            raise ValueError(
+                "backtest_weights_extra"
+            )
+    
+        # ----------------------------------------------------
+        # Stesso ordine utilizzato dal backtest
+        # ----------------------------------------------------
+    
+        target_weights = target_weights.reindex(
+            tickers
+        )
+    
+        # ----------------------------------------------------
+        # Validazione valori
+        # ----------------------------------------------------
+    
+        if target_weights.isna().any():
+            raise ValueError(
+                "backtest_weights_invalid"
+            )
+    
+        if (target_weights < 0).any():
+            raise ValueError(
+                "backtest_weights_negative"
+            )
+    
+        # ----------------------------------------------------
+        # Verifica totale = 100%
+        # ----------------------------------------------------
+    
+        total_weight = float(
+            target_weights.sum()
+        )
+    
+        if not np.isclose(
+            total_weight,
+            1.0,
+            atol=1e-6,
+        ):
+            raise ValueError(
+                "backtest_weights_total"
+            )
+    
+    # ========================================================
+    # Normalizzazione finale
+    # ========================================================
+    
     target_weights = (
         target_weights
         / target_weights.sum()
     )
-
     # ========================================================
     # Capitale nozionale iniziale
     #

@@ -222,6 +222,91 @@ def convert_closes_to_eur(closes: pd.DataFrame, ops: pd.DataFrame, start_date: p
 
     return closes_eur, fx_rates
     
+def prepare_backtest_closes_eur(
+    closes: pd.DataFrame,
+    ops: pd.DataFrame,
+) -> pd.DataFrame:
+
+    # ========================================================
+    # Controlli iniziali
+    # ========================================================
+
+    if closes is None or closes.empty:
+        return pd.DataFrame()
+
+    if ops is None or ops.empty:
+        raise ValueError(
+            "backtest_fx_missing_operations"
+        )
+
+    # ========================================================
+    # Periodo storico disponibile
+    # ========================================================
+
+    start_date = pd.to_datetime(
+        closes.index.min()
+    )
+
+    end_date = pd.to_datetime(
+        closes.index.max()
+    )
+
+    # ========================================================
+    # Valuta di ogni ticker
+    # ========================================================
+
+    ticker_ccy = (
+        ops.sort_values("Data")
+        .groupby("Ticker")["Valuta"]
+        .last()
+        .fillna("EUR")
+        .to_dict()
+    )
+
+    needed_ccy = {
+        ccy
+        for ccy in ticker_ccy.values()
+        if ccy != "EUR"
+    }
+
+    # ========================================================
+    # Conversione in EUR
+    # ========================================================
+
+    closes_eur, fx_rates = convert_closes_to_eur(
+        closes=closes,
+        ops=ops,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+    # ========================================================
+    # Verifica disponibilità cambi
+    # ========================================================
+
+    missing_fx = [
+        ccy
+        for ccy in needed_ccy
+        if (
+            ccy not in fx_rates.columns
+            or fx_rates[ccy].dropna().empty
+        )
+    ]
+
+    if missing_fx:
+        raise ValueError(
+            "backtest_fx_missing: "
+            + ", ".join(
+                sorted(missing_fx)
+            )
+        )
+
+    # ========================================================
+    # Return
+    # ========================================================
+
+    return closes_eur
+    
 @st.cache_data(show_spinner=False, ttl=120)
 def download_last_intraday_timestamp(tickers: list[str]):
     tickers = [t for t in tickers if isinstance(t, str) and t.strip()]
