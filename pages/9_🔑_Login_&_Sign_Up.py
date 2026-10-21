@@ -13,6 +13,7 @@ from utils.auth import (
     reset_password,
     change_password,
     set_recovery_session,
+    get_profile,
 )
 
 # ✅ CONFIG BASE
