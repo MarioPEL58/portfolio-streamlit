@@ -63,6 +63,11 @@ password_changed = "Password aggiornata correttamente."
 login_with_new_password = "Ora puoi accedere con la nuova password."
 login_email_not_verified = "La tua email non è ancora stata verificata. Controlla la casella di posta e clicca sul link di conferma ricevuto durante la registrazione."
 
+login_registration_info_title = "🎁 Registrazione gratuita"
+login_registration_info = "La registrazione consente di accedere ai servizi utente, recuperare la password tramite email e utilizzare le future funzionalità avanzate di Portfolio Streamlit."
+login_privacy_title = "🔒 Privacy"
+login_privacy_info = "Portfolio Streamlit non memorizza in modo permanente i dati degli investimenti caricati dall'utente. Le credenziali di accesso sono gestite tramite Supabase Authentication e vengono utilizzate esclusivamente per l'autenticazione e il recupero della password."
+
 # KPI
 kpi_title = "📊 KPI Portafoglio"
 
@@ -331,7 +336,7 @@ tail_risk_var_highlight = "Rendimento oltre la soglia VaR 95%"
 # ============================================================
 # Backtest
 # ============================================================
-
+backtest_no_positions = "Nessuna posizione disponibile per il backtest con i filtri correnti."
 backtest_rebalance_frequency = "Frequenza di ribilanciamento"
 backtest_initial_date = "Data iniziale"
 backtest_initial_value = "Valore iniziale"
@@ -567,6 +572,11 @@ password_changed = "Password updated successfully."
 
 login_with_new_password = "You can now sign in with your new password."
 login_email_not_verified = "Your email address has not been verified yet. Check your inbox and click the confirmation link received during registration."
+
+login_registration_info_title = "🎁 Free registration"
+login_registration_info = "Registration provides access to user services, password recovery by email and future advanced Portfolio Streamlit features."
+login_privacy_title = "🔒 Privacy"
+login_privacy_info = "Portfolio Streamlit does not permanently store investment data uploaded by users. Login credentials are managed through Supabase Authentication and are used exclusively for authentication and password recovery."
 
 # KPI
 kpi_title = "📊 Portfolio KPIs"
@@ -837,7 +847,7 @@ tail_risk_var_highlight = "Return beyond the 95% VaR threshold"
 # ============================================================
 # Backtest
 # ============================================================
-
+backtest_no_positions = "No positions available for backtest with the current filters."
 backtest_rebalance_frequency = "Rebalancing frequency"
 backtest_initial_date = "Initial date"
 backtest_initial_value = "Initial value"
