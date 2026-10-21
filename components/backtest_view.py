@@ -16,6 +16,11 @@ def render_backtest(
     ops,
     benchmark_prices=None,
     benchmark_name="",):
+
+    if current is None or current.empty:
+        st.info(t("backtest_no_positions"))
+        return
+    
     # ========================================================
     # Frequenza ribilanciamento
     # ========================================================
