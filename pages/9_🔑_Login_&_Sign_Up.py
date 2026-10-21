@@ -285,3 +285,10 @@ else:
                 
                 st.error(error)
 
+st.success(t("login_registration_info_title"))
+st.caption(t("login_registration_info"))
+st.markdown("---")
+st.caption(
+    f"**{t('login_privacy_title')}**\n\n"
+    f"{t('login_privacy_info')}"
+)
