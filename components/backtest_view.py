@@ -18,7 +18,7 @@ def render_backtest(
     benchmark_name="",):
 
     if current is None or current.empty:
-        st.info(t("backtest_no_positions"))
+        st.warning(t("backtest_no_positions"), icon="⚠️")
         return
     
     # ========================================================
