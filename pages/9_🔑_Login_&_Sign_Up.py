@@ -112,9 +112,18 @@ if is_logged():
          f"📧 {st.session_state.user_email}"
     )
     if profile:
-    
-        st.write(f"🏷️ Role: {profile['role']}")
-        st.write(f"🌐 Language: {profile['language']}")
+        if profile["language"] == "it":
+            lang_text = "🇮🇹 Italiano"
+        else:
+            lang_text = "🇬🇧 English"
+            
+        role_map = {
+            "free": "🆓 Free",
+            "premium": "⭐ Premium",
+            "admin": "👑 Admin",
+        }    
+        st.write(f"🏷️ Role: {role_map.get(profile['role'], profile['role'])}")
+        st.write(f"🌐 Language: {lang_text}")
         
     if st.button(
         t("logout_button")
