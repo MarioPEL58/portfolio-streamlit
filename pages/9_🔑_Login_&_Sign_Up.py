@@ -101,13 +101,20 @@ st.title(t("login_page_title"))
 
 if is_logged():
 
+    profile = get_profile()
+    
     st.success(
         t("login_authenticated")
     )
 
     st.write(
-        st.session_state.user.email
+         f"📧 {st.session_state.user_email}"
     )
+    if profile:
+    
+        st.write(f"🏷️ Role: {profile['role']}")
+        st.write(f"🌐 Language: {profile['language']}")
+        
     if st.button(
         t("logout_button")
     ):
