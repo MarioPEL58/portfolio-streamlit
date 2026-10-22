@@ -163,7 +163,7 @@ download_operations_xlsx = "Scarica operazioni XLSX"
 
 # Market data 
 yahoo_download_error = "Errore critico durante il download da Yahoo"
-prices_corrected = "Prezzi rettificati"
+prices_corrected = "⚠️ Correzione automatica di {count} prezzi anomali"
 
 # FOOTER
 footer_note = "Aggiornamento in tempo reale dei prezzi"
