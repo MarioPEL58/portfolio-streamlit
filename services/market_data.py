@@ -113,8 +113,8 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         invalid_points = outliers.sum().sum()
         
         if invalid_points > 0:
-            #st.caption(t("prices_corrected",count=invalid_points))
-            st.caption(f"⚠️ Correzione automatica di {invalid_points} prezzi anomali")
+            st.caption(t("prices_corrected",count=invalid_points))
+            #st.caption(f"⚠️ Correzione automatica di {invalid_points} prezzi anomali")
         
     # Missing ticker (Obbligazioni)
     missing = [t for t in tickers if (t not in closes.columns or closes[t].dropna().empty)]
