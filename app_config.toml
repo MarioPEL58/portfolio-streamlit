@@ -679,7 +679,7 @@ download_operations_xlsx = "Download operations XLSX"
 
 # Market data 
 yahoo_download_error = "Critical error while downloading data from Yahoo"
-prices_corrected = "Adjusted prices"
+prices_corrected = "⚠️ Automatic correction of {count} anomalous prices"
 
 # FOOTER
 footer_note = "Real-time price updates"
