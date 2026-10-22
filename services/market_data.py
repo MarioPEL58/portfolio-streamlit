@@ -131,7 +131,7 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
             closes = closes.join(bond_df, how="outer")
     
     if isins_caricati:
-        st.write(" Bond caricati bond da CSV:", ", ".join(isins_caricati))
+        st.write(tr("bonds_loaded_csv"), ", ".join(isins_caricati))
     
     closes = closes.sort_index().ffill()
     missing = [t for t in tickers if (t not in closes.columns or closes[t].dropna().empty)]
@@ -496,7 +496,8 @@ def load_bond_csv(isin: str) -> pd.DataFrame:
 
     else:
         raise ValueError(
-            f"Formato CSV non riconosciuto: {df.columns.tolist()}"
+            f"{tr('bond_csv_invalid_format')}: "
+            f"{df.columns.tolist()}"
         )
 
     return (
