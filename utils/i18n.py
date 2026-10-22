@@ -10,10 +10,26 @@ def set_language(lang_dict):
     _lang = lang_dict
 
 
-def t(key):
-    return _lang.get(key, key)
+# def t(key):
+#     return _lang.get(key, key)
 
+def t(
+    key,
+    placeholder=None,
+    **kwargs,
+):
+    text = _lang.get(
+        key,
+        placeholder if placeholder is not None else key,
+    )
 
+    if kwargs:
+        try:
+            text = text.format(**kwargs)
+        except Exception:
+            pass
+
+    return text
 # def init_language(CONFIG):
 #     if "lang" not in st.session_state:
 #         st.session_state.lang = "it"
