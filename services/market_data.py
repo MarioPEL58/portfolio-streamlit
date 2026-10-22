@@ -12,14 +12,14 @@ import pytz
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
-from utils.i18n import t
+from utils.i18n import t as tr
 
 # =====================================================================
 # 🌟 CONFIGURAZIONE SESSIONE GLOBALE STANDARD (Senza cache SQLite)
 # =====================================================================
 # Creiamo una sessione standard per gestire i tentativi (Retry) e camuffare lo User-Agent
 session = requests.Session()
-retries = Retry(
+reies = Rey(
     total=3,                # Numero massimo di tentativi prima di fallire
     backoff_factor=1,       # Tempo di attesa crescente tra i tentativi (1s, 2s, 4s...)
     status_forcelist=[500, 502, 503, 504] # Riprova se Yahoo risponde con questi errori di server
@@ -60,7 +60,7 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
             )
 
         except Exception as e:
-            st.error(f"{t('yahoo_download_error')}: {e}")
+            st.error(f"{tr('yahoo_download_error')}: {e}")
             raw = pd.DataFrame()
     else: 
         raw = pd.DataFrame()
@@ -113,7 +113,7 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         invalid_points = outliers.sum().sum()
         
         if invalid_points > 0:
-            st.caption(t("prices_corrected",count=invalid_points))
+            st.caption(tr("prices_corrected",count=invalid_points))
             #st.caption(f"⚠️ Correzione automatica di {invalid_points} prezzi anomali")
         
     # Missing ticker (Obbligazioni)
