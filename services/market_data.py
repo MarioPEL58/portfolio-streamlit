@@ -12,6 +12,7 @@ import pytz
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
+from utils.i18n import t
 
 # =====================================================================
 # 🌟 CONFIGURAZIONE SESSIONE GLOBALE STANDARD (Senza cache SQLite)
@@ -59,7 +60,7 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
             )
 
         except Exception as e:
-            st.error(f"Errore critico durante il download da Yahoo: {e}")
+            st.error(f"{t('yahoo_download_error')}: {e}")
             raw = pd.DataFrame()
     else: 
         raw = pd.DataFrame()
@@ -112,7 +113,8 @@ def download_close_prices(tickers: list[str], start_date: pd.Timestamp, end_date
         invalid_points = outliers.sum().sum()
         
         if invalid_points > 0:
-            st.caption(f"⚠️ Correzione automatica di {invalid_points} prezzi anomali")
+            st.caption(t("prices_corrected").format(count=invalid_points))
+            #st.caption(f"⚠️ Correzione automatica di {invalid_points} prezzi anomali")
         
     # Missing ticker (Obbligazioni)
     missing = [t for t in tickers if (t not in closes.columns or closes[t].dropna().empty)]
