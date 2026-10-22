@@ -19,7 +19,7 @@ from utils.i18n import t as tr
 # =====================================================================
 # Creiamo una sessione standard per gestire i tentativi (Retry) e camuffare lo User-Agent
 session = requests.Session()
-reies = Rey(
+reies = Retry(
     total=3,                # Numero massimo di tentativi prima di fallire
     backoff_factor=1,       # Tempo di attesa crescente tra i tentativi (1s, 2s, 4s...)
     status_forcelist=[500, 502, 503, 504] # Riprova se Yahoo risponde con questi errori di server
