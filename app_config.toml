@@ -161,6 +161,9 @@ download_series_xlsx = "Scarica serie XLSX"
 download_positions_xlsx = "Scarica posizioni XLSX"
 download_operations_xlsx = "Scarica operazioni XLSX"
 
+# Market data 
+yahoo_download_error = "Errore critico durante il download da Yahoo"
+
 # FOOTER
 footer_note = "Aggiornamento in tempo reale dei prezzi"
 
@@ -672,6 +675,9 @@ download_operations = "Download operations CSV"
 download_series_xlsx = "Download series XLSX"
 download_positions_xlsx = "Download positions XLSX"
 download_operations_xlsx = "Download operations XLSX"
+
+# Market data 
+yahoo_download_error = "Critical error while downloading data from Yahoo"
 
 # FOOTER
 footer_note = "Real-time price updates"
