@@ -13,6 +13,7 @@ from utils.auth import (
     reset_password,
     change_password,
     set_recovery_session,
+    get_profile,
 )
 
 # ✅ CONFIG BASE
@@ -101,13 +102,29 @@ st.title(t("login_page_title"))
 
 if is_logged():
 
+    profile = get_profile()
+    
     st.success(
         t("login_authenticated")
     )
 
     st.write(
-        st.session_state.user.email
+         f"📧 {st.session_state.user_email}"
     )
+    if profile:
+        if profile["language"] == "it":
+            lang_text = "🇮🇹 Italiano"
+        else:
+            lang_text = "🇬🇧 English"
+            
+        role_map = {
+            "free": "🆓 Free",
+            "premium": "⭐ Premium",
+            "admin": "👑 Admin",
+        }    
+        st.write(f"🏷️ Role: {role_map.get(profile['role'], profile['role'])}")
+        st.write(f"🌐 Language: {lang_text}")
+        
     if st.button(
         t("logout_button")
     ):

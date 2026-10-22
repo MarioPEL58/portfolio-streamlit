@@ -75,7 +75,10 @@ def signup(
     email: str,
     password: str
 ) -> tuple[bool, str | None]:
-
+    
+    # st.write("SIGNUP EMAIL:", repr(email))
+    # st.write("SIGNUP PASSWORD:", repr(password))
+    
     supabase = get_supabase()
 
     try:
@@ -252,3 +255,31 @@ def set_recovery_session(
     except Exception as e:
 
         return False, str(e)
+
+# =====================================================
+# PROFILE
+# =====================================================
+
+def get_profile():
+
+    user_id = get_user_id()
+
+    if not user_id:
+        return None
+
+    try:
+
+        result = (
+            get_supabase()
+            .table("profiles")
+            .select("*")
+            .eq("id", user_id)
+            .single()
+            .execute()
+        )
+
+        return result.data
+
+    except Exception:
+
+        return None
