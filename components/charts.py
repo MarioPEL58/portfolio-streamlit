@@ -8,6 +8,7 @@ import pandas as pd
 from services.portfolio_metrics import compute_var_historical, compute_conditional_var 
 from typing import Optional
 
+import streamlit as st
 
 
 def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
@@ -1351,20 +1352,10 @@ def pl_treemap(
 
     if current is None or current.empty:
         return None
-    print(
-        current[
-            [
-                "Intermediario",
-                "Tipo",
-                "Ticker",
-                "Valore",
-                "P/L",
-                "P/L %"
-            ]
-        ].head(10)
-    )
+
     
     df = current.copy()
+    
 
     # =========================
     # mapping colonne robusto
@@ -1375,7 +1366,20 @@ def pl_treemap(
     else:
         pl_col = "P/L Giornaliero"
         pl_pct_col = "P/L Giornaliero %"
-
+        
+    st.dataframe(
+        df[
+            [
+                "Intermediario",
+                "Tipo",
+                label_col,
+                "Valore",
+                pl_col,
+                pl_pct_col,
+            ]
+        ].head(20)
+    )
+    
     required = ["Valore", pl_pct_col, pl_col, "Intermediario", "Tipo"]
     for col in required:
         if col not in df.columns:
