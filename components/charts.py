@@ -1373,6 +1373,111 @@ def pl_treemap(
 
     if label_col not in df.columns:
         label_col = "Ticker"
+
+    # =========================
+    # colore = rendimento
+    # =========================
+    df["color_val"] = df[pl_pct_col] # per non aggregato 
+    # =========================
+    # ✅ LABEL CON € + %
+    # =========================
+    df["label_full"] = df.apply(
+        lambda row: (
+            f"{row[label_col]}"
+            f"<br>{row[pl_col]:+.0f}€ | {row[pl_pct_col]:+.2%}"
+        ),
+        axis=1
+    )
+    # =========================
+    # scala simmetrica
+    # =========================
+    max_abs = df["color_val"].abs().max()
+
+    # =========================
+    # TREEMAP
+    # =========================
+    fig = px.treemap(
+        df,
+        path=["Intermediario", "Tipo", "label_full"],
+        values="Valore",
+        color="color_val",
+        color_continuous_scale = [
+            (0.0,  "#F23636"),  # rosso acceso
+            (0.16, "#B53C3C"),  # rosso mattone
+            (0.33, "#7E3E47"),  # rosso bordeaux
+            (0.5,  "#3F4350"),  # grigio neutro
+            (0.66, "#2E6C4A"),  # verde scuro
+            (0.83, "#289F51"),  # verde medio
+            (1.0,  "#23CE5F")   # verde acceso
+        ],
+        range_color=[-max_abs, max_abs]
+    )
+
+    # =========================
+    # stile
+    # =========================
+    fig.update_traces(
+        marker=dict(line=dict(color="black", width=1.2)),
+        textinfo="label",
+        textposition="middle center",
+        # 🔹 Forza Plotly a calcolare correttamente le dimensioni dei font dentro i rettangoli
+        textfont=dict(size=13),
+        insidetextfont=dict(size=13)
+    )
+
+    # =========================
+    # hover
+    # =========================
+    fig.update_traces(
+        hovertemplate=
+        "<b>%{label}</b><br>" +
+        "Intermediario: %{parent}<br>" +
+        "Valore: %{value:.2f}€<br>" +
+        f"P/L: %{{customdata[0]:.2f}}€<br>" +
+        f"P/L %: %{{color:.2%}}<extra></extra>",
+        customdata=df[[pl_col]].values
+    )
+
+    # =========================
+    # layout
+    # =========================
+    fig.update_layout(
+        margin=dict(t=10, l=10, r=10, b=10),
+        coloraxis_colorbar=dict(title=pl_pct_col, tickformat=".0%")
+    )
+
+    return fig
+
+def pl_treemap_gerarchia(
+    current: pd.DataFrame,
+    label_col: str = "Ticker",
+    pl_mode: str = "daily"
+):
+
+    if current is None or current.empty:
+        return None
+    
+    df = current.copy()
+    
+    # =========================
+    # mapping colonne robusto
+    # =========================
+    if pl_mode == "total":
+        pl_col = "P/L"
+        pl_pct_col = "P/L %"
+    else:
+        pl_col = "P/L Giornaliero"
+        pl_pct_col = "P/L Giornaliero %"
+    
+    required = ["Valore", pl_pct_col, pl_col, "Intermediario", "Tipo"]
+    for col in required:
+        if col not in df.columns:
+            return None
+
+    df = df.dropna(subset=["Valore", pl_pct_col]).copy()
+
+    if label_col not in df.columns:
+        label_col = "Ticker"
         
     #################################
     ## Costruzione gerarchia 
@@ -1541,7 +1646,7 @@ def pl_treemap(
     )
 
     return fig
-
+    
 def create_tail_risk_figure(flow_adjusted_returns):
 
     # Serie completa per VaR/CVaR
