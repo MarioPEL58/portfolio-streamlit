@@ -1374,24 +1374,31 @@ def pl_treemap(
     if label_col not in df.columns:
         label_col = "Ticker"
     
-    agg_tipo = (
-        df.groupby(["Intermediario", "Tipo"])
+    df_intermediario = (
+        df.groupby("Intermediario", as_index=False)
           .agg(
               Valore=("Valore", "sum"),
               PL=(pl_col, "sum")
           )
-          .reset_index()
     )
-    
-    agg_tipo["PL_pct"] = (
-        agg_tipo["PL"] /
-        (agg_tipo["Valore"] - agg_tipo["PL"])
+    df_tipo = (
+        df.groupby(
+            ["Intermediario", "Tipo"],
+            as_index=False
+        )
+        .agg(
+            Valore=("Valore", "sum"),
+            PL=(pl_col, "sum")
+        )
     )
-    st.dataframe(
-        agg_tipo[
-            agg_tipo["Intermediario"]
-            == "IntesaSanPaolo"
-        ]
+    df_ticker = df.copy()
+        df_all = pd.concat(
+        [
+            df_intermediario,
+            df_tipo,
+            df_ticker
+        ],
+        ignore_index=True
     )
     # =========================
     # colore = rendimento
@@ -1417,11 +1424,30 @@ def pl_treemap(
     # =========================
     # TREEMAP
     # =========================
+    # fig = px.treemap(
+    #     df,
+    #     path=["Intermediario", "Tipo", "label_full"],
+    #     values="Valore",
+    #     color="color_val",
+    #     color_continuous_scale = [
+    #         (0.0,  "#F23636"),  # rosso acceso
+    #         (0.16, "#B53C3C"),  # rosso mattone
+    #         (0.33, "#7E3E47"),  # rosso bordeaux
+    #         (0.5,  "#3F4350"),  # grigio neutro
+    #         (0.66, "#2E6C4A"),  # verde scuro
+    #         (0.83, "#289F51"),  # verde medio
+    #         (1.0,  "#23CE5F")   # verde acceso
+    #     ],
+    #     range_color=[-max_abs, max_abs]
+    # )
     fig = px.treemap(
-        df,
-        path=["Intermediario", "Tipo", "label_full"],
+        df_strutturato,
+        ids="ID",
+        names="Label",
+        parents="Parent",
         values="Valore",
-        color="color_val",
+        color="PL_pct",
+        custom_data=["PL", "PL_pct"],
         color_continuous_scale = [
             (0.0,  "#F23636"),  # rosso acceso
             (0.16, "#B53C3C"),  # rosso mattone
@@ -1433,7 +1459,6 @@ def pl_treemap(
         ],
         range_color=[-max_abs, max_abs]
     )
-
     # =========================
     # stile
     # =========================
@@ -1455,8 +1480,9 @@ def pl_treemap(
         "Intermediario: %{parent}<br>" +
         "Valore: %{value:.2f}€<br>" +
         f"P/L: %{{customdata[0]:.2f}}€<br>" +
-        f"P/L %: %{{color:.2%}}<extra></extra>",
-        customdata=df[[pl_col]].values
+        "P/L %: %{customdata[1]:+.2%}" +
+        f"P/L %: %{{color:.2%}}<extra></extra>"
+        # customdata=df[[pl_col]].values
     )
 
     # =========================
