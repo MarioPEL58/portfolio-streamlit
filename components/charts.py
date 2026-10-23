@@ -9,6 +9,7 @@ from services.portfolio_metrics import compute_var_historical, compute_condition
 from typing import Optional
 
 
+
 def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
 
     columns_map = get_display_columns()
@@ -1350,7 +1351,7 @@ def pl_treemap(
 
     if current is None or current.empty:
         return None
-    st.dataframe(
+    print(
         current[
             [
                 "Intermediario",
