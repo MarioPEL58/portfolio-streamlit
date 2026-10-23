@@ -1478,80 +1478,44 @@ def pl_treemap_gerarchia(
 
     if label_col not in df.columns:
         label_col = "Ticker"
-        
-    #################################
-    ## Costruzione gerarchia 
-    #################################
-    df_intermediario = (
-        df.groupby("Intermediario", as_index=False)
-          .agg(
-              Valore=("Valore", "sum"),
-              PL=(pl_col, "sum")
-          )
-    )
-    df_intermediario["ID"] = df_intermediario["Intermediario"]    
-    df_intermediario["Label"] = df_intermediario["Intermediario"]
-    df_intermediario["Parent"] = ""
-    
-    df_tipo = (
-        df.groupby(["Intermediario", "Tipo"], as_index=False)
-          .agg(
-              Valore=("Valore", "sum"),
-              PL=(pl_col, "sum")
-          )
-    )
-    df_tipo["ID"] = df_tipo["Intermediario"] + "|" + df_tipo["Tipo"]
-    df_tipo["Label"] = df_tipo["Tipo"]
-    df_tipo["Parent"] = df_tipo["Intermediario"]
-    
-    # Rinominiamo le colonne sulle foglie per uniformarle ai genitori prima della concatenazione
-    df_ticker = df.copy()
-    df_ticker["ID"] = df_ticker["Intermediario"] + "|" + df_ticker["Tipo"] + "|" + df_ticker[label_col]
-    df_ticker["Label"] = df_ticker[label_col]
-    df_ticker["Parent"] = df_ticker["Intermediario"] + "|" + df_ticker["Tipo"]
-    df_ticker["PL"] = df_ticker[pl_col] # Uniformiamo il nome colonna per la sum
-
-    # Concateniamo usando solo le colonne strutturali comuni
-    df_all = pd.concat(
-        [
-            df_intermediario[["ID", "Label", "Parent", "Valore", "PL"]],
-            df_tipo[["ID", "Label", "Parent", "Valore", "PL"]],
-            df_ticker[["ID", "Label", "Parent", "Valore", "PL"]]
-        ],
-        ignore_index=True
-    )
 
     # ==========================================================
-    # Calcolo robusto del PL% e del Colore su TUTTI i livelli
+    # Pre-calcoliamo le colonne del colore e puliamo i dati
     # ==========================================================
-    # Ricalcoliamo la percentuale reale (evita la somma errata delle percentuali sui padri)
-    # Se Valore è 0, fillna(0) evita il NaN
-    df_all["PL_Pct_Calcolata"] = (df_all["PL"].div(df_all["Valore"])).fillna(0)
-    
-    # Se pl_mode è giornaliero ed era espresso in decimali (es. 0.05 per 5%), 
-    # non moltiplicare per 100. Se invece nel df originale era già es. 5.0, allora moltiplica.
-    # Assumiamo qui la consistenza con la scala decimale (.2% nel tuo template originale)
-    df_all["color_val"] = df_all["PL_Pct_Calcolata"]
-
-    # =========================
-    # scala simmetrica (presa dal df originale delle foglie)
-    # =========================
-    max_abs = df[pl_pct_col].abs().max()
+    df["color_val"] = df[pl_pct_col]
+    max_abs = df["color_val"].abs().max()
     if pd.isna(max_abs) or max_abs == 0:
         max_abs = 0.01
 
+    # ==========================================================
+    # 🌟 IL TRUCCO: Calcoliamo gli aggregati esatti per ogni livello
+    # con i nomi esatti che Plotly assegna internamente alle etichette
+    # ==========================================================
+    # Questo serve a fare in modo che il tooltip mostri i dati corretti del blocco
+    agg_interm = df.groupby("Intermediario")[[pl_col, "Valore"]].sum()
+    agg_tipo = df.groupby("Tipo")[[pl_col, "Valore"]].sum()
+    
+    # Creiamo dizionari di mappatura rapidi
+    dict_pl = {**agg_interm[pl_col].to_dict(), **agg_tipo[pl_col].to_dict(), **df.set_index(label_col)[pl_col].to_dict()}
+    dict_val = {**agg_interm["Valore"].to_dict(), **agg_tipo["Valore"].to_dict(), **df.set_index(label_col)["Valore"].to_dict()}
+
+    # Applichiamo le funzioni di mappatura dinamica basate su quello che Plotly sta visualizzando sul mouse (%{label})
+    df["custom_pl"] = df[label_col].map(dict_pl)
+
     # =========================
-    # TREEMAP
+    # TREEMAP (Ritorno a PATH nativo)
     # =========================
     fig = px.treemap(
-        df_all,
-        ids="ID",
-        names="Label",  # 🌟 FONDAMENTALE: Usiamo "Label" così i genitori non sono null
-        parents="Parent",
+        df,
+        path=["Intermediario", "Tipo", label_col], # Ripristiniamo la geometria perfetta
         values="Valore",
         color="color_val",
-        # Passiamo PL e PL_Pct_Calcolata come custom_data nativi per tutti i livelli
-        custom_data=["PL", "PL_Pct_Calcolata"], 
+        # Passiamo le colonne necessarie nell'hover_data nativo di Plotly
+        hover_data={
+            "Valore": ":.2f}€",
+            pl_col: ":.2f}€",
+            "color_val": ":.2%"
+        },
         color_continuous_scale=[
             (0.0,  "#F23636"),  # rosso acceso
             (0.16, "#B53C3C"),  # rosso mattone
@@ -1565,7 +1529,7 @@ def pl_treemap_gerarchia(
     )
 
     # =========================
-    # stile testo interno
+    # stile testo interno (Foglie)
     # =========================
     fig.update_traces(
         marker=dict(line=dict(color="black", width=1.2)),
@@ -1575,17 +1539,20 @@ def pl_treemap_gerarchia(
         insidetextfont=dict(size=13)
     )
 
-    # =========================
-    # hover / tooltip pulito
-    # =========================
+    # ==========================================================
+    # 🌟 TOOLTIP UNIFORME CHE LEGGE I DATI AGGREGATI DI PLOTLY
+    # ==========================================================
+    # Usando %{value} Plotly estrae in automatico la somma geometrica corretta del blocco corrente, 
+    # sia che tu sia su un Intermediario, su un Tipo o su un Ticker!
     fig.update_traces(
         hovertemplate=(
             "<b>%{label}</b><br>"
-            "Valore: %{value:,.2f}€<br>"
-            "P/L: %{customdata[0]:,.2f}€<br>"
-            "P/L %: %{customdata[1]:+.2%}<extra></extra>"
-        )
-        # 🌟 RIMOSSO customdata=... da qui, lasciamo gestire tutto a px.treemap
+            "Valore Blocco: %{value:,.2f}€<br>"
+            "P/L Blocco: %{customdata[0]:,.2f}€<br>"
+            "P/L % Blocco: %{color:+.2%}<extra></extra>"
+        ),
+        # customdata mappato sulle colonne del df originale per non alterare le righe
+        customdata=df[[pl_col]]
     )
 
     # =========================
@@ -1597,6 +1564,7 @@ def pl_treemap_gerarchia(
     )
 
     return fig
+
     
 pl_treemap = pl_treemap_gerarchia  # ridefinizione per testare la funzione mofificata 
     
