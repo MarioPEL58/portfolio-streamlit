@@ -1442,8 +1442,8 @@ def pl_treemap(
     # =========================
     # colore = rendimento
     # =========================
-    df["color_val"] = df[pl_pct_col]
-
+    df["color_val"] = df[pl_pct_col] # per non aggregato 
+    df_all["color_val"] = df_all[pl_pct_col]
     # =========================
     # ✅ LABEL CON € + %
     # =========================
@@ -1454,7 +1454,14 @@ def pl_treemap(
         ),
         axis=1
     )
-
+    
+    df_all["label_full"] = df_all.apply(
+        lambda row: (
+            f"{row[label_col]}"
+            f"<br>{row[pl_col]:+.0f}€ | {row[pl_pct_col]:+.2%}"
+        ),
+        axis=1
+    )
     # =========================
     # scala simmetrica
     # =========================
@@ -1485,8 +1492,8 @@ def pl_treemap(
         names=label_col,
         parents="Parent",
         values="Valore",
-        color="PL_pct",
-        custom_data=["PL", "PL_pct"],
+        color="color_val",
+        custom_data=[ pl_col, pl_pct_col],
         color_continuous_scale = [
             (0.0,  "#F23636"),  # rosso acceso
             (0.16, "#B53C3C"),  # rosso mattone
