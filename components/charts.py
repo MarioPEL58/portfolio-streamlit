@@ -1490,116 +1490,69 @@ def pl_treemap_gerarchia(
           )
     )
     df_intermediario["ID"] = df_intermediario["Intermediario"]    
-    df_intermediario["Label"] = (
-        df_intermediario["Intermediario"]
-    )
+    df_intermediario["Label"] = df_intermediario["Intermediario"]
     df_intermediario["Parent"] = ""
     
     df_tipo = (
-        df.groupby(
-            ["Intermediario", "Tipo"],
-            as_index=False
-        )
-        .agg(
-            Valore=("Valore", "sum"),
-            PL=(pl_col, "sum")
-        )
+        df.groupby(["Intermediario", "Tipo"], as_index=False)
+          .agg(
+              Valore=("Valore", "sum"),
+              PL=(pl_col, "sum")
+          )
     )
-    df_tipo["ID"] = (
-        df_tipo["Intermediario"]
-        + "|"
-        + df_tipo["Tipo"]
-    )
-    
+    df_tipo["ID"] = df_tipo["Intermediario"] + "|" + df_tipo["Tipo"]
     df_tipo["Label"] = df_tipo["Tipo"]
+    df_tipo["Parent"] = df_tipo["Intermediario"]
     
-    df_tipo["Parent"] = (
-        df_tipo["Intermediario"]
-    )
+    # Rinominiamo le colonne sulle foglie per uniformarle ai genitori prima della concatenazione
     df_ticker = df.copy()
-    
-    df_ticker["ID"] = (
-        df_ticker["Intermediario"]
-        + "|"
-        + df_ticker["Tipo"]
-        + "|"
-        + df_ticker[label_col]
-    )
-    
-    df_ticker["Label"] = (
-        df_ticker[label_col]
-    )
-    
-    df_ticker["Parent"] = (
-        df_ticker["Intermediario"]
-        + "|"
-        + df_ticker["Tipo"]
-    )
+    df_ticker["ID"] = df_ticker["Intermediario"] + "|" + df_ticker["Tipo"] + "|" + df_ticker[label_col]
+    df_ticker["Label"] = df_ticker[label_col]
+    df_ticker["Parent"] = df_ticker["Intermediario"] + "|" + df_ticker["Tipo"]
+    df_ticker["PL"] = df_ticker[pl_col] # Uniformiamo il nome colonna per la sum
+
+    # Concateniamo usando solo le colonne strutturali comuni
     df_all = pd.concat(
         [
-            df_intermediario,
-            df_tipo,
-            df_ticker
+            df_intermediario[["ID", "Label", "Parent", "Valore", "PL"]],
+            df_tipo[["ID", "Label", "Parent", "Valore", "PL"]],
+            df_ticker[["ID", "Label", "Parent", "Valore", "PL"]]
         ],
         ignore_index=True
     )
 
-    # =========================
-    # colore = rendimento
-    # =========================
-    df["color_val"] = df[pl_pct_col] # per non aggregato 
-    df_all["color_val"] = df_all[pl_pct_col]
-    # =========================
-    # ✅ LABEL CON € + %
-    # =========================
-    df["label_full"] = df.apply(
-        lambda row: (
-            f"{row[label_col]}"
-            f"<br>{row[pl_col]:+.0f}€ | {row[pl_pct_col]:+.2%}"
-        ),
-        axis=1
-    )
+    # ==========================================================
+    # Calcolo robusto del PL% e del Colore su TUTTI i livelli
+    # ==========================================================
+    # Ricalcoliamo la percentuale reale (evita la somma errata delle percentuali sui padri)
+    # Se Valore è 0, fillna(0) evita il NaN
+    df_all["PL_Pct_Calcolata"] = (df_all["PL"].div(df_all["Valore"])).fillna(0)
     
-    df_all["label_full"] = df_all.apply(
-        lambda row: (
-            f"{row[label_col]}"
-            f"<br>{row[pl_col]:+.0f}€ | {row[pl_pct_col]:+.2%}"
-        ),
-        axis=1
-    )
+    # Se pl_mode è giornaliero ed era espresso in decimali (es. 0.05 per 5%), 
+    # non moltiplicare per 100. Se invece nel df originale era già es. 5.0, allora moltiplica.
+    # Assumiamo qui la consistenza con la scala decimale (.2% nel tuo template originale)
+    df_all["color_val"] = df_all["PL_Pct_Calcolata"]
+
     # =========================
-    # scala simmetrica
+    # scala simmetrica (presa dal df originale delle foglie)
     # =========================
-    max_abs = df["color_val"].abs().max()
+    max_abs = df[pl_pct_col].abs().max()
+    if pd.isna(max_abs) or max_abs == 0:
+        max_abs = 0.01
 
     # =========================
     # TREEMAP
     # =========================
-    # fig = px.treemap(
-    #     df,
-    #     path=["Intermediario", "Tipo", "label_full"],
-    #     values="Valore",
-    #     color="color_val",
-    #     color_continuous_scale = [
-    #         (0.0,  "#F23636"),  # rosso acceso
-    #         (0.16, "#B53C3C"),  # rosso mattone
-    #         (0.33, "#7E3E47"),  # rosso bordeaux
-    #         (0.5,  "#3F4350"),  # grigio neutro
-    #         (0.66, "#2E6C4A"),  # verde scuro
-    #         (0.83, "#289F51"),  # verde medio
-    #         (1.0,  "#23CE5F")   # verde acceso
-    #     ],
-    #     range_color=[-max_abs, max_abs]
-    # )
     fig = px.treemap(
         df_all,
         ids="ID",
-        names=label_col,
+        names="Label",  # 🌟 FONDAMENTALE: Usiamo "Label" così i genitori non sono null
         parents="Parent",
         values="Valore",
         color="color_val",
-        custom_data=[ pl_col, pl_pct_col],
-        color_continuous_scale = [
+        # Passiamo PL e PL_Pct_Calcolata come custom_data nativi per tutti i livelli
+        custom_data=["PL", "PL_Pct_Calcolata"], 
+        color_continuous_scale=[
             (0.0,  "#F23636"),  # rosso acceso
             (0.16, "#B53C3C"),  # rosso mattone
             (0.33, "#7E3E47"),  # rosso bordeaux
@@ -1610,31 +1563,29 @@ def pl_treemap_gerarchia(
         ],
         range_color=[-max_abs, max_abs]
     )
+
     # =========================
-    # stile
+    # stile testo interno
     # =========================
     fig.update_traces(
         marker=dict(line=dict(color="black", width=1.2)),
         textinfo="label",
         textposition="middle center",
-        # 🔹 Forza Plotly a calcolare correttamente le dimensioni dei font dentro i rettangoli
         textfont=dict(size=13),
         insidetextfont=dict(size=13)
     )
 
     # =========================
-    # hover
+    # hover / tooltip pulito
     # =========================
     fig.update_traces(
-        hovertemplate=
-        "<b>%{label}</b><br>" +
-        "Intermediario: %{parent}<br>" +
-        "Valore: %{value:.2f}€<br>" +
-        f"P/L: %{{customdata[0]:.2f}}€<br>" +
-        #f"P/L %: %{{customdata[1]:+.2%}}" +
-        f"P/L %: %{{color:.2%}}<extra></extra>",
-        #customdata=df[[pl_col]].values
-        customdata=df_all[[pl_col]].values
+        hovertemplate=(
+            "<b>%{label}</b><br>"
+            "Valore: %{value:,.2f}€<br>"
+            "P/L: %{customdata[0]:,.2f}€<br>"
+            "P/L %: %{customdata[1]:+.2%}<extra></extra>"
+        )
+        # 🌟 RIMOSSO customdata=... da qui, lasciamo gestire tutto a px.treemap
     )
 
     # =========================
@@ -1642,10 +1593,12 @@ def pl_treemap_gerarchia(
     # =========================
     fig.update_layout(
         margin=dict(t=10, l=10, r=10, b=10),
-        coloraxis_colorbar=dict(title=pl_pct_col, tickformat=".0%")
+        coloraxis_colorbar=dict(title=pl_pct_col, tickformat=".2%")
     )
 
     return fig
+    
+pl_treemap = pl_treemap_gerarchia  # ridefinizione per testare la funzione mofificata 
     
 def create_tail_risk_figure(flow_adjusted_returns):
 
