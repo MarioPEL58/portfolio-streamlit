@@ -1246,6 +1246,7 @@ def ratio_bar_gradient_compare(
 #     return fig
 
 import plotly.express as px
+import streamlit as st   # per debug 
 
 def daily_pl_treemap(current: pd.DataFrame, label_col="Ticker"):
 
@@ -1342,7 +1343,6 @@ def daily_pl_treemap(current: pd.DataFrame, label_col="Ticker"):
 
     return fig
 
-#####   OLd tremap ############ 
 def pl_treemap(
     current: pd.DataFrame,
     label_col: str = "Ticker",
@@ -1373,7 +1373,26 @@ def pl_treemap(
 
     if label_col not in df.columns:
         label_col = "Ticker"
-
+    
+    agg_tipo = (
+        df.groupby(["Intermediario", "Tipo"])
+          .agg(
+              Valore=("Valore", "sum"),
+              PL=(pl_col, "sum")
+          )
+          .reset_index()
+    )
+    
+    agg_tipo["PL_pct"] = (
+        agg_tipo["PL"] /
+        (agg_tipo["Valore"] - agg_tipo["PL"])
+    )
+    st.dataframe(
+        agg_tipo[
+            agg_tipo["Intermediario"]
+            == "IntesaSanPaolo"
+        ]
+    )
     # =========================
     # colore = rendimento
     # =========================
