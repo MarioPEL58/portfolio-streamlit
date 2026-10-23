@@ -1373,7 +1373,10 @@ def pl_treemap(
 
     if label_col not in df.columns:
         label_col = "Ticker"
-    
+        
+    #################################
+    ## Costruzione gerarchia 
+    #################################
     df_intermediario = (
         df.groupby("Intermediario", as_index=False)
           .agg(
@@ -1381,6 +1384,12 @@ def pl_treemap(
               PL=(pl_col, "sum")
           )
     )
+    df_intermediario["ID"] = df_intermediario["Intermediario"]    
+    df_intermediario["Label"] = (
+        df_intermediario["Intermediario"]
+    )
+    df_intermediario["Parent"] = ""
+    
     df_tipo = (
         df.groupby(
             ["Intermediario", "Tipo"],
@@ -1391,8 +1400,36 @@ def pl_treemap(
             PL=(pl_col, "sum")
         )
     )
+    df_tipo["ID"] = (
+        df_tipo["Intermediario"]
+        + "|"
+        + df_tipo["Tipo"]
+    )
+    
+    df_tipo["Label"] = df_tipo["Tipo"]
+    
+    df_tipo["Parent"] = (
+        df_tipo["Intermediario"]
+    )
     df_ticker = df.copy()
     
+    df_ticker["ID"] = (
+        df_ticker["Intermediario"]
+        + "|"
+        + df_ticker["Tipo"]
+        + "|"
+        + df_ticker[label_col]
+    )
+    
+    df_ticker["Label"] = (
+        df_ticker[label_col]
+    )
+    
+    df_ticker["Parent"] = (
+        df_ticker["Intermediario"]
+        + "|"
+        + df_ticker["Tipo"]
+    )
     df_all = pd.concat(
         [
             df_intermediario,
@@ -1401,6 +1438,7 @@ def pl_treemap(
         ],
         ignore_index=True
     )
+
     # =========================
     # colore = rendimento
     # =========================
