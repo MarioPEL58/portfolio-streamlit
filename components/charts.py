@@ -1392,7 +1392,8 @@ def pl_treemap(
         )
     )
     df_ticker = df.copy()
-        df_all = pd.concat(
+    
+    df_all = pd.concat(
         [
             df_intermediario,
             df_tipo,
@@ -1441,7 +1442,7 @@ def pl_treemap(
     #     range_color=[-max_abs, max_abs]
     # )
     fig = px.treemap(
-        df_strutturato,
+        df_all,
         ids="ID",
         names="Label",
         parents="Parent",
