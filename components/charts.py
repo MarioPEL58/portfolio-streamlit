@@ -1676,7 +1676,12 @@ def pl_treemap(
                     width=1.2
                 ),
             ),
-
+            
+            branchvalues="total",
+            tiling=dict(
+                packing="squarify"
+            ),
+            
             textinfo="label",
 
             hovertemplate=
@@ -1687,7 +1692,12 @@ def pl_treemap(
             "<extra></extra>",
         )
     )
-
+    
+    fig.update_traces(
+        textinfo="label",
+        textposition="middle center",
+        root_color="rgba(0,0,0,0)"
+    )
     fig.update_layout(
         margin=dict(
             t=10,
