@@ -1350,7 +1350,19 @@ def pl_treemap(
 
     if current is None or current.empty:
         return None
-
+    st.dataframe(
+        current[
+            [
+                "Intermediario",
+                "Tipo",
+                "Ticker",
+                "Valore",
+                "P/L",
+                "P/L %"
+            ]
+        ].head(10)
+    )
+    
     df = current.copy()
 
     # =========================
