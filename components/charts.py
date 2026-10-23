@@ -1444,7 +1444,7 @@ def pl_treemap(
     fig = px.treemap(
         df_all,
         ids="ID",
-        names="Label",
+        names=label_col,
         parents="Parent",
         values="Valore",
         color="PL_pct",
