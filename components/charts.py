@@ -8,8 +8,6 @@ import pandas as pd
 from services.portfolio_metrics import compute_var_historical, compute_conditional_var 
 from typing import Optional
 
-import plotly.graph_objects as go
-
 
 def portfolio_chart(series, bench_norm=None, benchmark_name="", note_text=None):
 
@@ -1345,113 +1343,6 @@ def daily_pl_treemap(current: pd.DataFrame, label_col="Ticker"):
     return fig
 
 #####   OLd tremap ############ 
-# def pl_treemap(
-#     current: pd.DataFrame,
-#     label_col: str = "Ticker",
-#     pl_mode: str = "daily"
-# ):
-
-#     if current is None or current.empty:
-#         return None
-    
-#     df = current.copy()
-    
-#     # =========================
-#     # mapping colonne robusto
-#     # =========================
-#     if pl_mode == "total":
-#         pl_col = "P/L"
-#         pl_pct_col = "P/L %"
-#     else:
-#         pl_col = "P/L Giornaliero"
-#         pl_pct_col = "P/L Giornaliero %"
-    
-#     required = ["Valore", pl_pct_col, pl_col, "Intermediario", "Tipo"]
-#     for col in required:
-#         if col not in df.columns:
-#             return None
-
-#     df = df.dropna(subset=["Valore", pl_pct_col]).copy()
-
-#     if label_col not in df.columns:
-#         label_col = "Ticker"
-
-#     # =========================
-#     # colore = rendimento
-#     # =========================
-#     df["color_val"] = df[pl_pct_col]
-
-#     # =========================
-#     # ✅ LABEL CON € + %
-#     # =========================
-#     df["label_full"] = df.apply(
-#         lambda row: (
-#             f"{row[label_col]}"
-#             f"<br>{row[pl_col]:+.0f}€ | {row[pl_pct_col]:+.2%}"
-#         ),
-#         axis=1
-#     )
-
-#     # =========================
-#     # scala simmetrica
-#     # =========================
-#     max_abs = df["color_val"].abs().max()
-
-#     # =========================
-#     # TREEMAP
-#     # =========================
-#     fig = px.treemap(
-#         df,
-#         path=["Intermediario", "Tipo", "label_full"],
-#         values="Valore",
-#         color="color_val",
-#         color_continuous_scale = [
-#             (0.0,  "#F23636"),  # rosso acceso
-#             (0.16, "#B53C3C"),  # rosso mattone
-#             (0.33, "#7E3E47"),  # rosso bordeaux
-#             (0.5,  "#3F4350"),  # grigio neutro
-#             (0.66, "#2E6C4A"),  # verde scuro
-#             (0.83, "#289F51"),  # verde medio
-#             (1.0,  "#23CE5F")   # verde acceso
-#         ],
-#         range_color=[-max_abs, max_abs]
-#     )
-
-#     # =========================
-#     # stile
-#     # =========================
-#     fig.update_traces(
-#         marker=dict(line=dict(color="black", width=1.2)),
-#         textinfo="label",
-#         textposition="middle center",
-#         # 🔹 Forza Plotly a calcolare correttamente le dimensioni dei font dentro i rettangoli
-#         textfont=dict(size=13),
-#         insidetextfont=dict(size=13)
-#     )
-
-#     # =========================
-#     # hover
-#     # =========================
-#     fig.update_traces(
-#         hovertemplate=
-#         "<b>%{label}</b><br>" +
-#         "Intermediario: %{parent}<br>" +
-#         "Valore: %{value:.2f}€<br>" +
-#         f"P/L: %{{customdata[0]:.2f}}€<br>" +
-#         f"P/L %: %{{color:.2%}}<extra></extra>",
-#         customdata=df[[pl_col]].values
-#     )
-
-#     # =========================
-#     # layout
-#     # =========================
-#     fig.update_layout(
-#         margin=dict(t=10, l=10, r=10, b=10),
-#         coloraxis_colorbar=dict(title=pl_pct_col, tickformat=".0%")
-#     )
-
-#     return fig
-
 def pl_treemap(
     current: pd.DataFrame,
     label_col: str = "Ticker",
@@ -1460,11 +1351,11 @@ def pl_treemap(
 
     if current is None or current.empty:
         return None
-
+    
     df = current.copy()
-
+    
     # =========================
-    # mapping colonne
+    # mapping colonne robusto
     # =========================
     if pl_mode == "total":
         pl_col = "P/L"
@@ -1472,239 +1363,89 @@ def pl_treemap(
     else:
         pl_col = "P/L Giornaliero"
         pl_pct_col = "P/L Giornaliero %"
-
-    required = [
-        "Intermediario",
-        "Tipo",
-        label_col,
-        "Valore",
-        pl_col,
-    ]
-
+    
+    required = ["Valore", pl_pct_col, pl_col, "Intermediario", "Tipo"]
     for col in required:
         if col not in df.columns:
             return None
 
-    df = df.dropna(
-        subset=["Valore", pl_col]
-    ).copy()
+    df = df.dropna(subset=["Valore", pl_pct_col]).copy()
 
     if label_col not in df.columns:
         label_col = "Ticker"
 
     # =========================
-    # investimento iniziale
+    # colore = rendimento
     # =========================
-    df["Investito"] = (
-        df["Valore"] - df[pl_col]
-    )
+    df["color_val"] = df[pl_pct_col]
 
     # =========================
-    # label foglie
+    # ✅ LABEL CON € + %
     # =========================
     df["label_full"] = df.apply(
         lambda row: (
             f"{row[label_col]}"
-            f"<br>{row[pl_col]:+.0f}€"
-            f" | {row[pl_pct_col]:+.2%}"
+            f"<br>{row[pl_col]:+.0f}€ | {row[pl_pct_col]:+.2%}"
         ),
         axis=1
     )
 
-    nodes = []
+    # =========================
+    # scala simmetrica
+    # =========================
+    max_abs = df["color_val"].abs().max()
 
-    # ==================================================
-    # LIVELLO 3 - TITOLI
-    # ==================================================
-
-    for _, row in df.iterrows():
-
-        nodes.append(
-            {
-                "id":
-                    f"{row['Intermediario']}|"
-                    f"{row['Tipo']}|"
-                    f"{row[label_col]}",
-
-                "parent":
-                    f"{row['Intermediario']}|"
-                    f"{row['Tipo']}",
-
-                "label": row["label_full"],
-
-                "value": row["Valore"],
-
-                "pl": row[pl_col],
-
-                "invested": row["Investito"],
-            }
-        )
-
-    # ==================================================
-    # LIVELLO 2 - TIPO
-    # ==================================================
-
-    grp_tipo = (
-        df.groupby(
-            ["Intermediario", "Tipo"],
-            as_index=False
-        )
-        .agg(
-            Valore=("Valore", "sum"),
-            PL=(pl_col, "sum"),
-            Investito=("Investito", "sum"),
-        )
-    )
-
-    for _, row in grp_tipo.iterrows():
-
-        nodes.append(
-            {
-                "id":
-                    f"{row['Intermediario']}|"
-                    f"{row['Tipo']}",
-
-                "parent":
-                    row["Intermediario"],
-
-                "label":
-                    row["Tipo"],
-
-                "value":
-                    row["Valore"],
-
-                "pl":
-                    row["PL"],
-
-                "invested":
-                    row["Investito"],
-            }
-        )
-
-    # ==================================================
-    # LIVELLO 1 - INTERMEDIARIO
-    # ==================================================
-
-    grp_broker = (
-        df.groupby(
-            "Intermediario",
-            as_index=False
-        )
-        .agg(
-            Valore=("Valore", "sum"),
-            PL=(pl_col, "sum"),
-            Investito=("Investito", "sum"),
-        )
-    )
-
-    for _, row in grp_broker.iterrows():
-
-        nodes.append(
-            {
-                "id":
-                    row["Intermediario"],
-
-                "parent":
-                    "",
-
-                "label":
-                    row["Intermediario"],
-
-                "value":
-                    row["Valore"],
-
-                "pl":
-                    row["PL"],
-
-                "invested":
-                    row["Investito"],
-            }
-        )
-
-    tree = pd.DataFrame(nodes)
-
-    # ==================================================
-    # rendimento aggregato corretto
-    # ==================================================
-
-    tree["pl_pct"] = np.where(
-        tree["invested"] != 0,
-        tree["pl"] / tree["invested"],
-        0
-    )
-
-    max_abs = max(
-        abs(tree["pl_pct"].min()),
-        abs(tree["pl_pct"].max())
-    )
-
-    # ==================================================
+    # =========================
     # TREEMAP
-    # ==================================================
-
-    fig = go.Figure(
-        go.Treemap(
-            ids=tree["id"],
-            parents=tree["parent"],
-            labels=tree["label"],
-            values=tree["value"],
-
-            customdata=np.column_stack(
-                (
-                    tree["pl"],
-                    tree["pl_pct"]
-                )
-            ),
-
-            marker=dict(
-                colors=tree["pl_pct"],
-                colorscale=[
-                    [0.0,  "#F23636"],
-                    [0.16, "#B53C3C"],
-                    [0.33, "#7E3E47"],
-                    [0.50, "#3F4350"],
-                    [0.66, "#2E6C4A"],
-                    [0.83, "#289F51"],
-                    [1.00, "#23CE5F"],
-                ],
-
-                cmin=-max_abs,
-                cmax=max_abs,
-
-                line=dict(
-                    color="black",
-                    width=1.2
-                ),
-            ),
-            
-            branchvalues="total",
-            tiling=dict(
-                packing="squarify"
-            ),
-            
-            textinfo="label",
-
-            hovertemplate=
-            "<b>%{label}</b><br>"
-            "Valore: %{value:,.2f}€<br>"
-            "P/L: %{customdata[0]:+,.2f}€<br>"
-            "P/L %: %{customdata[1]:+.2%}"
-            "<extra></extra>",
-        )
+    # =========================
+    fig = px.treemap(
+        df,
+        path=["Intermediario", "Tipo", "label_full"],
+        values="Valore",
+        color="color_val",
+        color_continuous_scale = [
+            (0.0,  "#F23636"),  # rosso acceso
+            (0.16, "#B53C3C"),  # rosso mattone
+            (0.33, "#7E3E47"),  # rosso bordeaux
+            (0.5,  "#3F4350"),  # grigio neutro
+            (0.66, "#2E6C4A"),  # verde scuro
+            (0.83, "#289F51"),  # verde medio
+            (1.0,  "#23CE5F")   # verde acceso
+        ],
+        range_color=[-max_abs, max_abs]
     )
-    
+
+    # =========================
+    # stile
+    # =========================
     fig.update_traces(
+        marker=dict(line=dict(color="black", width=1.2)),
         textinfo="label",
         textposition="middle center",
-        root_color="rgba(0,0,0,0)"
+        # 🔹 Forza Plotly a calcolare correttamente le dimensioni dei font dentro i rettangoli
+        textfont=dict(size=13),
+        insidetextfont=dict(size=13)
     )
+
+    # =========================
+    # hover
+    # =========================
+    fig.update_traces(
+        hovertemplate=
+        "<b>%{label}</b><br>" +
+        "Intermediario: %{parent}<br>" +
+        "Valore: %{value:.2f}€<br>" +
+        f"P/L: %{{customdata[0]:.2f}}€<br>" +
+        f"P/L %: %{{color:.2%}}<extra></extra>",
+        customdata=df[[pl_col]].values
+    )
+
+    # =========================
+    # layout
+    # =========================
     fig.update_layout(
-        margin=dict(
-            t=10,
-            l=10,
-            r=10,
-            b=10
-        )
+        margin=dict(t=10, l=10, r=10, b=10),
+        coloraxis_colorbar=dict(title=pl_pct_col, tickformat=".0%")
     )
 
     return fig
