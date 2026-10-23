@@ -1352,11 +1352,9 @@ def pl_treemap(
 
     if current is None or current.empty:
         return None
-
     
     df = current.copy()
     
-
     # =========================
     # mapping colonne robusto
     # =========================
@@ -1366,19 +1364,6 @@ def pl_treemap(
     else:
         pl_col = "P/L Giornaliero"
         pl_pct_col = "P/L Giornaliero %"
-        
-    st.dataframe(
-        df[
-            [
-                "Intermediario",
-                "Tipo",
-                label_col,
-                "Valore",
-                pl_col,
-                pl_pct_col,
-            ]
-        ].head(20)
-    )
     
     required = ["Valore", pl_pct_col, pl_col, "Intermediario", "Tipo"]
     for col in required:
@@ -1414,32 +1399,11 @@ def pl_treemap(
     # =========================
     # TREEMAP
     # =========================
-    # fig = px.treemap(
-    #     df,
-    #     path=["Intermediario", "Tipo", "label_full"],
-    #     values="Valore",
-    #     color="color_val",
-    #     color_continuous_scale = [
-    #         (0.0,  "#F23636"),  # rosso acceso
-    #         (0.16, "#B53C3C"),  # rosso mattone
-    #         (0.33, "#7E3E47"),  # rosso bordeaux
-    #         (0.5,  "#3F4350"),  # grigio neutro
-    #         (0.66, "#2E6C4A"),  # verde scuro
-    #         (0.83, "#289F51"),  # verde medio
-    #         (1.0,  "#23CE5F")   # verde acceso
-    #     ],
-    #     range_color=[-max_abs, max_abs]
-    # )
-
-    # capitale investito
-    df["invested"] = df["Valore"] - df[pl_col]
-
     fig = px.treemap(
         df,
         path=["Intermediario", "Tipo", "label_full"],
         values="Valore",
         color="color_val",
-        custom_data=[pl_col, "invested"],
         color_continuous_scale = [
             (0.0,  "#F23636"),  # rosso acceso
             (0.16, "#B53C3C"),  # rosso mattone
@@ -1451,6 +1415,7 @@ def pl_treemap(
         ],
         range_color=[-max_abs, max_abs]
     )
+
     # =========================
     # stile
     # =========================
@@ -1466,23 +1431,16 @@ def pl_treemap(
     # =========================
     # hover
     # =========================
-    # fig.update_traces(
-    #     hovertemplate=
-    #     "<b>%{label}</b><br>" +
-    #     "Intermediario: %{parent}<br>" +
-    #     "Valore: %{value:.2f}€<br>" +
-    #     f"P/L: %{{customdata[0]:.2f}}€<br>" +
-    #     f"P/L %: %{{color:.2%}}<extra></extra>",
-    #     customdata=df[[pl_col]].values
-    # )
     fig.update_traces(
         hovertemplate=
         "<b>%{label}</b><br>" +
         "Intermediario: %{parent}<br>" +
         "Valore: %{value:.2f}€<br>" +
         f"P/L: %{{customdata[0]:.2f}}€<br>" +
-        f"P/L %: %{{color:.2%}}<extra></extra>"
+        f"P/L %: %{{color:.2%}}<extra></extra>",
+        customdata=df[[pl_col]].values
     )
+
     # =========================
     # layout
     # =========================
