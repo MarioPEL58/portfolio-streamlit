@@ -1526,10 +1526,10 @@ def pl_treemap(
         "Intermediario: %{parent}<br>" +
         "Valore: %{value:.2f}€<br>" +
         f"P/L: %{{customdata[0]:.2f}}€<br>" +
-        f"P/L %: %{{customdata[1]:+.2%}}" +
+        #f"P/L %: %{{customdata[1]:+.2%}}" +
         f"P/L %: %{{color:.2%}}<extra></extra>",
         #customdata=df[[pl_col]].values
-        customdata=df_all[[pl_col],[pl_pct_col]].values
+        customdata=df_all[[pl_col]].values
     )
 
     # =========================
