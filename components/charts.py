@@ -1527,7 +1527,7 @@ def pl_treemap(
         "Valore: %{value:.2f}€<br>" +
         f"P/L: %{{customdata[0]:.2f}}€<br>" +
         "P/L %: %{customdata[1]:+.2%}" +
-        f"P/L %: %{{color:.2%}}<extra></extra>"
+        f"P/L %: %{{color:.2%}}<extra></extra>" +
         customdata=df[[pl_col],[pl_pct_col]].values
     )
 
