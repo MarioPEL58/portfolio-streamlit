@@ -1479,48 +1479,72 @@ def pl_treemap_gerarchia(
     if label_col not in df.columns:
         label_col = "Ticker"
 
-    # ==========================================================
-    # Pre-calcoliamo il colore e le aggregazioni in Pandas
-    # ==========================================================
-    df["color_val"] = df[pl_pct_col]
-    max_abs = df["color_val"].abs().max()
+    # Scala cromatica simmetrica basata sulle foglie originali
+    max_abs = df[pl_pct_col].abs().max()
     if pd.isna(max_abs) or max_abs == 0:
         max_abs = 0.01
 
-    # Calcoliamo le somme REALI del P/L per i gruppi intermedi (Tipo) e Broker
-    agg_tipo = df.groupby(["Intermediario", "Tipo"])[pl_col].sum().to_dict()
-    agg_interm = df.groupby("Intermediario")[pl_col].sum().to_dict()
-
-    # Creiamo le tre colonne di testo pre-formattate in Pandas
-    df["txt_pl_broker"] = df.apply(lambda r: f"{agg_interm.get(r['Intermediario'], 0.0):,.2f}€", axis=1)
-    df["txt_pl_tipo"] = df.apply(lambda r: f"{agg_tipo.get((r['Intermediario'], r['Tipo']), 0.0):,.2f}€", axis=1)
-    df["txt_pl_ticker"] = df[pl_col].apply(lambda x: f"{x:,.2f}€")
-
     # ==========================================================
-    # TREEMAP (Geometria Perfetta con PATH)
+    # TREEMAP (Geometria NATIVA e PERFETTA con PATH)
     # ==========================================================
     fig = px.treemap(
         df,
         path=["Intermediario", "Tipo", label_col], 
-        values="Valore",
-        color="color_val",
-        # 🌟 ECCO IL PASSAGGIO MANCANTE: Mappiamo le colonne dentro custom_data!
-        # [0] -> Broker, [1] -> Tipo, [2] -> Ticker
-        custom_data=["txt_pl_broker", "txt_pl_tipo", "txt_pl_ticker"],
+        values="Valore",  # Geometria nativa intatta al 100%
+        color=pl_pct_col, # Il motore aggrega autonomamente la media colore del ramo
         color_continuous_scale=[
-            (0.0,  "#F23636"),  # rosso acceso
-            (0.16, "#B53C3C"),  # rosso mattone
-            (0.33, "#7E3E47"),  # rosso bordeaux
-            (0.5,  "#3F4350"),  # grigio neutro
-            (0.66, "#2E6C4A"),  # verde scuro
-            (0.83, "#289F51"),  # verde medio
-            (1.0,  "#23CE5F")   # verde acceso
+            (0.0,  "#F23636"), (0.16, "#B53C3C"), (0.33, "#7E3E47"),
+            (0.5,  "#3F4350"), (0.66, "#2E6C4A"), (0.83, "#289F51"), (1.0,  "#23CE5F")
         ],
         range_color=[-max_abs, max_abs]
     )
 
-    # Configurazione estetica testi interni
+    # ==========================================================
+    # 🌟 POST-ELABORAZIONE: INIEZIONE DIZIONARI SULL'ALBERO GENERATO
+    # ==========================================================
+    # Calcoliamo le somme reali in Pandas
+    agg_interm = df.groupby("Intermediario")[pl_col].sum().to_dict()
+    agg_tipo = df.groupby(["Intermediario", "Tipo"])[pl_col].sum().to_dict()
+    
+    # Mappatura rapida delle foglie
+    # Chiave foglia generata da Plotly: "Intermediario/Tipo/Ticker"
+    dict_foglie = {}
+    for _, row in df.iterrows():
+        key = f"{row['Intermediario']}/{row['Tipo']}/{row[label_col]}"
+        dict_foglie[key] = row[pl_col]
+
+    # Estraiamo gli ID gerarchici esatti nell'ordine strutturato da Plotly
+    plotly_ids = fig.data[0].ids
+    
+    # Costruiamo una lista di P/L pulita allineata riga per riga agli ID di Plotly
+    pl_allineato = []
+    for node_id in plotly_ids:
+        parts = node_id.split('/')
+        
+        if len(parts) == 1:    # Livello Radice (Intermediario) -> es: "Intesa"
+            pl_allineato.append(agg_interm.get(parts[0], 0.0))
+        elif len(parts) == 2:  # Livello Intermedio (Tipo) -> es: "Intesa/Fondi"
+            pl_allineato.append(agg_tipo.get((parts[0], parts[1]), 0.0))
+        elif len(parts) == 3:  # Livello Foglia (Ticker) -> es: "Intesa/Fondi/AAPL"
+            pl_allineato.append(dict_foglie.get(node_id, 0.0))
+        else:
+            pl_allineato.append(0.0)
+
+    # Assegniamo la colonna calcolata come customdata personalizzato allineato a Plotly
+    fig.data[0].customdata = np.array(pl_allineato).reshape(-1, 1)
+
+    # ==========================================================
+    # HOVER CONTESTUALE MINIMALE A SINGOLA RIGA
+    # ==========================================================
+    # Ora %{customdata} punta all'array monodimensionale allineato.
+    # %{color} è la percentuale aggregata calcolata dal browser.
     fig.update_traces(
+        hovertemplate=(
+            "<b>%{label}</b><br>"
+            "Valore: %{value:,.2f}€<br>"
+            "P/L: %{customdata:,.2f}€<br>"
+            "P/L %: %{color:+.2%}<extra></extra>"
+        ),
         textinfo="label",
         textposition="middle center",
         textfont=dict(size=13),
@@ -1528,33 +1552,14 @@ def pl_treemap_gerarchia(
         marker=dict(line=dict(color="black", width=1.2))
     )
 
-    # ==========================================================
-    # 🌟 HOVER TEMPLATE PULITO E COERENTE
-    # ==========================================================
-    # Ora %{customdata[0]} punta a txt_pl_broker
-    # %{customdata[1]} punta a txt_pl_tipo (es. Fondi, Obbligazioni)
-    # %{customdata[2]} punta a txt_pl_ticker
-    fig.update_traces(
-        hovertemplate=(
-            "<b>%{label}</b><br>"
-            "Valore di questo blocco: %{value:,.2f}€<br>"
-            "Performance di questo blocco: %{color:+.2%}<br>"
-            "----------------------------------------<br>"
-            "• P/L Totale Intermediario: %{customdata[0]}<br>"
-            "• P/L Totale di questo Tipo: %{customdata[1]}<br>"
-            "• P/L Specifico Asset: %{customdata[2]}<extra></extra>"
-        )
-    )
-
-    # ==========================================================
-    # Layout finale
-    # ==========================================================
+    # Configurazione Layout finale
     fig.update_layout(
         margin=dict(t=10, l=10, r=10, b=10),
         coloraxis_colorbar=dict(title=pl_pct_col, tickformat=".2%")
     )
 
     return fig
+
 
     
 pl_treemap = pl_treemap_gerarchia  # ridefinizione per testare la funzione mofificata 
