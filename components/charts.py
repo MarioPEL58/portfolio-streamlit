@@ -1459,9 +1459,9 @@ def pl_treemap_gerarchia(
     
     df = current.copy()
     
-    # =========================
-    # mapping colonne robusto
-    # =========================
+    # ==========================================================
+    # Mapping colonne robusto
+    # ==========================================================
     if pl_mode == "total":
         pl_col = "P/L"
         pl_pct_col = "P/L %"
@@ -1480,7 +1480,7 @@ def pl_treemap_gerarchia(
         label_col = "Ticker"
 
     # ==========================================================
-    # Pre-calcoliamo le colonne del colore e puliamo i dati
+    # Pre-calcoliamo le colonne del colore e della scala simmetrica
     # ==========================================================
     df["color_val"] = df[pl_pct_col]
     max_abs = df["color_val"].abs().max()
@@ -1488,34 +1488,30 @@ def pl_treemap_gerarchia(
         max_abs = 0.01
 
     # ==========================================================
-    # 🌟 IL TRUCCO: Calcoliamo gli aggregati esatti per ogni livello
-    # con i nomi esatti che Plotly assegna internamente alle etichette
+    # 🌟 CALCOLO DIZIONARI AGGREGATI PER L'HOVER TEMPLATE
     # ==========================================================
-    # Questo serve a fare in modo che il tooltip mostri i dati corretti del blocco
-    agg_interm = df.groupby("Intermediario")[[pl_col, "Valore"]].sum()
-    agg_tipo = df.groupby("Tipo")[[pl_col, "Valore"]].sum()
+    # Calcoliamo le somme reali di P/L lato Pandas per ogni livello della gerarchia
+    agg_interm = df.groupby("Intermediario")[pl_col].sum().to_dict()
+    agg_tipo = df.groupby(["Intermediario", "Tipo"])[pl_col].sum().to_dict()
     
-    # Creiamo dizionari di mappatura rapidi
-    dict_pl = {**agg_interm[pl_col].to_dict(), **agg_tipo[pl_col].to_dict(), **df.set_index(label_col)[pl_col].to_dict()}
-    dict_val = {**agg_interm["Valore"].to_dict(), **agg_tipo["Valore"].to_dict(), **df.set_index(label_col)["Valore"].to_dict()}
+    # Costruiamo una matrice tridimensionale affinché ogni foglia porti con sé i dati dei padri.
+    # [0] -> P/L Intermediario, [1] -> P/L Tipo, [2] -> P/L Ticker
+    custom_matrix = []
+    for _, row in df.iterrows():
+        pl_livello_intermediario = agg_interm.get(row["Intermediario"], 0.0)
+        pl_livello_tipo = agg_tipo.get((row["Intermediario"], row["Tipo"]), 0.0)
+        pl_livello_ticker = row[pl_col]
+        
+        custom_matrix.append([pl_livello_intermediario, pl_livello_tipo, pl_livello_ticker])
 
-    # Applichiamo le funzioni di mappatura dinamica basate su quello che Plotly sta visualizzando sul mouse (%{label})
-    df["custom_pl"] = df[label_col].map(dict_pl)
-
-    # =========================
-    # TREEMAP (Ritorno a PATH nativo)
-    # =========================
+    # ==========================================================
+    # TREEMAP (Geometria Nativa con PATH - Proporzioni Corrette)
+    # ==========================================================
     fig = px.treemap(
         df,
-        path=["Intermediario", "Tipo", label_col], # Ripristiniamo la geometria perfetta
+        path=["Intermediario", "Tipo", label_col], 
         values="Valore",
         color="color_val",
-        # Passiamo le colonne necessarie nell'hover_data nativo di Plotly
-        hover_data={
-            "Valore": ":.2f}€",
-            pl_col: ":.2f}€",
-            "color_val": ":.2%"
-        },
         color_continuous_scale=[
             (0.0,  "#F23636"),  # rosso acceso
             (0.16, "#B53C3C"),  # rosso mattone
@@ -1528,42 +1524,61 @@ def pl_treemap_gerarchia(
         range_color=[-max_abs, max_abs]
     )
 
-    # =========================
-    # stile testo interno (Foglie)
-    # =========================
+    # 1. Iniettiamo la nostra matrice tridimensionale di P/L dentro i customdata di Plotly
+    fig.update_traces(customdata=custom_matrix)
+
+    # 2. Configurazione dello stile visivo dei testi interni
     fig.update_traces(
-        marker=dict(line=dict(color="black", width=1.2)),
         textinfo="label",
         textposition="middle center",
         textfont=dict(size=13),
-        insidetextfont=dict(size=13)
+        insidetextfont=dict(size=13),
+        marker=dict(line=dict(color="black", width=1.2))
     )
 
     # ==========================================================
-    # 🌟 TOOLTIP UNIFORME CHE LEGGE I DATI AGGREGATI DI PLOTLY
+    # 🌟 CONFIGURAZIONE HOVER DINAMICA PER LIVELLO DI PROFONDITÀ
     # ==========================================================
-    # Usando %{value} Plotly estrae in automatico la somma geometrica corretta del blocco corrente, 
-    # sia che tu sia su un Intermediario, su un Tipo o su un Ticker!
+    # Plotly Express quando usa 'path' genera internamente più tracce o scomposizioni.
+    # Usiamo un ciclo sulle tracce (o data) per formattare l'hover in base al livello logico
+    # o applichiamo una logica basata sugli indici di customdata.
+    
+    # Per fare in modo che il blocco "Tipo" (Fondi, Obbligazioni) mostri l'indice,
+    # e il singolo Ticker (foglia) mostri l'indice, configuriamo il template:
     fig.update_traces(
         hovertemplate=(
             "<b>%{label}</b><br>"
             "Valore Blocco: %{value:,.2f}€<br>"
-            "P/L Blocco: %{customdata[0]:,.2f}€<br>"
+            # Se siamo sul livello intermedio (es. Fondi), peschiamo customdata[1].
+            # Se siamo sulle foglie (Ticker), mostriamo customdata[2] modificando se necessario.
+            # Per rendere l'hover robusto sui gruppi intermedi usiamo l'indice del Tipo:
+            "P/L Blocco: %{customdata[1]:,.2f}€<br>" 
             "P/L % Blocco: %{color:+.2%}<extra></extra>"
-        ),
-        # customdata mappato sulle colonne del df originale per non alterare le righe
-        customdata=df[[pl_col]]
+        )
     )
 
-    # =========================
-    # layout
-    # =========================
+    # Per affinare il comportamento sulle sole FOGLIE (i singoli Ticker), 
+    # diciamo a Plotly di usare l'indice [2] della nostra matrice per la massima precisione:
+    for trace in fig.data:
+        # Se la traccia contiene i Ticker (le foglie del grafico)
+        if trace.hovertemplate:
+            trace.hovertemplate = (
+                "<b>%{label}</b><br>"
+                "Valore: %{value:,.2f}€<br>"
+                "P/L Asset: %{customdata[2]:,.2f}€<br>"  # 🌟 Indice 2 per il singolo ticker
+                "P/L % Asset: %{color:+.2%}<extra></extra>"
+            )
+
+    # ==========================================================
+    # Layout finale della Toolbar e formati
+    # ==========================================================
     fig.update_layout(
         margin=dict(t=10, l=10, r=10, b=10),
         coloraxis_colorbar=dict(title=pl_pct_col, tickformat=".2%")
     )
 
     return fig
+
 
     
 pl_treemap = pl_treemap_gerarchia  # ridefinizione per testare la funzione mofificata 
