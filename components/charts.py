@@ -1506,7 +1506,7 @@ def pl_treemap_gerarchia(
         color="color_val",
         # 🌟 ECCO IL PASSAGGIO MANCANTE: Mappiamo le colonne dentro custom_data!
         # [0] -> Broker, [1] -> Tipo, [2] -> Ticker
-        customdata=["txt_pl_broker", "txt_pl_tipo", "txt_pl_ticker"],
+        custom_data=["txt_pl_broker", "txt_pl_tipo", "txt_pl_ticker"],
         color_continuous_scale=[
             (0.0,  "#F23636"),  # rosso acceso
             (0.16, "#B53C3C"),  # rosso mattone
