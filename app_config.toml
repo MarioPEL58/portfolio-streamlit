@@ -340,6 +340,12 @@ tail_risk_date = "Data"
 tail_risk_var_highlight = "Rendimento oltre la soglia VaR 95%"
 
 # ============================================================
+# Treemap
+# ============================================================
+treemap_value = "Valore"
+treemap_pl = "P/L"
+treemap_pl_pct = "P/L %"
+# ============================================================
 # Backtest
 # ============================================================
 backtest_no_positions = "Nessuna posizione disponibile per il backtest con i filtri correnti."
@@ -856,6 +862,12 @@ tail_risk_return = "Return"
 tail_risk_date = "Date"
 tail_risk_var_highlight = "Return beyond the 95% VaR threshold"
 
+# ============================================================
+# Treemap
+# ============================================================
+treemap_value = "Value"
+treemap_pl = "P/L"
+treemap_pl_pct = "P/L %"
 # ============================================================
 # Backtest
 # ============================================================
