@@ -176,12 +176,35 @@ def build_treemap_pl_customdata(
     )
 def get_treemap_path(
     df: pd.DataFrame,
-    label_col: str
+    label_col: str,
+    portfolio_label: str,
 ):
+    """
+    Costruisce dinamicamente il path
+    della Treemap.
+
+    Se esiste un solo intermediario:
+
+        Intermediario
+            ↓
+            Tipo
+                ↓
+                Ticker
+
+    Se esistono più intermediari:
+
+        Portafoglio
+            ↓
+            Intermediario
+                ↓
+                Tipo
+                    ↓
+                    Ticker
+    """
 
     if df["Intermediario"].nunique() > 1:
 
-        df["Portfolio"] = t("portfolio")
+        df["Portfolio"] = portfolio_label
 
         return [
             "Portfolio",
