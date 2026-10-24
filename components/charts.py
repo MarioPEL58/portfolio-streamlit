@@ -1656,7 +1656,7 @@ def pl_treemap_gerarchia2(
 
     return fig
     
-pl_treemap = pl_treemap_gerarchia2  # ridefinizione per testare la funzione mofificata 
+pl_treemap = pl_treemap_gerarchia  # ridefinizione per testare la funzione mofificata 
     
 def create_tail_risk_figure(flow_adjusted_returns):
 
