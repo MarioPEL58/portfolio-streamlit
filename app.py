@@ -11,25 +11,23 @@ from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
 from components.charts import daily_pl_bar_chart_by_sign, pl_treemap
-from components.charts import sharpe_bar_gradient, ratio_bar_gradient_compare, create_tail_risk_figure
+from components.charts import ratio_bar_gradient_compare, create_tail_risk_figure
 from components.chart_comparison_metrics import (render_chart_comparison_metrics,)
 from components.backtest_view import render_backtest
 from components.efficient_frontier_view import render_efficient_frontier
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
 from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
-from services.market_data import download_close_prices, download_last_intraday_timestamp, report_late_tickers, fill_late_tickers_with_purchase_price, prepare_backtest_closes_eur
+from services.market_data import download_close_prices, report_late_tickers, fill_late_tickers_with_purchase_price, prepare_backtest_closes_eur
 from services.portfolio import build_portfolio
-from services.portfolio_metrics import compute_portfolio_xirr, compute_sharpe_ratio
+from services.portfolio_metrics import compute_portfolio_xirr
 from services.portfolio_metrics import compute_flow_adjusted_returns, compute_sharpe_from_returns, compute_sortino_ratio, compute_beta
-from services.market_status import compute_market_update_label
 from services.benchmark import build_flow_adjusted_benchmark
 from services.risk_free import get_euro_risk_free_rate
 from utils.finance import annual_to_daily_rate, get_dynamic_max
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 from utils.display import get_display_columns
-from utils.series_utils import ensure_datetime_series
 from components.tables import render_positions_table, render_performance_table, render_operations_table
 from components.tables import render_best_worst_days
 from components.downloads import render_download_tab
