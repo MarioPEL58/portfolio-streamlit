@@ -6,6 +6,7 @@ from utils.i18n import t
 from utils.display import get_display_columns
 import pandas as pd
 from services.portfolio_metrics import compute_var_historical, compute_conditional_var 
+from utils.chart_utils import ( get_treemap_path,build_treemap_pl_customdata,)
 from typing import Optional
 
 
@@ -1560,9 +1561,102 @@ def pl_treemap_gerarchia(
 
     return fig
 
+def pl_treemap_gerarchia2(
+    current: pd.DataFrame,
+    label_col: str = "Ticker",
+    pl_mode: str = "daily"
+):
 
+    if current is None or current.empty:
+        return None
     
-pl_treemap = pl_treemap_gerarchia  # ridefinizione per testare la funzione mofificata 
+    df = current.copy()
+    
+    # ==========================================================
+    # Mapping colonne robusto
+    # ==========================================================
+    if pl_mode == "total":
+        pl_col = "P/L"
+        pl_pct_col = "P/L %"
+    else:
+        pl_col = "P/L Giornaliero"
+        pl_pct_col = "P/L Giornaliero %"
+    
+    required = ["Valore", pl_pct_col, pl_col, "Intermediario", "Tipo"]
+    for col in required:
+        if col not in df.columns:
+            return None
+
+    df = df.dropna(subset=["Valore", pl_pct_col]).copy()
+
+    if label_col not in df.columns:
+        label_col = "Ticker"
+
+    # Scala cromatica simmetrica basata sulle foglie originali
+    max_abs = df[pl_pct_col].abs().max()
+    if pd.isna(max_abs) or max_abs == 0:
+        max_abs = 0.01
+
+    # ==========================================================
+    # TREEMAP (Geometria NATIVA e PERFETTA con PATH)
+    # ==========================================================
+    path = get_treemap_path(
+        df,
+        label_col,
+        t("treemap_portfolio")
+    )
+    fig = px.treemap(
+        df,
+        path=path, 
+        values="Valore",  # Geometria nativa intatta al 100%
+        color=pl_pct_col, # Il motore aggrega autonomamente la media colore del ramo
+        color_continuous_scale=[
+            (0.0,  "#F23636"), (0.16, "#B53C3C"), (0.33, "#7E3E47"),
+            (0.5,  "#3F4350"), (0.66, "#2E6C4A"), (0.83, "#289F51"), (1.0,  "#23CE5F")
+        ],
+        range_color=[-max_abs, max_abs]
+    )
+
+    # ==========================================================
+    # 🌟 POST-ELABORAZIONE: INIEZIONE DIZIONARI SULL'ALBERO GENERATO
+    # ==========================================================
+    fig.data[0].customdata = (
+        build_treemap_pl_customdata(
+            df=df,
+            fig=fig,
+            pl_col=pl_col,
+            label_col=label_col,
+        )
+    )
+
+    # ==========================================================
+    # HOVER CONTESTUALE MINIMALE A SINGOLA RIGA
+    # ==========================================================
+    # Ora %{customdata} punta all'array monodimensionale allineato.
+    # %{color} è la percentuale aggregata calcolata dal browser.
+    fig.update_traces(
+        hovertemplate=(
+            "<b>%{label}</b><br>"
+            f"{t('treemap_value')}: %{{value:,.2f}}€<br>"
+            f"{t('treemap_pl')}: %{{customdata:,.2f}}€<br>"
+            f"{t('treemap_pl_pct')}: %{{color:+.2%}}<extra></extra>"
+        ),
+        textinfo="label",
+        textposition="middle center",
+        textfont=dict(size=13),
+        insidetextfont=dict(size=13),
+        marker=dict(line=dict(color="black", width=1.2))
+    )
+
+    # Configurazione Layout finale
+    fig.update_layout(
+        margin=dict(t=10, l=10, r=10, b=10),
+        coloraxis_colorbar=dict(title=pl_pct_col, tickformat=".2%")
+    )
+
+    return fig
+    
+pl_treemap = pl_treemap_gerarchia2  # ridefinizione per testare la funzione mofificata 
     
 def create_tail_risk_figure(flow_adjusted_returns):
 
