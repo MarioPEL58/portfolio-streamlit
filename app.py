@@ -10,8 +10,8 @@ from utils.ui import title_with_tooltip
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
-from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, pl_treemap, sharpe_gauge
-from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare, create_tail_risk_figure
+from components.charts import daily_pl_bar_chart_by_sign, pl_treemap
+from components.charts import sharpe_bar_gradient, ratio_bar_gradient_compare, create_tail_risk_figure
 from components.chart_comparison_metrics import (render_chart_comparison_metrics,)
 from components.backtest_view import render_backtest
 from components.efficient_frontier_view import render_efficient_frontier
@@ -764,11 +764,6 @@ with tab_heatmap:
         key="pl_mode"  # ✅ QUESTO è il punto chiave
     )
 
-    # fig_treemap = daily_pl_treemap(
-    #     current,
-    #     label_col=label_choice
-    # )
-    
     # costruzione grafico
     
     fig_treemap = pl_treemap(
