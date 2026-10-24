@@ -1542,8 +1542,8 @@ def pl_treemap_gerarchia(
         hovertemplate=(
             "<b>%{label}</b><br>"
             f"{t('treemap_value')}: %{{value:,.2f}}€<br>"
-            "P/L: %{customdata:,.2f}€<br>"
-            "P/L %: %{color:+.2%}<extra></extra>"
+            f"{t('treemap_pl')}: %{{customdata:,.2f}}€<br>"
+            f"{t('treemap_pl_pct')}: %{{color:+.2%}}<extra></extra>"
         ),
         textinfo="label",
         textposition="middle center",
