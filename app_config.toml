@@ -342,6 +342,7 @@ tail_risk_var_highlight = "Rendimento oltre la soglia VaR 95%"
 # ============================================================
 # Treemap
 # ============================================================
+treemap_portfolio = "Portafoglio"
 treemap_value = "Valore"
 treemap_pl = "P/L"
 treemap_pl_pct = "P/L %"
@@ -865,6 +866,7 @@ tail_risk_var_highlight = "Return beyond the 95% VaR threshold"
 # ============================================================
 # Treemap
 # ============================================================
+treemap_portfolio = "Portfolio"
 treemap_value = "Value"
 treemap_pl = "P/L"
 treemap_pl_pct = "P/L %"
