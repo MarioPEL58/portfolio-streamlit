@@ -45,4 +45,3 @@ def ensure_datetime_series(obj, value_col=None, date_col="Data"):
     else:
         print("Tipo non supportato:", type(obj))
         return None
-    return None
