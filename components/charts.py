@@ -1541,7 +1541,7 @@ def pl_treemap_gerarchia(
     fig.update_traces(
         hovertemplate=(
             "<b>%{label}</b><br>"
-            "Valore: %{value:,.2f}€<br>"
+            f"{t('treemap_value')}: %{{value:,.2f}}€<br>"
             "P/L: %{customdata:,.2f}€<br>"
             "P/L %: %{color:+.2%}<extra></extra>"
         ),
