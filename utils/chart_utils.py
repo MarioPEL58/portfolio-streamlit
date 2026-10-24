@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 
+# ==========================================================
+# TREEMAP UTILITIES
+# ==========================================================
 def build_treemap_pl_customdata(
     df: pd.DataFrame,
     fig,
