@@ -458,6 +458,14 @@ def download_intraday_range(tickers: list[str]):
 def load_bond_csv(isin: str) -> pd.DataFrame:
     file = Path("data/bonds") / f"{isin}.csv"
 
+    # fallback su archivio manuale
+    if not file.exists():
+
+        file = (
+            Path("data/manual_prices")
+            / f"{isin}.csv"
+        )
+        
     if not file.exists():
         return pd.DataFrame()
 
