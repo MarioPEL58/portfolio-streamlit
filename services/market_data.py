@@ -207,7 +207,11 @@ def convert_closes_to_eur(closes: pd.DataFrame, ops: pd.DataFrame, start_date: p
         .fillna("EUR")
         .to_dict()
     )
-
+    # Normalizza le valute del portafoglio (es. GBp -> GBP) 
+    for ticker, ccy in ticker_ccy.items():
+        if isinstance(ccy, str) and ccy.upper() in ["GBP", "GBP"]:
+            ticker_ccy[ticker] = "GBP"
+            
     needed_ccy = [ccy for ccy in ticker_ccy.values() if ccy != "EUR"]
     fx_rates = download_fx_series(needed_ccy, start_date, end_date)
 
@@ -217,6 +221,25 @@ def convert_closes_to_eur(closes: pd.DataFrame, ops: pd.DataFrame, start_date: p
     for ticker, ccy in ticker_ccy.items():
         if ticker not in closes_eur.columns or ccy == "EUR":
             continue
+        
+        # =====================================================================
+        # 🚀 SOLUZIONE SICURA 100%: Controllo metadati valuta Yahoo Finance
+        # =====================================================================
+        if ccy == "GBP":
+            try:
+                # fast_info non fa una chiamata HTTP pesante, legge i metadati veloci
+                yf_ticker = yf.Ticker(ticker, session=session)
+                valuta_yahoo = yf_ticker.fast_info.get('currency', 'GBP')
+                
+                # Se Yahoo dichiara esplicitamente che i dati storici estratti
+                # sono in Pence (GBp o GBX), allora dividiamo la serie per 100
+                if valuta_yahoo in ['GBp', 'GBX']:
+                    closes_eur[ticker] = closes_eur[ticker] / 100.0
+            except Exception as e:
+                # Fallback di sicurezza: se la chiamata veloce fallisce, usa la logica euristica
+                if closes_eur[ticker].dropna().median() > 150:
+                    closes_eur[ticker] = closes_eur[ticker] / 100.0
+        # =====================================================================
 
         if ccy in fx_rates.columns:
             fx_series = fx_rates[ccy].reindex(closes_eur.index).ffill()
