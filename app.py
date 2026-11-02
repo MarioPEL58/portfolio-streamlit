@@ -158,6 +158,15 @@ except Exception as e:
 
 effective_min_filter_date = min_filter_date or default_start
 
+st.write("data_min", data_min)
+st.write("data_max", data_max)
+
+st.write(
+    ops[
+        ["Ticker", "Data", "DateOnly"]
+    ]
+)
+
 # ops = ops[ops["Data"] >= pd.Timestamp(effective_min_filter_date)]
 if ops.empty:
     st.warning(t("no_ops_after_date"))
