@@ -299,7 +299,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     ops_all = ops.copy()
     ops_all["Data"] = pd.to_datetime(ops_all["Data"], errors="coerce")
     ops_all["DateOnly"] = ops_all["Data"].dt.normalize()
-
+    
+    st.write("OPS")
+    st.write(ops_all[["Ticker", "Data", "DateOnly", "Quantità"]])
+    
     if ops_all.empty:
         return (
             pd.DataFrame(),
