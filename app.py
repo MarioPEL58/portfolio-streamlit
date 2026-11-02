@@ -241,7 +241,8 @@ market_last_date = closes.index.max()
 closes_frontier = closes.copy()
 
 full_index = pd.date_range(
-    start=ops["Data"].min(),
+    # start=ops["Data"].min(),
+    start=ops["DateOnly"].min(),
     end=closes.index.max(),
     freq="D"
 )
