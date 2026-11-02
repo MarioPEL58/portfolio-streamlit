@@ -125,7 +125,7 @@ try:
 
     # ✅ normalizzazione date
     #ops["Data"] = pd.to_datetime(ops["Data"], errors="coerce")
-    ops["DateOnly"] = pd.to_datetime(ops["Data"], errors="coerce").dt.date
+    ops["DateOnly"] = pd.to_datetime(ops["Data"], errors="coerce").dt.normalize()
     
     # ✅ ordine stabile (importantissimo)
     ops["_rowid"] = np.arange(len(ops))
