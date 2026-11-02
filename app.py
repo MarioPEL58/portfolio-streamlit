@@ -124,7 +124,8 @@ try:
         ops = ops.sort_values(["Data", "Ticker"]).reset_index(drop=True)
 
     # ✅ normalizzazione date
-    ops["Data"] = pd.to_datetime(ops["Data"], errors="coerce")
+    #ops["Data"] = pd.to_datetime(ops["Data"], errors="coerce")
+    ops["DateOnly"] = pd.to_datetime(ops["Data"], errors="coerce").dt.date
     
     # ✅ ordine stabile (importantissimo)
     ops["_rowid"] = np.arange(len(ops))
@@ -132,13 +133,16 @@ try:
     # ✅ SORT CORRETTO (fix principale)
     ops = (
         ops
-        .sort_values(["PositionKey", "Data", "_rowid"])
+        #.sort_values(["PositionKey", "Data", "_rowid"])
+        .sort_values(["PositionKey", "DateOnly", "_rowid"])
         .reset_index(drop=True)
     )
 
-    data_min = ops["Data"].min()
-    data_max = ops["Data"].max()
-
+    # data_min = ops["Data"].min()
+    # data_max = ops["Data"].max()
+    data_min = ops["DateOnly"].min()
+    data_max = ops["DateOnly"].max()
+    
     six_months_ago = pd.Timestamp.today() - pd.DateOffset(months=6)
 
     if six_months_ago > data_max:
