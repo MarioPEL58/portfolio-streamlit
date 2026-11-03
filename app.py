@@ -256,20 +256,31 @@ if missing:
     st.warning(t("missing_tickers") + ", ".join(missing))
     
 start= time.time()
+if historical_data_available:
 # Portfolio
-series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
+    series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
+    
+    #debug
+    # st.write(series.tail(5))
+    st.write(f"time to build Portfolio: {time.time() - start:.2f} sec")
+    
+    # ✅ taglia serie alla data reale
+    series = series.loc[:market_last_date]
+else:
+    series = pd.DataFrame()
+    current = pd.DataFrame()
+    holdings = pd.DataFrame()
+    exposure = pd.DataFrame()
 
+    ops_enriched = ops_filtered.copy()
 #debug
 # st.write(series.tail(5))
-st.write(f"time to build Portfolio: {time.time() - start:.2f} sec")
+if not historical_data_available:
 
-# ✅ taglia serie alla data reale
-series = series.loc[:market_last_date]
-
-#debug
-# st.write(series.tail(5))
-
-if series.empty:
+    st.warning(
+        t("historical_charts_unavailable")
+    )
+elif series.empty:
     st.error(t("portfolio_error"))
     st.stop()
 
