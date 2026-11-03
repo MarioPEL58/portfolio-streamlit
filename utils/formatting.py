@@ -11,11 +11,13 @@ def fmt_eur(x):
 
 
 def fmt_pct(x):
+    if pd.isna(x):
+        return "-"
+
     try:
         return f"{x:.2%}"
     except Exception:
         return "-"
-
 
 def color_pl(val):
     if pd.isna(val):
