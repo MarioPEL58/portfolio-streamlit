@@ -641,17 +641,17 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         ).rename("P/L Totale Giornaliero %")
         
         # debug
-        st.write("TOTAL VALUE")
-        st.write(total_value.tail(20))
+        # st.write("TOTAL VALUE")
+        # st.write(total_value.tail(20))
         
-        st.write("TOTAL VALUE SHIFT")
-        st.write(total_value.shift(1).tail(20))
+        # st.write("TOTAL VALUE SHIFT")
+        # st.write(total_value.shift(1).tail(20))
         
-        st.write("DAILY TOTAL PL")
-        st.write(daily_total_pl.tail(20))
+        # st.write("DAILY TOTAL PL")
+        # st.write(daily_total_pl.tail(20))
         
-        st.write("DAILY TOTAL PL %")
-        st.write(daily_total_pl_pct.tail(20))
+        # st.write("DAILY TOTAL PL %")
+        # st.write(daily_total_pl_pct.tail(20))
         # end debug
         
         first_investment_day = (
