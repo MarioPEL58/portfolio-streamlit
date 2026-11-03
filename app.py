@@ -223,7 +223,7 @@ closes, missing = download_close_prices(
 historical_data_available = not closes.empty
 
 if historical_data_available:
-market_last_date = closes.index.max()
+    market_last_date = closes.index.max()
 
     closes_frontier = closes.copy()
     
