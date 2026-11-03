@@ -803,6 +803,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             "Emittente": "last",
             "Valuta": "last",
             "Tassa": "last",
+            "Moltiplicatore": "last",
         })
     )
 
@@ -842,6 +843,16 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     current["Valore"] = current["Quantita"] * current["Prezzo Attuale"]
 
     current = current.join(cost_state, how="left").join(meta, how="left")
+    print(
+        current[
+            [
+                "Ticker",
+                "Quantita",
+                "Prezzo Attuale",
+                "Moltiplicatore"
+            ]
+        ]
+    )
 
     current["Costo Medio Stimato"] = current["AvgCost"]
     current["Costo Totale Stimato"] = current["OpenCost"]
