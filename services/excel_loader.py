@@ -363,7 +363,6 @@ def load_dividends_from_excel(file_obj) -> pd.DataFrame:
 
     out["Nome"] = df[cols["Nome"]] if cols.get("Nome") is not None else ""
     out["Valuta"] = df[cols["Valuta"]] if cols.get("Valuta") is not None else ""
-    out["Moltiplicatore"] = (parse_numeric(df[cols["Moltiplicatore"]]).fillna(1.0) if cols.get("Moltiplicatore") is not None else 1.0)
 
     out = out[out["Data"].notna() & (out["DividendoNetto"] != 0)].copy()
 
@@ -432,6 +431,7 @@ def load_start_from_excel(file_obj) -> pd.DataFrame:
     out["Settore"] = ""
     out["Emittente"] = df[cols["Emittente"]] if cols.get("Emittente") else ""
     out["Valuta"] = df[cols["Valuta"]] if cols.get("Valuta") else "EUR"
+    out["Moltiplicatore"] = (parse_numeric(df[cols["Moltiplicatore"]]).fillna(1.0) if cols.get("Moltiplicatore") is not None else 1.0)
     
 
     # ✅ PositionKey COERENTE con operations (fix fondamentale)
