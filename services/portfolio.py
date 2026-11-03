@@ -162,6 +162,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
             fx = float(row["Cambio"])
             fees = float(row["SpeseEuro"])
             tax_rate = float(row["Tassa"])
+            mult = float(row.get("Moltiplicatore", 1.0))
 
             avg_cost_before = open_cost / open_qty if open_qty != 0 else 0.0
 
@@ -181,7 +182,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
                     avg_cost_short = abs(avg_cost_before)
             
                     cost_basis = close_qty * avg_cost_short
-                    buy_cost = close_qty * price * fx
+                    buy_cost = close_qty * price * fx * mult
             
                     realized_gross = cost_basis - buy_cost
             
@@ -197,13 +198,13 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
                     remaining_qty = qty - close_qty
             
                     if remaining_qty > 0:
-                        buy_cost_extra = remaining_qty * price * fx + fees
+                        buy_cost_extra = remaining_qty * price * fx * mult + fees
                         open_qty += remaining_qty
                         open_cost += buy_cost_extra
             
                 else:
                     # ✅ ACQUISTO LONG
-                    buy_cost = qty * price * fx + fees
+                    buy_cost = qty * price * fx * mult + fees
                     open_qty += qty
                     open_cost += buy_cost
             
@@ -217,7 +218,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
             
                 # ✅ SHORT (open o estensione)
                 if open_qty <= 0:
-                    gross_proceeds = sell_qty * price * fx
+                    gross_proceeds = sell_qty * price * fx * mult
             
                     cashflow = gross_proceeds - fees
                     realized_trade_pl = 0.0
@@ -229,7 +230,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
                     # ✅ CHIUSURA LONG
                     cost_basis_sold = sell_qty * avg_cost_before
             
-                    gross_proceeds = sell_qty * price * fx
+                    gross_proceeds = sell_qty * price * fx * mult
                     realized_gross = gross_proceeds - fees - cost_basis_sold
             
                     tax_euro = max(realized_gross, 0.0) * tax_rate
