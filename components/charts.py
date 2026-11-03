@@ -1515,24 +1515,24 @@ def create_tail_risk_figure(flow_adjusted_returns):
             opacity=0.7,
         )
     )
-
-    fig_rend.add_vline(
-        x=-var_giornaliero,
-        line_dash="dash",
-        line_color="#e74c3c",
-        line_width=2,
-        annotation_text=f"{t('tail_risk_var_label')}: {-var_giornaliero:.2%}",
-        annotation_position="top left",
-    )
-
-    fig_rend.add_vline(
-        x=-cvar_giornaliero,
-        line_dash="dot",
-        line_color="#c0392b",
-        line_width=2,
-        annotation_text=f"{t('tail_risk_cvar_label')}: {-cvar_giornaliero:.2%}",
-        annotation_position="bottom left",
-    )
+    if var_giornaliero is not None:
+        fig_rend.add_vline(
+            x=-var_giornaliero,
+            line_dash="dash",
+            line_color="#e74c3c",
+            line_width=2,
+            annotation_text=f"{t('tail_risk_var_label')}: {-var_giornaliero:.2%}",
+            annotation_position="top left",
+        )
+    if cvar_giornaliero is not None:
+        fig_rend.add_vline(
+            x=-cvar_giornaliero,
+            line_dash="dot",
+            line_color="#c0392b",
+            line_width=2,
+            annotation_text=f"{t('tail_risk_cvar_label')}: {-cvar_giornaliero:.2%}",
+            annotation_position="bottom left",
+        )
     
     # Linea Media
     fig_rend.add_vline(
