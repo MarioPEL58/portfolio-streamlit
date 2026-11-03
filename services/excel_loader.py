@@ -292,8 +292,12 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
         parse_numeric(df[cols["Cambio"]])
         if cols.get("Cambio") is not None else np.nan
     )
-
-    valore = out["Quantita"] * out["Prezzo"].fillna(0.0) * out["Cambio"].fillna(1.0)
+    
+    out["Moltiplicatore"] = (parse_numeric(df[cols["Moltiplicatore"]]).fillna(1.0) if cols.get("Moltiplicatore") is not None else 1.0)
+    mask_opt = (out["Tipo"].astype(str).str.upper().eq("OPZIONI"))
+    out.loc[mask_opt & (out["Moltiplicatore"] == 1), "Moltiplicatore"] = 100
+    
+    valore = out["Quantita"] * out["Prezzo"].fillna(0.0) * out["Cambio"].fillna(1.0) * out["Moltiplicatore"].fillna(1.0)
     flusso_base = -valore - out["SpeseEuro"].fillna(0.0)
 
     if cols.get("FlussoNetto") is not None:
@@ -312,10 +316,7 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
     out["Settore"] = df[cols["Settore"]] if cols.get("Settore") is not None else ""
     out["Emittente"] = df[cols["Emittente"]] if cols.get("Emittente") is not None else ""
     out["Valuta"] = df[cols["Valuta"]] if cols.get("Valuta") is not None else ""
-    out["Moltiplicatore"] = (parse_numeric(df[cols["Moltiplicatore"]]).fillna(1.0) if cols.get("Moltiplicatore") is not None else 1.0)
-    
-    mask_opt = (out["Tipo"].astype(str).str.upper().eq("OPZIONI"))
-    out.loc[mask_opt & (out["Moltiplicatore"] == 1), "Moltiplicatore"] = 100
+
     
     out = out.dropna(subset=["Ticker", "Data", "Quantita"])
     out = out[out["Ticker"] != ""]
