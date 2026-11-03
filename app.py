@@ -219,74 +219,38 @@ closes, missing = download_close_prices(
 )
 # Price download new  end 
 
+# ✅ nuovo flag
+historical_data_available = not closes.empty
+
+if historical_data_available:
 market_last_date = closes.index.max()
 
-# st.write("=== FILTERED TICKERS ===")
-# st.write(sorted(filtered_tickers))
-# st.write("=== CLOSES COLUMNS ===")
-# st.write(sorted(closes.columns.tolist()))
-# st.write("=== MISSING ===")
-# st.write(sorted(missing))
+    closes_frontier = closes.copy()
+    
+    full_index = pd.date_range(
+        # start=ops["Data"].min(),
+        start=ops["DateOnly"].min(),
+        end=closes.index.max(),
+        freq="D"
+    )
+    
+    closes = closes.reindex(full_index)
+    
+    closes, price_quality = fill_late_tickers_with_purchase_price(closes,ops,price_col="Prezzo")
 
-# st.write("DOWNLOAD CLOSES")
-# st.write(closes.tail(10))
-# st.write(closes.index)
-# st.write("ops Data dtype:", ops["Data"].dtype)
-# st.write("ops min:", ops["Data"].min())
-# st.write("ops min type:", type(ops["Data"].min()))
-
-# st.write("closes max:", closes.index.max())
-# st.write("closes max type:", type(closes.index.max()))
-
-closes_frontier = closes.copy()
-
-st.write("start", ops["DateOnly"].min())
-st.write(type(ops["DateOnly"].min()))
-
-st.write("end", closes.index.max())
-st.write(type(closes.index.max()))
-
-st.write("closes empty", closes.empty)
-
-full_index = pd.date_range(
-    # start=ops["Data"].min(),
-    start=ops["DateOnly"].min(),
-    end=closes.index.max(),
-    freq="D"
-)
-
-closes = closes.reindex(full_index)
-
-# st.write(closes.index.min())
-# st.write(closes.index.max())
-
-# st.dataframe(report_late_tickers(closes, ops))
-# ticker = "0P0000M2UJ.F"
-
-# st.write("OPERAZIONI")
-# st.dataframe(
-#     ops[ops["Ticker"] == ticker]
-#     .sort_values("Data")
-#     .head(10)
-# )
-
-# st.write("CLOSE PRIMA")
-# st.write(
-#     closes[ticker]
-#     .loc["2014":"2015"]
-#     .head(20)
-# )
-
-closes, price_quality = fill_late_tickers_with_purchase_price(closes,ops,price_col="Prezzo")
+else:
+    market_last_date = None
+    price_quality = pd.DataFrame()
 
 # st.write("CLOSE DOPO")
 # st.write(closes[ticker].loc["2014":"2015"].head(20))
 
 # st.dataframe(report_late_tickers(closes, ops))
 
-if closes.empty:
-    st.error(t("no_prices"))
-    st.stop()
+if not historical_data_available:
+    st.warning(
+        t("no_market_data_selected")
+    )
 
 if missing:
     st.warning(t("missing_tickers") + ", ".join(missing))
