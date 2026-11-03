@@ -426,6 +426,12 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # =========================
         # 8. Valore storico portafoglio
         # =========================
+        st.write("HOLDINGS")
+        st.write(holdings.tail())
+        
+        st.write("CLOSES")
+        st.write(position_closes_eur.tail())
+        
         position_values = holdings * position_closes_eur
         
         # st.write(f"⏱️ Position values: {time.perf_counter() - t:.2f} sec")
@@ -840,7 +846,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     ], axis=1)
 
     current["Ultimo Close Storico"] = last_close_eur
-    current["Valore"] = current["Quantita"] * current["Prezzo Attuale"]
+    current["Valore"] = current["Quantita"] * current["Prezzo Attuale"] * current["Moltiplicatore"]
 
     current = current.join(cost_state, how="left").join(meta, how="left")
     st.subheader("DEBUG MOLTIPLICATORE")
