@@ -16,6 +16,8 @@ COLUMN_ALIASES = {
     "Settore": ["settore", "sector", "industry"],
     "Emittente": ["emittente", "issuer", "provider"],
     "Valuta": ["valuta", "currency"],
+        # NUOVA
+    "Moltiplicatore": ["moltiplicatore","multiplier","contract multiplier","contract size"],
 }
 DIVIDEND_ALIASES = {
     "ID": ["id"],
