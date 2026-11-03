@@ -276,10 +276,16 @@ else:
 #debug
 # st.write(series.tail(5))
 if not historical_data_available:
-
-    st.warning(
-        t("historical_charts_unavailable")
+        st.warning(
+        t("no_market_data_selected")
     )
+
+    render_operations_preview(ops_filtered)
+
+    st.subheader(t("operations_title"))
+    render_operations_table(ops_filtered)
+
+    st.stop()
 elif series.empty:
     st.error(t("portfolio_error"))
     st.stop()
