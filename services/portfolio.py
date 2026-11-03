@@ -846,9 +846,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     ], axis=1)
 
     current["Ultimo Close Storico"] = last_close_eur
-    current["Valore"] = current["Quantita"] * current["Prezzo Attuale"] * current["Moltiplicatore"]
 
     current = current.join(cost_state, how="left").join(meta, how="left")
+    current["Valore"] = current["Quantita"] * current["Prezzo Attuale"] * current["Moltiplicatore"]  
     st.subheader("DEBUG MOLTIPLICATORE")
 
     st.dataframe(
