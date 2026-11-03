@@ -276,7 +276,7 @@ else:
 #debug
 # st.write(series.tail(5))
 if not historical_data_available:
-        st.warning(
+    st.warning(
         t("no_market_data_selected")
     )
 
