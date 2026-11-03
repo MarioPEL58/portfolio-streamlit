@@ -293,18 +293,6 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
         if cols.get("Cambio") is not None else np.nan
     )
     
-
-
-    if cols.get("FlussoNetto") is not None:
-        out["FlussoNetto"] = parse_numeric(df[cols["FlussoNetto"]])
-    else:
-        out["FlussoNetto"] = flusso_base
-
-    out["Prezzo medio s/carico"] = (
-        parse_numeric(df[cols["Prezzo medio s/carico"]])
-        if cols.get("Prezzo medio s/carico") is not None else np.nan
-    )
-
     out["Nome"] = df[cols["Nome"]] if cols.get("Nome") is not None else out["Ticker"]
     out["Tipo"] = df[cols["Tipo"]] if cols.get("Tipo") is not None else ""
     out["Area"] = df[cols["Area"]] if cols.get("Area") is not None else ""
@@ -318,6 +306,16 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
     
     valore = out["Quantita"] * out["Prezzo"].fillna(0.0) * out["Cambio"].fillna(1.0) * out["Moltiplicatore"].fillna(1.0)
     flusso_base = -valore - out["SpeseEuro"].fillna(0.0)
+    
+    if cols.get("FlussoNetto") is not None:
+        out["FlussoNetto"] = parse_numeric(df[cols["FlussoNetto"]])
+    else:
+        out["FlussoNetto"] = flusso_base
+
+    out["Prezzo medio s/carico"] = (
+        parse_numeric(df[cols["Prezzo medio s/carico"]])
+        if cols.get("Prezzo medio s/carico") is not None else np.nan
+    )
     
     out = out.dropna(subset=["Ticker", "Data", "Quantita"])
     out = out[out["Ticker"] != ""]
