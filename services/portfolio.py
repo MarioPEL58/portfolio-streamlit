@@ -843,7 +843,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     current["Valore"] = current["Quantita"] * current["Prezzo Attuale"]
 
     current = current.join(cost_state, how="left").join(meta, how="left")
-    print(
+    st.subheader("DEBUG MOLTIPLICATORE")
+
+    st.dataframe(
         current[
             [
                 "Ticker",
