@@ -379,7 +379,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # =========================
         qty_history = (
             ops.sort_values(["PositionKey", "Data"])
-            .groupby(["PositionKey", "Data"])["QtyOpenAfter"]
+            .groupby(["PositionKey", "DateOnly"])["QtyOpenAfter"]
             .last()
             .unstack(level=0)
             .reindex(idx)
@@ -477,7 +477,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     else:
         cost_history = (
             ops.sort_values(["PositionKey", "Data"])
-            .groupby(["PositionKey", "Data"])["CostOpenAfter"]
+            .groupby(["PositionKey", "DateOnly"])["CostOpenAfter"]
             .last()
             .unstack(level=0)
             .reindex(idx)
