@@ -66,3 +66,9 @@ SHEET_ALIASES = {
         "opening"
     ]
 }
+OPTION_TYPE_ALIASES = [
+    "opzioni",
+    "options",
+    "option",
+    "opt",
+]
