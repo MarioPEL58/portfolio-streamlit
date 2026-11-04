@@ -497,3 +497,70 @@ def load_start_from_excel(file_obj) -> pd.DataFrame:
     out = out.sort_values(["Data", "Ticker"]).reset_index(drop=True)
 
     return out
+    
+def load_cash_from_excel(file_obj) -> pd.DataFrame:
+
+    structure = detect_excel_structure(file_obj)
+
+    if not structure["cash"]["is_valid"]:
+        return pd.DataFrame(
+            columns=[
+                "Data",
+                "Valuta",
+                "Importo",
+                "Descrizione",
+                "DateOnly",
+            ]
+        )
+
+    excel_bytes = read_excel_safely(file_obj)
+
+    sheet_name = structure["cash"]["sheet_name"]
+    cols = structure["cash"]["columns"]
+
+    df = pd.read_excel(
+        BytesIO(excel_bytes),
+        sheet_name=sheet_name,
+        engine="openpyxl"
+    )
+
+    df = (df.dropna(axis=0, how="all").dropna(axis=1, how="all"))
+
+    out = pd.DataFrame()
+
+    out["Data"] = pd.to_datetime(df[cols["Data"]], errors="coerce")
+
+    out["Valuta"] = (
+        df[cols["Valuta"]]
+        .astype(str)
+        .str.strip()
+        .str.upper()
+    )
+
+    out["Importo"] = (
+        parse_numeric(
+            df[cols["Importo"]]
+        )
+        .fillna(0.0)
+    )
+
+    out["Descrizione"] = (
+        df[cols["Descrizione"]]
+        .astype(str)
+        .str.strip()
+        if cols.get("Descrizione") is not None
+        else ""
+    )
+
+    out["DateOnly"] = out["Data"].dt.normalize()
+
+    out = out[
+        out["Data"].notna()
+    ]
+
+    out = out.sort_values("Data")
+
+    out = out.reset_index(drop=True)
+
+    return out
+
