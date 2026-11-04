@@ -229,7 +229,45 @@ def detect_excel_structure(file_obj) -> dict:
         missing = missing_required(start_columns, REQUIRED_START_COLUMNS)
     
         start_is_valid = len(missing) == 0
-        
+    # -------------------------
+    # cash
+    # -------------------------    
+    cash_sheet = find_sheet_name(
+        xls.sheet_names,
+        SHEET_ALIASES["MovimentiCash"]
+    )
+    
+    cash_columns = {}
+    
+    if cash_sheet is not None:
+    
+        tmp = pd.read_excel(
+            BytesIO(excel_bytes),
+            sheet_name=cash_sheet,
+            engine="openpyxl",
+            nrows=30,
+        )
+    
+        tmp = (
+            tmp
+            .dropna(axis=0, how="all")
+            .dropna(axis=1, how="all")
+        )
+    
+        cash_columns = map_columns(
+            tmp,
+            CASH_ALIASES
+        )
+    
+    cash_missing = (
+        missing_required(
+            cash_columns,
+            REQUIRED_CASH_COLUMNS
+        )
+        if cash_sheet is not None
+        else REQUIRED_CASH_COLUMNS.copy()
+    )
+    
     return {
         "sheet_names": xls.sheet_names,
         "operations": {
@@ -248,6 +286,15 @@ def detect_excel_structure(file_obj) -> dict:
             "sheet_name": start_sheet,
             "columns": start_columns,
             "is_valid": start_is_valid,
+        },
+        "cash": {
+            "sheet_name": cash_sheet,
+            "columns": cash_columns,
+            "missing_required": cash_missing,
+            "is_valid": (
+                cash_sheet is not None
+                and len(cash_missing) == 0
+            )
         },
     }
 
