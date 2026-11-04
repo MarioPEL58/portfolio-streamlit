@@ -854,18 +854,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
 
     current = current.join(cost_state, how="left").join(meta, how="left")
     current["Valore"] = current["Quantita"] * current["Prezzo Attuale"] * current["Moltiplicatore"]  
-    st.subheader("DEBUG MOLTIPLICATORE")
-
-    st.dataframe(
-        current[
-            [
-                "Ticker",
-                "Quantita",
-                "Prezzo Attuale",
-                "Moltiplicatore"
-            ]
-        ]
-    )
 
     current["Costo Medio Stimato"] = current["AvgCost"]
     current["Costo Totale Stimato"] = current["OpenCost"]
