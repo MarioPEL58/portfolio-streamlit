@@ -426,11 +426,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # =========================
         # 8. Valore storico portafoglio
         # =========================
-        st.write("HOLDINGS")
-        st.write(holdings.tail())
-        
-        st.write("CLOSES")
-        st.write(position_closes_eur.tail())
         
         position_multipliers = (
             ops.groupby("PositionKey")["Moltiplicatore"]
@@ -441,14 +436,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             holdings.columns
         ).fillna(1.0)
 
-        # position_values = holdings * position_closes_eur
+        # Usa Moltiplicatore per gestire prodotti come le opzioni 
         position_values = holdings * position_closes_eur * position_multipliers
-        
-        st.write("MULTIPLIERS")
-        st.write(position_multipliers)
-        
-        st.write("POSITION VALUES")
-        st.write(position_values.tail())
         
         # st.write(f"⏱️ Position values: {time.perf_counter() - t:.2f} sec")
         # t = time.perf_counter()
