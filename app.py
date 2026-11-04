@@ -17,7 +17,7 @@ from components.backtest_view import render_backtest
 from components.efficient_frontier_view import render_efficient_frontier
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
-from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
+from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel, load_cash_from_excel, detect_excel_structure
 from services.market_data import download_close_prices, report_late_tickers, fill_late_tickers_with_purchase_price, prepare_backtest_closes_eur
 from services.portfolio import build_portfolio
 from services.portfolio_metrics import compute_portfolio_xirr
