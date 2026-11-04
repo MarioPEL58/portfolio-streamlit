@@ -432,7 +432,23 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         st.write("CLOSES")
         st.write(position_closes_eur.tail())
         
-        position_values = holdings * position_closes_eur
+        position_multipliers = (
+            ops.groupby("PositionKey")["Moltiplicatore"]
+            .last()
+        )
+        
+        position_multipliers = position_multipliers.reindex(
+            holdings.columns
+        ).fillna(1.0)
+
+        # position_values = holdings * position_closes_eur
+        position_values = holdings * position_closes_eur * position_multipliers
+        
+        st.write("MULTIPLIERS")
+        st.write(position_multipliers)
+        
+        st.write("POSITION VALUES")
+        st.write(position_values.tail())
         
         # st.write(f"⏱️ Position values: {time.perf_counter() - t:.2f} sec")
         # t = time.perf_counter()
