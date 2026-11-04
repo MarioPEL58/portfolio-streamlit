@@ -13,6 +13,7 @@ from services.schema import (
     REQUIRED_OPERATION_COLUMNS,
     REQUIRED_DIVIDEND_COLUMNS,
     REQUIRED_START_COLUMNS,
+    OPTION_TYPE_ALIASES,
 )
 
 
@@ -301,7 +302,7 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
     out["Valuta"] = df[cols["Valuta"]] if cols.get("Valuta") is not None else ""
     
     out["Moltiplicatore"] = (parse_numeric(df[cols["Moltiplicatore"]]).fillna(1.0) if cols.get("Moltiplicatore") is not None else 1.0)
-    mask_opt = (out["Tipo"].astype(str).str.upper().eq("OPZIONI"))
+    mask_opt = (out["Tipo"].astype(str).str.upper().apply(normalize_text).isin(OPTION_TYPE_ALIASES))
     out.loc[mask_opt & (out["Moltiplicatore"] == 1), "Moltiplicatore"] = 100
     
     valore = out["Quantita"] * out["Prezzo"].fillna(0.0) * out["Cambio"].fillna(1.0) * out["Moltiplicatore"].fillna(1.0)
