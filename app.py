@@ -115,6 +115,14 @@ try:
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
     start_ops = load_start_from_excel(file_source)
+    cash = load_cash_from_excel(uploaded_file)
+    
+    if cash is not None and not cash.empty:
+        st.subheader("Movimenti Cash")
+        st.dataframe(cash)
+        structure = detect_excel_structure(uploaded_file)
+        st.write(structure["cash"])
+
     # # debug 
     # st.write("START KEYS:", start_ops["PositionKey"].unique())
     # st.write("OPS KEYS:", ops["PositionKey"].unique())
