@@ -64,7 +64,22 @@ SHEET_ALIASES = {
         "portafoglio iniziale",
         "baseline",
         "opening"
-    ]
+    ],
+    "MovimentiCash": [
+        "movimenticash",
+        "movimenti cash",
+        "cash",
+        "cashflow",
+        "cash flow",
+        "cash movements",
+        "cashmovements",
+        "liquidita",
+        "liquidità",
+        "movimenti conto",
+        "trasferimenti",
+        "cash transfer",
+        "cash transfers",
+    ],
 }
 OPTION_TYPE_ALIASES = [
     "opzioni",
@@ -72,3 +87,29 @@ OPTION_TYPE_ALIASES = [
     "option",
     "opt",
 ]
+
+CASH_ALIASES = {
+    "Data": [
+        "data",
+        "date",
+        "date/time",
+        "datetime",
+    ],
+
+    "Valuta": [
+        "valuta",
+        "currency",
+        "currencyprimary",
+    ],
+
+    "Importo": [
+        "importo",
+        "amount",
+        "net amount",
+    ],
+
+    "Descrizione": [
+        "descrizione",
+        "description",
+    ],
+}
