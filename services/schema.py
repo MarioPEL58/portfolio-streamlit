@@ -38,6 +38,7 @@ DIVIDEND_ALIASES = {
 REQUIRED_OPERATION_COLUMNS = ["Ticker", "Data", "Quantita"]
 REQUIRED_DIVIDEND_COLUMNS = ["Data", "DividendoNetto"]
 REQUIRED_START_COLUMNS = ["Data", "Ticker", "Quantita", "Prezzo"]
+REQUIRED_CASH_COLUMNS = ["Data","Valuta","Importo",]
 SHEET_ALIASES = {
     "Operazioni": [
         "operazioni",
