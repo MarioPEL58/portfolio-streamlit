@@ -608,7 +608,7 @@ with tab_perf:
     # st.plotly_chart(fig, use_container_width=True)
     chart_key = (f"portfolio_chart_"f"{benchmark.strip()}_"f"{show_benchmark}")
     
-    st.plotly_chart(fig, width="stretch", theme=None, key=chart_key)
+    st.plotly_chart(fig, width="stretch", key=chart_key)
     
     # ========================================================
     # Metriche confronto portafoglio / benchmark
