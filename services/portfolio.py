@@ -359,7 +359,22 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # end_date = closes.index.max()
     
     today = pd.Timestamp.today().normalize()
-    start_date = ops_all["DateOnly"].min() - pd.Timedelta(days=5)
+        
+    start_candidates = [
+        ops_all["DateOnly"].min()
+    ]
+    
+    if cash is not None and not cash.empty:
+        start_candidates.append(
+            cash["DateOnly"].min()
+        )
+    
+    if dividends is not None and not dividends.empty:
+        start_candidates.append(
+            dividends["DateOnly"].min()
+        )
+    
+    start_date = min(start_candidates) - pd.Timedelta(days=5)
     end_date = today
     
     market_last_date = closes.index.max()
