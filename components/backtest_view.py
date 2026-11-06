@@ -432,7 +432,6 @@ def render_backtest(
         st.plotly_chart(
             fig,
             width="stretch",
-            theme=None,
             key=chart_key,
         )
         
