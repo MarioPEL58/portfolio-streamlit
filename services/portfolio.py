@@ -530,6 +530,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .reindex(idx, fill_value=0.0)
             .rename("Movimenti Cash")
         )
+        st.write(cash_daily.sum())
         
     cash_balance = (
         cash_daily
