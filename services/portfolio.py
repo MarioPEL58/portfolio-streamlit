@@ -293,7 +293,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
 
     return ops
 
-def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
+def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None, cash: pd.DataFrame | None = None,):
 
     # t = time.perf_counter()
     # ✅ normalizzazione date
@@ -510,6 +510,34 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
 
     capital_versato = (-daily_cf_total.cumsum()).rename("Capitale versato")
 
+    # =========================
+    # 11bis. Movimenti Cash
+    # =========================
+    
+    if cash is None or cash.empty:
+    
+        cash_daily = pd.Series(
+            0.0,
+            index=idx,
+            name="Movimenti Cash"
+        )
+    
+    else:
+    
+        cash_daily = (
+            cash.groupby("DateOnly")["Importo"]
+            .sum()
+            .reindex(idx, fill_value=0.0)
+            .rename("Movimenti Cash")
+        )
+        
+    cash_balance = (
+        cash_daily
+        + daily_cf_total
+        + daily_dividends
+    ).cumsum().rename("Cash")
+    #debug cash Balance 
+    st.write(cash_balance.tail())
     # =========================
     # 12. P/L giornaliero per posizione
     # =========================
