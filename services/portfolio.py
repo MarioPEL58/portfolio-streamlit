@@ -546,11 +546,11 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .rename("Movimenti Cash")
         )
         
-    cash_balance = (
+    cashflow_cumulato = (
         cash_daily
         + daily_cf_total
         + daily_dividends
-    ).cumsum().rename("Cash")
+    ).cumsum().rename("Cashflow cumulato")
 
     # =========================
     # 12. P/L giornaliero per posizione
@@ -800,9 +800,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     
     # st.write(f"⏱️ Metriche portfolio: {time.perf_counter() - t:.2f} sec")
     # t = time.perf_counter()
-    st.write(cash_balance.iloc[-1])
-    st.write(total_value.iloc[-1])
-    st.write((total_value + cash_balance).iloc[-1])
+
     # =========================
     # 14. Serie storica finale
     # =========================
@@ -830,7 +828,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             perf_1y_pct,
             daily_dividends,
             pl_realizzato,
-            cash_balance,
+            cashflow_cumulato,
         ],
         axis=1
     )
