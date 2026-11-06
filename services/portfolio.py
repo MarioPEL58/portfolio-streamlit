@@ -537,6 +537,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         + daily_dividends
     ).cumsum().rename("Cash")
     #debug cash Balance 
+    st.write(cash["DateOnly"].min())
+    st.write(idx.min())
+    
     st.write("Cash totale movimenti")
     st.write(cash_daily.sum())
     
