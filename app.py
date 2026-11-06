@@ -260,7 +260,7 @@ if missing:
 start= time.time()
 if historical_data_available:
 # Portfolio
-    series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
+    series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered, cash)
     
     #debug
     # st.write(series.tail(5))
