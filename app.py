@@ -666,7 +666,7 @@ with tab_daily:
 
     if fig_pos:
         # st.plotly_chart(fig_pos, use_container_width=True)
-        st.plotly_chart(fig_pos, theme=None, width="stretch")
+        st.plotly_chart(fig_pos, width="stretch")
     else:
         st.caption(t("no_profit_today"))
         
@@ -685,7 +685,7 @@ with tab_daily:
 
     if fig_neg:
         # st.plotly_chart(fig_neg, use_container_width=True)
-        st.plotly_chart(fig_neg, theme=None, width="stretch")
+        st.plotly_chart(fig_neg, width="stretch")
     else:
         st.caption(t("no_loss_today"))
         
@@ -733,7 +733,7 @@ with tab_unrealized:
 
     if fig_pos:
         #st.plotly_chart(fig_pos, use_container_width=True)
-        st.plotly_chart(fig_pos, theme=None, width="stretch")
+        st.plotly_chart(fig_pos, width="stretch")
     else:
         st.caption(t("no_profit_open"))
 
@@ -752,7 +752,7 @@ with tab_unrealized:
 
     if fig_neg:
         #st.plotly_chart(fig_neg, use_container_width=True)
-        st.plotly_chart(fig_neg, theme=None, width="stretch")
+        st.plotly_chart(fig_neg, width="stretch")
     else:
         st.caption(t("no_loss_open"))
 with tab_heatmap:
@@ -777,7 +777,7 @@ with tab_heatmap:
 
     if fig_treemap:
         # st.plotly_chart(fig_treemap, use_container_width=True)
-        st.plotly_chart(fig_treemap, theme=None, width="stretch")
+        st.plotly_chart(fig_treemap, width="stretch")
 
 with tab_analysis:
 
@@ -811,7 +811,7 @@ with tab_analysis:
 
         if fig_beta:
             # st.plotly_chart(fig_beta, use_container_width=True, key="beta_chart")
-            st.plotly_chart(fig_beta, theme=None, width="stretch", key="beta_chart")
+            st.plotly_chart(fig_beta, width="stretch", key="beta_chart")
 
     # =========================
     # ✅ SHARPE
@@ -834,7 +834,7 @@ with tab_analysis:
 
     if fig_sharpe:
         # st.plotly_chart(fig_sharpe, use_container_width=True, key="sharpe_chart")
-        st.plotly_chart(fig_sharpe, theme=None, width="stretch", key="sharpe_chart")
+        st.plotly_chart(fig_sharpe, width="stretch", key="sharpe_chart")
 
     # =========================
     # ✅ SORTINO
@@ -857,7 +857,7 @@ with tab_analysis:
 
     if fig_sortino:
         # st.plotly_chart(fig_sortino, use_container_width=True, key="sortino_chart")
-        st.plotly_chart(fig_sortino, theme=None, width="stretch", key="sortino_chart")
+        st.plotly_chart(fig_sortino, width="stretch", key="sortino_chart")
         
     st.markdown(f"### {t('tail_risk_title')}")
 
@@ -880,7 +880,6 @@ with tab_analysis:
     
     st.plotly_chart(
         fig_rend,
-        theme=None,
         width="stretch",
         key="rend_chart"
     )
@@ -945,7 +944,7 @@ with tab_exp:
         )
     if fig:
         # st.plotly_chart(fig, use_container_width=True)
-        st.plotly_chart(fig, theme=None, width="stretch")
+        st.plotly_chart(fig, width="stretch")
 
     c1, c2 = st.columns(2)
     
