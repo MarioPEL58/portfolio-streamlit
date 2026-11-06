@@ -370,6 +370,18 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
     
     if dividends is not None and not dividends.empty:
+    
+        dividends = dividends.copy()
+    
+        if "DateOnly" not in dividends.columns:
+            dividends["DateOnly"] = (
+                pd.to_datetime(
+                    dividends["Data"],
+                    errors="coerce"
+                )
+                .dt.normalize()
+            )
+    
         start_candidates.append(
             dividends["DateOnly"].min()
         )
