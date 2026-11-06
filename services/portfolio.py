@@ -537,7 +537,23 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         + daily_dividends
     ).cumsum().rename("Cash")
     #debug cash Balance 
-    st.write(cash_balance.tail())
+    st.write("Cash totale movimenti")
+    st.write(cash_daily.sum())
+    
+    st.write("Cash totale trading")
+    st.write(daily_cf_total.sum())
+    
+    st.write("Dividendi")
+    st.write(daily_dividends.sum())
+    
+    st.write("Cash finale")
+    st.write(cash_balance.iloc[-1])
+    st.write(ops_cf[[
+        "Data",
+        "Ticker",
+        "Cashflow"
+    ]].tail(20))
+    # st.write(cash_balance.tail())
     # =========================
     # 12. P/L giornaliero per posizione
     # =========================
