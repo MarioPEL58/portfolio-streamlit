@@ -545,34 +545,13 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .reindex(idx, fill_value=0.0)
             .rename("Movimenti Cash")
         )
-        st.write(cash_daily.sum())
         
     cash_balance = (
         cash_daily
         + daily_cf_total
         + daily_dividends
     ).cumsum().rename("Cash")
-    #debug cash Balance 
-    st.write(cash["DateOnly"].min())
-    st.write(idx.min())
-    
-    st.write("Cash totale movimenti")
-    st.write(cash_daily.sum())
-    
-    st.write("Cash totale trading")
-    st.write(daily_cf_total.sum())
-    
-    st.write("Dividendi")
-    st.write(daily_dividends.sum())
-    
-    st.write("Cash finale")
-    st.write(cash_balance.iloc[-1])
-    st.write(ops_cf[[
-        "Data",
-        "Ticker",
-        "Cashflow"
-    ]].tail(20))
-    # st.write(cash_balance.tail())
+
     # =========================
     # 12. P/L giornaliero per posizione
     # =========================
@@ -821,6 +800,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     
     # st.write(f"⏱️ Metriche portfolio: {time.perf_counter() - t:.2f} sec")
     # t = time.perf_counter()
+    st.write(cash_balance.iloc[-1])
+    st.write(total_value.iloc[-1])
+    st.write((total_value + cash_balance).iloc[-1])
     # =========================
     # 14. Serie storica finale
     # =========================
@@ -847,11 +829,12 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             perf_ytd_pct,
             perf_1y_pct,
             daily_dividends,
-            pl_realizzato
+            pl_realizzato,
+            cash_balance,
         ],
         axis=1
     )
-
+    
     # =========================
     # 15. Se non ci sono ticker validi → niente current/exposure
     # =========================
