@@ -672,17 +672,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         st.write("ANOMALIA 05/06")
         
         st.write(
-            daily_cf_positions.loc["2026-06-05"]
-                .sort_values(ascending=False)
-                .head(20)
-        )
-        
-        st.write(
-            market_move.loc["2026-06-05"]
-                .sort_values(ascending=False)
-                .head(20)
-        )
-        st.write(
             ops_cf.loc[
                 ops_cf["DateOnly"] == "2026-06-05"
             ][
@@ -695,10 +684,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
                 ]
             ]
         )
-        st.write(
-            daily_cf_positions.loc["2026-06-05"]
-            .sort_values(ascending=False)
-        )
+        st.write(position_values.loc["2026-06-01":"2026-06-10", 7])
+        st.write(market_move.loc["2026-06-01":"2026-06-10", 7])
         
         # P/L rolling 7 giorni
         weekly_pl = (
