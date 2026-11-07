@@ -638,6 +638,15 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         #     .add(daily_cf_positions, fill_value=0.0)
         # )
 
+        daily_realized_positions = (
+            ops_cf.groupby(["DateOnly", "PositionKey"])["RealizedTradePL"]
+            .sum()
+            .unstack(fill_value=0.0)
+            .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
+        )
+        
+
+        
         market_move = position_values.diff()
         
         first_day = (
@@ -649,8 +658,12 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         daily_pl_positions = (
             market_move
-            .add(daily_cf_positions, fill_value=0.0)
+            .add(daily_realized_positions, fill_value=0.0)
         )
+        # daily_pl_positions = (
+        #     market_move
+        #     .add(daily_cf_positions, fill_value=0.0)
+        # )
         #per debug
         #daily_pl_positions = market_move.copy()
         
