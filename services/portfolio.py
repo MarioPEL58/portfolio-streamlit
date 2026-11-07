@@ -656,14 +656,14 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         market_move[first_day] = position_values[first_day]
         
-        daily_pl_positions = (
-            market_move
-            .add(daily_realized_positions, fill_value=0.0)
-        )
         # daily_pl_positions = (
         #     market_move
-        #     .add(daily_cf_positions, fill_value=0.0)
+        #     .add(daily_realized_positions, fill_value=0.0)
         # )
+        daily_pl_positions = (
+            market_move
+            .add(daily_cf_positions, fill_value=0.0)
+        )
         #per debug
         #daily_pl_positions = market_move.copy()
         
@@ -682,27 +682,27 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
         daily_pl_pct = (daily_pl / total_value.shift(1)).rename("P/L Giornaliero %")
         
-        st.write("ANOMALIA 05/06")
+        # st.write("ANOMALIA 05/06")
         
-        st.write(
-            ops_cf.loc[
-                ops_cf["DateOnly"] == "2026-06-05"
-            ][
-                [
-                    "Ticker",
-                    "Tipo",
-                    "CashflowCalc",
-                    "RealizedTradePL",
-                    "PositionKey"
-                ]
-            ]
-        )
-        st.write(position_values.loc["2026-06-01":"2026-06-10"])
-        st.write(market_move.loc["2026-06-01":"2026-06-10"])
+        # st.write(
+        #     ops_cf.loc[
+        #         ops_cf["DateOnly"] == "2026-06-05"
+        #     ][
+        #         [
+        #             "Ticker",
+        #             "Tipo",
+        #             "CashflowCalc",
+        #             "RealizedTradePL",
+        #             "PositionKey"
+        #         ]
+        #     ]
+        # )
+        # st.write(position_values.loc["2026-06-01":"2026-06-10"])
+        # st.write(market_move.loc["2026-06-01":"2026-06-10"])
         
-        st.write(
-            daily_pl_positions.loc["2026-06-05"]
-        )
+        # st.write(
+        #     daily_pl_positions.loc["2026-06-05"]
+        # )
         # P/L rolling 7 giorni
         weekly_pl = (
             daily_pl
