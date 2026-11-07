@@ -690,9 +690,14 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
                     "Ticker",
                     "Tipo",
                     "CashflowCalc",
-                    "RealizedTradePL"
+                    "RealizedTradePL",
+                    "PositionKey"
                 ]
             ]
+        )
+        st.write(
+            daily_cf_positions.loc["2026-06-05"]
+            .sort_values(ascending=False)
         )
         
         # P/L rolling 7 giorni
