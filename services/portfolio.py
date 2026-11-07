@@ -667,6 +667,17 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
         daily_pl_pct = (daily_pl / total_value.shift(1)).rename("P/L Giornaliero %")
         
+        debug_date = pd.Timestamp("2026-06-05")
+
+        st.write("market_move")
+        st.write(market_move.loc[debug_date])
+        
+        st.write("daily_cf_positions")
+        st.write(daily_cf_positions.loc[debug_date])
+        
+        st.write("daily_pl_positions")
+        st.write(daily_pl_positions.loc[debug_date])
+        
         # P/L rolling 7 giorni
         weekly_pl = (
             daily_pl
