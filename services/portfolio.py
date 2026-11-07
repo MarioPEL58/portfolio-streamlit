@@ -676,6 +676,25 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         #     market_move
         #     .add(daily_realized_positions, fill_value=0.0)
         # )
+        st.write("HOLDINGS")
+        st.write(
+            holdings.loc["2026-06-01":"2026-06-10", ["7"]]
+        )
+        
+        st.write("POSITION VALUES")
+        st.write(
+            position_values.loc["2026-06-01":"2026-06-10", ["7"]]
+        )
+        
+        st.write("MARKET MOVE")
+        st.write(
+            market_move.loc["2026-06-01":"2026-06-10", ["7"]]
+        )
+        
+        st.write("REALIZED")
+        st.write(
+            daily_realized_positions.loc["2026-06-01":"2026-06-10", ["7"]]
+        )
         daily_pl_positions = (
             market_move
             .add(daily_cf_positions, fill_value=0.0)
