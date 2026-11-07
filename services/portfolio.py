@@ -684,8 +684,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
                 ]
             ]
         )
-        st.write(position_values.loc["2026-06-01":"2026-06-10", 7])
-        st.write(market_move.loc["2026-06-01":"2026-06-10", 7])
+        st.write(position_values.loc["2026-06-01":"2026-06-10"])
+        st.write(market_move.loc["2026-06-01":"2026-06-10"])
         
         # P/L rolling 7 giorni
         weekly_pl = (
