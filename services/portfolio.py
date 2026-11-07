@@ -700,20 +700,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         st.write(position_values.loc["2026-06-01":"2026-06-10"])
         st.write(market_move.loc["2026-06-01":"2026-06-10"])
         
-        daily_realized_positions = (
-            ops_cf.groupby(["DateOnly", "PositionKey"])["RealizedTradePL"]
-            .sum()
-            .unstack(fill_value=0.0)
-            .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
-        )
-        
-        daily_pl_positions_test = (
-            market_move
-            .add(daily_realized_positions, fill_value=0.0)
-        )
-        
         st.write(
-            daily_pl_positions_test.loc["2026-06-05"]
+            daily_pl_positions.loc["2026-06-05"]
         )
         # P/L rolling 7 giorni
         weekly_pl = (
