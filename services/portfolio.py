@@ -693,6 +693,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
                     "RealizedTradePL"
                 ]
             ]
+        )
         
         # P/L rolling 7 giorni
         weekly_pl = (
