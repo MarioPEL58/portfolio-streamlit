@@ -647,10 +647,12 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         market_move[first_day] = position_values[first_day]
         
-        daily_pl_positions = (
-            market_move
-            .add(daily_cf_positions, fill_value=0.0)
-        )
+        # daily_pl_positions = (
+        #     market_move
+        #     .add(daily_cf_positions, fill_value=0.0)
+        # )
+        #per debug
+        daily_pl_positions = market_move.copy()
         
         weekly_pl_positions = (
             daily_pl_positions
