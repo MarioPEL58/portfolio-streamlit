@@ -553,7 +553,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         .reindex(idx, fill_value=0.0)
     )
 
-    capital_versato = (-daily_cf_total.cumsum()).rename("Capitale versato")
+    # capital_versato = (-daily_cf_total.cumsum()).rename("Capitale versato")
 
     # =========================
     # 11bis. Movimenti Cash
