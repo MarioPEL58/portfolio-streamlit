@@ -541,6 +541,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
 
         cost_history = cost_history.fillna(0.0)
         # invested = cost_history.sum(axis=1).rename("Capitale investito")
+        invested = cost_history.sum(axis=1).rename("Capitale investito")
         capital_versato = invested.rename("Capitale versato")  #temp check 
 
     # =========================
