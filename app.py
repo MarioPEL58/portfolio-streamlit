@@ -430,11 +430,11 @@ if show_benchmark and benchmark.strip():
             flows_input = flows_input[["Data", "Flow"]]
             #alternativa temporanea 
             flows_input = pd.DataFrame({
-                "Data": ts.index,
+                "Data": series.index,
                 "Flow": (
-                    ts["Capitale investito"]
+                    series["Capitale investito"]
                     .diff()
-                    .fillna(ts["Capitale investito"])
+                    .fillna(series["Capitale investito"])
                 )
             }).reset_index(drop=True)
             #debug 
