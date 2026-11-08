@@ -672,40 +672,58 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         market_move[first_day] = position_values[first_day]
         
+        # TEST
+        closed_today = (
+            (holdings.shift(1) != 0)
+            & (holdings == 0)
+        )
+        
+        market_move_adj = market_move.copy()
+        market_move_adj[closed_today] = 0
+        
+        st.write("CHIUSE OGGI")
+        st.write(closed_today.loc["2026-06-01":"2026-06-10", ["7"]])
+        
+        st.write("MARKET MOVE ORIGINALE")
+        st.write(market_move.loc["2026-06-01":"2026-06-10", ["7"]])
+        
+        st.write("MARKET MOVE CORRETTO")
+        st.write(market_move_adj.loc["2026-06-01":"2026-06-10", ["7"]])
+        
+        daily_pl_positions = (
+            market_move_adj
+            .add(daily_realized_positions, fill_value=0.0)
+        )
+        # st.write("HOLDINGS")
+        # st.write(
+        #     holdings.loc["2026-06-01":"2026-06-10", ["7"]]
+        # )
+        
+        # st.write("POSITION VALUES")
+        # st.write(
+        #     position_values.loc["2026-06-01":"2026-06-10", ["7"]]
+        # )
+        
+        # st.write("MARKET MOVE")
+        # st.write(
+        #     market_move.loc["2026-06-01":"2026-06-10", ["7"]]
+        # )
+        
+        # st.write("REALIZED")
+        # st.write(
+        #     daily_realized_positions.loc["2026-06-01":"2026-06-10", ["7"]]
+        # )
+        # st.write(
+        #     daily_realized_positions.loc["2026-06-05"]
+        # )
+        
+        # st.write(
+        #     market_move.loc["2026-06-05"]
+        # )
         # daily_pl_positions = (
         #     market_move
-        #     .add(daily_realized_positions, fill_value=0.0)
+        #     .add(daily_cf_positions, fill_value=0.0)
         # )
-        st.write("HOLDINGS")
-        st.write(
-            holdings.loc["2026-06-01":"2026-06-10", ["7"]]
-        )
-        
-        st.write("POSITION VALUES")
-        st.write(
-            position_values.loc["2026-06-01":"2026-06-10", ["7"]]
-        )
-        
-        st.write("MARKET MOVE")
-        st.write(
-            market_move.loc["2026-06-01":"2026-06-10", ["7"]]
-        )
-        
-        st.write("REALIZED")
-        st.write(
-            daily_realized_positions.loc["2026-06-01":"2026-06-10", ["7"]]
-        )
-        st.write(
-            daily_realized_positions.loc["2026-06-05"]
-        )
-        
-        st.write(
-            market_move.loc["2026-06-05"]
-        )
-        daily_pl_positions = (
-            market_move
-            .add(daily_cf_positions, fill_value=0.0)
-        )
         #per debug
         #daily_pl_positions = market_move.copy()
         
