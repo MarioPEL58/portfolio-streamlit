@@ -431,7 +431,7 @@ if show_benchmark and benchmark.strip():
             #alternativa temporanea 
             flows_input = pd.DataFrame({
                 "Data": series.index,
-                "Flow": (
+                "Flow": -(
                     series["Capitale investito"]
                     .diff()
                     .fillna(series["Capitale investito"])
