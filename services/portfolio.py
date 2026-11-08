@@ -580,6 +580,20 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         + daily_dividends
     ).cumsum().rename("Cashflow cumulato")
 
+    # debug capitale 
+    st.write("CASH DAILY")
+    st.write(
+        cash_daily.loc["2026-06-01":"2026-06-10"]
+    )
+    
+    st.write("DAILY CF TOTAL")
+    st.write(
+        daily_cf_total.loc["2026-06-01":"2026-06-10"]
+    )
+    st.write("CAPITALE VERSATO")
+    st.write(
+        capital_versato.loc["2026-06-01":"2026-06-10"]
+    )
     # =========================
     # 12. P/L giornaliero per posizione
     # =========================
@@ -620,6 +634,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
 
         # debug
+
         # st.write("CLOSES RAW")
         # st.dataframe(
         #     closes.loc["2026-06-30":"2026-07-02", ["LDO.MI"]]
@@ -673,22 +688,22 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         market_move[first_day] = position_values[first_day]
         
         # TEST
-        closed_today = (
-            (holdings.shift(1) != 0)
-            & (holdings == 0)
-        )
+        # closed_today = (
+        #     (holdings.shift(1) != 0)
+        #     & (holdings == 0)
+        # )
         
-        market_move_adj = market_move.copy()
-        market_move_adj[closed_today] = 0
+        # market_move_adj = market_move.copy()
+        # market_move_adj[closed_today] = 0
         
-        st.write("CHIUSE OGGI")
-        st.write(closed_today.loc["2026-06-01":"2026-06-10", ["7"]])
+        # st.write("CHIUSE OGGI")
+        # st.write(closed_today.loc["2026-06-01":"2026-06-10", ["7"]])
         
-        st.write("MARKET MOVE ORIGINALE")
-        st.write(market_move.loc["2026-06-01":"2026-06-10", ["7"]])
+        # st.write("MARKET MOVE ORIGINALE")
+        # st.write(market_move.loc["2026-06-01":"2026-06-10", ["7"]])
         
-        st.write("MARKET MOVE CORRETTO")
-        st.write(market_move_adj.loc["2026-06-01":"2026-06-10", ["7"]])
+        # st.write("MARKET MOVE CORRETTO")
+        # st.write(market_move_adj.loc["2026-06-01":"2026-06-10", ["7"]])
         
         daily_pl_positions = (
             market_move_adj
