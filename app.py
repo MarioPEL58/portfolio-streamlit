@@ -428,15 +428,7 @@ if show_benchmark and benchmark.strip():
             flows_input["Flow"] = flows_input["Operazioni"].fillna(0.0)
         
             flows_input = flows_input[["Data", "Flow"]]
-            #alternativa temporanea 
-            flows_input = pd.DataFrame({
-                "Data": series.index,
-                "Flow": -(
-                    series["Capitale investito"]
-                    .diff()
-                    .fillna(series["Capitale investito"])
-                )
-            }).reset_index(drop=True)
+
             #debug 
             st.write("FLOWS INPUT")
             st.write(
