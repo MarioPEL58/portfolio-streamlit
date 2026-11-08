@@ -439,7 +439,12 @@ if show_benchmark and benchmark.strip():
             }).reset_index(drop=True)
             #debug 
             st.write("FLOWS INPUT")
-            st.write(flows_input.head(30))
+            st.write(
+                flows_input.loc[
+                    (flows_input["Data"] >= "2026-05-25") &
+                    (flows_input["Data"] <= "2026-06-10")
+                ]
+            )
             # ✅ nuovo benchmark corretto
             bench_series = build_flow_adjusted_benchmark(
                 flows_df=flows_input,
