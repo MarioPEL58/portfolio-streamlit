@@ -450,6 +450,13 @@ if show_benchmark and benchmark.strip():
                 flows_df=flows_input,
                 benchmark_prices=b
             )
+            #debug 
+            st.write("BENCHMARK SERIES")
+            st.write(
+                bench_series.loc[
+                    "2026-05-25":"2026-08-15"
+                ]
+            )
 
 bench_sharpe = None
 bench_sortino = None
