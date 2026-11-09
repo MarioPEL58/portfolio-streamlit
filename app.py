@@ -451,7 +451,7 @@ if show_benchmark and benchmark.strip():
                     "2026-05-20":"2026-06-10"
                 ]
             )
-            capital_exposed_flow = (
+            capital_exposed_flow = -(
                 series["Capitale investito"]
                 .diff()
                 .fillna(series["Capitale investito"])
