@@ -429,26 +429,12 @@ if show_benchmark and benchmark.strip():
         
             flows_input = flows_input[["Data", "Flow"]]
 
-            #debug 
-            st.write("FLOWS INPUT")
-            st.write(
-                flows_input.loc[
-                    (flows_input["Data"] >= "2026-05-25") &
-                    (flows_input["Data"] <= "2026-06-10")
-                ]
-            )
             # ✅ nuovo benchmark corretto
             bench_series = build_flow_adjusted_benchmark(
                 flows_df=flows_input,
                 benchmark_prices=b
             )
-            #debug 
-            st.write("BENCHMARK SERIES")
-            st.write(
-                bench_series.loc[
-                    "2026-05-25":"2026-08-15"
-                ]
-            )
+
 
 bench_sharpe = None
 bench_sortino = None
