@@ -32,6 +32,18 @@ def compute_portfolio_xirr(ops_enriched, dividends, final_value, valuation_date=
             ]
         ]
     )
+    st.write(
+        ops.loc[
+            ops["Ticker"] == "AMD",
+            [
+                "Data",
+                "Quantita",
+                "CashflowCalc",
+                "QtyOpenAfter",
+                "CostOpenAfter"
+            ]
+        ]
+    )
     # --- flussi dividendi
     if dividends is not None and not dividends.empty:
         div = dividends.copy()
