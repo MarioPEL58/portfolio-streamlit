@@ -13,37 +13,37 @@ def compute_portfolio_xirr(ops_enriched, dividends, final_value, valuation_date=
     # --- flussi operazioni
     ops_flows = ops.groupby("DateOnly")["CashflowCalc"].sum().rename("Operazioni")
 
-    st.write("in XIRR : OPS FLOWS")
-    st.write(
-        ops_flows.loc[
-            "2026-05-25":"2026-06-10"
-        ]
-    )
-    st.write("DETTAGLIO 05/06")
+    # st.write("in XIRR : OPS FLOWS")
+    # st.write(
+    #     ops_flows.loc[
+    #         "2026-05-25":"2026-06-10"
+    #     ]
+    # )
+    # st.write("DETTAGLIO 05/06")
     
-    st.write(
-        ops.loc[
-            ops["DateOnly"] == pd.Timestamp("2026-06-05"),
-            [
-                "Ticker",
-                "Quantita",
-                "CashflowCalc",
-                "RealizedTradePL"
-            ]
-        ]
-    )
-    st.write(
-        ops.loc[
-            ops["Ticker"] == "AMD",
-            [
-                "Data",
-                "Quantita",
-                "CashflowCalc",
-                "QtyOpenAfter",
-                "CostOpenAfter"
-            ]
-        ]
-    )
+    # st.write(
+    #     ops.loc[
+    #         ops["DateOnly"] == pd.Timestamp("2026-06-05"),
+    #         [
+    #             "Ticker",
+    #             "Quantita",
+    #             "CashflowCalc",
+    #             "RealizedTradePL"
+    #         ]
+    #     ]
+    # )
+    # st.write(
+    #     ops.loc[
+    #         ops["Ticker"] == "AMD",
+    #         [
+    #             "Data",
+    #             "Quantita",
+    #             "CashflowCalc",
+    #             "QtyOpenAfter",
+    #             "CostOpenAfter"
+    #         ]
+    #     ]
+    # )
     # --- flussi dividendi
     if dividends is not None and not dividends.empty:
         div = dividends.copy()
