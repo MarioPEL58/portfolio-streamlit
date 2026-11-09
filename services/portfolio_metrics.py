@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import streamlit as st  # per debug only
 
 def compute_portfolio_xirr(ops_enriched, dividends, final_value, valuation_date=None):
     ops = ops_enriched.copy()
