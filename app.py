@@ -451,6 +451,16 @@ if show_benchmark and benchmark.strip():
                     "2026-05-20":"2026-06-10"
                 ]
             )
+            capital_exposed_flow = (
+                series["Capitale investito"]
+                .diff()
+                .fillna(series["Capitale investito"])
+            )
+            
+            flows_input = pd.DataFrame({
+                "Data": capital_exposed_flow.index,
+                "Flow": capital_exposed_flow.values
+            })
             # ✅ nuovo benchmark corretto
             bench_series = build_flow_adjusted_benchmark(
                 flows_df=flows_input,
