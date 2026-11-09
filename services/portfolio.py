@@ -317,22 +317,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # 1. Arricchimento cost engine
     # =========================
     ops_all = enrich_ops_with_cost_engine(ops_all)
-    st.write(
-        ops_all.loc[
-            ops_all["ID"] == 7,
-            [
-                "Data",
-                "PositionKey",
-                "Quantita",
-                "Prezzo",
-                "AvgCostBefore",
-                "QtyOpenAfter",
-                "CostOpenAfter",
-                "CashflowCalc",
-                "RealizedTradePL"
-            ]
-        ]
-    )
+
 
     # st.write(f"⏱️ Cost engine: {time.perf_counter() - t:.2f} sec")
     # t = time.perf_counter()
