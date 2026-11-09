@@ -429,6 +429,28 @@ if show_benchmark and benchmark.strip():
         
             flows_input = flows_input[["Data", "Flow"]]
 
+            # DEBUG 
+            capital_exposed = series["Capitale investito"]
+            
+            capital_exposed_flow = (
+                capital_exposed
+                .diff()
+                .fillna(capital_exposed)
+            )
+            
+            st.write("CAPITALE ESPOSTO")
+            st.write(
+                capital_exposed.loc[
+                    "2026-05-20":"2026-06-10"
+                ]
+            )
+            
+            st.write("FLOW CAPITALE ESPOSTO")
+            st.write(
+                capital_exposed_flow.loc[
+                    "2026-05-20":"2026-06-10"
+                ]
+            )
             # ✅ nuovo benchmark corretto
             bench_series = build_flow_adjusted_benchmark(
                 flows_df=flows_input,
