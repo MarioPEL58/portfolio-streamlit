@@ -450,8 +450,8 @@ if show_benchmark and benchmark.strip():
                 .fillna(series["Capitale investito"])
             )
             st.write(
-                ops_all.loc[
-                    ops_all["DateOnly"].isin(
+                ops_enriched.loc[
+                    ops_enriched["DateOnly"].isin(
                         [
                             pd.Timestamp("2026-07-15"),
                             pd.Timestamp("2026-07-16"),
