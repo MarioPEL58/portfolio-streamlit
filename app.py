@@ -292,49 +292,7 @@ elif series.empty:
     st.error(t("portfolio_error"))
     st.stop()
 
-# st.subheader("DEBUG COERENZA VALORI")
-# st.write({
-#     "Valore serie": series["Valore portafoglio"].iloc[-1],
-#     "Valore current": current["Valore"].sum(),
-#     "Differenza": series["Valore portafoglio"].iloc[-1] - current["Valore"].sum()
-# })
-
-# st.subheader("DEBUG Capitale investito")
-
-# capitale_serie = series["Capitale investito"].iloc[-1]
-# costo_current = current["Costo Totale Stimato"].sum()
-
-# st.write({
-#     "Capitale investito (serie)": capitale_serie,
-#     "Costo totale stimato (current)": costo_current,
-#     "Differenza": capitale_serie - costo_current
-# })
-
-# st.subheader("DEBUG Flussi vs Investito")
-
-# st.write({
-#     "Capitale versato (flussi)": series["Capitale versato"].iloc[-1],
-#     "Capitale investito (open)": series["Capitale investito"].iloc[-1]
-# })
-
 render_operations_preview(ops_enriched)
-# with st.expander("Anteprima operazioni", expanded=False):
-#    st.dataframe(ops_enriched, use_container_width=True)
-
-st.write(
-    current[
-        [
-            "Ticker",
-            "Valore",
-            "P/L Giornaliero",
-            "P/L Giornaliero %",
-            "P/L 7 Giorni",
-            "P/L 7 Giorni %",
-            "P/L 30 Giorni",
-            "P/L 30 Giorni %"
-        ]
-    ]
-)
 
 # =========================
 # KPIs
