@@ -661,12 +661,17 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         market_move[first_day] = position_values[first_day]
         
         # TEST
+        opened_today = (
+            (holdings.shift(1) == 0)
+            & (holdings != 0)
+        )
         closed_today = (
             (holdings.shift(1) != 0)
             & (holdings == 0)
         )
         
         market_move_adj = market_move.copy()
+        market_move_adj[opened_today] = 0.0
         market_move_adj[closed_today] = 0
         
         # st.write("CHIUSE OGGI")
