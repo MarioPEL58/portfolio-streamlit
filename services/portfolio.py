@@ -653,13 +653,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .rolling("30D")
             .sum()
         )
-        # DEBUG
 
-        st.write("DAILY PL")
-        st.write(daily_pl_positions.tail(40))
-        
-        st.write("MONTHLY PL")
-        st.write(monthly_pl_positions.tail(40))
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
         daily_pl_pct = (daily_pl / total_value.shift(1)).rename("P/L Giornaliero %")
         
