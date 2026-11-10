@@ -407,67 +407,19 @@ if show_benchmark and benchmark.strip():
 
     if not bench_df.empty and benchmark.strip() in bench_df.columns:
         b = bench_df[benchmark.strip()].dropna()
-        
-        # Prezzi grezzi benchmark utilizzati dal Backtest
-        benchmark_prices = b.copy()
-        
-        #OLD investing all capital on the first day
-        # if not b.empty and b.iloc[0] != 0:
-        #     bench_norm = abs(series["Capitale investito"].iloc[-1]) * (b / b.iloc[0])
 
         if not b.empty:
         
-            # ✅ prepara flows per benchmark
-            flows_input = xirr_flows.copy()
-            
-            # ✅ RIMUOVE la riga finale sintetica
-            if "Valore finale" in flows_input.columns:
-                flows_input = flows_input[flows_input["Valore finale"].fillna(0) == 0]
-                
-            # ✅ Flow corretto (solo flussi di acquisto / vendita no Dividendi per correto confronto valore portfolio )
-            flows_input["Flow"] = flows_input["Operazioni"].fillna(0.0)
-        
-            flows_input = flows_input[["Data", "Flow"]]
-
-            # DEBUG 
-            capital_exposed = series["Capitale investito"]
-            
-            capital_exposed_flow = (
-                capital_exposed
-                .diff()
-                .fillna(capital_exposed)
-            )
-            st.write("CAPITALE ESPOSTO >1000")
-            st.write(
-                capital_exposed_flow[
-                    capital_exposed_flow.abs() > 1000
-                ]
-            )
+            # ====================================
+            # Flow basato sul capitale esposto
+            # ====================================
             
             capital_exposed_flow = -(
                 series["Capitale investito"]
                 .diff()
                 .fillna(series["Capitale investito"])
             )
-            st.write(
-                ops_enriched.loc[
-                    ops_enriched["DateOnly"].isin(
-                        [
-                            pd.Timestamp("2026-07-15"),
-                            pd.Timestamp("2026-07-16"),
-                            pd.Timestamp("2026-07-29"),
-                            pd.Timestamp("2026-07-30"),
-                        ]
-                    ),
-                    [
-                        "Data",
-                        "Ticker",
-                        "Quantita",
-                        "QtyOpenAfter",
-                        "CostOpenAfter"
-                    ]
-                ]
-            )
+
             flows_input = pd.DataFrame({
                 "Data": capital_exposed_flow.index,
                 "Flow": capital_exposed_flow.values
