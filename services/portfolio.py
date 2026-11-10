@@ -622,7 +622,15 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # )
         
         # market_move[first_day] = position_values[first_day]
+        qty_delta = holdings - holdings.shift(1)
+
+        purchase_value = (
+            qty_delta.clip(lower=0)
+            * position_closes_eur
+            * position_multipliers
+        ).fillna(0.0)
         
+        market_move_adj = market_move - purchase_value
 
         opened_today = (
             (holdings.shift(1) == 0)
@@ -634,7 +642,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
         
         market_move_adj = market_move.copy()
-        market_move_adj[opened_today] = 0.0
+        # market_move_adj[opened_today] = 0.0
         market_move_adj[closed_today] = 0
         
         daily_pl_positions = (
