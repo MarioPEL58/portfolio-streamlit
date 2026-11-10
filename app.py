@@ -449,7 +449,25 @@ if show_benchmark and benchmark.strip():
                 .diff()
                 .fillna(series["Capitale investito"])
             )
-
+            st.write(
+                ops_all.loc[
+                    ops_all["DateOnly"].isin(
+                        [
+                            pd.Timestamp("2026-07-15"),
+                            pd.Timestamp("2026-07-16"),
+                            pd.Timestamp("2026-07-29"),
+                            pd.Timestamp("2026-07-30"),
+                        ]
+                    ),
+                    [
+                        "Data",
+                        "Ticker",
+                        "Quantita",
+                        "QtyOpenAfter",
+                        "CostOpenAfter"
+                    ]
+                ]
+            )
             flows_input = pd.DataFrame({
                 "Data": capital_exposed_flow.index,
                 "Flow": capital_exposed_flow.values
