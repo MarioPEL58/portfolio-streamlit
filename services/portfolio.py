@@ -682,7 +682,19 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             market_move_adj
             .add(daily_realized_positions, fill_value=0.0)
         )
-
+        
+        st.write("POSITION VALUES MAIRE")
+        st.write(position_values[20].loc["2026-11-01":])
+        
+        st.write("MARKET MOVE MAIRE")
+        st.write(market_move[20].loc["2026-11-01":])
+        
+        st.write("MARKET MOVE ADJ MAIRE")
+        st.write(market_move_adj[20].loc["2026-11-01":])
+        
+        st.write("REALIZED MAIRE")
+        st.write(daily_realized_positions[20].loc["2026-11-01":])
+        
         weekly_pl_positions = (
             daily_pl_positions
             .rolling("7D")
