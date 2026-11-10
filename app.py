@@ -437,26 +437,19 @@ if show_benchmark and benchmark.strip():
                 .diff()
                 .fillna(capital_exposed)
             )
-            
-            st.write("CAPITALE ESPOSTO")
+            st.write("CAPITALE ESPOSTO >1000")
             st.write(
-                capital_exposed.loc[
-                    "2026-05-20":"2026-06-10"
+                capital_exposed_flow[
+                    capital_exposed_flow.abs() > 1000
                 ]
             )
             
-            st.write("FLOW CAPITALE ESPOSTO")
-            st.write(
-                capital_exposed_flow.loc[
-                    "2026-05-20":"2026-06-10"
-                ]
-            )
             capital_exposed_flow = -(
                 series["Capitale investito"]
                 .diff()
                 .fillna(series["Capitale investito"])
             )
-            
+
             flows_input = pd.DataFrame({
                 "Data": capital_exposed_flow.index,
                 "Flow": capital_exposed_flow.values
