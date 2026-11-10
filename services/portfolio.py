@@ -599,48 +599,13 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
     else:
         
-        daily_cf_positions = (
-            ops_cf.groupby(["DateOnly", "PositionKey"])["Cashflow"]
-            .sum()
-            .unstack(fill_value=0.0)
-            .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
-        )
+        # daily_cf_positions = (
+        #     ops_cf.groupby(["DateOnly", "PositionKey"])["Cashflow"]
+        #     .sum()
+        #     .unstack(fill_value=0.0)
+        #     .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
+        # )
 
-        # debug
-
-        # st.write("CLOSES RAW")
-        # st.dataframe(
-        #     closes.loc["2026-06-30":"2026-07-02", ["LDO.MI"]]
-        # )
-        
-        # st.write("CLOSES_TICKER")
-        # st.dataframe(
-        #     closes_ticker.loc["2026-06-30":"2026-07-02"]
-        # )
-        
-        # st.write("CLOSES_EUR_TICKER")
-        # st.dataframe(
-        #     closes_eur_ticker.loc["2026-06-30":"2026-07-02"]
-        # )
-        
-        # st.write("POSITION_CLOSES_EUR")
-        # st.dataframe(
-        #     position_closes_eur.loc["2026-06-30":"2026-07-02"]
-        # )
-        
-        # st.write("position_values")
-        # st.write(position_values.tail(10))
-        
-        # st.write("position_values.diff()")
-        # st.write(position_values.diff().tail(10))
-        
-        # st.write("daily_cf_positions")
-        # st.write(daily_cf_positions.tail(10))
-
-        # daily_pl_positions = (
-        #     position_values.diff().fillna(0.0)
-        #     .add(daily_cf_positions, fill_value=0.0)
-        # )
 
         daily_realized_positions = (
             ops_cf.groupby(["DateOnly", "PositionKey"])["RealizedTradePL"]
@@ -649,18 +614,16 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
         )
         
-
-        
         market_move = position_values.diff()
         
-        first_day = (
-            position_values.notna()
-            & position_values.shift(1).isna()
-        )
+        # first_day = (
+        #     position_values.notna()
+        #     & position_values.shift(1).isna()
+        # )
         
-        market_move[first_day] = position_values[first_day]
+        # market_move[first_day] = position_values[first_day]
         
-        # TEST
+
         opened_today = (
             (holdings.shift(1) == 0)
             & (holdings != 0)
@@ -674,30 +637,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         market_move_adj[opened_today] = 0.0
         market_move_adj[closed_today] = 0
         
-        # st.write("CHIUSE OGGI")
-        # st.write(closed_today.loc["2026-06-01":"2026-06-10", ["7"]])
-        
-        # st.write("MARKET MOVE ORIGINALE")
-        # st.write(market_move.loc["2026-06-01":"2026-06-10", ["7"]])
-        
-        # st.write("MARKET MOVE CORRETTO")
-        # st.write(market_move_adj.loc["2026-06-01":"2026-06-10", ["7"]])
-        
         daily_pl_positions = (
             market_move_adj
             .add(daily_realized_positions, fill_value=0.0)
         )
-        st.write("POSITION VALUES MAIRE")
-        st.write(position_values["20"].loc["2026-11-01":"2026-11-10"])
-        
-        st.write("MARKET MOVE MAIRE")
-        st.write(market_move["20"].loc["2026-11-01":"2026-11-10"])
-        
-        st.write("MARKET MOVE ADJ MAIRE")
-        st.write(market_move_adj["20"].loc["2026-11-01":"2026-11-10"])
-        
-        st.write("REALIZED MAIRE")
-        st.write(daily_realized_positions["20"].loc["2026-11-01":"2026-11-10"])
         
         weekly_pl_positions = (
             daily_pl_positions
