@@ -682,14 +682,13 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             market_move_adj
             .add(daily_realized_positions, fill_value=0.0)
         )
-        maire_key = 20 # oppure la sua PositionKey
         
         st.write(
-            daily_pl_positions[maire_key].tail(40)
+            daily_pl_positions.tail(40)
         )
         
         st.write(
-            monthly_pl_positions[maire_key].tail(40)
+            monthly_pl_positions.tail(40)
         )
         
         weekly_pl_positions = (
