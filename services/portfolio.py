@@ -567,21 +567,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         + daily_dividends
     ).cumsum().rename("Cashflow cumulato")
 
-    # debug capitale 
-    # debug_df = pd.concat(
-    #     [
-    #         total_value.rename("Valore"),
-    #         invested.rename("Investito"),
-    #         capital_versato.rename("CapitaleVersato"),
-    #         cashflow_cumulato.rename("CashflowCumulato"),
-    #         pl_realizzato.rename("PLRealizzato")
-    #     ],
-    #     axis=1
-    # )
-    
-    # st.write(
-    #     debug_df.loc["2026-06-01":"2026-06-10"]
-    # )
     # =========================
     # 12. P/L giornaliero per posizione
     # =========================
