@@ -321,6 +321,21 @@ render_operations_preview(ops_enriched)
 # with st.expander("Anteprima operazioni", expanded=False):
 #    st.dataframe(ops_enriched, use_container_width=True)
 
+st.write(
+    current[
+        [
+            "Ticker",
+            "Valore",
+            "P/L Giornaliero",
+            "P/L Giornaliero %",
+            "P/L 7 Giorni",
+            "P/L 7 Giorni %",
+            "P/L 30 Giorni",
+            "P/L 30 Giorni %"
+        ]
+    ]
+)
+
 # =========================
 # KPIs
 # =========================
