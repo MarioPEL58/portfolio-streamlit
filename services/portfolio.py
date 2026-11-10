@@ -655,7 +655,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
 
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
-        daily_pl_pct = (daily_pl / total_value.shift(1)).rename("P/L Giornaliero %")
+        daily_pl_pct = (daily_pl / total_value.shift(1).replace(0, np.nan)).rename("P/L Giornaliero %")
         
         # st.write("ANOMALIA 05/06")
         
@@ -701,7 +701,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         monthly_pl_pct = (
             monthly_pl
-            / total_value.shift(30)
+            / total_value.shift(30).replace(0, np.nan)
         ).rename("P/L 30 Giorni %")
 
         # ==================================================
@@ -714,7 +714,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         ).rename("P/L Totale Giornaliero")
         
         daily_total_pl_pct = (
-            daily_total_pl / total_value.shift(1)
+            daily_total_pl / total_value.shift(1).replace(0, np.nan)
         ).rename("P/L Totale Giornaliero %")
         
         # debug
@@ -750,7 +750,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
         
         weekly_total_pl_pct = (
-            weekly_total_pl / total_value.shift(7)
+            weekly_total_pl / total_value.shift(7).replace(0, np.nan)
         ).rename("P/L Totale 7 Giorni %")
         
         monthly_total_pl = (
@@ -761,7 +761,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
         
         monthly_total_pl_pct = (
-            monthly_total_pl / total_value.shift(30)
+            monthly_total_pl / total_value.shift(30).replace(0, np.nan)
         ).rename("P/L Totale 30 Giorni %")
         # ==========================================
         # Performance storiche portafoglio
