@@ -669,6 +669,12 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         st.dataframe(
             debug_pos11.loc["2026-04-14":"2026-04-16"]
         )
+        market_move_test = market_move - trade_value
+        
+        st.write(
+            market_move_test["11"]
+            .loc["2026-04-14":"2026-04-16"]
+        )
         
         weekly_pl_positions = (
             daily_pl_positions
