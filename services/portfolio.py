@@ -697,23 +697,26 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .rolling("30D")
             .sum()
         )
-        st.write("Debug Position 5 incremento")
-        debug_pos5 = pd.concat([
-            holdings["5"].rename("Holdings"),
-            qty_delta["5"].rename("QtyDelta"),
-            position_closes_eur["5"].rename("Close"),
-            trade_price_matrix["5"].rename("TradePrice"),
-            entry_pl["5"].rename("EntryPL"),
-            trade_value["5"].rename("TradeValue"),
-            market_move["5"].rename("MarketMove"),
-            market_move_adj["5"].rename("MarketMoveAdj"),
-            (
-                market_move_adj["5"] + entry_pl["5"]
-            ).rename("MarketMoveAdjPlusEntry")
+        
+        entry_exit_pl = (
+            qty_delta
+            * (
+                position_closes_eur
+                - trade_price_matrix
+            )
+        ).fillna(0.0)
+        
+        st.write("Debug Position 11 vendita parziale Intesa ")
+        debug_pos11 = pd.concat([
+            qty_delta["11"].rename("QtyDelta"),
+            trade_price_matrix["11"].rename("TradePrice"),
+            position_closes_eur["11"].rename("Close"),
+            entry_exit_pl["11"].rename("EntryExitPL"),
+            daily_realized_positions["11"].rename("Realized")
         ], axis=1)
         
         st.dataframe(
-            debug_pos5.loc["2026-08-01":"2026-08-10"]
+            debug_pos11.loc["2026-04-14":"2026-04-16"]
         )
         
         weekly_pl = (
