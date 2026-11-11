@@ -697,12 +697,23 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .rolling("30D")
             .sum()
         )
-        st.write("P/L attuale")
-        st.write(
-            pd.DataFrame({
-                "Old30D": monthly_pl_positions["3"],
-                "New30D": monthly_pl_positions_test["3"]
-            }).tail(15)
+        st.write("Debug Position 5 incremento")
+        debug_pos5 = pd.concat([
+            holdings["5"].rename("Holdings"),
+            qty_delta["5"].rename("QtyDelta"),
+            position_closes_eur["5"].rename("Close"),
+            trade_price_matrix["5"].rename("TradePrice"),
+            entry_pl["5"].rename("EntryPL"),
+            trade_value["5"].rename("TradeValue"),
+            market_move["5"].rename("MarketMove"),
+            market_move_adj["5"].rename("MarketMoveAdj"),
+            (
+                market_move_adj["5"] + entry_pl["5"]
+            ).rename("MarketMoveAdjPlusEntry")
+        ], axis=1)
+        
+        st.dataframe(
+            debug_pos5.loc["2026-08-01":"2026-08-10"]
         )
         
         weekly_pl = (
