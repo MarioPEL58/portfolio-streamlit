@@ -699,15 +699,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
         st.write("P/L attuale")
         st.write(
-        current.loc[
-        current["PositionKey"] == "3",
-        ["Ticker", "P/L", "P/L 30 Giorni"]
-        ]
-        )
-        
-        st.write("P/L 30gg corretto")
-        st.write(
-        monthly_pl_positions_test["3"].iloc[-1]
+            pd.DataFrame({
+                "Old30D": monthly_pl_positions["3"],
+                "New30D": monthly_pl_positions_test["3"]
+            }).tail(15)
         )
         
         weekly_pl = (
