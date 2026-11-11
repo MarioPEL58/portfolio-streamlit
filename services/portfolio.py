@@ -631,19 +631,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         ).fillna(0.0)
         
         market_move_adj = market_move - purchase_value
-        
-        debug_pos11 = pd.concat([
-            holdings["11"].rename("Holdings"),
-            position_values["11"].rename("PositionValue"),
-            market_move["11"].rename("MarketMove"),
-            market_move_adj["11"].rename("MarketMoveAdj"),
-            daily_pl_positions["11"].rename("DailyPL")
-        ], axis=1)
-        
-        st.dataframe(
-            debug_pos11.loc["2026-04-10":"2026-04-20"]
-        )
-        
+
         opened_today = (
             (holdings.shift(1) == 0)
             & (holdings != 0)
@@ -660,6 +648,18 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_pl_positions = (
             market_move_adj
             .add(daily_realized_positions, fill_value=0.0)
+        )
+                
+        debug_pos11 = pd.concat([
+            holdings["11"].rename("Holdings"),
+            position_values["11"].rename("PositionValue"),
+            market_move["11"].rename("MarketMove"),
+            market_move_adj["11"].rename("MarketMoveAdj"),
+            daily_pl_positions["11"].rename("DailyPL")
+        ], axis=1)
+        
+        st.dataframe(
+            debug_pos11.loc["2026-04-10":"2026-04-20"]
         )
         
         weekly_pl_positions = (
