@@ -676,8 +676,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         st.write(ops_cf.columns.tolist())
         ops_debug = (
             ops_cf.loc[
-                ops_cf["ID"] == "3",
-                ["DateOnly", "Qty", "Price"]
+                ops_cf["ID"] == 3,
+                ["DateOnly", "Quantita", "Prezzo"]
             ]
             .set_index("DateOnly")
         )
@@ -685,17 +685,24 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         debug_pry = pd.concat([
             holdings["3"].rename("Holdings"),
             qty_delta["3"].rename("QtyDelta"),
+            position_closes_eur["3"].rename("Close"),
             trade_value["3"].rename("TradeValue"),
             market_move["3"].rename("MarketMove"),
             market_move_adj["3"].rename("MarketMoveAdj"),
-            daily_realized_positions["3"].rename("Realized"),
             daily_pl_positions["3"].rename("DailyPL"),
-            ops_debug["Qty"].rename("TradeQty"),
-            ops_debug["Price"].rename("TradePrice"),
+            ops_debug["Quantita"].rename("TradeQty"),
+            ops_debug["Prezzo"].rename("TradePrice"),
             (
                 position_closes_eur["3"]
-                - ops_debug["Price"]
-            ).rename("EntryGap")
+                - ops_debug["Prezzo"]
+            ).rename("EntryGap"),
+            (
+                qty_delta["3"]
+                * (
+                    position_closes_eur["3"]
+                    - ops_debug["Prezzo"]
+                )
+            ).rename("EntryPL")
         ], axis=1)
         
         st.dataframe(
