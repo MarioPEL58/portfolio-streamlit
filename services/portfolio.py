@@ -616,35 +616,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         market_move = position_values.diff()
         
-        # first_day = (
-        #     position_values.notna()
-        #     & position_values.shift(1).isna()
-        # )
-        
-        # market_move[first_day] = position_values[first_day]
-        # qty_delta = holdings - holdings.shift(1)
-
-        # purchase_value = (
-        #     qty_delta.clip(lower=0)
-        #     * position_closes_eur
-        #     * position_multipliers
-        # ).fillna(0.0)
-        
-        # market_move_adj = market_move - purchase_value
-
-        # opened_today = (
-        #     (holdings.shift(1) == 0)
-        #     & (holdings != 0)
-        # )
-        # closed_today = (
-        #     (holdings.shift(1) != 0)
-        #     & (holdings == 0)
-        # )
-        
-        # # market_move_adj = market_move.copy()
-        # # market_move_adj[opened_today] = 0.0
-        # market_move_adj[closed_today] = 0
-        
         qty_delta = holdings - holdings.shift(1)
         
         trade_value = (
@@ -668,23 +639,23 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             * position_multipliers
         ).fillna(0.0)
         
-        debug_pos11 = pd.concat([
-            qty_delta["11"].rename("QtyDelta"),
-            trade_value["11"].rename("TradeValue"),
-            market_move["11"].rename("MarketMove"),
-            market_move_adj["11"].rename("MarketMoveAdj"),
-            daily_realized_positions["11"].rename("Realized")
-        ], axis=1)
+        # debug_pos11 = pd.concat([
+        #     qty_delta["11"].rename("QtyDelta"),
+        #     trade_value["11"].rename("TradeValue"),
+        #     market_move["11"].rename("MarketMove"),
+        #     market_move_adj["11"].rename("MarketMoveAdj"),
+        #     daily_realized_positions["11"].rename("Realized")
+        # ], axis=1)
         
-        st.dataframe(
-            debug_pos11.loc["2026-04-14":"2026-04-16"]
-        )
-        market_move_test = market_move - trade_value
+        # st.dataframe(
+        #     debug_pos11.loc["2026-04-14":"2026-04-16"]
+        # )
+        # market_move_test = market_move - trade_value
         
-        st.write(
-            market_move_test["11"]
-            .loc["2026-04-14":"2026-04-16"]
-        )
+        # st.write(
+        #     market_move_test["11"]
+        #     .loc["2026-04-14":"2026-04-16"]
+        # )
         
         weekly_pl_positions = (
             daily_pl_positions
@@ -700,21 +671,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
 
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
         daily_pl_pct = (daily_pl / total_value.shift(1).replace(0, np.nan)).rename("P/L Giornaliero %")
-
-        # Debug incremento posizione 
-        
-        debug_pos5 = pd.concat([
-            holdings["5"].rename("Holdings"),
-            position_values["5"].rename("PositionValue"),
-            market_move["5"].rename("MarketMove"),
-            market_move_adj["5"].rename("MarketMoveAdj"),
-            daily_pl_positions["5"].rename("DailyPL")
-        ], axis=1)
-        
-        st.dataframe(
-            debug_pos5.loc["2026-08-01":"2026-08-10"]
-        )
-
         
         weekly_pl = (
             daily_pl
