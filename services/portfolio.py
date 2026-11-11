@@ -646,6 +646,14 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             * position_multipliers
         ).fillna(0.0)
         
+        entry_pl = (
+            qty_delta.clip(lower=0)
+            * (
+                position_closes_eur
+                - trade_price_matrix
+            )
+        ).fillna(0.0)
+        
         # debug_pos11 = pd.concat([
         #     qty_delta["11"].rename("QtyDelta"),
         #     trade_value["11"].rename("TradeValue"),
@@ -699,28 +707,18 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             holdings["3"].rename("Holdings"),
             qty_delta["3"].rename("QtyDelta"),
             position_closes_eur["3"].rename("Close"),
-            trade_value["3"].rename("TradeValue"),
-            market_move["3"].rename("MarketMove"),
+            trade_price_matrix["3"].rename("TradePrice"),
+            entry_pl["3"].rename("EntryPL"),
             market_move_adj["3"].rename("MarketMoveAdj"),
-            daily_pl_positions["3"].rename("DailyPL"),
-            ops_debug["Quantita"].rename("TradeQty"),
-            ops_debug["Prezzo"].rename("TradePrice"),
             (
-                position_closes_eur["3"]
-                - ops_debug["Prezzo"]
-            ).rename("EntryGap"),
-            (
-                qty_delta["3"]
-                * (
-                    position_closes_eur["3"]
-                    - ops_debug["Prezzo"]
-                )
-            ).rename("EntryPL")
+                market_move_adj["3"] + entry_pl["3"]
+            ).rename("MarketMoveAdjPlusEntry")
         ], axis=1)
         
         st.dataframe(
-            debug_pry.tail(40)
+            debug_pry.loc["2026-10-28":"2026-10-31"]
         )
+        
         weekly_pl = (
             daily_pl
             .rolling("7D")
