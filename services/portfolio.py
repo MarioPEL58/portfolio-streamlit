@@ -687,36 +687,27 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
         daily_pl_pct = (daily_pl / total_value.shift(1).replace(0, np.nan)).rename("P/L Giornaliero %")
 
-        entry_pl = (
-            qty_delta.clip(lower=0)
-            * (
-                position_closes_eur
-                - trade_price_matrix
-            )
-        ).fillna(0.0)
-        # st.write(ops_cf.columns.tolist())
-        ops_debug = (
-            ops_cf.loc[
-                ops_cf["ID"] == 3,
-                ["DateOnly", "Quantita", "Prezzo"]
-            ]
-            .set_index("DateOnly")
+        daily_pl_positions_test = (
+            market_move_adj
+            + entry_pl
+            + daily_realized_positions
         )
-        
-        debug_pry = pd.concat([
-            holdings["3"].rename("Holdings"),
-            qty_delta["3"].rename("QtyDelta"),
-            position_closes_eur["3"].rename("Close"),
-            trade_price_matrix["3"].rename("TradePrice"),
-            entry_pl["3"].rename("EntryPL"),
-            market_move_adj["3"].rename("MarketMoveAdj"),
-            (
-                market_move_adj["3"] + entry_pl["3"]
-            ).rename("MarketMoveAdjPlusEntry")
-        ], axis=1)
-        
-        st.dataframe(
-            debug_pry.loc["2026-10-28":"2026-10-31"]
+        monthly_pl_positions_test = (
+            daily_pl_positions_test
+            .rolling("30D")
+            .sum()
+        )
+        st.write("P/L attuale")
+        st.write(
+        current.loc[
+        current["PositionKey"] == "3",
+        ["Ticker", "P/L", "P/L 30 Giorni"]
+        ]
+        )
+         
+        st.write("P/L 30gg corretto")
+        st.write(
+        monthly_pl_positions_test["3"].iloc[-1]
         )
         
         weekly_pl = (
