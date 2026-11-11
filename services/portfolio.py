@@ -651,7 +651,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             & (holdings == 0)
         )
         
-        market_move_adj = market_move.copy()
+        # market_move_adj = market_move.copy()
         # market_move_adj[opened_today] = 0.0
         market_move_adj[closed_today] = 0
         
