@@ -630,6 +630,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             * position_multipliers
         ).fillna(0.0)
         
+        market_move_adj = market_move - purchase_value
+        
         debug_pos11 = pd.concat([
             holdings["11"].rename("Holdings"),
             position_values["11"].rename("PositionValue"),
@@ -642,8 +644,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             debug_pos11.loc["2026-04-10":"2026-04-20"]
         )
         
-        market_move_adj = market_move - purchase_value
-
         opened_today = (
             (holdings.shift(1) == 0)
             & (holdings != 0)
