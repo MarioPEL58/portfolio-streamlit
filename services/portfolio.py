@@ -671,7 +671,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
 
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
         daily_pl_pct = (daily_pl / total_value.shift(1).replace(0, np.nan)).rename("P/L Giornaliero %")
+
         
+        st.write(ops_cf.columns.tolist())
         ops_debug = (
             ops_cf.loc[
                 ops_cf["ID"] == "3",
