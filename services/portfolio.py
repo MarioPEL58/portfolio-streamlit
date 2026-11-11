@@ -672,6 +672,14 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
         daily_pl_pct = (daily_pl / total_value.shift(1).replace(0, np.nan)).rename("P/L Giornaliero %")
         
+        ops_debug = (
+            ops_cf.loc[
+                ops_cf["PositionKey"] == "3",
+                ["DateOnly", "Qty", "Price"]
+            ]
+            .set_index("DateOnly")
+        )
+        
         debug_pry = pd.concat([
             holdings["3"].rename("Holdings"),
             qty_delta["3"].rename("QtyDelta"),
@@ -679,7 +687,13 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             market_move["3"].rename("MarketMove"),
             market_move_adj["3"].rename("MarketMoveAdj"),
             daily_realized_positions["3"].rename("Realized"),
-            daily_pl_positions["3"].rename("DailyPL")
+            daily_pl_positions["3"].rename("DailyPL"),
+            ops_debug["Qty"].rename("TradeQty"),
+            ops_debug["Price"].rename("TradePrice"),
+            (
+                position_closes_eur["3"]
+                - ops_debug["Price"]
+            ).rename("EntryGap")
         ], axis=1)
         
         st.dataframe(
