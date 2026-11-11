@@ -633,44 +633,19 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         market_move_adj = (market_move- trade_value)
         
-        daily_pl_positions = (
-            market_move_adj
-            .add(daily_realized_positions, fill_value=0.0)
-        )
-                
-        qty_delta = holdings - holdings.shift(1)
-        
-        trade_value = (
+        entry_exit_pl = (
             qty_delta
-            * position_closes_eur
-            * position_multipliers
-        ).fillna(0.0)
-        
-        entry_pl = (
-            qty_delta.clip(lower=0)
             * (
                 position_closes_eur
                 - trade_price_matrix
             )
         ).fillna(0.0)
         
-        # debug_pos11 = pd.concat([
-        #     qty_delta["11"].rename("QtyDelta"),
-        #     trade_value["11"].rename("TradeValue"),
-        #     market_move["11"].rename("MarketMove"),
-        #     market_move_adj["11"].rename("MarketMoveAdj"),
-        #     daily_realized_positions["11"].rename("Realized")
-        # ], axis=1)
-        
-        # st.dataframe(
-        #     debug_pos11.loc["2026-04-14":"2026-04-16"]
-        # )
-        # market_move_test = market_move - trade_value
-        
-        # st.write(
-        #     market_move_test["11"]
-        #     .loc["2026-04-14":"2026-04-16"]
-        # )
+        daily_pl_positions = (
+            market_move_adj
+            .add(entry_exit_pl, fill_value=0.0)
+            .add(daily_realized_positions, fill_value=0.0)
+        )
         
         weekly_pl_positions = (
             daily_pl_positions
@@ -687,38 +662,6 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
         daily_pl_pct = (daily_pl / total_value.shift(1).replace(0, np.nan)).rename("P/L Giornaliero %")
 
-        daily_pl_positions_test = (
-            market_move_adj
-            + entry_pl
-            + daily_realized_positions
-        )
-        monthly_pl_positions_test = (
-            daily_pl_positions_test
-            .rolling("30D")
-            .sum()
-        )
-        
-        entry_exit_pl = (
-            qty_delta
-            * (
-                position_closes_eur
-                - trade_price_matrix
-            )
-        ).fillna(0.0)
-        
-        st.write("Debug Position 11 vendita parziale Intesa ")
-        debug_pos11 = pd.concat([
-            qty_delta["11"].rename("QtyDelta"),
-            trade_price_matrix["11"].rename("TradePrice"),
-            position_closes_eur["11"].rename("Close"),
-            entry_exit_pl["11"].rename("EntryExitPL"),
-            daily_realized_positions["11"].rename("Realized")
-        ], axis=1)
-        
-        st.dataframe(
-            debug_pos11.loc["2026-04-14":"2026-04-16"]
-        )
-        
         weekly_pl = (
             daily_pl
             .rolling("7D")
