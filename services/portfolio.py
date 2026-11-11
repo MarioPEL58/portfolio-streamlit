@@ -650,16 +650,24 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .add(daily_realized_positions, fill_value=0.0)
         )
                 
+        qty_delta = holdings - holdings.shift(1)
+        
+        trade_value = (
+            qty_delta
+            * position_closes_eur
+            * position_multipliers
+        ).fillna(0.0)
+        
         debug_pos11 = pd.concat([
-            holdings["11"].rename("Holdings"),
-            position_values["11"].rename("PositionValue"),
+            qty_delta["11"].rename("QtyDelta"),
+            trade_value["11"].rename("TradeValue"),
             market_move["11"].rename("MarketMove"),
             market_move_adj["11"].rename("MarketMoveAdj"),
-            daily_pl_positions["11"].rename("DailyPL")
+            daily_realized_positions["11"].rename("Realized")
         ], axis=1)
         
         st.dataframe(
-            debug_pos11.loc["2026-04-10":"2026-04-20"]
+            debug_pos11.loc["2026-04-14":"2026-04-16"]
         )
         
         weekly_pl_positions = (
