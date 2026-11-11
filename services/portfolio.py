@@ -704,7 +704,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         ["Ticker", "P/L", "P/L 30 Giorni"]
         ]
         )
-         
+        
         st.write("P/L 30gg corretto")
         st.write(
         monthly_pl_positions_test["3"].iloc[-1]
