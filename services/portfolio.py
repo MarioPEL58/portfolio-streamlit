@@ -672,6 +672,19 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
         daily_pl_pct = (daily_pl / total_value.shift(1).replace(0, np.nan)).rename("P/L Giornaliero %")
         
+        debug_pry = pd.concat([
+            holdings["3"].rename("Holdings"),
+            qty_delta["3"].rename("QtyDelta"),
+            trade_value["3"].rename("TradeValue"),
+            market_move["3"].rename("MarketMove"),
+            market_move_adj["3"].rename("MarketMoveAdj"),
+            daily_realized_positions["3"].rename("Realized"),
+            daily_pl_positions["3"].rename("DailyPL")
+        ], axis=1)
+        
+        st.dataframe(
+            debug_pry.tail(40)
+        )
         weekly_pl = (
             daily_pl
             .rolling("7D")
