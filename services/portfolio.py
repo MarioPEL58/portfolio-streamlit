@@ -614,6 +614,13 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
         )
         
+        trade_price_matrix = (
+            ops_cf.groupby(["DateOnly", "PositionKey"])["Prezzo"]
+            .last()
+            .unstack()
+            .reindex(index=idx, columns=holdings.columns)
+        )
+        
         market_move = position_values.diff()
         
         qty_delta = holdings - holdings.shift(1)
@@ -672,8 +679,14 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
         daily_pl_pct = (daily_pl / total_value.shift(1).replace(0, np.nan)).rename("P/L Giornaliero %")
 
-        
-        st.write(ops_cf.columns.tolist())
+        entry_pl = (
+            qty_delta.clip(lower=0)
+            * (
+                position_closes_eur
+                - trade_price_matrix
+            )
+        ).fillna(0.0)
+        # st.write(ops_cf.columns.tolist())
         ops_debug = (
             ops_cf.loc[
                 ops_cf["ID"] == 3,
