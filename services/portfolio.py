@@ -674,7 +674,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         ops_debug = (
             ops_cf.loc[
-                ops_cf["PositionKey"] == "3",
+                ops_cf["ID"] == 3,
                 ["DateOnly", "Qty", "Price"]
             ]
             .set_index("DateOnly")
