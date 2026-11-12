@@ -920,13 +920,13 @@ with tab_exp:
     if "Area" in exposure.columns and exposure["Area"].astype(str).str.strip().any():
         fig_area = allocation_bar_chart(exposure, column="Area", title=t("allocation_area"))
         if fig_area:
-            c1.plotly_chart(fig_area, theme=None, width="stretch")
+            c1.plotly_chart(fig_area, width="stretch")
 
     # ✅ BAR Tipo
     if "Tipo" in exposure.columns and exposure["Tipo"].astype(str).str.strip().any():
         fig_tipo = allocation_bar_chart(exposure, column="Tipo", title=t("allocation_type"))
         if fig_tipo:
-            c2.plotly_chart(fig_tipo, theme=None, width="stretch")
+            c2.plotly_chart(fig_tipo, width="stretch")
 
 with tab_flu:
     st.subheader(t("flows_title"))
