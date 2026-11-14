@@ -650,21 +650,21 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # DEBUG SHORT INTRADAY LEONARDO
 
         debug_rklb = pd.concat([
-            holdings["17"].rename("Holdings"),
-            qty_delta["17"].rename("QtyDelta"),
-            trade_price_matrix["17"].rename("TradePrice"),
-            position_closes_eur["17"].rename("Close"),
-            trade_value["17"].rename("TradeValue"),
-            entry_exit_pl["17"].rename("EntryExitPL"),
-            market_move["17"].rename("MarketMove"),
-            market_move_adj["17"].rename("MarketMoveAdj"),
-            daily_realized_positions["17"].rename("Realized"),
-            daily_pl_positions["17"].rename("DailyPL")
+            holdings["10"].rename("Holdings"),
+            qty_delta["10"].rename("QtyDelta"),
+            trade_price_matrix["10"].rename("TradePrice"),
+            position_closes_eur["10"].rename("Close"),
+            trade_value["10"].rename("TradeValue"),
+            entry_exit_pl["10"].rename("EntryExitPL"),
+            market_move["10"].rename("MarketMove"),
+            market_move_adj["10"].rename("MarketMoveAdj"),
+            daily_realized_positions["10"].rename("Realized"),
+            daily_pl_positions["10"].rename("DailyPL")
         ], axis=1)
         
-        st.write("Debug Short Intraday RKLAB")
+        st.write("Debug Short Intraday INTEL")
         st.dataframe(
-            debug_rklb.loc["2026-10-25":"2026-10-28"]
+            debug_rklb.loc["2026-06-28":"2026-06-30"]
         )
 
         weekly_pl_positions = (
