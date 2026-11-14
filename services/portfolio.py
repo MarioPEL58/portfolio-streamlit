@@ -691,7 +691,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         debug_ibm = pd.concat([
             holdings["10"].rename("Holdings"),
             qty_delta["10"].rename("QtyDelta"),
-            trade_price_matrix["10"].rename("TradePrice"),
+            trade_price_eur_matrix["10"].rename("TradePrice"),
             position_closes_eur["10"].rename("Close"),
             entry_exit_pl["10"].rename("EntryExitPL"),
             daily_realized_positions["10"].rename("Realized"),
