@@ -649,18 +649,22 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         # DEBUG SHORT INTRADAY LEONARDO
 
-        debug_short = pd.concat([
-            holdings["1"].rename("Holdings"),
-            qty_delta["1"].rename("QtyDelta"),
-            trade_value["1"].rename("TradeValue"),
-            entry_exit_pl["1"].rename("EntryExitPL"),
-            daily_realized_positions["1"].rename("Realized"),
-            daily_pl_positions["1"].rename("DailyPL")
+        debug_rklb = pd.concat([
+            holdings["17"].rename("Holdings"),
+            qty_delta["17"].rename("QtyDelta"),
+            trade_price_matrix["17"].rename("TradePrice"),
+            position_closes_eur["17"].rename("Close"),
+            trade_value["17"].rename("TradeValue"),
+            entry_exit_pl["17"].rename("EntryExitPL"),
+            market_move["17"].rename("MarketMove"),
+            market_move_adj["17"].rename("MarketMoveAdj"),
+            daily_realized_positions["17"].rename("Realized"),
+            daily_pl_positions["17"].rename("DailyPL")
         ], axis=1)
         
-        st.write("Debug Short Intraday Leonardo")
+        st.write("Debug Short Intraday RKLAB")
         st.dataframe(
-            debug_short.loc["2026-06-25":"2026-06-27"]
+            debug_rklb.loc["2026-10-25":"2026-10-28"]
         )
 
         weekly_pl_positions = (
