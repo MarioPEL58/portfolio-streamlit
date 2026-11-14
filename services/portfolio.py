@@ -666,7 +666,21 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         st.dataframe(
             debug_rklb.loc["2026-06-28":"2026-06-30"]
         )
-
+        
+        st.dataframe(
+            ops_cf.loc[
+                ops_cf["PositionKey"] == "10",
+                [
+                    "DateOnly",
+                    "Ticker",
+                    "Quantita",
+                    "Prezzo",
+                    "QtyOpenAfter",
+                    "AvgCostAfter",
+                    "RealizedTradePL"
+                ]
+            ]
+        )
         weekly_pl_positions = (
             daily_pl_positions
             .rolling("7D")
