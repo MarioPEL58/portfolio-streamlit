@@ -662,11 +662,12 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         st.dataframe(
             debug_ibm.loc["2026-07-15":"2026-07-30"]
         )
-                weekly_pl_positions = (
-                    daily_pl_positions
-                    .rolling("7D")
-                    .sum()
-                )
+        
+        weekly_pl_positions = (
+            daily_pl_positions
+            .rolling("7D")
+            .sum()
+        )
         
         monthly_pl_positions = (
             daily_pl_positions
