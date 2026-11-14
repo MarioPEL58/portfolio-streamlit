@@ -655,6 +655,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
                     "DateOnly",
                     "Quantita",
                     "Prezzo",
+                    "Cambio",
                     "QtyOpenAfter",
                     "AvgCostAfter",
                     "RealizedTradePL"
