@@ -648,50 +648,25 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
         
         # DEBUG SHORT INTRADAY LEONARDO
-        st.dataframe(
-            ops_cf[
-                ["PositionKey", "Ticker"]
-            ]
-            .drop_duplicates()
-            .sort_values("PositionKey")
-        )
-        debug_rklb = pd.concat([
+        
+        debug_ibm = pd.concat([
             holdings["10"].rename("Holdings"),
             qty_delta["10"].rename("QtyDelta"),
             trade_price_matrix["10"].rename("TradePrice"),
             position_closes_eur["10"].rename("Close"),
-            trade_value["10"].rename("TradeValue"),
             entry_exit_pl["10"].rename("EntryExitPL"),
-            market_move["10"].rename("MarketMove"),
-            market_move_adj["10"].rename("MarketMoveAdj"),
             daily_realized_positions["10"].rename("Realized"),
             daily_pl_positions["10"].rename("DailyPL")
         ], axis=1)
         
-        st.write("Debug Short Intraday INTEL")
         st.dataframe(
-            debug_rklb.loc["2026-06-28":"2026-06-30"]
+            debug_ibm.loc["2026-07-15":"2026-07-30"]
         )
-        
-        st.dataframe(
-            ops_cf.loc[
-                ops_cf["PositionKey"] == "10",
-                [
-                    "DateOnly",
-                    "Ticker",
-                    "Quantita",
-                    "Prezzo",
-                    "QtyOpenAfter",
-                    "AvgCostAfter",
-                    "RealizedTradePL"
-                ]
-            ]
-        )
-        weekly_pl_positions = (
-            daily_pl_positions
-            .rolling("7D")
-            .sum()
-        )
+                weekly_pl_positions = (
+                    daily_pl_positions
+                    .rolling("7D")
+                    .sum()
+                )
         
         monthly_pl_positions = (
             daily_pl_positions
