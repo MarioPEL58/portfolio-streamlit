@@ -647,6 +647,22 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .add(daily_realized_positions, fill_value=0.0)
         )
         
+        # DEBUG SHORT INTRADAY LEONARDO
+
+        debug_short = pd.concat([
+            holdings["1"].rename("Holdings"),
+            qty_delta["1"].rename("QtyDelta"),
+            trade_value["1"].rename("TradeValue"),
+            entry_exit_pl["1"].rename("EntryExitPL"),
+            daily_realized_positions["1"].rename("Realized"),
+            daily_pl_positions["1"].rename("DailyPL")
+        ], axis=1)
+        
+        st.write("Debug Short Intraday Leonardo")
+        st.dataframe(
+            debug_short.loc["2026-06-25":"2026-06-27"]
+        )
+
         weekly_pl_positions = (
             daily_pl_positions
             .rolling("7D")
