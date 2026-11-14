@@ -669,7 +669,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         st.dataframe(
             ops_cf.loc[
-                ops_cf["PositionKey"] == "10",
+                ops_cf["ID"] == "10",
                 [
                     "DateOnly",
                     "Ticker",
