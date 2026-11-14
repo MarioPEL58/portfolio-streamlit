@@ -614,11 +614,27 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
         )
         
-        trade_price_matrix = (
-            ops_cf.groupby(["DateOnly", "PositionKey"])["Prezzo"]
+        # trade_price_matrix = (
+        #     ops_cf.groupby(["DateOnly", "PositionKey"])["Prezzo"]
+        #     .last()
+        #     .unstack()
+        #     .reindex(index=idx, columns=holdings.columns)
+        # )
+        trade_price_eur_matrix = (
+            (
+                ops_cf["Prezzo"]
+                * ops_cf["Cambio"].fillna(1.0)
+            )
+            .groupby([
+                ops_cf["DateOnly"],
+                ops_cf["PositionKey"]
+            ])
             .last()
             .unstack()
-            .reindex(index=idx, columns=holdings.columns)
+            .reindex(
+                index=idx,
+                columns=holdings.columns
+            )
         )
         
         market_move = position_values.diff()
@@ -637,7 +653,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             qty_delta
             * (
                 position_closes_eur
-                - trade_price_matrix
+                #- trade_price_matrix
+                 - trade_price_eur_matrix
             )
         ).fillna(0.0)
         
