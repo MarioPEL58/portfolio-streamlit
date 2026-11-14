@@ -647,8 +647,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .add(daily_realized_positions, fill_value=0.0)
         )
         
-        # DEBUG SHORT INTRADAY LEONARDO
-        
+        # DEBUG SHORT INTRADAY IBM
+        st.write(position_closes_eur["10"].loc["2026-07-15":"2026-07-16"])
+        st.write(position_closes["10"].loc["2026-07-15":"2026-07-16"])
         debug_ibm = pd.concat([
             holdings["10"].rename("Holdings"),
             qty_delta["10"].rename("QtyDelta"),
