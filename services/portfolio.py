@@ -648,7 +648,19 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
         
         # DEBUG SHORT INTRADAY IBM
-
+        st.dataframe(
+            ops_cf.loc[
+                ops_cf["PositionKey"] == "10",
+                [
+                    "DateOnly",
+                    "Quantita",
+                    "Prezzo",
+                    "QtyOpenAfter",
+                    "AvgCostAfter",
+                    "RealizedTradePL"
+                ]
+            ]
+        )
         debug_ibm_prices = pd.concat([
             position_closes_eur["10"].rename("CloseEUR"),
             holdings["10"].rename("Holdings"),
