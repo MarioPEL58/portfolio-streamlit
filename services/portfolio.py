@@ -665,42 +665,42 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
         
         # DEBUG SHORT INTRADAY IBM
-        st.dataframe(
-            ops_cf.loc[
-                ops_cf["PositionKey"] == "10",
-                [
-                    "DateOnly",
-                    "Quantita",
-                    "Prezzo",
-                    "Cambio",
-                    "QtyOpenAfter",
-                    "AvgCostAfter",
-                    "RealizedTradePL"
-                ]
-            ]
-        )
-        debug_ibm_prices = pd.concat([
-            position_closes_eur["10"].rename("CloseEUR"),
-            holdings["10"].rename("Holdings"),
-            position_values["10"].rename("PositionValue")
-        ], axis=1)
+        # st.dataframe(
+        #     ops_cf.loc[
+        #         ops_cf["PositionKey"] == "10",
+        #         [
+        #             "DateOnly",
+        #             "Quantita",
+        #             "Prezzo",
+        #             "Cambio",
+        #             "QtyOpenAfter",
+        #             "AvgCostAfter",
+        #             "RealizedTradePL"
+        #         ]
+        #     ]
+        # )
+        # debug_ibm_prices = pd.concat([
+        #     position_closes_eur["10"].rename("CloseEUR"),
+        #     holdings["10"].rename("Holdings"),
+        #     position_values["10"].rename("PositionValue")
+        # ], axis=1)
         
-        st.dataframe(
-            debug_ibm_prices.loc["2026-07-15":"2026-07-16"]
-        )
-        debug_ibm = pd.concat([
-            holdings["10"].rename("Holdings"),
-            qty_delta["10"].rename("QtyDelta"),
-            trade_price_eur_matrix["10"].rename("TradePrice"),
-            position_closes_eur["10"].rename("Close"),
-            entry_exit_pl["10"].rename("EntryExitPL"),
-            daily_realized_positions["10"].rename("Realized"),
-            daily_pl_positions["10"].rename("DailyPL")
-        ], axis=1)
+        # st.dataframe(
+        #     debug_ibm_prices.loc["2026-07-15":"2026-07-16"]
+        # )
+        # debug_ibm = pd.concat([
+        #     holdings["10"].rename("Holdings"),
+        #     qty_delta["10"].rename("QtyDelta"),
+        #     trade_price_eur_matrix["10"].rename("TradePrice"),
+        #     position_closes_eur["10"].rename("Close"),
+        #     entry_exit_pl["10"].rename("EntryExitPL"),
+        #     daily_realized_positions["10"].rename("Realized"),
+        #     daily_pl_positions["10"].rename("DailyPL")
+        # ], axis=1)
         
-        st.dataframe(
-            debug_ibm.loc["2026-07-15":"2026-07-30"]
-        )
+        # st.dataframe(
+        #     debug_ibm.loc["2026-07-15":"2026-07-30"]
+        # )
         
         weekly_pl_positions = (
             daily_pl_positions
