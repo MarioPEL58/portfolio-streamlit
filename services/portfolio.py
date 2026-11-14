@@ -648,7 +648,16 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
         
         # DEBUG SHORT INTRADAY IBM
-        st.write(position_closes_eur["10"].loc["2026-07-15":"2026-07-16"])
+
+        debug_ibm_prices = pd.concat([
+            position_closes_eur["10"].rename("CloseEUR"),
+            holdings["10"].rename("Holdings"),
+            position_values["10"].rename("PositionValue")
+        ], axis=1)
+        
+        st.dataframe(
+            debug_ibm_prices.loc["2026-07-15":"2026-07-16"]
+        )
         debug_ibm = pd.concat([
             holdings["10"].rename("Holdings"),
             qty_delta["10"].rename("QtyDelta"),
