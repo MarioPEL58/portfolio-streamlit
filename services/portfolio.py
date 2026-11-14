@@ -648,7 +648,13 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
         
         # DEBUG SHORT INTRADAY LEONARDO
-
+        st.dataframe(
+            ops_cf[
+                ["PositionKey", "Ticker"]
+            ]
+            .drop_duplicates()
+            .sort_values("PositionKey")
+        )
         debug_rklb = pd.concat([
             holdings["10"].rename("Holdings"),
             qty_delta["10"].rename("QtyDelta"),
