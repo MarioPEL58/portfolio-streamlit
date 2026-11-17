@@ -271,6 +271,7 @@ def backtest_chart(
                     f"{benchmark_name}"
                 ),
                 line=dict(
+                    color="#F39C12",
                     width=2,
                 ),
                 hovertemplate=(
