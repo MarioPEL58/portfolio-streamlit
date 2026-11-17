@@ -112,8 +112,6 @@ if file_source is None:
 
 # Load data
 try:
-    st.write("file_source", file_source)
-    st.write("uploaded_file", uploaded_file)
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
     start_ops = load_start_from_excel(file_source)
