@@ -16,15 +16,6 @@ def render_backtest(
     ops,
     benchmark_prices=None,
     benchmark_name="",):
-
-    st.write("benchmark_name")
-    st.write(benchmark_name)
-    
-    st.write("benchmark_prices")
-    st.write(type(benchmark_prices))
-    
-    st.write("backtest_benchmark")
-    st.write(backtest_benchmark.tail())
         
     if current is None or current.empty:
         st.warning(t("backtest_no_positions"), icon="⚠️")
