@@ -925,7 +925,20 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         #     perf_ytd_pct.loc[mask] = (
         #         (1.0 + r).cumprod() - 1.0
         #     )
-            
+        st.write("DAILY TOTAL PL PCT")
+        
+        st.dataframe(
+            daily_total_pl_pct.loc[
+                "2026-10-29":"2026-11-15"
+            ]
+        )
+        st.write("DAILY TOTAL PL")
+        
+        st.dataframe(
+            daily_total_pl.loc[
+                "2026-10-29":"2026-11-15"
+            ]
+        )
         perf_ytd_pct = build_ytd_performance(
             daily_total_pl_pct,
             "Performance YTD %"
