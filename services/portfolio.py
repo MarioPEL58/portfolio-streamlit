@@ -939,6 +939,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
         perf_ytd_pct = build_ytd_performance(
             daily_total_pl_pct,
+            total_value,
             "Performance YTD %"
         )
         # st.write("YTD SERIES")
