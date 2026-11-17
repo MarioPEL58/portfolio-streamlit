@@ -925,26 +925,23 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         #     perf_ytd_pct.loc[mask] = (
         #         (1.0 + r).cumprod() - 1.0
         #     )
-        st.write("DAILY TOTAL PL PCT")
+        st.write("PRY DAILY PL")
+        
+        debug_pry = pd.concat([
+            daily_pl_positions["3"].rename("DailyPL"),
+            daily_total_pl.rename("DailyTotalPL"),
+            daily_total_pl_pct.rename("DailyTotalPLPct"),
+        ], axis=1)
         
         st.dataframe(
-            daily_total_pl_pct.loc[
-                "2026-10-29":"2026-11-15"
-            ]
-        )
-        st.write("DAILY TOTAL PL")
-        
-        st.dataframe(
-            daily_total_pl.loc[
-                "2026-10-29":"2026-11-15"
-            ]
+            debug_pry.loc["2026-10-29":"2026-11-03"]
         )
         perf_ytd_pct = build_ytd_performance(
             daily_total_pl_pct,
             "Performance YTD %"
         )
-        st.write("YTD SERIES")
-        st.write(perf_ytd_pct.loc["2026-10-20":"2026-11-15"])
+        # st.write("YTD SERIES")
+        # st.write(perf_ytd_pct.loc["2026-10-20":"2026-11-15"])
         
     # st.write(f"YTD: {time.perf_counter()-t0:.2f} sec")
     # =========================
