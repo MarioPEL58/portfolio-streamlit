@@ -379,9 +379,9 @@ if show_benchmark and benchmark.strip():
     )
 
     if not bench_df.empty and benchmark.strip() in bench_df.columns:
-        b = bench_df[benchmark.strip()].dropna()
+        benchmark_prices = bench_df[benchmark.strip()].dropna()
 
-        if not b.empty:
+        if not benchmark_prices.empty:
         
             # ====================================
             # Flow basato sul capitale esposto
@@ -400,7 +400,7 @@ if show_benchmark and benchmark.strip():
             # ✅ nuovo benchmark corretto
             bench_series = build_flow_adjusted_benchmark(
                 flows_df=flows_input,
-                benchmark_prices=b
+                benchmark_prices=benchmark_prices
             )
 
 
