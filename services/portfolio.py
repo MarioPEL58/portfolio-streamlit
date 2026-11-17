@@ -842,9 +842,14 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # st.write(daily_total_pl_pct.tail(20))
         # end debug
         
+        # first_investment_day = (
+        #     total_value.notna()
+        #     & total_value.shift(1).isna()
+        #     & (daily_cf_total < 0)
+        # )
         first_investment_day = (
-            total_value.notna()
-            & total_value.shift(1).isna()
+            (total_value > 0)
+            & (total_value.shift(1).fillna(0) == 0)
             & (daily_cf_total < 0)
         )
         
