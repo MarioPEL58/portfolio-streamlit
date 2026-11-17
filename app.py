@@ -117,7 +117,7 @@ try:
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
     start_ops = load_start_from_excel(file_source)
-    cash = load_cash_from_excel(uploaded_file)
+    cash = load_cash_from_excel(file_source)
 
     # # debug 
     # st.write("START KEYS:", start_ops["PositionKey"].unique())
