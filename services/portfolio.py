@@ -929,7 +929,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         perf_ytd_pct = build_ytd_performance(
             daily_total_pl_pct,
             "Performance YTD %"
-        )       
+        )
+        st.write("YTD SERIES")
+        st.write(perf_ytd_pct.loc["2026-10-20":"2026-11-15"])
+        
     # st.write(f"YTD: {time.perf_counter()-t0:.2f} sec")
     # =========================
     # 13. P/L trading = valore portafoglio - costo residuo aperto
