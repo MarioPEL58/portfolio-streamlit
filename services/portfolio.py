@@ -827,7 +827,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         daily_total_pl_pct = (
             daily_total_pl / total_value.shift(1).replace(0, np.nan)
         ).rename("P/L Totale Giornaliero %")
-        
+
         # debug
         # st.write("TOTAL VALUE")
         # st.write(total_value.tail(20))
@@ -927,18 +927,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         #     )
         st.write(
             pd.concat([
-                total_value.rename("TotalValue"),
                 daily_total_pl.rename("DailyPL"),
+                daily_cf_total.rename("CashFlow"),
                 daily_total_pl_pct.rename("DailyPLPct")
-            ], axis=1)
-            .loc["2026-10-29":"2026-10-30"]
-        )
-        st.write(
-            daily_total_pl.loc["2026-10-29"]
-        )
-        
-        st.write(
-            total_value.loc["2026-10-29"]
+            ], axis=1).loc["2026-10-29":"2026-10-30"]
         )
         st.write(
             ops_cf.loc[
