@@ -943,6 +943,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
                 daily_total_pl_pct.rename("DailyPLPct")
             ], axis=1).loc["2026-10-29":"2026-11-03"]
         )
+        st.write(
+            (total_value / total_value.iloc[0] - 1)
+            .loc["2026-10-29":"2026-11-15"]
+        )
         perf_ytd_pct = build_ytd_performance(
             daily_total_pl_pct,
             "Performance YTD %"
