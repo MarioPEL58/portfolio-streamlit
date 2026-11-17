@@ -117,7 +117,64 @@ def build_period_performance(
         index=growth.index,
         name=name
     )
+def build_ytd_performance(
+    daily_total_pl_pct: pd.Series,
+    name: str = "Performance YTD %"
+) -> pd.Series:
 
+    r = (
+        daily_total_pl_pct
+        .replace([np.inf, -np.inf], np.nan)
+    )
+
+    first_valid = r.first_valid_index()
+
+    if first_valid is None:
+        return pd.Series(
+            np.nan,
+            index=r.index,
+            dtype=float,
+            name=name
+        )
+
+    result = pd.Series(
+        np.nan,
+        index=r.index,
+        dtype=float,
+        name=name
+    )
+
+    for year in r.index.year.unique():
+
+        year_mask = r.index.year == year
+
+        year_start = pd.Timestamp(
+            year=year,
+            month=1,
+            day=1
+        )
+
+        effective_start = max(
+            year_start,
+            first_valid
+        )
+
+        mask = (
+            year_mask
+            & (r.index >= effective_start)
+        )
+
+        if not mask.any():
+            continue
+
+        rr = r.loc[mask].fillna(0.0)
+
+        result.loc[mask] = (
+            (1.0 + rr).cumprod() - 1.0
+        )
+
+    return result
+    
 def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
     keys = sorted(ops["PositionKey"].unique().tolist())
     holdings = pd.DataFrame(0.0, index=idx, columns=keys)
@@ -828,38 +885,42 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             name="Performance 6M %"
         )
         
-        # st.write(f"6M: {time.perf_counter()-t0:.2f} sec")
-        # t0 = time.perf_counter()
+        # # st.write(f"6M: {time.perf_counter()-t0:.2f} sec")
+        # # t0 = time.perf_counter()
         
-        perf_1y_pct = build_period_performance(
+        # perf_1y_pct = build_period_performance(
+        #     daily_total_pl_pct,
+        #     years=1,
+        #     name="Performance 1Y %"
+        # )
+        
+        # # st.write(f"1Y: {time.perf_counter()-t0:.2f} sec")
+        # # t0 = time.perf_counter()
+                
+        # perf_ytd_pct = pd.Series(
+        #     np.nan,
+        #     index=total_value.index,
+        #     dtype=float,
+        #     name="Performance YTD %"
+        # )
+        
+        # for year in total_value.index.year.unique():
+        #     mask = total_value.index.year == year
+        
+        #     r = (
+        #         daily_total_pl_pct.loc[mask]
+        #         .replace([np.inf, -np.inf], np.nan)
+        #         .fillna(0.0)
+        #     )
+        
+        #     perf_ytd_pct.loc[mask] = (
+        #         (1.0 + r).cumprod() - 1.0
+        #     )
+            
+        perf_ytd_pct = build_ytd_performance(
             daily_total_pl_pct,
-            years=1,
-            name="Performance 1Y %"
-        )
-        
-        # st.write(f"1Y: {time.perf_counter()-t0:.2f} sec")
-        # t0 = time.perf_counter()
-                
-        perf_ytd_pct = pd.Series(
-            np.nan,
-            index=total_value.index,
-            dtype=float,
-            name="Performance YTD %"
-        )
-        
-        for year in total_value.index.year.unique():
-            mask = total_value.index.year == year
-        
-            r = (
-                daily_total_pl_pct.loc[mask]
-                .replace([np.inf, -np.inf], np.nan)
-                .fillna(0.0)
-            )
-        
-            perf_ytd_pct.loc[mask] = (
-                (1.0 + r).cumprod() - 1.0
-            )
-                
+            "Performance YTD %"
+        )       
     # st.write(f"YTD: {time.perf_counter()-t0:.2f} sec")
     # =========================
     # 13. P/L trading = valore portafoglio - costo residuo aperto
