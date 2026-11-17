@@ -143,7 +143,10 @@ def build_ytd_performance(
         dtype=float,
         name=name
     )
-
+    
+    st.write("YTD DEBUG")
+    st.write("first_valid_index:", first_valid)
+    
     for year in r.index.year.unique():
 
         year_mask = r.index.year == year
@@ -158,7 +161,11 @@ def build_ytd_performance(
             year_start,
             first_valid
         )
-
+        st.write(
+            f"year={year}",
+            f"year_start={year_start}",
+            f"effective_start={effective_start}"
+        )
         mask = (
             year_mask
             & (r.index >= effective_start)
@@ -172,7 +179,9 @@ def build_ytd_performance(
         result.loc[mask] = (
             (1.0 + rr).cumprod() - 1.0
         )
-
+    st.write(
+        result.loc["2026-10-20":"2026-11-15"]
+    )
     return result
     
 def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
