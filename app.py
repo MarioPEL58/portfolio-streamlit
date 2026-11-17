@@ -860,11 +860,6 @@ with tab_backtest:
     #     closes=closes,
     #     ops=ops_filtered,
     # )
-    st.write("APP benchmark:", benchmark)
-    st.write("APP benchmark_prices:", benchmark_prices)
-    
-    if benchmark_prices is not None:
-        st.write(benchmark_prices.tail())
         
     render_backtest(
         current=current,
