@@ -59,9 +59,11 @@ def build_period_performance(
     r = (
         daily_total_pl_pct
         .replace([np.inf, -np.inf], np.nan)
-        .fillna(0.0)
     )
-
+    
+    first_valid = r.first_valid_index()
+    r = r.fillna(0.0)
+    
     # Growth index TWR
     growth = (1.0 + r).cumprod()
 
@@ -86,7 +88,12 @@ def build_period_performance(
     ) - 1
 
     # Periodi non ancora disponibili
-    valid = positions >= 0
+    # valid = positions >= 0 
+    first_valid_pos = growth.index.get_loc(first_valid)
+    
+    valid = (
+        (positions >= first_valid_pos)
+    )
 
     # Array risultato
     result = np.full(
