@@ -933,6 +933,13 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             ], axis=1).loc["2026-10-29":"2026-10-30"]
         )
         st.write(
+            pd.concat([
+                total_value.rename("TotalValue"),
+                total_value.shift(1).rename("PrevTotalValue"),
+                daily_cf_total.rename("CashFlow")
+            ], axis=1).loc["2026-10-25":"2026-10-31"]
+        )
+        st.write(
             ops_cf.loc[
                 ops_cf["PositionKey"] == "3",
                 [
