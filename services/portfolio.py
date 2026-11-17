@@ -119,23 +119,14 @@ def build_period_performance(
     )
 def build_ytd_performance(
     daily_total_pl_pct: pd.Series,
+    total_value: pd.Series,
     name: str = "Performance YTD %"
 ) -> pd.Series:
 
-    r = (
-        daily_total_pl_pct
-        .replace([np.inf, -np.inf], np.nan)
+    r = daily_total_pl_pct.replace(
+        [np.inf, -np.inf],
+        np.nan
     )
-
-    first_valid = r.first_valid_index()
-
-    if first_valid is None:
-        return pd.Series(
-            np.nan,
-            index=r.index,
-            dtype=float,
-            name=name
-        )
 
     result = pd.Series(
         np.nan,
@@ -143,13 +134,17 @@ def build_ytd_performance(
         dtype=float,
         name=name
     )
-    
-    st.write("YTD DEBUG")
-    st.write("first_valid_index:", first_valid)
-    
-    for year in r.index.year.unique():
 
-        year_mask = r.index.year == year
+    first_valid = (
+        total_value
+        .where(total_value > 0)
+        .first_valid_index()
+    )
+
+    if first_valid is None:
+        return result
+
+    for year in r.index.year.unique():
 
         year_start = pd.Timestamp(
             year=year,
@@ -157,31 +152,19 @@ def build_ytd_performance(
             day=1
         )
 
-        effective_start = max(
-            year_start,
-            first_valid
-        )
-        st.write(
-            f"year={year}",
-            f"year_start={year_start}",
-            f"effective_start={effective_start}"
-        )
-        mask = (
-            year_mask
-            & (r.index >= effective_start)
-        )
-
-        if not mask.any():
+        # Portafoglio nato dopo il 1° gennaio:
+        # niente YTD
+        if first_valid > year_start:
             continue
+
+        mask = r.index.year == year
 
         rr = r.loc[mask].fillna(0.0)
 
         result.loc[mask] = (
             (1.0 + rr).cumprod() - 1.0
         )
-    st.write(
-        result.loc["2026-10-20":"2026-11-15"]
-    )
+
     return result
     
 def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
