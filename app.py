@@ -10,26 +10,24 @@ from utils.ui import title_with_tooltip
 from components.sidebar import render_sidebar, resolve_file_source
 from components.charts import portfolio_chart
 from components.charts import allocation_pie_chart, allocation_bar_chart
-from components.charts import daily_pl_bar_chart_by_sign, daily_pl_treemap, pl_treemap, sharpe_gauge
-from components.charts import sharpe_bar_gradient, ratio_bar_gradient, ratio_bar_gradient_compare, create_tail_risk_figure
+from components.charts import daily_pl_bar_chart_by_sign, pl_treemap
+from components.charts import ratio_bar_gradient_compare, create_tail_risk_figure
 from components.chart_comparison_metrics import (render_chart_comparison_metrics,)
 from components.backtest_view import render_backtest
 from components.efficient_frontier_view import render_efficient_frontier
 from components.operations_preview import render_operations_preview
 from components.filters import render_filters
-from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel
-from services.market_data import download_close_prices, download_last_intraday_timestamp, report_late_tickers, fill_late_tickers_with_purchase_price, prepare_backtest_closes_eur
+from services.excel_loader import load_dividends_from_excel, load_operations_from_excel, load_start_from_excel, load_cash_from_excel, detect_excel_structure
+from services.market_data import download_close_prices, report_late_tickers, fill_late_tickers_with_purchase_price, prepare_backtest_closes_eur
 from services.portfolio import build_portfolio
-from services.portfolio_metrics import compute_portfolio_xirr, compute_sharpe_ratio
+from services.portfolio_metrics import compute_portfolio_xirr
 from services.portfolio_metrics import compute_flow_adjusted_returns, compute_sharpe_from_returns, compute_sortino_ratio, compute_beta
-from services.market_status import compute_market_update_label
 from services.benchmark import build_flow_adjusted_benchmark
 from services.risk_free import get_euro_risk_free_rate
 from utils.finance import annual_to_daily_rate, get_dynamic_max
 from utils.formatting import fmt_eur, fmt_pct, style_pl_column
 from utils.demo import create_demo_file
 from utils.display import get_display_columns
-from utils.series_utils import ensure_datetime_series
 from components.tables import render_positions_table, render_performance_table, render_operations_table
 from components.tables import render_best_worst_days
 from components.downloads import render_download_tab
@@ -117,6 +115,8 @@ try:
     ops = load_operations_from_excel(file_source)
     dividends = load_dividends_from_excel(file_source)
     start_ops = load_start_from_excel(file_source)
+    cash = load_cash_from_excel(uploaded_file)
+
     # # debug 
     # st.write("START KEYS:", start_ops["PositionKey"].unique())
     # st.write("OPS KEYS:", ops["PositionKey"].unique())
@@ -126,7 +126,8 @@ try:
         ops = ops.sort_values(["Data", "Ticker"]).reset_index(drop=True)
 
     # ✅ normalizzazione date
-    ops["Data"] = pd.to_datetime(ops["Data"], errors="coerce")
+    #ops["Data"] = pd.to_datetime(ops["Data"], errors="coerce")
+    ops["DateOnly"] = pd.to_datetime(ops["Data"], errors="coerce").dt.normalize()
     
     # ✅ ordine stabile (importantissimo)
     ops["_rowid"] = np.arange(len(ops))
@@ -134,13 +135,16 @@ try:
     # ✅ SORT CORRETTO (fix principale)
     ops = (
         ops
-        .sort_values(["PositionKey", "Data", "_rowid"])
+        #.sort_values(["PositionKey", "Data", "_rowid"])
+        .sort_values(["PositionKey", "DateOnly", "_rowid"])
         .reset_index(drop=True)
     )
 
-    data_min = ops["Data"].min()
-    data_max = ops["Data"].max()
-
+    # data_min = ops["Data"].min()
+    # data_max = ops["Data"].max()
+    data_min = ops["DateOnly"].min()
+    data_max = ops["DateOnly"].max()
+    
     six_months_ago = pd.Timestamp.today() - pd.DateOffset(months=6)
 
     if six_months_ago > data_max:
@@ -155,6 +159,15 @@ except Exception as e:
     st.stop()
 
 effective_min_filter_date = min_filter_date or default_start
+
+# st.write("data_min", data_min)
+# st.write("data_max", data_max)
+
+# st.write(
+#     ops[
+#         ["Ticker", "Data", "DateOnly"]
+#     ]
+# )
 
 # ops = ops[ops["Data"] >= pd.Timestamp(effective_min_filter_date)]
 if ops.empty:
@@ -208,115 +221,78 @@ closes, missing = download_close_prices(
 )
 # Price download new  end 
 
-market_last_date = closes.index.max()
+# ✅ nuovo flag
+historical_data_available = not closes.empty
 
-# st.write("=== FILTERED TICKERS ===")
-# st.write(sorted(filtered_tickers))
-# st.write("=== CLOSES COLUMNS ===")
-# st.write(sorted(closes.columns.tolist()))
-# st.write("=== MISSING ===")
-# st.write(sorted(missing))
+if historical_data_available:
+    market_last_date = closes.index.max()
 
-# st.write("DOWNLOAD CLOSES")
-# st.write(closes.tail(10))
-# st.write(closes.index)
-# st.write("ops Data dtype:", ops["Data"].dtype)
-# st.write("ops min:", ops["Data"].min())
-# st.write("ops min type:", type(ops["Data"].min()))
+    closes_frontier = closes.copy()
+    
+    full_index = pd.date_range(
+        # start=ops["Data"].min(),
+        start=ops["DateOnly"].min(),
+        end=closes.index.max(),
+        freq="D"
+    )
+    
+    closes = closes.reindex(full_index)
+    
+    closes, price_quality = fill_late_tickers_with_purchase_price(closes,ops,price_col="Prezzo")
 
-# st.write("closes max:", closes.index.max())
-# st.write("closes max type:", type(closes.index.max()))
-
-closes_frontier = closes.copy()
-
-full_index = pd.date_range(
-    start=ops["Data"].min(),
-    end=closes.index.max(),
-    freq="D"
-)
-
-closes = closes.reindex(full_index)
-
-# st.write(closes.index.min())
-# st.write(closes.index.max())
-
-# st.dataframe(report_late_tickers(closes, ops))
-# ticker = "0P0000M2UJ.F"
-
-# st.write("OPERAZIONI")
-# st.dataframe(
-#     ops[ops["Ticker"] == ticker]
-#     .sort_values("Data")
-#     .head(10)
-# )
-
-# st.write("CLOSE PRIMA")
-# st.write(
-#     closes[ticker]
-#     .loc["2014":"2015"]
-#     .head(20)
-# )
-
-closes, price_quality = fill_late_tickers_with_purchase_price(closes,ops,price_col="Prezzo")
+else:
+    market_last_date = None
+    price_quality = pd.DataFrame()
 
 # st.write("CLOSE DOPO")
 # st.write(closes[ticker].loc["2014":"2015"].head(20))
 
 # st.dataframe(report_late_tickers(closes, ops))
 
-if closes.empty:
-    st.error(t("no_prices"))
-    st.stop()
+if not historical_data_available:
+    st.warning(
+        t("no_market_data_selected")
+    )
 
 if missing:
     st.warning(t("missing_tickers") + ", ".join(missing))
     
 start= time.time()
+if historical_data_available:
 # Portfolio
-series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered)
+    series, current, holdings, exposure, ops_enriched = build_portfolio(ops_filtered, closes, dividends_filtered, cash)
+    
+    #debug
+    # st.write(series.tail(5))
+    st.write(f"time to build Portfolio: {time.time() - start:.2f} sec")
+    
+    # ✅ taglia serie alla data reale
+    series = series.loc[:market_last_date]
+else:
+    series = pd.DataFrame()
+    current = pd.DataFrame()
+    holdings = pd.DataFrame()
+    exposure = pd.DataFrame()
 
+    ops_enriched = ops_filtered.copy()
 #debug
 # st.write(series.tail(5))
-st.write(f"time to build Portfolio: {time.time() - start:.2f} sec")
+if not historical_data_available:
+    st.warning(
+        t("no_market_data_selected")
+    )
 
-# ✅ taglia serie alla data reale
-series = series.loc[:market_last_date]
+    render_operations_preview(ops_filtered)
 
-#debug
-# st.write(series.tail(5))
+    st.subheader(t("operations_title"))
+    render_operations_table(ops_filtered)
 
-if series.empty:
+    st.stop()
+elif series.empty:
     st.error(t("portfolio_error"))
     st.stop()
 
-# st.subheader("DEBUG COERENZA VALORI")
-# st.write({
-#     "Valore serie": series["Valore portafoglio"].iloc[-1],
-#     "Valore current": current["Valore"].sum(),
-#     "Differenza": series["Valore portafoglio"].iloc[-1] - current["Valore"].sum()
-# })
-
-# st.subheader("DEBUG Capitale investito")
-
-# capitale_serie = series["Capitale investito"].iloc[-1]
-# costo_current = current["Costo Totale Stimato"].sum()
-
-# st.write({
-#     "Capitale investito (serie)": capitale_serie,
-#     "Costo totale stimato (current)": costo_current,
-#     "Differenza": capitale_serie - costo_current
-# })
-
-# st.subheader("DEBUG Flussi vs Investito")
-
-# st.write({
-#     "Capitale versato (flussi)": series["Capitale versato"].iloc[-1],
-#     "Capitale investito (open)": series["Capitale investito"].iloc[-1]
-# })
-
 render_operations_preview(ops_enriched)
-# with st.expander("Anteprima operazioni", expanded=False):
-#    st.dataframe(ops_enriched, use_container_width=True)
 
 # =========================
 # KPIs
@@ -404,34 +380,29 @@ if show_benchmark and benchmark.strip():
 
     if not bench_df.empty and benchmark.strip() in bench_df.columns:
         b = bench_df[benchmark.strip()].dropna()
-        
-        # Prezzi grezzi benchmark utilizzati dal Backtest
-        benchmark_prices = b.copy()
-        
-        #OLD investing all capital on the first day
-        # if not b.empty and b.iloc[0] != 0:
-        #     bench_norm = abs(series["Capitale investito"].iloc[-1]) * (b / b.iloc[0])
 
         if not b.empty:
         
-            # ✅ prepara flows per benchmark
-            flows_input = xirr_flows.copy()
+            # ====================================
+            # Flow basato sul capitale esposto
+            # ====================================
             
-            # ✅ RIMUOVE la riga finale sintetica
-            if "Valore finale" in flows_input.columns:
-                flows_input = flows_input[flows_input["Valore finale"].fillna(0) == 0]
-                
-            # ✅ Flow corretto (solo flussi di acquisto / vendita no Dividendi per correto confronto valore portfolio )
-            flows_input["Flow"] = flows_input["Operazioni"].fillna(0.0)
-        
-            flows_input = flows_input[["Data", "Flow"]]
-            #debug 
-            # st.write(flows_input.head(10))
+            capital_exposed_flow = -(
+                series["Capitale investito"]
+                .diff()
+                .fillna(series["Capitale investito"])
+            )
+
+            flows_input = pd.DataFrame({
+                "Data": capital_exposed_flow.index,
+                "Flow": capital_exposed_flow.values
+            })
             # ✅ nuovo benchmark corretto
             bench_series = build_flow_adjusted_benchmark(
                 flows_df=flows_input,
                 benchmark_prices=b
             )
+
 
 bench_sharpe = None
 bench_sortino = None
@@ -605,7 +576,7 @@ with tab_perf:
     # st.plotly_chart(fig, use_container_width=True)
     chart_key = (f"portfolio_chart_"f"{benchmark.strip()}_"f"{show_benchmark}")
     
-    st.plotly_chart(fig, width="stretch", theme=None, key=chart_key)
+    st.plotly_chart(fig, width="stretch", key=chart_key)
     
     # ========================================================
     # Metriche confronto portafoglio / benchmark
@@ -663,7 +634,7 @@ with tab_daily:
 
     if fig_pos:
         # st.plotly_chart(fig_pos, use_container_width=True)
-        st.plotly_chart(fig_pos, theme=None, width="stretch")
+        st.plotly_chart(fig_pos, width="stretch")
     else:
         st.caption(t("no_profit_today"))
         
@@ -682,7 +653,7 @@ with tab_daily:
 
     if fig_neg:
         # st.plotly_chart(fig_neg, use_container_width=True)
-        st.plotly_chart(fig_neg, theme=None, width="stretch")
+        st.plotly_chart(fig_neg, width="stretch")
     else:
         st.caption(t("no_loss_today"))
         
@@ -730,7 +701,7 @@ with tab_unrealized:
 
     if fig_pos:
         #st.plotly_chart(fig_pos, use_container_width=True)
-        st.plotly_chart(fig_pos, theme=None, width="stretch")
+        st.plotly_chart(fig_pos, width="stretch")
     else:
         st.caption(t("no_profit_open"))
 
@@ -749,7 +720,7 @@ with tab_unrealized:
 
     if fig_neg:
         #st.plotly_chart(fig_neg, use_container_width=True)
-        st.plotly_chart(fig_neg, theme=None, width="stretch")
+        st.plotly_chart(fig_neg, width="stretch")
     else:
         st.caption(t("no_loss_open"))
 with tab_heatmap:
@@ -764,11 +735,6 @@ with tab_heatmap:
         key="pl_mode"  # ✅ QUESTO è il punto chiave
     )
 
-    # fig_treemap = daily_pl_treemap(
-    #     current,
-    #     label_col=label_choice
-    # )
-    
     # costruzione grafico
     
     fig_treemap = pl_treemap(
@@ -779,7 +745,7 @@ with tab_heatmap:
 
     if fig_treemap:
         # st.plotly_chart(fig_treemap, use_container_width=True)
-        st.plotly_chart(fig_treemap, theme=None, width="stretch")
+        st.plotly_chart(fig_treemap, width="stretch")
 
 with tab_analysis:
 
@@ -813,7 +779,7 @@ with tab_analysis:
 
         if fig_beta:
             # st.plotly_chart(fig_beta, use_container_width=True, key="beta_chart")
-            st.plotly_chart(fig_beta, theme=None, width="stretch", key="beta_chart")
+            st.plotly_chart(fig_beta, width="stretch", key="beta_chart")
 
     # =========================
     # ✅ SHARPE
@@ -836,7 +802,7 @@ with tab_analysis:
 
     if fig_sharpe:
         # st.plotly_chart(fig_sharpe, use_container_width=True, key="sharpe_chart")
-        st.plotly_chart(fig_sharpe, theme=None, width="stretch", key="sharpe_chart")
+        st.plotly_chart(fig_sharpe, width="stretch", key="sharpe_chart")
 
     # =========================
     # ✅ SORTINO
@@ -859,7 +825,7 @@ with tab_analysis:
 
     if fig_sortino:
         # st.plotly_chart(fig_sortino, use_container_width=True, key="sortino_chart")
-        st.plotly_chart(fig_sortino, theme=None, width="stretch", key="sortino_chart")
+        st.plotly_chart(fig_sortino, width="stretch", key="sortino_chart")
         
     st.markdown(f"### {t('tail_risk_title')}")
 
@@ -882,7 +848,6 @@ with tab_analysis:
     
     st.plotly_chart(
         fig_rend,
-        theme=None,
         width="stretch",
         key="rend_chart"
     )
@@ -947,7 +912,7 @@ with tab_exp:
         )
     if fig:
         # st.plotly_chart(fig, use_container_width=True)
-        st.plotly_chart(fig, theme=None, width="stretch")
+        st.plotly_chart(fig, width="stretch")
 
     c1, c2 = st.columns(2)
     
@@ -955,13 +920,13 @@ with tab_exp:
     if "Area" in exposure.columns and exposure["Area"].astype(str).str.strip().any():
         fig_area = allocation_bar_chart(exposure, column="Area", title=t("allocation_area"))
         if fig_area:
-            c1.plotly_chart(fig_area, theme=None, width="stretch")
+            c1.plotly_chart(fig_area, width="stretch")
 
     # ✅ BAR Tipo
     if "Tipo" in exposure.columns and exposure["Tipo"].astype(str).str.strip().any():
         fig_tipo = allocation_bar_chart(exposure, column="Tipo", title=t("allocation_type"))
         if fig_tipo:
-            c2.plotly_chart(fig_tipo, theme=None, width="stretch")
+            c2.plotly_chart(fig_tipo, width="stretch")
 
 with tab_flu:
     st.subheader(t("flows_title"))

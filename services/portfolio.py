@@ -59,9 +59,11 @@ def build_period_performance(
     r = (
         daily_total_pl_pct
         .replace([np.inf, -np.inf], np.nan)
-        .fillna(0.0)
     )
-
+    
+    first_valid = r.first_valid_index()
+    r = r.fillna(0.0)
+    
     # Growth index TWR
     growth = (1.0 + r).cumprod()
 
@@ -86,7 +88,12 @@ def build_period_performance(
     ) - 1
 
     # Periodi non ancora disponibili
-    valid = positions >= 0
+    # valid = positions >= 0 
+    first_valid_pos = growth.index.get_loc(first_valid)
+    
+    valid = (
+        (positions >= first_valid_pos)
+    )
 
     # Array risultato
     result = np.full(
@@ -110,7 +117,56 @@ def build_period_performance(
         index=growth.index,
         name=name
     )
+def build_ytd_performance(
+    daily_total_pl_pct: pd.Series,
+    total_value: pd.Series,
+    name: str = "Performance YTD %"
+) -> pd.Series:
 
+    r = daily_total_pl_pct.replace(
+        [np.inf, -np.inf],
+        np.nan
+    )
+
+    result = pd.Series(
+        np.nan,
+        index=r.index,
+        dtype=float,
+        name=name
+    )
+
+    first_valid = (
+        total_value
+        .where(total_value > 0)
+        .first_valid_index()
+    )
+
+    if first_valid is None:
+        return result
+
+    for year in r.index.year.unique():
+
+        year_start = pd.Timestamp(
+            year=year,
+            month=1,
+            day=1
+        )
+
+        # Portafoglio nato dopo il 1° gennaio:
+        # niente YTD
+        if first_valid > year_start:
+            continue
+
+        mask = r.index.year == year
+
+        rr = r.loc[mask].fillna(0.0)
+
+        result.loc[mask] = (
+            (1.0 + rr).cumprod() - 1.0
+        )
+
+    return result
+    
 def build_holdings(ops: pd.DataFrame, idx: pd.DatetimeIndex) -> pd.DataFrame:
     keys = sorted(ops["PositionKey"].unique().tolist())
     holdings = pd.DataFrame(0.0, index=idx, columns=keys)
@@ -162,6 +218,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
             fx = float(row["Cambio"])
             fees = float(row["SpeseEuro"])
             tax_rate = float(row["Tassa"])
+            mult = float(row.get("Moltiplicatore", 1.0))
 
             avg_cost_before = open_cost / open_qty if open_qty != 0 else 0.0
 
@@ -181,7 +238,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
                     avg_cost_short = abs(avg_cost_before)
             
                     cost_basis = close_qty * avg_cost_short
-                    buy_cost = close_qty * price * fx
+                    buy_cost = close_qty * price * fx * mult
             
                     realized_gross = cost_basis - buy_cost
             
@@ -197,13 +254,13 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
                     remaining_qty = qty - close_qty
             
                     if remaining_qty > 0:
-                        buy_cost_extra = remaining_qty * price * fx + fees
+                        buy_cost_extra = remaining_qty * price * fx * mult + fees
                         open_qty += remaining_qty
                         open_cost += buy_cost_extra
             
                 else:
                     # ✅ ACQUISTO LONG
-                    buy_cost = qty * price * fx + fees
+                    buy_cost = qty * price * fx * mult + fees
                     open_qty += qty
                     open_cost += buy_cost
             
@@ -217,7 +274,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
             
                 # ✅ SHORT (open o estensione)
                 if open_qty <= 0:
-                    gross_proceeds = sell_qty * price * fx
+                    gross_proceeds = sell_qty * price * fx * mult
             
                     cashflow = gross_proceeds - fees
                     realized_trade_pl = 0.0
@@ -229,7 +286,7 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
                     # ✅ CHIUSURA LONG
                     cost_basis_sold = sell_qty * avg_cost_before
             
-                    gross_proceeds = sell_qty * price * fx
+                    gross_proceeds = sell_qty * price * fx * mult
                     realized_gross = gross_proceeds - fees - cost_basis_sold
             
                     tax_euro = max(realized_gross, 0.0) * tax_rate
@@ -292,14 +349,17 @@ def enrich_ops_with_cost_engine(ops: pd.DataFrame) -> pd.DataFrame:
 
     return ops
 
-def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None):
+def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataFrame | None = None, cash: pd.DataFrame | None = None,):
 
     # t = time.perf_counter()
     # ✅ normalizzazione date
     ops_all = ops.copy()
     ops_all["Data"] = pd.to_datetime(ops_all["Data"], errors="coerce")
     ops_all["DateOnly"] = ops_all["Data"].dt.normalize()
-
+    
+    # st.write("OPS")
+    # st.write(ops_all[["Ticker", "Data", "DateOnly", "Quantità"]])
+    
     if ops_all.empty:
         return (
             pd.DataFrame(),
@@ -313,7 +373,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # 1. Arricchimento cost engine
     # =========================
     ops_all = enrich_ops_with_cost_engine(ops_all)
-    
+
+
     # st.write(f"⏱️ Cost engine: {time.perf_counter() - t:.2f} sec")
     # t = time.perf_counter()
     
@@ -355,7 +416,34 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     # end_date = closes.index.max()
     
     today = pd.Timestamp.today().normalize()
-    start_date = ops_all["DateOnly"].min() - pd.Timedelta(days=5)
+        
+    start_candidates = [
+        ops_all["DateOnly"].min()
+    ]
+    
+    if cash is not None and not cash.empty:
+        start_candidates.append(
+            cash["DateOnly"].min()
+        )
+    
+    if dividends is not None and not dividends.empty:
+    
+        dividends = dividends.copy()
+    
+        if "DateOnly" not in dividends.columns:
+            dividends["DateOnly"] = (
+                pd.to_datetime(
+                    dividends["Data"],
+                    errors="coerce"
+                )
+                .dt.normalize()
+            )
+    
+        start_candidates.append(
+            dividends["DateOnly"].min()
+        )
+    
+    start_date = min(start_candidates) - pd.Timedelta(days=5)
     end_date = today
     
     market_last_date = closes.index.max()
@@ -376,7 +464,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # =========================
         qty_history = (
             ops.sort_values(["PositionKey", "Data"])
-            .groupby(["PositionKey", "Data"])["QtyOpenAfter"]
+            .groupby(["PositionKey", "DateOnly"])["QtyOpenAfter"]
             .last()
             .unstack(level=0)
             .reindex(idx)
@@ -422,7 +510,18 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         # =========================
         # 8. Valore storico portafoglio
         # =========================
-        position_values = holdings * position_closes_eur
+        
+        position_multipliers = (
+            ops.groupby("PositionKey")["Moltiplicatore"]
+            .last()
+        )
+        
+        position_multipliers = position_multipliers.reindex(
+            holdings.columns
+        ).fillna(1.0)
+
+        # Usa Moltiplicatore per gestire prodotti come le opzioni 
+        position_values = holdings * position_closes_eur * position_multipliers
         
         # st.write(f"⏱️ Position values: {time.perf_counter() - t:.2f} sec")
         # t = time.perf_counter()
@@ -474,7 +573,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     else:
         cost_history = (
             ops.sort_values(["PositionKey", "Data"])
-            .groupby(["PositionKey", "Data"])["CostOpenAfter"]
+            .groupby(["PositionKey", "DateOnly"])["CostOpenAfter"]
             .last()
             .unstack(level=0)
             .reindex(idx)
@@ -482,7 +581,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
 
         cost_history = cost_history.fillna(0.0)
+        # invested = cost_history.sum(axis=1).rename("Capitale investito")
         invested = cost_history.sum(axis=1).rename("Capitale investito")
+        capital_versato = invested.rename("Capitale versato")  #temp check 
 
     # =========================
     # 11. Capitale versato (flussi netti cumulati)
@@ -493,7 +594,34 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         .reindex(idx, fill_value=0.0)
     )
 
-    capital_versato = (-daily_cf_total.cumsum()).rename("Capitale versato")
+    # capital_versato = (-daily_cf_total.cumsum()).rename("Capitale versato")
+
+    # =========================
+    # 11bis. Movimenti Cash
+    # =========================
+    
+    if cash is None or cash.empty:
+    
+        cash_daily = pd.Series(
+            0.0,
+            index=idx,
+            name="Movimenti Cash"
+        )
+    
+    else:
+    
+        cash_daily = (
+            cash.groupby("DateOnly")["Importo"]
+            .sum()
+            .reindex(idx, fill_value=0.0)
+            .rename("Movimenti Cash")
+        )
+        
+    cashflow_cumulato = (
+        cash_daily
+        + daily_cf_total
+        + daily_dividends
+    ).cumsum().rename("Cashflow cumulato")
 
     # =========================
     # 12. P/L giornaliero per posizione
@@ -527,61 +655,108 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
     else:
         
-        daily_cf_positions = (
-            ops_cf.groupby(["DateOnly", "PositionKey"])["Cashflow"]
+        # daily_cf_positions = (
+        #     ops_cf.groupby(["DateOnly", "PositionKey"])["Cashflow"]
+        #     .sum()
+        #     .unstack(fill_value=0.0)
+        #     .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
+        # )
+
+
+        daily_realized_positions = (
+            ops_cf.groupby(["DateOnly", "PositionKey"])["RealizedTradePL"]
             .sum()
             .unstack(fill_value=0.0)
             .reindex(index=idx, columns=holdings.columns, fill_value=0.0)
         )
-
-        # debug
-        # st.write("CLOSES RAW")
-        # st.dataframe(
-        #     closes.loc["2026-06-30":"2026-07-02", ["LDO.MI"]]
+        
+        # trade_price_matrix = (
+        #     ops_cf.groupby(["DateOnly", "PositionKey"])["Prezzo"]
+        #     .last()
+        #     .unstack()
+        #     .reindex(index=idx, columns=holdings.columns)
         # )
+        trade_price_eur_matrix = (
+            (
+                ops_cf["Prezzo"]
+                * ops_cf["Cambio"].fillna(1.0)
+            )
+            .groupby([
+                ops_cf["DateOnly"],
+                ops_cf["PositionKey"]
+            ])
+            .last()
+            .unstack()
+            .reindex(
+                index=idx,
+                columns=holdings.columns
+            )
+        )
         
-        # st.write("CLOSES_TICKER")
-        # st.dataframe(
-        #     closes_ticker.loc["2026-06-30":"2026-07-02"]
-        # )
-        
-        # st.write("CLOSES_EUR_TICKER")
-        # st.dataframe(
-        #     closes_eur_ticker.loc["2026-06-30":"2026-07-02"]
-        # )
-        
-        # st.write("POSITION_CLOSES_EUR")
-        # st.dataframe(
-        #     position_closes_eur.loc["2026-06-30":"2026-07-02"]
-        # )
-        
-        # st.write("position_values")
-        # st.write(position_values.tail(10))
-        
-        # st.write("position_values.diff()")
-        # st.write(position_values.diff().tail(10))
-        
-        # st.write("daily_cf_positions")
-        # st.write(daily_cf_positions.tail(10))
-
-        # daily_pl_positions = (
-        #     position_values.diff().fillna(0.0)
-        #     .add(daily_cf_positions, fill_value=0.0)
-        # )
-
         market_move = position_values.diff()
         
-        first_day = (
-            position_values.notna()
-            & position_values.shift(1).isna()
-        )
+        qty_delta = holdings - holdings.shift(1)
         
-        market_move[first_day] = position_values[first_day]
+        trade_value = (
+            qty_delta
+            * position_closes_eur
+            * position_multipliers
+        ).fillna(0.0)
+        
+        market_move_adj = (market_move- trade_value)
+        
+        entry_exit_pl = (
+            qty_delta
+            * (
+                position_closes_eur
+                #- trade_price_matrix
+                 - trade_price_eur_matrix
+            )
+        ).fillna(0.0)
         
         daily_pl_positions = (
-            market_move
-            .add(daily_cf_positions, fill_value=0.0)
+            market_move_adj
+            .add(entry_exit_pl, fill_value=0.0)
+            .add(daily_realized_positions, fill_value=0.0)
         )
+        
+        # DEBUG SHORT INTRADAY IBM
+        # st.dataframe(
+        #     ops_cf.loc[
+        #         ops_cf["PositionKey"] == "10",
+        #         [
+        #             "DateOnly",
+        #             "Quantita",
+        #             "Prezzo",
+        #             "Cambio",
+        #             "QtyOpenAfter",
+        #             "AvgCostAfter",
+        #             "RealizedTradePL"
+        #         ]
+        #     ]
+        # )
+        # debug_ibm_prices = pd.concat([
+        #     position_closes_eur["10"].rename("CloseEUR"),
+        #     holdings["10"].rename("Holdings"),
+        #     position_values["10"].rename("PositionValue")
+        # ], axis=1)
+        
+        # st.dataframe(
+        #     debug_ibm_prices.loc["2026-07-15":"2026-07-16"]
+        # )
+        # debug_ibm = pd.concat([
+        #     holdings["10"].rename("Holdings"),
+        #     qty_delta["10"].rename("QtyDelta"),
+        #     trade_price_eur_matrix["10"].rename("TradePrice"),
+        #     position_closes_eur["10"].rename("Close"),
+        #     entry_exit_pl["10"].rename("EntryExitPL"),
+        #     daily_realized_positions["10"].rename("Realized"),
+        #     daily_pl_positions["10"].rename("DailyPL")
+        # ], axis=1)
+        
+        # st.dataframe(
+        #     debug_ibm.loc["2026-07-15":"2026-07-30"]
+        # )
         
         weekly_pl_positions = (
             daily_pl_positions
@@ -594,11 +769,10 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             .rolling("30D")
             .sum()
         )
-        
+
         daily_pl = daily_pl_positions.sum(axis=1).rename("P/L Giornaliero")
-        daily_pl_pct = (daily_pl / total_value.shift(1)).rename("P/L Giornaliero %")
-        
-        # P/L rolling 7 giorni
+        daily_pl_pct = (daily_pl / total_value.shift(1).replace(0, np.nan)).rename("P/L Giornaliero %")
+
         weekly_pl = (
             daily_pl
             .rolling("7D")
@@ -621,7 +795,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         
         monthly_pl_pct = (
             monthly_pl
-            / total_value.shift(30)
+            / total_value.shift(30).replace(0, np.nan)
         ).rename("P/L 30 Giorni %")
 
         # ==================================================
@@ -634,12 +808,31 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         ).rename("P/L Totale Giornaliero")
         
         daily_total_pl_pct = (
-            daily_total_pl / total_value.shift(1)
+            daily_total_pl / total_value.shift(1).replace(0, np.nan)
         ).rename("P/L Totale Giornaliero %")
+
+        # debug
+        # st.write("TOTAL VALUE")
+        # st.write(total_value.tail(20))
         
+        # st.write("TOTAL VALUE SHIFT")
+        # st.write(total_value.shift(1).tail(20))
+        
+        # st.write("DAILY TOTAL PL")
+        # st.write(daily_total_pl.tail(20))
+        
+        # st.write("DAILY TOTAL PL %")
+        # st.write(daily_total_pl_pct.tail(20))
+        # end debug
+        
+        # first_investment_day = (
+        #     total_value.notna()
+        #     & total_value.shift(1).isna()
+        #     & (daily_cf_total < 0)
+        # )
         first_investment_day = (
-            total_value.notna()
-            & total_value.shift(1).isna()
+            (total_value > 0)
+            & (total_value.shift(1).fillna(0) == 0)
             & (daily_cf_total < 0)
         )
         
@@ -656,7 +849,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
         
         weekly_total_pl_pct = (
-            weekly_total_pl / total_value.shift(7)
+            weekly_total_pl / total_value.shift(7).replace(0, np.nan)
         ).rename("P/L Totale 7 Giorni %")
         
         monthly_total_pl = (
@@ -667,7 +860,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
         )
         
         monthly_total_pl_pct = (
-            monthly_total_pl / total_value.shift(30)
+            monthly_total_pl / total_value.shift(30).replace(0, np.nan)
         ).rename("P/L Totale 30 Giorni %")
         # ==========================================
         # Performance storiche portafoglio
@@ -689,8 +882,8 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             name="Performance 6M %"
         )
         
-        # st.write(f"6M: {time.perf_counter()-t0:.2f} sec")
-        # t0 = time.perf_counter()
+        # # st.write(f"6M: {time.perf_counter()-t0:.2f} sec")
+        # # t0 = time.perf_counter()
         
         perf_1y_pct = build_period_performance(
             daily_total_pl_pct,
@@ -698,29 +891,37 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             name="Performance 1Y %"
         )
         
-        # st.write(f"1Y: {time.perf_counter()-t0:.2f} sec")
-        # t0 = time.perf_counter()
+        # # st.write(f"1Y: {time.perf_counter()-t0:.2f} sec")
+        # # t0 = time.perf_counter()
                 
-        perf_ytd_pct = pd.Series(
-            np.nan,
-            index=total_value.index,
-            dtype=float,
-            name="Performance YTD %"
+        # perf_ytd_pct = pd.Series(
+        #     np.nan,
+        #     index=total_value.index,
+        #     dtype=float,
+        #     name="Performance YTD %"
+        # )
+        
+        # for year in total_value.index.year.unique():
+        #     mask = total_value.index.year == year
+        
+        #     r = (
+        #         daily_total_pl_pct.loc[mask]
+        #         .replace([np.inf, -np.inf], np.nan)
+        #         .fillna(0.0)
+        #     )
+        
+        #     perf_ytd_pct.loc[mask] = (
+        #         (1.0 + r).cumprod() - 1.0
+        #     )
+
+        perf_ytd_pct = build_ytd_performance(
+            daily_total_pl_pct,
+            total_value,
+            "Performance YTD %"
         )
+        # st.write("YTD SERIES")
+        # st.write(perf_ytd_pct.loc["2026-10-20":"2026-11-15"])
         
-        for year in total_value.index.year.unique():
-            mask = total_value.index.year == year
-        
-            r = (
-                daily_total_pl_pct.loc[mask]
-                .replace([np.inf, -np.inf], np.nan)
-                .fillna(0.0)
-            )
-        
-            perf_ytd_pct.loc[mask] = (
-                (1.0 + r).cumprod() - 1.0
-            )
-                
     # st.write(f"YTD: {time.perf_counter()-t0:.2f} sec")
     # =========================
     # 13. P/L trading = valore portafoglio - costo residuo aperto
@@ -729,6 +930,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     
     # st.write(f"⏱️ Metriche portfolio: {time.perf_counter() - t:.2f} sec")
     # t = time.perf_counter()
+
     # =========================
     # 14. Serie storica finale
     # =========================
@@ -755,11 +957,12 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             perf_ytd_pct,
             perf_1y_pct,
             daily_dividends,
-            pl_realizzato
+            pl_realizzato,
+            cashflow_cumulato,
         ],
         axis=1
     )
-
+    
     # =========================
     # 15. Se non ci sono ticker validi → niente current/exposure
     # =========================
@@ -785,6 +988,7 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
             "Emittente": "last",
             "Valuta": "last",
             "Tassa": "last",
+            "Moltiplicatore": "last",
         })
     )
 
@@ -821,9 +1025,9 @@ def build_portfolio(ops: pd.DataFrame, closes: pd.DataFrame, dividends: pd.DataF
     ], axis=1)
 
     current["Ultimo Close Storico"] = last_close_eur
-    current["Valore"] = current["Quantita"] * current["Prezzo Attuale"]
 
     current = current.join(cost_state, how="left").join(meta, how="left")
+    current["Valore"] = current["Quantita"] * current["Prezzo Attuale"] * current["Moltiplicatore"]  
 
     current["Costo Medio Stimato"] = current["AvgCost"]
     current["Costo Totale Stimato"] = current["OpenCost"]

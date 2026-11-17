@@ -16,6 +16,8 @@ COLUMN_ALIASES = {
     "Settore": ["settore", "sector", "industry"],
     "Emittente": ["emittente", "issuer", "provider"],
     "Valuta": ["valuta", "currency"],
+        # NUOVA
+    "Moltiplicatore": ["moltiplicatore","multiplier","contract multiplier","contract size"],
 }
 DIVIDEND_ALIASES = {
     "ID": ["id"],
@@ -36,6 +38,7 @@ DIVIDEND_ALIASES = {
 REQUIRED_OPERATION_COLUMNS = ["Ticker", "Data", "Quantita"]
 REQUIRED_DIVIDEND_COLUMNS = ["Data", "DividendoNetto"]
 REQUIRED_START_COLUMNS = ["Data", "Ticker", "Quantita", "Prezzo"]
+REQUIRED_CASH_COLUMNS = ["Data","Valuta","Importo",]
 SHEET_ALIASES = {
     "Operazioni": [
         "operazioni",
@@ -62,5 +65,52 @@ SHEET_ALIASES = {
         "portafoglio iniziale",
         "baseline",
         "opening"
-    ]
+    ],
+    "MovimentiCash": [
+        "movimenticash",
+        "movimenti cash",
+        "cash",
+        "cashflow",
+        "cash flow",
+        "cash movements",
+        "cashmovements",
+        "liquidita",
+        "liquidità",
+        "movimenti conto",
+        "trasferimenti",
+        "cash transfer",
+        "cash transfers",
+    ],
+}
+OPTION_TYPE_ALIASES = [
+    "opzioni",
+    "options",
+    "option",
+    "opt",
+]
+
+CASH_ALIASES = {
+    "Data": [
+        "data",
+        "date",
+        "date/time",
+        "datetime",
+    ],
+
+    "Valuta": [
+        "valuta",
+        "currency",
+        "currencyprimary",
+    ],
+
+    "Importo": [
+        "importo",
+        "amount",
+        "net amount",
+    ],
+
+    "Descrizione": [
+        "descrizione",
+        "description",
+    ],
 }

@@ -6,6 +6,7 @@ from utils.i18n import t
 from utils.display import get_display_columns
 import pandas as pd
 from services.portfolio_metrics import compute_var_historical, compute_conditional_var 
+from utils.chart_utils import ( get_treemap_path,build_treemap_pl_customdata,)
 from typing import Optional
 
 
@@ -1179,73 +1180,8 @@ def ratio_bar_gradient_compare(
 
     return fig
 
-# def daily_pl_treemap(current: pd.DataFrame, label_col="Ticker"):
 
-#     if current is None or current.empty:
-#         return None
-
-#     df = current.copy()
-
-#     required = ["Valore", "P/L Giornaliero %", "P/L Giornaliero", "Intermediario"]
-#     for col in required:
-#         if col not in df.columns:
-#             return None
-
-#     df = df.dropna(subset=["Valore", "P/L Giornaliero %"]).copy()
-
-#     if label_col not in df.columns:
-#         label_col = "Ticker"
-
-#     df["color_val"] = df["P/L Giornaliero %"]
-
-#     # ✅ LABEL SU DUE RIGHE
-#     df["label_full"] = df.apply(
-#         lambda row: f"{row[label_col]}<br>{row['P/L Giornaliero']:+.0f}€",
-#         axis=1
-#     )
-
-#     max_abs = df["color_val"].abs().max()
-
-#     fig = px.treemap(
-#         df,
-#         path=["Intermediario", "label_full"],
-#         values="Valore",
-#         color="color_val",
-#         color_continuous_scale=[
-#             (0.0, "#5a0000"),
-#             (0.25, "#d73027"),
-#             (0.5, "#2b2b2b"),   # neutro tipo finviz
-#             (0.75, "#1a9850"),
-#             (1.0, "#00441b")
-#         ],
-#         range_color=[-max_abs, max_abs]
-#     )
-
-#     # ✅ TESTO CENTRATO
-#     fig.update_traces(
-#         textinfo="label",
-#         textposition="middle center"
-#     )
-
-#     # hover
-#     fig.update_traces(
-#         hovertemplate=
-#         "<b>%{label}</b><br>" +
-#         "Intermediario: %{parent}<br>" +
-#         "Valore: %{value:.2f}€<br>" +
-#         "P/L giornaliero: %{customdata.2f}€<br>" +
-#         "P/L %: %{color:.2%}<extra></extra>",
-#         customdata=df[["P/L Giornaliero"]]
-#     )
-
-#     fig.update_layout(
-#         margin=dict(t=10, l=10, r=10, b=10),
-#         coloraxis_colorbar=dict(title="P/L %")
-#     )
-
-#     return fig
-
-import plotly.express as px
+import streamlit as st   # per debug 
 
 def daily_pl_treemap(current: pd.DataFrame, label_col="Ticker"):
 
@@ -1342,7 +1278,7 @@ def daily_pl_treemap(current: pd.DataFrame, label_col="Ticker"):
 
     return fig
 
-def pl_treemap(
+def pl_treemap_nogerarchia(
     current: pd.DataFrame,
     label_col: str = "Ticker",
     pl_mode: str = "daily"
@@ -1350,9 +1286,9 @@ def pl_treemap(
 
     if current is None or current.empty:
         return None
-
+    
     df = current.copy()
-
+    
     # =========================
     # mapping colonne robusto
     # =========================
@@ -1362,7 +1298,7 @@ def pl_treemap(
     else:
         pl_col = "P/L Giornaliero"
         pl_pct_col = "P/L Giornaliero %"
-
+    
     required = ["Valore", pl_pct_col, pl_col, "Intermediario", "Tipo"]
     for col in required:
         if col not in df.columns:
@@ -1376,8 +1312,7 @@ def pl_treemap(
     # =========================
     # colore = rendimento
     # =========================
-    df["color_val"] = df[pl_pct_col]
-
+    df["color_val"] = df[pl_pct_col] # per non aggregato 
     # =========================
     # ✅ LABEL CON € + %
     # =========================
@@ -1388,7 +1323,6 @@ def pl_treemap(
         ),
         axis=1
     )
-
     # =========================
     # scala simmetrica
     # =========================
@@ -1449,6 +1383,102 @@ def pl_treemap(
 
     return fig
 
+def pl_treemap(
+    current: pd.DataFrame,
+    label_col: str = "Ticker",
+    pl_mode: str = "daily"
+):
+
+    if current is None or current.empty:
+        return None
+    
+    df = current.copy()
+    
+    # ==========================================================
+    # Mapping colonne robusto
+    # ==========================================================
+    if pl_mode == "total":
+        pl_col = "P/L"
+        pl_pct_col = "P/L %"
+    else:
+        pl_col = "P/L Giornaliero"
+        pl_pct_col = "P/L Giornaliero %"
+    
+    required = ["Valore", pl_pct_col, pl_col, "Intermediario", "Tipo"]
+    for col in required:
+        if col not in df.columns:
+            return None
+
+    df = df.dropna(subset=["Valore", pl_pct_col]).copy()
+
+    if label_col not in df.columns:
+        label_col = "Ticker"
+
+    # Scala cromatica simmetrica basata sulle foglie originali
+    max_abs = df[pl_pct_col].abs().max()
+    if pd.isna(max_abs) or max_abs == 0:
+        max_abs = 0.01
+
+    # ==========================================================
+    # TREEMAP (Geometria NATIVA e PERFETTA con PATH)
+    # ==========================================================
+    path = get_treemap_path(
+        df,
+        label_col,
+        t("treemap_portfolio")
+    )
+    fig = px.treemap(
+        df,
+        path=path, 
+        values="Valore",  # Geometria nativa intatta al 100%
+        color=pl_pct_col, # Il motore aggrega autonomamente la media colore del ramo
+        color_continuous_scale=[
+            (0.0,  "#F23636"), (0.16, "#B53C3C"), (0.33, "#7E3E47"),
+            (0.5,  "#3F4350"), (0.66, "#2E6C4A"), (0.83, "#289F51"), (1.0,  "#23CE5F")
+        ],
+        range_color=[-max_abs, max_abs]
+    )
+
+    # ==========================================================
+    # 🌟 POST-ELABORAZIONE: INIEZIONE DIZIONARI SULL'ALBERO GENERATO
+    # ==========================================================
+    fig.data[0].customdata = (
+        build_treemap_pl_customdata(
+            df=df,
+            fig=fig,
+            pl_col=pl_col,
+            label_col=label_col,
+        )
+    )
+
+    # ==========================================================
+    # HOVER CONTESTUALE MINIMALE A SINGOLA RIGA
+    # ==========================================================
+    # Ora %{customdata} punta all'array monodimensionale allineato.
+    # %{color} è la percentuale aggregata calcolata dal browser.
+    fig.update_traces(
+        hovertemplate=(
+            "<b>%{label}</b><br>"
+            f"{t('treemap_value')}: %{{value:,.2f}}€<br>"
+            f"{t('treemap_pl')}: %{{customdata:,.2f}}€<br>"
+            f"{t('treemap_pl_pct')}: %{{color:+.2%}}<extra></extra>"
+        ),
+        textinfo="label",
+        textposition="middle center",
+        textfont=dict(size=13),
+        insidetextfont=dict(size=13),
+        marker=dict(line=dict(color="black", width=1.2))
+    )
+
+    # Configurazione Layout finale
+    fig.update_layout(
+        margin=dict(t=10, l=10, r=10, b=10),
+        coloraxis_colorbar=dict(title=pl_pct_col, tickformat=".2%")
+    )
+
+    return fig
+    
+    
 def create_tail_risk_figure(flow_adjusted_returns):
 
     # Serie completa per VaR/CVaR
@@ -1485,24 +1515,24 @@ def create_tail_risk_figure(flow_adjusted_returns):
             opacity=0.7,
         )
     )
-
-    fig_rend.add_vline(
-        x=-var_giornaliero,
-        line_dash="dash",
-        line_color="#e74c3c",
-        line_width=2,
-        annotation_text=f"{t('tail_risk_var_label')}: {-var_giornaliero:.2%}",
-        annotation_position="top left",
-    )
-
-    fig_rend.add_vline(
-        x=-cvar_giornaliero,
-        line_dash="dot",
-        line_color="#c0392b",
-        line_width=2,
-        annotation_text=f"{t('tail_risk_cvar_label')}: {-cvar_giornaliero:.2%}",
-        annotation_position="bottom left",
-    )
+    if var_giornaliero is not None:
+        fig_rend.add_vline(
+            x=-var_giornaliero,
+            line_dash="dash",
+            line_color="#e74c3c",
+            line_width=2,
+            annotation_text=f"{t('tail_risk_var_label')}: {-var_giornaliero:.2%}",
+            annotation_position="top left",
+        )
+    if cvar_giornaliero is not None:
+        fig_rend.add_vline(
+            x=-cvar_giornaliero,
+            line_dash="dot",
+            line_color="#c0392b",
+            line_width=2,
+            annotation_text=f"{t('tail_risk_cvar_label')}: {-cvar_giornaliero:.2%}",
+            annotation_position="bottom left",
+        )
     
     # Linea Media
     fig_rend.add_vline(

@@ -13,6 +13,9 @@ from services.schema import (
     REQUIRED_OPERATION_COLUMNS,
     REQUIRED_DIVIDEND_COLUMNS,
     REQUIRED_START_COLUMNS,
+    OPTION_TYPE_ALIASES,
+    CASH_ALIASES,
+    REQUIRED_CASH_COLUMNS,
 )
 
 
@@ -228,7 +231,45 @@ def detect_excel_structure(file_obj) -> dict:
         missing = missing_required(start_columns, REQUIRED_START_COLUMNS)
     
         start_is_valid = len(missing) == 0
-        
+    # -------------------------
+    # cash
+    # -------------------------    
+    cash_sheet = find_sheet_name(
+        xls.sheet_names,
+        SHEET_ALIASES["MovimentiCash"]
+    )
+    
+    cash_columns = {}
+    
+    if cash_sheet is not None:
+    
+        tmp = pd.read_excel(
+            BytesIO(excel_bytes),
+            sheet_name=cash_sheet,
+            engine="openpyxl",
+            nrows=30,
+        )
+    
+        tmp = (
+            tmp
+            .dropna(axis=0, how="all")
+            .dropna(axis=1, how="all")
+        )
+    
+        cash_columns = map_columns(
+            tmp,
+            CASH_ALIASES
+        )
+    
+    cash_missing = (
+        missing_required(
+            cash_columns,
+            REQUIRED_CASH_COLUMNS
+        )
+        if cash_sheet is not None
+        else REQUIRED_CASH_COLUMNS.copy()
+    )
+    
     return {
         "sheet_names": xls.sheet_names,
         "operations": {
@@ -247,6 +288,15 @@ def detect_excel_structure(file_obj) -> dict:
             "sheet_name": start_sheet,
             "columns": start_columns,
             "is_valid": start_is_valid,
+        },
+        "cash": {
+            "sheet_name": cash_sheet,
+            "columns": cash_columns,
+            "missing_required": cash_missing,
+            "is_valid": (
+                cash_sheet is not None
+                and len(cash_missing) == 0
+            )
         },
     }
 
@@ -292,10 +342,21 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
         parse_numeric(df[cols["Cambio"]])
         if cols.get("Cambio") is not None else np.nan
     )
-
-    valore = out["Quantita"] * out["Prezzo"].fillna(0.0) * out["Cambio"].fillna(1.0)
+    
+    out["Nome"] = df[cols["Nome"]] if cols.get("Nome") is not None else out["Ticker"]
+    out["Tipo"] = df[cols["Tipo"]] if cols.get("Tipo") is not None else ""
+    out["Area"] = df[cols["Area"]] if cols.get("Area") is not None else ""
+    out["Settore"] = df[cols["Settore"]] if cols.get("Settore") is not None else ""
+    out["Emittente"] = df[cols["Emittente"]] if cols.get("Emittente") is not None else ""
+    out["Valuta"] = df[cols["Valuta"]] if cols.get("Valuta") is not None else ""
+    
+    out["Moltiplicatore"] = (parse_numeric(df[cols["Moltiplicatore"]]).fillna(1.0) if cols.get("Moltiplicatore") is not None else 1.0)
+    mask_opt = (out["Tipo"].astype(str).str.upper().apply(normalize_text).isin(OPTION_TYPE_ALIASES))
+    out.loc[mask_opt & (out["Moltiplicatore"] == 1), "Moltiplicatore"] = 100
+    
+    valore = out["Quantita"] * out["Prezzo"].fillna(0.0) * out["Cambio"].fillna(1.0) * out["Moltiplicatore"].fillna(1.0)
     flusso_base = -valore - out["SpeseEuro"].fillna(0.0)
-
+    
     if cols.get("FlussoNetto") is not None:
         out["FlussoNetto"] = parse_numeric(df[cols["FlussoNetto"]])
     else:
@@ -305,14 +366,7 @@ def load_operations_from_excel(file_obj) -> pd.DataFrame:
         parse_numeric(df[cols["Prezzo medio s/carico"]])
         if cols.get("Prezzo medio s/carico") is not None else np.nan
     )
-
-    out["Nome"] = df[cols["Nome"]] if cols.get("Nome") is not None else out["Ticker"]
-    out["Tipo"] = df[cols["Tipo"]] if cols.get("Tipo") is not None else ""
-    out["Area"] = df[cols["Area"]] if cols.get("Area") is not None else ""
-    out["Settore"] = df[cols["Settore"]] if cols.get("Settore") is not None else ""
-    out["Emittente"] = df[cols["Emittente"]] if cols.get("Emittente") is not None else ""
-    out["Valuta"] = df[cols["Valuta"]] if cols.get("Valuta") is not None else ""
-
+    
     out = out.dropna(subset=["Ticker", "Data", "Quantita"])
     out = out[out["Ticker"] != ""]
     out = out.sort_values(["Data", "Ticker"]).reset_index(drop=True)
@@ -426,6 +480,8 @@ def load_start_from_excel(file_obj) -> pd.DataFrame:
     out["Settore"] = ""
     out["Emittente"] = df[cols["Emittente"]] if cols.get("Emittente") else ""
     out["Valuta"] = df[cols["Valuta"]] if cols.get("Valuta") else "EUR"
+    out["Moltiplicatore"] = (parse_numeric(df[cols["Moltiplicatore"]]).fillna(1.0) if cols.get("Moltiplicatore") is not None else 1.0)
+    
 
     # ✅ PositionKey COERENTE con operations (fix fondamentale)
     out["PositionKey"] = np.where(
@@ -441,3 +497,70 @@ def load_start_from_excel(file_obj) -> pd.DataFrame:
     out = out.sort_values(["Data", "Ticker"]).reset_index(drop=True)
 
     return out
+    
+def load_cash_from_excel(file_obj) -> pd.DataFrame:
+
+    structure = detect_excel_structure(file_obj)
+
+    if not structure["cash"]["is_valid"]:
+        return pd.DataFrame(
+            columns=[
+                "Data",
+                "Valuta",
+                "Importo",
+                "Descrizione",
+                "DateOnly",
+            ]
+        )
+
+    excel_bytes = read_excel_safely(file_obj)
+
+    sheet_name = structure["cash"]["sheet_name"]
+    cols = structure["cash"]["columns"]
+
+    df = pd.read_excel(
+        BytesIO(excel_bytes),
+        sheet_name=sheet_name,
+        engine="openpyxl"
+    )
+
+    df = (df.dropna(axis=0, how="all").dropna(axis=1, how="all"))
+
+    out = pd.DataFrame()
+
+    out["Data"] = pd.to_datetime(df[cols["Data"]], errors="coerce")
+
+    out["Valuta"] = (
+        df[cols["Valuta"]]
+        .astype(str)
+        .str.strip()
+        .str.upper()
+    )
+
+    out["Importo"] = (
+        parse_numeric(
+            df[cols["Importo"]]
+        )
+        .fillna(0.0)
+    )
+
+    out["Descrizione"] = (
+        df[cols["Descrizione"]]
+        .astype(str)
+        .str.strip()
+        if cols.get("Descrizione") is not None
+        else ""
+    )
+
+    out["DateOnly"] = out["Data"].dt.normalize()
+
+    out = out[
+        out["Data"].notna()
+    ]
+
+    out = out.sort_values("Data")
+
+    out = out.reset_index(drop=True)
+
+    return out
+
